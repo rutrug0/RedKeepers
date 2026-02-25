@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any
 
 DEFAULT_CODEX_COMMAND = "codex exec"
+_MODEL_ACCESS_PRECHECK_TIMEOUT_SECONDS = 20
+_MODEL_ACCESS_PRECHECK_CACHE: dict[str, str | None] = {}
 
 
 @dataclass
@@ -157,6 +159,82 @@ def _normalize_model_name(model: str | None) -> str | None:
     if " " not in text:
         return text.lower()
     return text
+
+
+def _extract_model_access_error(stdout: str, stderr: str) -> str | None:
+    text = f"{stdout}\n{stderr}".strip()
+    if not text:
+        return None
+
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    for line in lines:
+        if _looks_like_model_access_error(line, ""):
+            return line
+
+    lowered = text.lower()
+    signals = (
+        "not supported",
+        "does not have access",
+        "not authorized",
+        "not enabled",
+        "permission denied",
+        "model is unavailable",
+        "unsupported model",
+    )
+    for line in lines:
+        candidate = line.lower()
+        if "model" in candidate and any(signal in candidate for signal in signals):
+            return line
+
+    if "model" in lowered:
+        return lines[0]
+    return None
+
+
+def codex_model_access_preflight_error(model: str) -> str | None:
+    normalized_model = _normalize_model_name(model)
+    if not normalized_model:
+        return None
+    if normalized_model in _MODEL_ACCESS_PRECHECK_CACHE:
+        return _MODEL_ACCESS_PRECHECK_CACHE[normalized_model]
+
+    mode = os.environ.get("REDKEEPERS_WORKER_MODE", "").strip().lower()
+    if mode == "mock":
+        _MODEL_ACCESS_PRECHECK_CACHE[normalized_model] = None
+        return None
+
+    raw_command = os.environ.get("REDKEEPERS_CODEX_COMMAND", DEFAULT_CODEX_COMMAND)
+    command, command_error = _parse_and_resolve_codex_command(raw_command)
+    if command_error:
+        _MODEL_ACCESS_PRECHECK_CACHE[normalized_model] = command_error
+        return command_error
+
+    probe_command = _with_model_arg(_without_model_arg(command), normalized_model)
+    proc, immediate_error = _execute_codex(
+        command=probe_command,
+        prompt="Health check: report ok.",
+        project_root=Path(__file__).resolve().parents[1],
+        timeout_seconds=_MODEL_ACCESS_PRECHECK_TIMEOUT_SECONDS,
+        tokens_in_est=_estimate_tokens("Health check"),
+    )
+    if immediate_error is not None:
+        immediate_error.requested_model = model
+        immediate_error.used_model = normalized_model
+        _MODEL_ACCESS_PRECHECK_CACHE[normalized_model] = immediate_error.summary
+        return immediate_error.summary
+
+    assert proc is not None
+    stdout = (proc.stdout or "").strip()
+    stderr = (proc.stderr or "").strip()
+    if proc.returncode != 0 and _looks_like_model_access_error(stdout, stderr):
+        reason = _extract_model_access_error(stdout, stderr)
+        if reason is None:
+            reason = f"Model '{normalized_model}' is not accessible with the current Codex account."
+        _MODEL_ACCESS_PRECHECK_CACHE[normalized_model] = reason
+        return reason
+
+    _MODEL_ACCESS_PRECHECK_CACHE[normalized_model] = None
+    return None
 
 
 def _looks_like_model_access_error(stdout: str, stderr: str) -> bool:

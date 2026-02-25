@@ -3,7 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from codex_worker import codex_command_preflight_error
+from codex_worker import (
+    codex_command_preflight_error,
+    codex_model_access_preflight_error,
+)
 from schemas import load_json, load_yaml_like, validate_work_items
 
 
@@ -38,6 +41,66 @@ def _validate_json_object(*, errors: list[str], path: Path, label: str) -> None:
         return
     if not isinstance(data, dict):
         errors.append(f"{label} must contain an object")
+
+
+def _validate_model_profile_access(*, errors: list[str], model_policy: Any) -> None:
+    if not isinstance(model_policy, dict):
+        return
+    agent_models = model_policy.get("agent_models", {})
+    if not isinstance(agent_models, dict):
+        return
+
+    escalation_upgrade = model_policy.get("escalation_upgrade", {}) or {}
+    critical_cfg = escalation_upgrade.get("critical_or_repeated_failure") or {}
+
+    checks: list[tuple[str, str | None]] = []
+
+    for cfg in agent_models.values():
+        if not isinstance(cfg, dict):
+            continue
+        model = cfg.get("model")
+        fallback = cfg.get("fallback_model")
+        if isinstance(model, str) and model.strip():
+            checks.append((model.strip(), fallback.strip() if isinstance(fallback, str) and fallback.strip() else None))
+
+    if isinstance(critical_cfg, dict):
+        crit_model = critical_cfg.get("model")
+        crit_fallback = critical_cfg.get("fallback_model")
+        if isinstance(crit_model, str) and crit_model.strip():
+            checks.append((crit_model.strip(), crit_fallback.strip() if isinstance(crit_fallback, str) and crit_fallback.strip() else None))
+
+    seen: set[tuple[str, str | None]] = set()
+    for requested_model, fallback_model in checks:
+        key = (requested_model.lower(), fallback_model.lower() if fallback_model else None)
+        if key in seen:
+            continue
+        seen.add(key)
+
+        requested_error = codex_model_access_preflight_error(requested_model)
+        if not requested_error:
+            continue
+
+        if fallback_model:
+            fallback_error = codex_model_access_preflight_error(fallback_model)
+            if not fallback_error:
+                continue
+            errors.append(
+                (
+                    f"model '{requested_model}' is not accessible: {requested_error} "
+                    f"and fallback model '{fallback_model}' is also not accessible: {fallback_error}. "
+                    "Remediation: update model-policy.yaml to an accessible model, "
+                    "or configure an accessible fallback_model for this agent/escalation path."
+                )
+            )
+            continue
+
+        errors.append(
+            (
+                f"model '{requested_model}' is not accessible: {requested_error}. "
+                "Remediation: update model-policy.yaml to an accessible model, "
+                "or configure an accessible fallback_model for this agent/escalation path."
+            )
+        )
 
 
 def validate_environment(root: Path) -> list[str]:
@@ -85,6 +148,10 @@ def validate_environment(root: Path) -> list[str]:
         errors=errors,
         path=root / "coordination" / "state" / "agents.json",
         label="agents.json",
+    )
+    _validate_model_profile_access(
+        errors=errors,
+        model_policy=load_yaml_like(root / "coordination" / "policies" / "model-policy.yaml", {}),
     )
 
     # Runtime files are generated on demand; validate them only if they already exist.

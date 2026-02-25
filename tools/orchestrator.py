@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from codex_worker import run_agent
+from codex_worker import codex_model_access_preflight_error, run_agent
 from git_guard import changed_files, commit_changes, current_branch, is_git_repo, run_validation_commands
 from health_checks import validate_environment
 from model_stats import ModelStatsTracker
@@ -723,6 +723,10 @@ def process_one(
         model_policy=policies.get("model", {}),
         item=item,
     )
+    requested_model = execution_profile.get("model")
+    selected_model = requested_model
+    preflight_fallback_model = execution_profile.get("fallback_model")
+    selected_fallback_used = False
     emit_event(
         "select",
         "Selected work item",
@@ -732,7 +736,7 @@ def process_one(
         role=agent_cfg.get("role"),
         priority=item.get("priority"),
         milestone=item.get("milestone"),
-        model=execution_profile.get("model"),
+        model=requested_model,
         reasoning=execution_profile.get("reasoning"),
         fallback_model=execution_profile.get("fallback_model"),
         model_selection=execution_profile.get("selection_reason"),
@@ -745,7 +749,7 @@ def process_one(
             item_id=item["id"],
             agent_id=agent_id,
             role=agent_cfg.get("role"),
-            model=execution_profile.get("model"),
+            model=requested_model,
             model_selection=execution_profile.get("selection_reason"),
         )
         daemon_state = set_daemon_state(
@@ -757,12 +761,81 @@ def process_one(
         print(render_status(build_status_payload(daemon_state=daemon_state, queue=queue, stats=stats)))
         return 0
 
+    preflight_error = codex_model_access_preflight_error(requested_model or "")
+    preflight_fallback_error: str | None = None
+    if preflight_error is not None and preflight_fallback_model:
+        preflight_fallback_error = codex_model_access_preflight_error(preflight_fallback_model)
+        if preflight_fallback_error is None:
+            selected_model = preflight_fallback_model
+            selected_fallback_used = True
+            emit_event(
+                "model_preflight",
+                "Configured model not accessible; using configured fallback model",
+                item_id=item["id"],
+                agent_id=agent_id,
+                requested_model=requested_model,
+                selected_model=selected_model,
+                reason=preflight_error,
+            )
+
+    if preflight_error is not None and not selected_fallback_used:
+        blocker_reason = (
+            f"{preflight_error}. Remediation: update model-policy.yaml to an accessible model or configure an "
+            f"accessible fallback_model for this agent/escalation path."
+            if preflight_fallback_model is None
+            else (
+                f"{preflight_error}. Fallback model '{preflight_fallback_model}' is also not accessible: "
+                f"{preflight_fallback_error}."
+                " Remediation: update model-policy.yaml to an accessible model or configure an "
+                "accessible fallback model."
+            )
+        )
+        emit_event("blocked", "Model preflight blocked execution", item_id=item["id"], agent_id=agent_id, reason=blocker_reason)
+        queue.mark_blocked(item["id"], blocker_reason)
+        queue.save()
+        if model_stats_tracker is not None and model_stats_data is not None:
+            model_stats_tracker.record_run(
+                model_stats_data,
+                session_id=session_id,
+                agent_id=agent_id,
+                role=agent_cfg.get("role"),
+                outcome="blocked",
+                requested_model=requested_model,
+                used_model=selected_model,
+                fallback_used=False,
+                tokens_in=0,
+                tokens_out=0,
+                runtime_seconds=0.0,
+            )
+        stats_tracker.record_result(stats, agent_id=agent_id, outcome="blocked", tokens_in=0, tokens_out=0)
+        set_daemon_state(
+            state="blocked",
+            active_item=None,
+            last_run_summary=f"{item['id']} blocked by {agent_id}: {blocker_reason}",
+            lock_held=True,
+        )
+        append_jsonl(
+            RUN_HISTORY_PATH,
+            {
+                "ts": utc_now_iso(),
+                "item_id": item["id"],
+                "agent_id": agent_id,
+                "result": "blocked",
+                "summary": blocker_reason,
+                "exit_code": 1,
+                "model_requested": requested_model,
+                "model_used": selected_model,
+                "fallback_used": selected_fallback_used,
+            },
+        )
+        return 0
+
     queue.mark_assigned(item["id"], agent_id)
     queue.mark_running(item["id"])
     queue.save()
     daemon_state = set_daemon_state(
         state="running",
-        active_item={**item, "assigned_agent": agent_id, "assigned_role": agent_cfg.get("role")},
+        active_item={**item, "assigned_agent": agent_id, "assigned_role": agent_cfg.get("role"), "requested_model": requested_model},
         lock_held=True,
     )
     stats_tracker.begin_run()
@@ -774,11 +847,15 @@ def process_one(
         item_id=item["id"],
         agent_id=agent_id,
         role=agent_cfg.get("role"),
-        model=execution_profile.get("model"),
+        model=selected_model,
+        requested_model=requested_model,
         reasoning=execution_profile.get("reasoning"),
         fallback_model=execution_profile.get("fallback_model"),
         model_selection=execution_profile.get("selection_reason"),
     )
+    runtime_fallback_model = execution_profile.get("fallback_model")
+    if selected_fallback_used and runtime_fallback_model == selected_model:
+        runtime_fallback_model = None
     worker_started = time.monotonic()
     worker_timeout = int(policies.get("retry", {}).get("worker_timeout_seconds", 900))
     worker_box: dict[str, Any] = {}
@@ -789,8 +866,8 @@ def process_one(
                 project_root=ROOT,
                 agent_id=agent_id,
                 prompt=prompt,
-                model=execution_profile.get("model"),
-                fallback_model=execution_profile.get("fallback_model"),
+                model=selected_model,
+                fallback_model=runtime_fallback_model,
                 timeout_seconds=worker_timeout,
                 dry_run=False,
             )
@@ -819,6 +896,11 @@ def process_one(
         raise RuntimeError(f"Worker wrapper crashed for {agent_id}: {exc}") from exc
     worker = worker_box["result"]
     elapsed_seconds = time.monotonic() - worker_started
+    run_requested_model = requested_model
+    run_used_model = worker.used_model
+    if run_used_model is None:
+        run_used_model = worker.requested_model
+    run_fallback_used = selected_fallback_used or worker.fallback_used
     emit_event(
         "agent_end",
         "Agent execution finished",
@@ -828,9 +910,9 @@ def process_one(
         result=worker.status,
         exit_code=worker.exit_code,
         elapsed_seconds=round(elapsed_seconds, 2),
-        model_requested=worker.requested_model,
-        model_used=worker.used_model,
-        fallback_used=worker.fallback_used,
+        model_requested=run_requested_model,
+        model_used=run_used_model,
+        fallback_used=run_fallback_used,
     )
 
     if verbose and worker.stdout:
@@ -838,7 +920,16 @@ def process_one(
     if verbose and worker.stderr:
         print(worker.stderr[-2000:], file=sys.stderr)
 
-    def record_run_stats(outcome: str) -> None:
+    def record_run_stats(
+        outcome: str,
+        *,
+        requested_model_override: str | None = None,
+        used_model_override: str | None = None,
+        fallback_used_override: bool = False,
+    ) -> None:
+        run_requested = requested_model_override if requested_model_override is not None else run_requested_model
+        run_used = used_model_override if used_model_override is not None else run_used_model
+        run_fallback = fallback_used_override or run_fallback_used
         stats_tracker.record_result(
             stats,
             agent_id=agent_id,
@@ -853,9 +944,9 @@ def process_one(
                 agent_id=agent_id,
                 role=agent_cfg.get("role"),
                 outcome=outcome,
-                requested_model=worker.requested_model,
-                used_model=worker.used_model,
-                fallback_used=worker.fallback_used,
+                requested_model=run_requested,
+                used_model=run_used,
+                fallback_used=run_fallback,
                 tokens_in=worker.tokens_in_est,
                 tokens_out=worker.tokens_out_est,
                 runtime_seconds=elapsed_seconds,
@@ -865,7 +956,12 @@ def process_one(
         emit_event("blocked", "Work item blocked by agent", item_id=item["id"], agent_id=agent_id, reason=worker.summary)
         queue.mark_blocked(item["id"], worker.blocker_reason or worker.summary)
         queue.save()
-        record_run_stats("blocked")
+        record_run_stats(
+            "blocked",
+            requested_model_override=run_requested_model,
+            used_model_override=run_used_model,
+            fallback_used_override=run_fallback_used,
+        )
         set_daemon_state(
             state="blocked",
             active_item=None,
@@ -880,9 +976,9 @@ def process_one(
                 "agent_id": agent_id,
                 "result": "blocked",
                 "summary": worker.summary,
-                "model_requested": worker.requested_model,
-                "model_used": worker.used_model,
-                "fallback_used": worker.fallback_used,
+                "model_requested": run_requested_model,
+                "model_used": run_used_model,
+                "fallback_used": run_fallback_used,
             },
         )
     elif worker.status == "completed":
@@ -968,7 +1064,12 @@ def process_one(
                     source_item_id=item["id"],
                     rejected_count=len(rejected_followups),
                 )
-            record_run_stats("completed")
+            record_run_stats(
+                "completed",
+                requested_model_override=run_requested_model,
+                used_model_override=run_used_model,
+                fallback_used_override=run_fallback_used,
+            )
             set_daemon_state(
                 state="idle",
                 active_item=None,
@@ -985,9 +1086,9 @@ def process_one(
                     "summary": worker.summary,
                     "commit_sha": commit_sha,
                     "validation_results": validation_results,
-                    "model_requested": worker.requested_model,
-                    "model_used": worker.used_model,
-                    "fallback_used": worker.fallback_used,
+                    "model_requested": run_requested_model,
+                    "model_used": run_used_model,
+                    "fallback_used": run_fallback_used,
                 },
             )
         else:
@@ -1004,7 +1105,12 @@ def process_one(
                     )
                     queue.mark_blocked(item["id"], "retry threshold exceeded; escalated")
             queue.save()
-            record_run_stats("failed")
+            record_run_stats(
+                "failed",
+                requested_model_override=run_requested_model,
+                used_model_override=run_used_model,
+                fallback_used_override=run_fallback_used,
+            )
             set_daemon_state(
                 state="error",
                 active_item=None,
@@ -1021,9 +1127,9 @@ def process_one(
                     "result": "failed_validation",
                     "summary": worker.summary,
                     "validation_results": validation_results,
-                    "model_requested": worker.requested_model,
-                    "model_used": worker.used_model,
-                    "fallback_used": worker.fallback_used,
+                    "model_requested": run_requested_model,
+                    "model_used": run_used_model,
+                    "fallback_used": run_fallback_used,
                 },
             )
     else:
@@ -1033,7 +1139,12 @@ def process_one(
             # or spawn escalation chains. Leave the item queued and stop the daemon loop.
             queue.update_item_status(item["id"], "queued", last_failure_reason=worker.summary)
             queue.save()
-            record_run_stats("failed")
+            record_run_stats(
+                "failed",
+                requested_model_override=run_requested_model,
+                used_model_override=run_used_model,
+                fallback_used_override=run_fallback_used,
+            )
             set_daemon_state(
                 state="error",
                 active_item=None,
@@ -1050,9 +1161,9 @@ def process_one(
                     "result": "failed_infrastructure",
                     "summary": worker.summary,
                     "exit_code": worker.exit_code,
-                    "model_requested": worker.requested_model,
-                    "model_used": worker.used_model,
-                    "fallback_used": worker.fallback_used,
+                    "model_requested": run_requested_model,
+                    "model_used": run_used_model,
+                    "fallback_used": run_fallback_used,
                 },
             )
             queue.load()
@@ -1092,7 +1203,12 @@ def process_one(
                 emit_event("blocked", "Item blocked after retry threshold", item_id=item["id"], agent_id=agent_id)
                 queue.mark_blocked(item["id"], f"Repeated failure: {worker.summary}")
         queue.save()
-        record_run_stats("failed")
+        record_run_stats(
+            "failed",
+            requested_model_override=run_requested_model,
+            used_model_override=run_used_model,
+            fallback_used_override=run_fallback_used,
+        )
         set_daemon_state(
             state="error",
             active_item=None,
@@ -1109,9 +1225,9 @@ def process_one(
                 "result": "failed",
                 "summary": worker.summary,
                 "exit_code": worker.exit_code,
-                "model_requested": worker.requested_model,
-                "model_used": worker.used_model,
-                "fallback_used": worker.fallback_used,
+                "model_requested": run_requested_model,
+                "model_used": run_used_model,
+                "fallback_used": run_fallback_used,
             },
         )
 

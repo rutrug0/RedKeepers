@@ -132,4 +132,38 @@
       }
     ]
   }
+,
+  {
+    "ts": "2026-02-25T18:12:30Z",
+    "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01",
+    "status": "completed",
+    "summary": "Added Codex model-policy compatibility preflight checks for both startup validation and per-run execution to avoid repeated fallback retries on unsupported models, and ensured blocked runs now capture model-requested/model-used/fallback fields.",
+    "checks": [],
+    "proposed_work_items": [
+      {
+        "title": "Add regression tests for codex model access preflight paths",
+        "owner_role": "qa",
+        "description": "Create focused tests that cover startup status preflight failures, fallback selection preflight behavior, and blocked run_history/model_stats fields for unsupported model profiles.",
+        "acceptance_criteria": [
+          "status validation fails fast with exact unsupported-model reason when policy model is inaccessible and no usable fallback exists",
+          "execution selects configured fallback when primary model preflight fails and proceeds to run",
+          "blocked run_history and model-stats entries include model_requested/model_used/fallback fields"
+        ],
+        "inputs": [
+          "tools/codex_worker.py",
+          "tools/health_checks.py",
+          "tools/orchestrator.py",
+          "tests"
+        ],
+        "validation_commands": [
+          "python -m unittest discover -s tests"
+        ],
+        "dependencies": [
+          "tests package"
+        ],
+        "priority": "normal",
+        "milestone": "M1"
+      }
+    ]
+  }
 ]
