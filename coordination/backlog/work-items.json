@@ -23,17 +23,18 @@
       "Tests verify first-slice filtering excludes balance/data stubs and keeps cinder_throne_legates starter content by default"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T16:00:57.781880+00:00",
-    "updated_at": "2026-02-25T16:00:57.781880+00:00",
+    "updated_at": "2026-02-25T18:03:27.030128+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M1-0006-F01-F01"
+    "generated_from_item_id": "RK-M1-0006-F01-F01",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M1-0007-F02-F01",
@@ -69,44 +70,6 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-M1-0007-F02"
-  },
-  {
-    "id": "RK-M1-0004-F01-F01-F01-ESC-F02",
-    "title": "Add regression test that guards model-policy and runtime selection against unsupported models",
-    "description": "Add tests for `resolve_execution_profile` + model-policy contract so unsupported IDs are surfaced as a non-production-ready state, with explicit checks for escalation model path.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0004-F01-F01-F01-ESC"
-    ],
-    "inputs": [
-      "tools/orchestrator.py",
-      "tools/codex_worker.py",
-      "coordination/policies/model-policy.yaml",
-      "tests/test_model_routing.py",
-      "tests/test_codex_preflight.py"
-    ],
-    "acceptance_criteria": [
-      "Escalation path to `gpt-5.3-codex-spark` is asserted when policy currently specifies it and can be flagged by contract smoke test",
-      "At least one test asserts that unsupported `model_requested` produces a deterministic block/fail summary before execution",
-      "Tests cover both standard and `escalation_upgrade` model selection paths"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T17:58:54.202452+00:00",
-    "updated_at": "2026-02-25T18:01:54.687957+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC",
-    "assigned_agent": "tomas-grell"
   },
   {
     "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
