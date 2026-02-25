@@ -1,1 +1,96 @@
-[]
+[
+  {
+    "timestamp_utc": "2026-02-25T20:12:00Z",
+    "agent_id": "juno-cairn",
+    "work_item_id": "RK-AUTO-PLATFORM-0001",
+    "status": "done",
+    "summary": "Prepared platform-lane follow-up tasks for web packaging, Steam wrapper packaging, and Android wrapper packaging, all constrained to first-slice scope with placeholder assets only.",
+    "changed_files": [
+      "agents/juno-cairn/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "id": "RK-AUTO-PLATFORM-0001-F01",
+        "title": "Create reproducible web vertical-slice packaging and run scripts",
+        "owner_role": "platform",
+        "milestone": "M0",
+        "type": "infra",
+        "priority": "high",
+        "description": "Define and implement a deterministic web packaging path for the first vertical slice, including a single-command build/package flow, local run smoke command, and placeholder-only release metadata/artifact manifest.",
+        "dependencies": [
+          "RK-AUTO-PLATFORM-0001"
+        ],
+        "inputs": [
+          "docs/design/first-vertical-slice.md",
+          "docs/architecture/client-cross-platform-strategy.md",
+          "docs/operations/daemon-usage.md",
+          "client-web/",
+          "scripts/"
+        ],
+        "acceptance_criteria": [
+          "A repo-documented command sequence can produce a repeatable web-first vertical-slice artifact from `client-web`",
+          "Packaging flow includes placeholder-only release metadata/asset references and does not depend on final art",
+          "A local run/smoke command is documented and executes against the packaged artifact"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-PLATFORM-0001-F02",
+        "title": "Scaffold Steam wrapper packaging lane using Tauri default",
+        "owner_role": "platform",
+        "milestone": "M0",
+        "type": "infra",
+        "priority": "high",
+        "description": "Set up an initial Steam-targeted desktop wrapper path around the web client using the documented Tauri-first strategy, with reproducible build/run commands and deferred Steamworks/native integrations.",
+        "dependencies": [
+          "RK-AUTO-PLATFORM-0001",
+          "RK-AUTO-PLATFORM-0001-F01"
+        ],
+        "inputs": [
+          "docs/architecture/client-cross-platform-strategy.md",
+          "docs/design/first-vertical-slice.md",
+          "client-web/",
+          "scripts/"
+        ],
+        "acceptance_criteria": [
+          "A Tauri-based wrapper scaffold is added for Windows-first packaging of the web vertical-slice artifact",
+          "Wrapper docs/scripts define repeatable local run and packaged build commands without requiring Steamworks feature integration",
+          "Store/build placeholders (icon/capsule/metadata) are explicitly marked temporary and final art is not a blocker"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-PLATFORM-0001-F03",
+        "title": "Scaffold Android wrapper packaging lane using Capacitor default",
+        "owner_role": "platform",
+        "milestone": "M0",
+        "type": "infra",
+        "priority": "high",
+        "description": "Set up an initial Android packaging path around the web client via Capacitor/WebView with deterministic sync/build/run steps, touch-safe baseline configuration, and placeholder-only mobile store assets.",
+        "dependencies": [
+          "RK-AUTO-PLATFORM-0001",
+          "RK-AUTO-PLATFORM-0001-F01"
+        ],
+        "inputs": [
+          "docs/architecture/client-cross-platform-strategy.md",
+          "docs/design/first-vertical-slice.md",
+          "client-web/",
+          "scripts/"
+        ],
+        "acceptance_criteria": [
+          "A Capacitor/WebView wrapper scaffold is added with repeatable commands to sync web assets and produce an Android debug/release package",
+          "Wrapper configuration covers first-slice essentials (back button/orientation/safe-area baseline) without adding new game mechanics",
+          "Android icon/splash/store metadata are placeholder-only and explicitly non-blocking for final art"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
+  }
+]

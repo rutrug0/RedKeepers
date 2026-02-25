@@ -75,43 +75,6 @@
     "escalation_target": "Mara Voss"
   },
   {
-    "id": "RK-M0-0009",
-    "title": "Define map scout interaction contract and tile outcome mapping",
-    "description": "Publish a concise first-slice map interaction spec and stable data contract for one scout/select flow with three tile outcomes and placeholder feedback mapping.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "design",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0005",
-      "RK-M1-0007"
-    ],
-    "inputs": [
-      "client-web/",
-      "docs/design/first-vertical-slice.md",
-      "docs/design/v1-starter-data-tables.md"
-    ],
-    "acceptance_criteria": [
-      "Spec documents exactly one map interaction flow with 3 tile states and 3 outcomes",
-      "Spec maps each outcome to stable placeholder event/feed keys consumed by frontend",
-      "All interaction text and labels are replaceable placeholders and do not introduce new mechanics"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:15:22.000000+00:00",
-    "updated_at": "2026-02-25T19:42:40.678036+00:00",
-    "estimated_effort": "S",
-    "token_budget": 9000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "assigned_agent": "rowan-hale"
-  },
-  {
     "id": "RK-M0-0010",
     "title": "Create first-slice map/build/train placeholder content keys",
     "description": "Add structured placeholder event and panel copy keys for tick, build, train, and scout outcomes so gameplay actions can render through stable identifiers.",
@@ -706,15 +669,86 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T19:41:43.957401+00:00",
-    "updated_at": "2026-02-25T19:41:43.957401+00:00",
+    "updated_at": "2026-02-25T19:47:47.495401+00:00",
     "estimated_effort": "S",
     "token_budget": 9000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "platform_bootstrap"
+    "auto_generated": "platform_bootstrap",
+    "assigned_agent": "juno-cairn"
+  },
+  {
+    "id": "RK-M0-0009-F01",
+    "title": "Implement `world_map.scout_select_v1` endpoint and DTO contract",
+    "description": "Wire an API handler for `POST /world-map/tiles/{tileId}/interact` that emits one of the contract outcomes and returns a single `event.world.*` content key payload.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0009"
+    ],
+    "inputs": [
+      "docs/design/map-scout-interaction-contract.md",
+      "backend/src/modules/world_map"
+    ],
+    "acceptance_criteria": [
+      "Response payload includes `flow`, `tile_id`, `tile_state`, `interaction_outcome`, and `event.content_key`",
+      "Only the three contract outcome codes are returned in M0",
+      "Tile state transitions stay limited to unknown/quiet/hostile_hint values"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T19:42:43.440378+00:00",
+    "updated_at": "2026-02-25T19:42:43.440378+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-M0-0009"
+  },
+  {
+    "id": "RK-M0-0009-F02",
+    "title": "Add placeholder map tile seeds and event-token fixtures for the scout-select flow",
+    "description": "Create minimal static tile seed rows for unknown/quiet/hostile_hint states and token fixtures for `target_tile_label` and `hostile_force_estimate` on scout outcomes.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0009"
+    ],
+    "inputs": [
+      "docs/design/map-scout-interaction-contract.md",
+      "backend/src/app/config/seeds"
+    ],
+    "acceptance_criteria": [
+      "Seed data can produce all three scout outcomes in a deterministic dev fixture setup",
+      "Fixture event tokens are placeholder-only and do not introduce new mechanics",
+      "No additional map interaction flow is introduced beyond scout/select"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T19:42:43.440378+00:00",
+    "updated_at": "2026-02-25T19:42:43.440378+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-M0-0009"
   }
 ]

@@ -1336,5 +1336,43 @@
     "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
     "blocked_revisit_count": 1,
     "commit_sha": "5fa073defdb158701258c3f4cfa8ddfbc39061fe"
+  },
+  {
+    "id": "RK-M0-0009",
+    "title": "Define map scout interaction contract and tile outcome mapping",
+    "description": "Publish a concise first-slice map interaction spec and stable data contract for one scout/select flow with three tile outcomes and placeholder feedback mapping.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005",
+      "RK-M1-0007"
+    ],
+    "inputs": [
+      "client-web/",
+      "docs/design/first-vertical-slice.md",
+      "docs/design/v1-starter-data-tables.md"
+    ],
+    "acceptance_criteria": [
+      "Spec documents exactly one map interaction flow with 3 tile states and 3 outcomes",
+      "Spec maps each outcome to stable placeholder event/feed keys consumed by frontend",
+      "All interaction text and labels are replaceable placeholders and do not introduce new mechanics"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-25T19:42:43.432830+00:00",
+    "estimated_effort": "S",
+    "token_budget": 9000,
+    "result_summary": "If you want, I can also add the same contract into `docs/design/first-vertical-slice.md` as a quick cross-reference for discoverability.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "assigned_agent": "rowan-hale",
+    "commit_sha": "356d0385e1df807e43d4587a85b1847668a1e09c"
   }
 ]
