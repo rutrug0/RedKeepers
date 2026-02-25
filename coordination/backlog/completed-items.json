@@ -66,5 +66,40 @@
     "assigned_agent": "rowan-hale",
     "last_failure_reason": "Codex CLI command not found: codex",
     "commit_sha": "977fdf69d9c656816b0f5dbcd701bb333f6de1cf"
+  },
+  {
+    "id": "RK-M0-0004",
+    "title": "Recover queue state after Codex CLI bootstrap incident",
+    "description": "Normalize backlog after the repeated `codex` bootstrap failures by closing escalation-chain artifacts, requeuing eligible blocked items, and documenting the incident root cause in coordination notes.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/state/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "Root-cause note references Windows subprocess npm shim resolution behavior",
+      "Escalation chain for RK-M1-0001 is closed or consolidated without further churn",
+      "Eligible blocked work items are requeued with clear audit trail"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T13:17:16.1177208Z",
+    "updated_at": "2026-02-25T14:07:00.280268+00:00",
+    "estimated_effort": "S",
+    "token_budget": 7000,
+    "result_summary": "- `agents/mara-voss/outbox.json` (structured completion summary)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "assigned_agent": "mara-voss",
+    "last_failure_reason": null,
+    "cleanup_note": "Backlog stall cleared by operator; recovery task dependency on RK-M0-0003 was removed because this item is intended to resolve blocked dependency issues.",
+    "commit_sha": "860181f94837cf4eab98b6c5445e4ce4621b8a48"
   }
 ]

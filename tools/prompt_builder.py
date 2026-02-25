@@ -77,6 +77,8 @@ Validation Commands:
 - Start your final response with one explicit status line: `STATUS: COMPLETED` or `STATUS: BLOCKED`.
 - Make only the changes needed for this work item.
 - If blocked, explain the blocker clearly and propose follow-up tasks.
+- If you identify follow-up work, append/update your `agents/{agent_id}/outbox.json` entry for this item with a `proposed_work_items` array (structured tasks for daemon ingestion).
+- `proposed_work_items` entries should include at minimum: `title`, `owner_role`, `description`, `acceptance_criteria` (array). Optional: `priority`, `dependencies`, `inputs`, `validation_commands`, `milestone`.
 - Summarize changed files and results at the end.
 - Do not print long chain-of-thought; provide concise action/results.
 """

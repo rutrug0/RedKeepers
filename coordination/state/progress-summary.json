@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-02-25T13:58:35.239330+00:00",
+  "generated_at": "2026-02-25T14:11:37.261779+00:00",
   "daemon_state": "idle",
   "active_item": null,
   "queue_counts": {
-    "queued": 1,
+    "queued": 0,
     "running": 0,
     "blocked": 8,
-    "completed": 2
+    "completed": 3
   },
   "milestone_progress": {
     "M0": {
-      "active": 1,
-      "completed": 1,
+      "active": 0,
+      "completed": 2,
       "blocked": 2
     },
     "M1": {
