@@ -182,5 +182,46 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
     "assigned_agent": "tomas-grell",
     "commit_sha": "a5ffe18ee386f3180f647a68849cea4aec01b307"
+  },
+  {
+    "id": "RK-M1-0005",
+    "title": "Build responsive client shell wireframe for settlement and world map",
+    "description": "Implement an initial web-first client shell in client-web/ with placeholder panels for settlement management, world-map viewport, and event feed, designed for desktop-first play with responsive mobile support and no final art dependencies.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0005",
+      "RK-M1-0003"
+    ],
+    "inputs": [
+      "client-web/",
+      "docs/architecture/client-cross-platform-strategy.md",
+      "docs/design/game-vision.md",
+      "docs/design/factions-and-civilizations.md"
+    ],
+    "acceptance_criteria": [
+      "Client shell includes navigable placeholder layout regions for settlement UI, world map view, and player event feed",
+      "Layout works on desktop and mobile breakpoints with basic keyboard/focus handling and touch-safe spacing",
+      "Placeholder art only (wireframes/neutral silhouettes/labeled mock blocks) with no final art assumptions baked into components"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:20:08.432712+00:00",
+    "updated_at": "2026-02-25T14:27:22.677790+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/sera-kest/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "939dbf09b6acd33546a229bc3ce8ae1825845914"
   }
 ]

@@ -24,49 +24,10 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T14:20:08.432712+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0001"
-  },
-  {
-    "id": "RK-M1-0005",
-    "title": "Build responsive client shell wireframe for settlement and world map",
-    "description": "Implement an initial web-first client shell in client-web/ with placeholder panels for settlement management, world-map viewport, and event feed, designed for desktop-first play with responsive mobile support and no final art dependencies.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0005",
-      "RK-M1-0003"
-    ],
-    "inputs": [
-      "client-web/",
-      "docs/architecture/client-cross-platform-strategy.md",
-      "docs/design/game-vision.md",
-      "docs/design/factions-and-civilizations.md"
-    ],
-    "acceptance_criteria": [
-      "Client shell includes navigable placeholder layout regions for settlement UI, world map view, and player event feed",
-      "Layout works on desktop and mobile breakpoints with basic keyboard/focus handling and touch-safe spacing",
-      "Placeholder art only (wireframes/neutral silhouettes/labeled mock blocks) with no final art assumptions baked into components"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
     "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T14:27:21.451076+00:00",
+    "updated_at": "2026-02-25T14:50:15.506942+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -74,7 +35,7 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
-    "assigned_agent": "sera-kest"
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M1-0006",
@@ -186,5 +147,71 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0001"
+  },
+  {
+    "id": "RK-M1-0005-F01",
+    "title": "Add mock data state to client shell wireframe",
+    "description": "Replace hard-coded placeholder values in the settlement, map, and event panels with a local mock data model so future UI iterations can test empty/loading/error and selection states without backend dependencies.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Client shell reads panel content from a single mock state source in client-web/",
+      "At least loading and populated placeholder states are demonstrated for all three regions",
+      "Components remain art-agnostic and use placeholder assets/blocks only"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:27:22.682338+00:00",
+    "updated_at": "2026-02-25T14:27:22.682338+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-M1-0005"
+  },
+  {
+    "id": "RK-M1-0005-F02",
+    "title": "Frontend QA pass for accessibility and mobile shell interactions",
+    "description": "Run a focused QA pass on the client shell wireframe for keyboard navigation, focus visibility, reduced-motion behavior, and common mobile viewport sizes, then patch issues found.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Region navigation is operable with keyboard only across desktop and mobile layouts",
+      "No clipped content or unusable controls at common mobile widths (360px and 390px)",
+      "Focus indicators remain visible on all interactive placeholder controls"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:27:22.682841+00:00",
+    "updated_at": "2026-02-25T14:27:22.682841+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-M1-0005"
   }
 ]

@@ -1,29 +1,27 @@
 {
   "state": "validating",
-  "updated_at": "2026-02-25T14:27:21.455112+00:00",
+  "updated_at": "2026-02-25T14:50:15.511996+00:00",
   "active_item": {
-    "id": "RK-M1-0005",
-    "title": "Build responsive client shell wireframe for settlement and world map",
-    "description": "Implement an initial web-first client shell in client-web/ with placeholder panels for settlement management, world-map viewport, and event feed, designed for desktop-first play with responsive mobile support and no final art dependencies.",
+    "id": "RK-M1-0004",
+    "title": "Bootstrap backend source tree from modular monolith spec",
+    "description": "Create the initial framework-agnostic backend scaffold under backend/ matching the documented modular monolith package layout, including module template structure and placeholder files that make the intended boundaries explicit.",
     "milestone": "M1",
     "type": "feature",
     "priority": "high",
-    "owner_role": "frontend",
+    "owner_role": "backend",
     "preferred_agent": null,
     "dependencies": [
-      "RK-M0-0005",
-      "RK-M1-0003"
+      "RK-M0-0005"
     ],
     "inputs": [
-      "client-web/",
-      "docs/architecture/client-cross-platform-strategy.md",
-      "docs/design/game-vision.md",
-      "docs/design/factions-and-civilizations.md"
+      "backend/",
+      "docs/architecture/backend-modular-monolith.md",
+      "docs/architecture/system-overview.md"
     ],
     "acceptance_criteria": [
-      "Client shell includes navigable placeholder layout regions for settlement UI, world map view, and player event feed",
-      "Layout works on desktop and mobile breakpoints with basic keyboard/focus handling and touch-safe spacing",
-      "Placeholder art only (wireframes/neutral silhouettes/labeled mock blocks) with no final art assumptions baked into components"
+      "backend scaffold includes src/app, src/shared, and src/modules directories aligned with the architecture spec",
+      "Planned modules (auth/player/settlement/world_map/economy/buildings/units/combat/events/telemetry) each have placeholder api/application/domain/ports/infra structure",
+      "A brief backend scaffold note maps the created structure back to the architecture spec and deferred framework choice"
     ],
     "validation_commands": [
       "python tools/orchestrator.py status"
@@ -39,9 +37,9 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
-    "assigned_agent": "sera-kest"
+    "assigned_agent": "ilya-fen"
   },
   "last_error": null,
-  "last_run_summary": "RK-M0-0005 completed by tomas-grell",
+  "last_run_summary": "Dry run selected RK-M1-0004 for ilya-fen",
   "lock_held": true
 }
