@@ -84,5 +84,39 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-25T15:38:57.2879408Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-M1-0006-F02",
+    "status": "done",
+    "summary": "Ran a 30m/2h/6h early progression pacing simulation against starter economy/build/training tables, documented a severe early refill dead-zone (pre-barracks), and proposed a numeric-only Pass A tuning set to improve onboarding cadence without adding mechanics.",
+    "changed_files": [
+      "docs/design/v1-early-progression-pacing-sim.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Re-validate rally/stone pacing after starter Pass A tuning is serialized",
+        "owner_role": "design",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "After backend seed/config data is updated with the approved starter tuning pass, rerun the 30m/2h/6h pacing simulation to confirm barracks timing improvement holds and determine whether rally_post/stone timing still needs a narrow follow-up adjustment.",
+        "dependencies": [
+          "RK-M1-0006-F02"
+        ],
+        "inputs": [
+          "docs/design/v1-early-progression-pacing-sim.md",
+          "docs/design/v1-starter-data-tables.md"
+        ],
+        "acceptance_criteria": [
+          "Updated pacing checkpoints are documented for 30m, 2h, and 6h using serialized seed values",
+          "Barracks unlock and first unit training cadence are explicitly verified against the tuned target",
+          "Rally_post timing is either approved or a small stone/rally-only tuning pass is proposed"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]

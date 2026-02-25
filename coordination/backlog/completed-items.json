@@ -489,5 +489,40 @@
     "generated_from_item_id": "RK-M1-0005",
     "assigned_agent": "sera-kest",
     "commit_sha": "9a9fd46951a43cc4fc8ac7ff4b990d39d969626e"
+  },
+  {
+    "id": "RK-M1-0005-F02",
+    "title": "Frontend QA pass for accessibility and mobile shell interactions",
+    "description": "Run a focused QA pass on the client shell wireframe for keyboard navigation, focus visibility, reduced-motion behavior, and common mobile viewport sizes, then patch issues found.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Region navigation is operable with keyboard only across desktop and mobile layouts",
+      "No clipped content or unusable controls at common mobile widths (360px and 390px)",
+      "Focus indicators remain visible on all interactive placeholder controls"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:27:22.682841+00:00",
+    "updated_at": "2026-02-25T15:31:58.482032+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- I did a targeted code/CSS QA pass and patched concrete issues; no automated browser viewport/a11y test harness exists yet (deferred in `proposed_work_items`).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-M1-0005",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "5cacfa41d2b1f927037c0d6dbf00b1db5e6d19f2"
   }
 ]
