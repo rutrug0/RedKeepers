@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "ts": "2026-02-25T13:22:02.0528209Z",
+    "item_id": "RK-M0-0003",
+    "status": "completed",
+    "summary": "Added Codex command preflight to environment validation/status, with Windows codex.cmd remediation and REDKEEPERS_CODEX_COMMAND guidance.",
+    "checks": [
+      "python tools/orchestrator.py status (pass)",
+      "REDKEEPERS_CODEX_COMMAND='definitely-missing-codex exec' + python tools/orchestrator.py status (fails preflight with override hint)"
+    ]
+  }
+]

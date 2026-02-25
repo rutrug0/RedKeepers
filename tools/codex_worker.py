@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import os
 import shlex
+import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+DEFAULT_CODEX_COMMAND = "codex exec"
 
 
 @dataclass
@@ -23,6 +26,64 @@ class WorkerResult:
 def _estimate_tokens(text: str) -> int:
     # Cheap heuristic suitable for local stats only.
     return max(1, len(text) // 4)
+
+
+def _codex_override_hint() -> str:
+    if os.name == "nt":
+        return "Set REDKEEPERS_CODEX_COMMAND (Windows npm shim example: 'codex.cmd exec')."
+    return "Set REDKEEPERS_CODEX_COMMAND to a valid Codex CLI command."
+
+
+def _resolve_executable(command: list[str]) -> list[str]:
+    if not command:
+        return command
+    resolved = list(command)
+    exe = resolved[0]
+    found = shutil.which(exe)
+    if found:
+        resolved[0] = found
+        return resolved
+
+    # On Windows, Python subprocess may not resolve npm .cmd shims when the
+    # command is provided without an extension (e.g. "codex").
+    if os.name == "nt" and "." not in Path(exe).name:
+        for suffix in (".cmd", ".exe", ".bat"):
+            found = shutil.which(exe + suffix)
+            if found:
+                resolved[0] = found
+                return resolved
+    return resolved
+
+
+def _parse_and_resolve_codex_command(raw_command: str) -> tuple[list[str], str | None]:
+    try:
+        parsed = shlex.split(raw_command)
+    except ValueError as exc:
+        return [], f"invalid REDKEEPERS_CODEX_COMMAND={raw_command!r}: {exc}"
+    if not parsed:
+        return [], f"invalid REDKEEPERS_CODEX_COMMAND={raw_command!r}: empty command"
+    return _resolve_executable(parsed), None
+
+
+def codex_command_preflight_error() -> str | None:
+    mode = os.environ.get("REDKEEPERS_WORKER_MODE", "").strip().lower()
+    if mode == "mock":
+        return None
+
+    raw_command = os.environ.get("REDKEEPERS_CODEX_COMMAND", DEFAULT_CODEX_COMMAND)
+    command, command_error = _parse_and_resolve_codex_command(raw_command)
+    if command_error:
+        return f"Codex command preflight failed: {command_error}. {_codex_override_hint()}"
+
+    executable = command[0]
+    if shutil.which(executable) or Path(executable).exists():
+        return None
+
+    return (
+        "Codex command preflight failed: "
+        f"could not resolve executable {executable!r} from REDKEEPERS_CODEX_COMMAND={raw_command!r}. "
+        f"{_codex_override_hint()}"
+    )
 
 
 def run_agent(
@@ -56,8 +117,18 @@ def run_agent(
             tokens_out_est=300,
         )
 
-    raw_command = os.environ.get("REDKEEPERS_CODEX_COMMAND", "codex exec")
-    command = shlex.split(raw_command)
+    raw_command = os.environ.get("REDKEEPERS_CODEX_COMMAND", DEFAULT_CODEX_COMMAND)
+    command, command_error = _parse_and_resolve_codex_command(raw_command)
+    if command_error:
+        return WorkerResult(
+            status="failed",
+            summary="Invalid Codex CLI command configuration (check REDKEEPERS_CODEX_COMMAND)",
+            stdout="",
+            stderr=command_error,
+            exit_code=127,
+            tokens_in_est=_estimate_tokens(prompt),
+            blocker_reason=f"{command_error}. {_codex_override_hint()}",
+        )
     try:
         proc = subprocess.run(
             command,
@@ -71,12 +142,12 @@ def run_agent(
     except FileNotFoundError as exc:
         return WorkerResult(
             status="failed",
-            summary=f"Codex CLI command not found: {command[0]}",
+            summary=f"Codex CLI command not found: {command[0]} (check REDKEEPERS_CODEX_COMMAND)",
             stdout="",
             stderr=str(exc),
             exit_code=127,
             tokens_in_est=_estimate_tokens(prompt),
-            blocker_reason="Codex CLI not installed or REDKEEPERS_CODEX_COMMAND is invalid",
+            blocker_reason=f"Codex CLI not installed or REDKEEPERS_CODEX_COMMAND is invalid. {_codex_override_hint()}",
         )
     except subprocess.TimeoutExpired as exc:
         return WorkerResult(
@@ -106,4 +177,3 @@ def run_agent(
         tokens_out_est=_estimate_tokens(stdout),
         blocker_reason=summary[:500] if status == "blocked" else None,
     )
-

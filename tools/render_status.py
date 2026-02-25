@@ -14,6 +14,8 @@ def render_status(data: dict[str, Any]) -> str:
     lines.append(f"State: {daemon.get('state', 'unknown')}")
     lines.append(f"Lock held: {daemon.get('lock_held', False)}")
     lines.append(f"Last updated (UTC): {daemon.get('updated_at', 'n/a')}")
+    if daemon.get("last_error"):
+        lines.append(f"Last error: {daemon.get('last_error')}")
 
     if active_item:
         lines.append(
@@ -43,4 +45,3 @@ def render_status(data: dict[str, Any]) -> str:
         )
 
     return "\n".join(lines)
-

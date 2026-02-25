@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from codex_worker import codex_command_preflight_error
 from schemas import load_json, load_yaml_like, validate_work_items
 
 
@@ -42,5 +43,8 @@ def validate_environment(root: Path) -> list[str]:
             except Exception as exc:
                 errors.append(f"failed parsing {policy_name}: {exc}")
 
-    return errors
+    codex_error = codex_command_preflight_error()
+    if codex_error:
+        errors.append(codex_error)
 
+    return errors

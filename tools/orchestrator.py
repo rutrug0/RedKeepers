@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,8 @@ STATE_DIR = ROOT / "coordination" / "state"
 DAEMON_STATE_PATH = STATE_DIR / "daemon-state.json"
 LOCK_META_PATH = STATE_DIR / "locks.json"
 LOCK_FILE = STATE_DIR / "daemon.lock"
+EVENTS_LOG_PATH = STATE_DIR / "daemon-events.jsonl"
+AGENT_HEARTBEAT_SECONDS = 15
 
 
 def load_agent_catalog(root: Path) -> dict[str, dict[str, Any]]:
@@ -85,6 +88,24 @@ def default_daemon_state() -> dict[str, Any]:
         "last_run_summary": None,
         "lock_held": False,
     }
+
+
+def emit_event(kind: str, message: str, **fields: Any) -> None:
+    ts = utc_now_iso()
+    line = f"[{ts}][{kind}] {message}"
+    if fields:
+        ordered = " ".join(f"{key}={fields[key]!r}" for key in sorted(fields))
+        line = f"{line} | {ordered}"
+    print(line, flush=True)
+    append_jsonl(
+        EVENTS_LOG_PATH,
+        {
+            "ts": ts,
+            "kind": kind,
+            "message": message,
+            "fields": fields,
+        },
+    )
 
 
 def set_daemon_state(**patch: Any) -> dict[str, Any]:
@@ -155,6 +176,11 @@ def run_validation_for_item(root: Path, item: dict[str, Any], commit_rules: dict
     return run_validation_commands(root, commands)
 
 
+def is_systemic_worker_bootstrap_error(worker_summary: str, exit_code: int) -> bool:
+    text = (worker_summary or "").lower()
+    return exit_code == 127 or "command not found" in text or "codex cli command not found" in text
+
+
 def process_one(
     *,
     dry_run: bool,
@@ -163,6 +189,7 @@ def process_one(
     errors = validate_environment(ROOT)
     if errors:
         set_daemon_state(state="error", last_error="; ".join(errors[:5]), lock_held=False)
+        emit_event("error", "Environment validation failed", error_count=len(errors))
         print("Environment validation failed:")
         for err in errors:
             print(f"- {err}")
@@ -184,6 +211,7 @@ def process_one(
 
     item = queue.select_next(policies["routing"], stats)
     if item is None:
+        emit_event("idle", "No dependency-ready queued work item available")
         daemon_state = set_daemon_state(state="idle", active_item=None, last_run_summary="No queued dependency-ready work item", lock_held=True)
         stats_tracker.write_progress_summary(
             daemon_state="idle",
@@ -195,8 +223,18 @@ def process_one(
         return 0
 
     agent_id, agent_cfg = select_agent_for_item(item, agents, policies["routing"])
+    emit_event(
+        "select",
+        "Selected work item",
+        item_id=item["id"],
+        title=item["title"],
+        agent_id=agent_id,
+        priority=item.get("priority"),
+        milestone=item.get("milestone"),
+    )
 
     if dry_run:
+        emit_event("dry_run", "Dry-run selected item without execution", item_id=item["id"], agent_id=agent_id)
         daemon_state = set_daemon_state(
             state="dry_run",
             active_item={**item, "assigned_agent": agent_id},
@@ -213,12 +251,52 @@ def process_one(
     stats_tracker.begin_run()
 
     prompt = build_prompt(ROOT, agent_id=agent_id, agent_cfg=agent_cfg, work_item=item)
-    worker = run_agent(
-        project_root=ROOT,
+    emit_event("agent_start", "Agent execution started", item_id=item["id"], agent_id=agent_id, role=agent_cfg.get("role"))
+    worker_started = time.monotonic()
+    worker_timeout = int(policies.get("retry", {}).get("worker_timeout_seconds", 900))
+    worker_box: dict[str, Any] = {}
+
+    def _worker_runner() -> None:
+        try:
+            worker_box["result"] = run_agent(
+                project_root=ROOT,
+                agent_id=agent_id,
+                prompt=prompt,
+                timeout_seconds=worker_timeout,
+                dry_run=False,
+            )
+        except Exception as exc:  # Defensive guard around worker wrapper.
+            worker_box["exception"] = exc
+
+    worker_thread = threading.Thread(target=_worker_runner, name=f"worker-{agent_id}", daemon=True)
+    worker_thread.start()
+    last_heartbeat = worker_started
+    while worker_thread.is_alive():
+        worker_thread.join(timeout=1.0)
+        now = time.monotonic()
+        if worker_thread.is_alive() and now - last_heartbeat >= AGENT_HEARTBEAT_SECONDS:
+            emit_event(
+                "agent_heartbeat",
+                "Agent still running",
+                item_id=item["id"],
+                agent_id=agent_id,
+                elapsed_seconds=round(now - worker_started, 1),
+                timeout_seconds=worker_timeout,
+            )
+            last_heartbeat = now
+
+    if "exception" in worker_box:
+        exc = worker_box["exception"]
+        raise RuntimeError(f"Worker wrapper crashed for {agent_id}: {exc}") from exc
+    worker = worker_box["result"]
+    emit_event(
+        "agent_end",
+        "Agent execution finished",
+        item_id=item["id"],
         agent_id=agent_id,
-        prompt=prompt,
-        timeout_seconds=int(policies.get("retry", {}).get("worker_timeout_seconds", 900)),
-        dry_run=False,
+        result=worker.status,
+        exit_code=worker.exit_code,
+        elapsed_seconds=round(time.monotonic() - worker_started, 2),
     )
 
     if verbose and worker.stdout:
@@ -227,6 +305,7 @@ def process_one(
         print(worker.stderr[-2000:], file=sys.stderr)
 
     if worker.status == "blocked":
+        emit_event("blocked", "Work item blocked by agent", item_id=item["id"], agent_id=agent_id, reason=worker.summary)
         queue.mark_blocked(item["id"], worker.blocker_reason or worker.summary)
         queue.save()
         stats_tracker.record_result(stats, agent_id=agent_id, outcome="blocked", tokens_in=worker.tokens_in_est, tokens_out=worker.tokens_out_est)
@@ -247,6 +326,7 @@ def process_one(
             },
         )
     elif worker.status == "completed":
+        emit_event("validating", "Starting validation for completed work item", item_id=item["id"], agent_id=agent_id)
         queue.mark_validating(item["id"])
         queue.save()
         set_daemon_state(state="validating", active_item={**item, "assigned_agent": agent_id}, lock_held=True)
@@ -271,6 +351,13 @@ def process_one(
                     ok, commit_out = commit_changes(ROOT, commit_message(agent_cfg["display_name"], item["id"], item["title"]))
                     if ok:
                         commit_sha = None if commit_out == "NO_CHANGES" else commit_out
+                        emit_event(
+                            "commit",
+                            "Commit guard passed; changes committed" if commit_sha else "Validation passed; no file changes to commit",
+                            item_id=item["id"],
+                            agent_id=agent_id,
+                            commit_sha=commit_sha,
+                        )
                     else:
                         validations_ok = False
                         validation_results.append(
@@ -292,6 +379,7 @@ def process_one(
                 )
 
         if validations_ok:
+            emit_event("completed", "Work item completed", item_id=item["id"], agent_id=agent_id, commit_sha=commit_sha)
             queue.mark_completed(item["id"], worker.summary, commit_sha=commit_sha)
             queue.save()
             stats_tracker.record_result(stats, agent_id=agent_id, outcome="completed", tokens_in=worker.tokens_in_est, tokens_out=worker.tokens_out_est)
@@ -314,6 +402,7 @@ def process_one(
                 },
             )
         else:
+            emit_event("validation_failed", "Validation or commit failed", item_id=item["id"], agent_id=agent_id)
             max_retries = int(policies.get("retry", {}).get("max_retries_per_item_per_agent", 2))
             retry_count = queue.increment_retry(item["id"], "validation failed or commit failed")
             if retry_count > max_retries:
@@ -346,16 +435,64 @@ def process_one(
                 },
             )
     else:
+        if is_systemic_worker_bootstrap_error(worker.summary, worker.exit_code):
+            emit_event("infrastructure_error", "Worker bootstrap error; stopping daemon loop", item_id=item["id"], agent_id=agent_id, error=worker.summary)
+            # Infrastructure misconfiguration (e.g. missing Codex CLI) should not burn retries
+            # or spawn escalation chains. Leave the item queued and stop the daemon loop.
+            queue.update_item_status(item["id"], "queued", last_failure_reason=worker.summary)
+            queue.save()
+            stats_tracker.record_result(stats, agent_id=agent_id, outcome="failed", tokens_in=worker.tokens_in_est, tokens_out=worker.tokens_out_est)
+            set_daemon_state(
+                state="error",
+                active_item=None,
+                last_error=worker.summary,
+                last_run_summary=f"Infrastructure error while running {item['id']} for {agent_id}",
+                lock_held=True,
+            )
+            append_jsonl(
+                ROOT / "coordination" / "state" / "run-history.jsonl",
+                {
+                    "ts": utc_now_iso(),
+                    "item_id": item["id"],
+                    "agent_id": agent_id,
+                    "result": "failed_infrastructure",
+                    "summary": worker.summary,
+                    "exit_code": worker.exit_code,
+                },
+            )
+            queue.load()
+            stats_tracker.refresh_queue_totals(
+                stats,
+                queued_count=sum(1 for entry in queue.active if entry.get("status") == "queued"),
+                blocked_count=len(queue.blocked),
+                completed_count=len(queue.completed),
+            )
+            stats_tracker.save(stats)
+            daemon_state = load_json(DAEMON_STATE_PATH, default_daemon_state())
+            stats_tracker.write_progress_summary(
+                daemon_state=daemon_state.get("state", "unknown"),
+                active_item=daemon_state.get("active_item"),
+                queue_counts=queue_counts(queue),
+                milestone_progress=milestone_progress(queue),
+            )
+            print(render_status(build_status_payload(daemon_state=daemon_state, queue=queue, stats=stats)))
+            return 3
+
+        emit_event("failed", "Agent run failed; item will be retried or escalated", item_id=item["id"], agent_id=agent_id, reason=worker.summary)
         max_retries = int(policies.get("retry", {}).get("max_retries_per_item_per_agent", 2))
         retry_count = queue.increment_retry(item["id"], worker.summary)
         if retry_count > max_retries:
             source_item = queue.get_active_item(item["id"])
             if source_item:
-                queue.create_escalation_item(
-                    source_item,
-                    lead_agent_name=agents.get("mara-voss", {}).get("display_name", "Mara Voss"),
-                    reason=worker.summary,
-                )
+                is_escalation_item = bool(source_item.get("source_item_id")) or str(source_item.get("id", "")).endswith("-ESC")
+                if not is_escalation_item:
+                    emit_event("escalation", "Creating escalation item for repeated failures", item_id=item["id"], agent_id="mara-voss")
+                    queue.create_escalation_item(
+                        source_item,
+                        lead_agent_name=agents.get("mara-voss", {}).get("display_name", "Mara Voss"),
+                        reason=worker.summary,
+                    )
+                emit_event("blocked", "Item blocked after retry threshold", item_id=item["id"], agent_id=agent_id)
                 queue.mark_blocked(item["id"], f"Repeated failure: {worker.summary}")
         queue.save()
         stats_tracker.record_result(stats, agent_id=agent_id, outcome="failed", tokens_in=worker.tokens_in_est, tokens_out=worker.tokens_out_est)
@@ -398,6 +535,13 @@ def process_one(
 
 
 def cmd_status() -> int:
+    errors = validate_environment(ROOT)
+    if errors:
+        print("Environment validation failed:")
+        for err in errors:
+            print(f"- {err}")
+        return 2
+
     agents = load_agent_catalog(ROOT)
     queue = QueueManager(ROOT)
     queue.load()
@@ -416,6 +560,7 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool) -> 
         print(str(exc), file=sys.stderr)
         return 1
 
+    emit_event("daemon_start", "Daemon started and lock acquired", pid=os.getpid(), mode="once" if once else "run", dry_run=dry_run)
     set_daemon_state(lock_held=True, state="idle", last_error=None)
     try:
         if once:
@@ -423,15 +568,20 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool) -> 
         while True:
             rc = process_one(dry_run=dry_run, verbose=verbose)
             if rc != 0 or dry_run:
+                if rc != 0:
+                    emit_event("daemon_stop", "Daemon loop exiting with non-zero status", exit_code=rc)
                 return rc
             queue = QueueManager(ROOT)
             queue.load()
             if not any(item.get("status") == "queued" for item in queue.active):
+                emit_event("daemon_stop", "Queue idle; daemon run completed")
                 return 0
+            emit_event("sleep", "Sleeping before next scheduling cycle", seconds=sleep_seconds)
             time.sleep(sleep_seconds)
     finally:
         set_daemon_state(lock_held=False, active_item=None, state="idle")
         lock.release()
+        emit_event("daemon_stop", "Daemon stopped and lock released", pid=os.getpid())
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -467,4 +617,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -5,6 +5,7 @@ __pycache__/
 .env
 coordination/state/*.tmp
 coordination/state/daemon.lock
+coordination/state/daemon-events.jsonl
 coordination/state/run-logs/
 backend/.env
 client-web/node_modules/

@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "ts": "2026-02-25T13:24:09.7573990Z",
+    "item_id": "RK-M1-0002",
+    "status": "completed",
+    "summary": "Documented early Steam and Android packaging options/constraints for the web-first client, with tradeoffs and recommended defaults (Steam: Tauri, Android: Capacitor).",
+    "files": [
+      "docs/architecture/client-cross-platform-strategy.md"
+    ]
+  }
+]

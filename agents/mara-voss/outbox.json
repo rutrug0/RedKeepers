@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "ts": "2026-02-25T13:17:16.1177208Z",
+    "item_id": "RK-M1-0001-ESC-ESC-ESC-ESC",
+    "status": "completed",
+    "summary": "Root cause confirmed: Windows Python subprocess cannot launch npm shim `codex` without `.cmd`; `codex.cmd` succeeds. Follow-ups queued for preflight validation and queue recovery.",
+    "root_cause": "Windows command resolution mismatch for npm shim (`codex` vs `codex.cmd`) when launched via Python subprocess",
+    "evidence": {
+      "get_command_codex": "present (PowerShell ExternalScript)",
+      "python_subprocess_codex": "FileNotFoundError [WinError 2]",
+      "python_subprocess_codex_cmd": "exit_code=0"
+    },
+    "follow_up_item_ids": [
+      "RK-M0-0003",
+      "RK-M0-0004"
+    ]
+  }
+]

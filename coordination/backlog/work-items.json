@@ -1,39 +1,5 @@
 [
   {
-    "id": "RK-M0-0001",
-    "title": "Document orchestrator runtime usage and recovery flow",
-    "description": "Create or refine daemon usage and incident recovery documentation for local operators, including status, dry-run, run loop, and lock recovery.",
-    "milestone": "M0",
-    "type": "docs",
-    "priority": "high",
-    "owner_role": "lead",
-    "preferred_agent": "mara-voss",
-    "dependencies": [],
-    "inputs": [
-      "tools/orchestrator.py",
-      "docs/operations/daemon-usage.md",
-      "docs/operations/incident-recovery.md"
-    ],
-    "acceptance_criteria": [
-      "Daemon usage docs cover status/once/run commands",
-      "Recovery doc explains lock and state files",
-      "Docs are concise and aligned with current implementation"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T13:01:17.669127+00:00",
-    "updated_at": "2026-02-25T13:04:57.575437+00:00",
-    "estimated_effort": "S",
-    "token_budget": 10000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "assigned_agent": "mara-voss"
-  },
-  {
     "id": "RK-M0-0002",
     "title": "Add daemon smoke checks for environment validation",
     "description": "Expand health checks and add a small smoke test script or documented manual checks for queue/policy/state validation.",
@@ -58,72 +24,16 @@
       "python tools/orchestrator.py status"
     ],
     "status": "queued",
-    "retry_count": 0,
+    "retry_count": 2,
     "created_at": "2026-02-25T13:01:17.669127+00:00",
-    "updated_at": "2026-02-25T13:01:17.669127+00:00",
+    "updated_at": "2026-02-25T13:10:13.049138+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
-    "escalation_target": "Mara Voss"
-  },
-  {
-    "id": "RK-M1-0001",
-    "title": "Backend modular monolith scaffold spec",
-    "description": "Draft initial backend module layout and interfaces for auth, world, economy, and combat under a single service deployable.",
-    "milestone": "M1",
-    "type": "design",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": "ilya-fen",
-    "dependencies": [],
-    "inputs": [
-      "docs/architecture/backend-modular-monolith.md"
-    ],
-    "acceptance_criteria": [
-      "Module boundaries and interfaces listed",
-      "M1 bootstrap implementation steps defined",
-      "Assumptions and deferred decisions documented"
-    ],
-    "validation_commands": [],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T13:01:17.669127+00:00",
-    "updated_at": "2026-02-25T13:01:17.669127+00:00",
-    "estimated_effort": "M",
-    "token_budget": 12000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss"
-  },
-  {
-    "id": "RK-M1-0002",
-    "title": "Web client cross-platform packaging decision note",
-    "description": "Document early Steam and Android packaging options and constraints for a web-first client.",
-    "milestone": "M1",
-    "type": "design",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": "sera-kest",
-    "dependencies": [],
-    "inputs": [
-      "docs/architecture/client-cross-platform-strategy.md"
-    ],
-    "acceptance_criteria": [
-      "Steam path documented",
-      "Android path documented",
-      "Tradeoffs and recommended defaults stated"
-    ],
-    "validation_commands": [],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T13:01:17.669127+00:00",
-    "updated_at": "2026-02-25T13:01:17.669127+00:00",
-    "estimated_effort": "S",
-    "token_budget": 9000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss"
+    "escalation_target": "Mara Voss",
+    "assigned_agent": "tomas-grell",
+    "last_failure_reason": "Codex CLI command not found: codex"
   },
   {
     "id": "RK-M1-0003",
@@ -145,14 +55,83 @@
       "Complexity kept moderate and explicitly justified"
     ],
     "validation_commands": [],
-    "status": "queued",
-    "retry_count": 0,
+    "status": "validating",
+    "retry_count": 2,
     "created_at": "2026-02-25T13:01:17.669127+00:00",
-    "updated_at": "2026-02-25T13:01:17.669127+00:00",
+    "updated_at": "2026-02-25T13:26:28.593972+00:00",
     "estimated_effort": "M",
     "token_budget": 15000,
     "result_summary": null,
     "blocker_reason": null,
-    "escalation_target": "Mara Voss"
+    "escalation_target": "Mara Voss",
+    "assigned_agent": "rowan-hale",
+    "last_failure_reason": "Codex CLI command not found: codex"
+  },
+  {
+    "id": "RK-M1-0001-ESC-ESC-ESC-ESC",
+    "title": "Escalation: Escalation: Escalation: Escalation: Backend modular monolith scaffold spec",
+    "description": "Investigate repeated failure for item RK-M1-0001-ESC-ESC-ESC. Reason: Codex CLI command not found: codex",
+    "milestone": "M1",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "running",
+    "retry_count": 2,
+    "created_at": "2026-02-25T13:11:18.456863+00:00",
+    "updated_at": "2026-02-25T13:14:56.744811+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M1-0001-ESC-ESC-ESC",
+    "assigned_agent": "mara-voss",
+    "last_failure_reason": "Codex CLI command not found: codex"
+  },
+  {
+    "id": "RK-M0-0004",
+    "title": "Recover queue state after Codex CLI bootstrap incident",
+    "description": "Normalize backlog after the repeated `codex` bootstrap failures by closing escalation-chain artifacts, requeuing eligible blocked items, and documenting the incident root cause in coordination notes.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [
+      "RK-M0-0003"
+    ],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/state/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "Root-cause note references Windows subprocess npm shim resolution behavior",
+      "Escalation chain for RK-M1-0001 is closed or consolidated without further churn",
+      "Eligible blocked work items are requeued with clear audit trail"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T13:17:16.1177208Z",
+    "updated_at": "2026-02-25T13:17:16.1177208Z",
+    "estimated_effort": "S",
+    "token_budget": 7000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "assigned_agent": "mara-voss",
+    "last_failure_reason": null
   }
 ]

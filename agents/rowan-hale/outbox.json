@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "timestamp_utc": "2026-02-25T13:24:41.223162+00:00",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-M1-0003",
+    "status": "done",
+    "summary": "Drafted v1 civilization concepts with 3 original civilizations, asymmetric mechanics, signature unit identities, and explicit onboarding/complexity moderation rationale.",
+    "changed_files": [
+      "docs/design/factions-and-civilizations.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": []
+  }
+]
