@@ -321,4 +321,51 @@
       }
     ]
   }
+  ,
+  {
+    "timestamp_utc": "2026-02-25T18:44:00.7684098Z",
+    "agent_id": "ilya-fen",
+    "work_item_id": "RK-M0-0007",
+    "status": "done",
+    "summary": "Implemented first-slice building upgrade and unit training command handlers using starter-table defaults/filtering, with structured accepted/failed outcomes (`insufficient_resources`, `cooldown`, `invalid_state`) and placeholder success event keys for feed wiring.",
+    "changed_files": [
+      "backend/src/modules/buildings/application/first-slice-building-upgrade-command-handler.ts",
+      "backend/src/modules/buildings/application/first-slice-building-upgrade-command-handler.test.ts",
+      "backend/src/modules/buildings/application/index.ts",
+      "backend/src/modules/buildings/index.ts",
+      "backend/src/modules/units/application/first-slice-unit-train-command-handler.ts",
+      "backend/src/modules/units/application/first-slice-unit-train-command-handler.test.ts",
+      "backend/src/modules/units/application/index.ts",
+      "backend/src/modules/units/index.ts",
+      "agents/ilya-fen/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Wire first-slice upgrade/train handlers into backend command transport and settlement persistence ports",
+        "owner_role": "backend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Integrate the new first-slice building upgrade and unit training handlers with module API command entrypoints and persistence-facing ports so accepted commands can reserve resources, persist queue state, and publish placeholder events through app composition.",
+        "acceptance_criteria": [
+          "A backend command entrypoint can invoke the building upgrade handler for `grain_plot` and return the structured accepted/failed result payload unchanged",
+          "A backend command entrypoint can invoke the unit train handler for `watch_levy` and return the structured accepted/failed result payload unchanged",
+          "Accepted results can be persisted through explicit settlement/building/unit queue port interfaces (in-memory reference adapters are acceptable for first integration pass)",
+          "Accepted command placeholder events (`event.buildings.upgrade_started`, `event.units.training_started`) are published through the in-process event bus contract"
+        ],
+        "dependencies": [
+          "RK-M0-0007"
+        ],
+        "inputs": [
+          "backend/src/modules/buildings/application/first-slice-building-upgrade-command-handler.ts",
+          "backend/src/modules/units/application/first-slice-unit-train-command-handler.ts",
+          "backend/src/app/composition.ts",
+          "backend/src/shared/events.ts"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
+  }
 ]

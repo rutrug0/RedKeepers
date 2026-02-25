@@ -528,5 +528,69 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "ts":  "2026-02-25T18:51:11.8512057Z",
+        "item_id":  "RK-M1-0005-F02-F01-ESC",
+        "status":  "completed",
+        "summary":  "Root cause updated: source item now runs under `default` and implements the smoke checks, but strict frontend validation fails in daemon commit-guard because `playwright` is unavailable in the active Python runtime; this keeps the item in retry/escalation churn.",
+        "root_cause":  "Validation environment mismatch: `tools/orchestrator.py` auto-appends strict `tools/frontend_visual_smoke.py` for frontend items, and that script exits non-zero with `STATUS: BLOCKED` when `playwright` import fails (`No module named 'playwright'`).",
+        "evidence":  {
+                         "source_execution_completed":  "coordination/runtime/daemon-events.jsonl:1170",
+                         "validation_failed_event":  "coordination/runtime/daemon-events.jsonl:1172",
+                         "run_history_validation_error":  "coordination/runtime/run-history.jsonl:84",
+                         "blocked_signature":  "playwright import failed: No module named 'playwright'",
+                         "validation_injection":  "tools/orchestrator.py:796-808 (frontend_visual_qa command auto-append)",
+                         "smoke_block_behavior":  "tools/frontend_visual_smoke.py:304-309 and 461-462 (`STATUS: BLOCKED`, non-zero in strict mode)",
+                         "source_backlog_state":  "coordination/backlog/blocked-items.json:350-385 (`RK-M1-0005-F02-F01`, retry_count=4, last_failure_reason=validation failed or commit failed)"
+                     },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Add frontend visual QA dependency preflight to daemon environment checks",
+                                        "owner_role":  "qa",
+                                        "priority":  "high",
+                                        "milestone":  "M1",
+                                        "description":  "Extend daemon environment validation so frontend-visual QA prerequisites are verified before scheduling frontend items, including Playwright importability in the exact Python interpreter used by orchestrator validation.",
+                                        "dependencies":  [
+                                                             "RK-M0-0002"
+                                                         ],
+                                        "inputs":  [
+                                                       "tools/health_checks.py",
+                                                       "tools/orchestrator.py",
+                                                       "coordination/policies/commit-guard-rules.yaml",
+                                                       "docs/operations/frontend-visual-qa.md"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Environment/status preflight emits a clear actionable error when frontend visual QA is enabled and `playwright` is missing for the active Python interpreter",
+                                                                    "Preflight guidance includes explicit install/remediation commands for Playwright and Chromium runtime",
+                                                                    "When prerequisites are present, `python tools/orchestrator.py status` passes without false frontend-visual dependency errors"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    },
+                                    {
+                                        "title":  "Treat frontend visual `STATUS: BLOCKED` validation results as block-state outcomes",
+                                        "owner_role":  "qa",
+                                        "priority":  "high",
+                                        "milestone":  "M1",
+                                        "description":  "Adjust validation result handling so environment blockers reported by `tools/frontend_visual_smoke.py` (`STATUS: BLOCKED`) mark work items blocked with actionable reason instead of repeatedly retrying/escalating as generic validation failures.",
+                                        "inputs":  [
+                                                       "tools/orchestrator.py",
+                                                       "tools/frontend_visual_smoke.py",
+                                                       "coordination/runtime/run-history.jsonl",
+                                                       "tests/"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Frontend validation runs that return `STATUS: BLOCKED` are recorded as blocked with blocker reason containing the visual smoke error summary",
+                                                                    "Retry count is not incremented for environmental blockers and no new retry-threshold escalation is created from that condition",
+                                                                    "Regression coverage demonstrates this behavior while preserving existing failure semantics for real visual regressions"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status",
+                                                                    "python -m unittest discover -s tests"
+                                                                ]
+                                    }
+                                ]
     }
 ]

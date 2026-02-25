@@ -117,6 +117,179 @@ def _overflow_value(page: Any) -> int:
     )
 
 
+def _shell_overflow_value(page: Any) -> int | None:
+    value = page.evaluate(
+        """() => {
+            const shell = document.querySelector(".shell");
+            if (!shell) {
+                return null;
+            }
+            return Math.max(0, shell.scrollWidth - shell.clientWidth);
+        }"""
+    )
+    if value is None:
+        return None
+    return int(value)
+
+
+def _parse_px(value: Any) -> float:
+    text = str(value or "").strip().lower()
+    if text.endswith("px"):
+        text = text[:-2]
+    try:
+        return float(text)
+    except Exception:
+        return 0.0
+
+
+def _focus_indicator_visible(style: Any) -> bool:
+    if not isinstance(style, dict):
+        return False
+    outline_style = str(style.get("outlineStyle", "")).strip().lower()
+    outline_width = _parse_px(style.get("outlineWidth"))
+    outline_visible = outline_style not in {"", "none"} and outline_width > 0.0
+    box_shadow = str(style.get("boxShadow", "")).strip().lower()
+    box_shadow_visible = bool(box_shadow and box_shadow != "none")
+    return outline_visible or box_shadow_visible
+
+
+def _active_focus_style(page: Any) -> dict[str, Any] | None:
+    value = page.evaluate(
+        """() => {
+            const el = document.activeElement;
+            if (!el) {
+                return null;
+            }
+            const style = window.getComputedStyle(el);
+            return {
+                tagName: el.tagName.toLowerCase(),
+                id: el.id || "",
+                className: typeof el.className === "string" ? el.className : "",
+                outlineStyle: style.outlineStyle,
+                outlineWidth: style.outlineWidth,
+                boxShadow: style.boxShadow,
+            };
+        }"""
+    )
+    if isinstance(value, dict):
+        return value
+    return None
+
+
+def _active_matches_selector(page: Any, selector: str) -> bool:
+    return bool(
+        page.evaluate(
+            """(targetSelector) => {
+                const el = document.activeElement;
+                return Boolean(el && el.matches(targetSelector));
+            }""",
+            selector,
+        )
+    )
+
+
+def _tab_until_focus(page: Any, selector: str, *, max_steps: int = 50) -> bool:
+    if _active_matches_selector(page, selector):
+        return True
+    for _ in range(max_steps):
+        page.keyboard.press("Tab")
+        if _active_matches_selector(page, selector):
+            return True
+    return False
+
+
+def _install_scroll_capture(page: Any) -> None:
+    page.evaluate(
+        """() => {
+            window.__rkScrollCalls = [];
+            if (window.__rkScrollCaptureInstalled) {
+                return;
+            }
+
+            window.__rkScrollCaptureInstalled = true;
+            const original = Element.prototype.scrollIntoView;
+            Element.prototype.scrollIntoView = function patchedScrollIntoView(options) {
+                let behavior = null;
+                if (typeof options === "object" && options !== null && "behavior" in options) {
+                    behavior = String(options.behavior);
+                }
+
+                window.__rkScrollCalls.push({
+                    targetId: this.id || "",
+                    targetClass: typeof this.className === "string" ? this.className : "",
+                    behavior,
+                });
+                return original.call(this, options);
+            };
+        }"""
+    )
+
+
+def _collect_accessibility_issues(page: Any) -> list[str]:
+    issues: list[str] = []
+    region_tab_selector = ".region-tab"
+    representative_control_selector = ".ghost-btn, .mock-state-btn"
+
+    if page.locator(region_tab_selector).count() == 0:
+        return ["keyboard navigation check failed: no .region-tab controls found"]
+
+    _install_scroll_capture(page)
+    prefers_reduce = bool(page.evaluate("() => window.matchMedia('(prefers-reduced-motion: reduce)').matches"))
+    if not prefers_reduce:
+        issues.append("reduced-motion check failed: prefers-reduced-motion is not active in browser context")
+
+    if not _tab_until_focus(page, region_tab_selector):
+        issues.append("keyboard navigation check failed: tab sequence did not reach .region-tab")
+        return issues
+
+    tab_focus_style = _active_focus_style(page)
+    if not _focus_indicator_visible(tab_focus_style):
+        issues.append("focus-visible check failed: .region-tab did not expose a visible focus indicator")
+
+    page.keyboard.press("ArrowRight")
+    page.keyboard.press("Enter")
+
+    worldmap_selected = bool(
+        page.evaluate(
+            """() => {
+                const tab = document.querySelector('.region-tab[data-target="worldmap-panel"]');
+                return Boolean(tab && tab.getAttribute("aria-selected") === "true");
+            }"""
+        )
+    )
+    if not worldmap_selected:
+        issues.append("keyboard navigation check failed: ArrowRight+Enter did not activate world map region tab")
+
+    scroll_calls = page.evaluate("() => window.__rkScrollCalls || []")
+    if not isinstance(scroll_calls, list):
+        scroll_calls = []
+
+    worldmap_calls = [
+        call
+        for call in scroll_calls
+        if isinstance(call, dict) and str(call.get("targetId", "")) == "worldmap-panel"
+    ]
+    if not worldmap_calls:
+        issues.append("reduced-motion check failed: worldmap-panel activation did not invoke scrollIntoView")
+    elif any(str(call.get("behavior", "")).lower() == "smooth" for call in worldmap_calls):
+        issues.append("reduced-motion check failed: worldmap-panel activation requested smooth scrolling")
+
+    if not _tab_until_focus(page, representative_control_selector):
+        issues.append(
+            "keyboard navigation check failed: tab sequence did not reach representative panel controls "
+            "(.ghost-btn/.mock-state-btn)"
+        )
+        return issues
+
+    control_focus_style = _active_focus_style(page)
+    if not _focus_indicator_visible(control_focus_style):
+        issues.append(
+            "focus-visible check failed: representative panel control did not expose a visible focus indicator"
+        )
+
+    return issues
+
+
 def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     requested_devices = [name.strip() for name in args.devices.split(",") if name.strip()]
     unknown = [name for name in requested_devices if name not in DEVICE_PROFILES]
@@ -165,6 +338,8 @@ def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
                     "screenshot_path": None,
                     "baseline_path": None,
                     "diff_percent": None,
+                    "document_overflow_px": None,
+                    "shell_overflow_px": None,
                 }
                 context = browser.new_context(
                     viewport=profile.get("viewport"),
@@ -179,10 +354,19 @@ def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
                     page.goto(args.url, wait_until="networkidle", timeout=30000)
                     missing = _panel_checks(page)
                     overflow = _overflow_value(page)
+                    shell_overflow = _shell_overflow_value(page)
+                    device_result["document_overflow_px"] = overflow
+                    device_result["shell_overflow_px"] = shell_overflow
                     if missing:
                         device_result["issues"].extend(missing)
                     if overflow > args.max_overflow_px:
                         device_result["issues"].append(f"horizontal overflow {overflow}px > {args.max_overflow_px}px")
+                    if shell_overflow is None:
+                        device_result["issues"].append("missing shell container .shell")
+                    elif shell_overflow > args.max_overflow_px:
+                        device_result["issues"].append(
+                            f"shell overflow {shell_overflow}px > {args.max_overflow_px}px"
+                        )
 
                     shot_path = args.output_dir / f"{device_name}.png"
                     page.screenshot(path=str(shot_path), full_page=True)
@@ -205,6 +389,8 @@ def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
                             ) + 1
                     else:
                         device_result["issues"].append("baseline screenshot missing")
+
+                    device_result["issues"].extend(_collect_accessibility_issues(page))
                 finally:
                     context.close()
 

@@ -7,8 +7,11 @@ This project can run browser-based frontend visual smoke checks using Playwright
 - Multi-device emulation (`desktop-1440`, `tablet-1024`, `mobile-390`, `mobile-360`)
 - Screenshot capture per device
 - Baseline diffing per device
-- Layout guard (`horizontal overflow`)
+- Layout guard (`horizontal overflow` on `document` and `.shell` container)
 - Basic panel-presence checks (`settlement`, `worldmap`, `event-feed`)
+- Keyboard smoke checks for region navigation activation (`ArrowRight` + `Enter`)
+- Focus-visible assertions on representative controls (`.region-tab`, `.ghost-btn`/`.mock-state-btn`)
+- Reduced-motion assertion that region navigation does not request `smooth` scrolling
 
 ## Script
 

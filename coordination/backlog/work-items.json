@@ -38,79 +38,6 @@
     "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01"
   },
   {
-    "id": "RK-M0-0006",
-    "title": "Implement first-slice settlement tick and resource projection service",
-    "description": "Create a backend service to compute deterministic resource ticks for a single settlement using starter economy data and emit placeholder event payloads for UI/state sync.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006-F01-F01"
-    ],
-    "inputs": [
-      "backend/src/modules/economy/",
-      "backend/src/app",
-      "docs/design/v1-starter-data-tables.md"
-    ],
-    "acceptance_criteria": [
-      "A deterministic tick function applies per-resource deltas for 3-4 first-slice resources and returns updated stock + reason codes",
-      "Tick math is bounded to one settlement and starter-enabled content only, with clear defaults for unavailable values",
-      "Output schema is suitable for client mock/state binding without PvP or diplomacy side effects"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:15:22.000000+00:00",
-    "updated_at": "2026-02-25T18:38:04.317163+00:00",
-    "estimated_effort": "M",
-    "token_budget": 14000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "assigned_agent": "ilya-fen"
-  },
-  {
-    "id": "RK-M0-0007",
-    "title": "Add first-slice upgrade and train command handlers",
-    "description": "Add backend handlers for one building upgrade and one unit train action using starter tables, including structured success/fail outcomes and placeholder event keys.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0006",
-      "RK-M1-0006-F01"
-    ],
-    "inputs": [
-      "backend/src/modules/buildings/",
-      "backend/src/modules/units/",
-      "backend/src/modules/telemetry",
-      "docs/design/v1-starter-data-tables.md"
-    ],
-    "acceptance_criteria": [
-      "At least one building upgrade and one unit training command handler are implemented for first-slice IDs",
-      "Each handler returns structured results with `insufficient_resources`, `cooldown`, and `invalid_state` failure cases",
-      "Successful results emit placeholder event keys compatible with existing feed wiring and without combat/diplomacy dependencies"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:15:22.000000+00:00",
-    "updated_at": "2026-02-25T18:15:22.000000+00:00",
-    "estimated_effort": "M",
-    "token_budget": 16000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss"
-  },
-  {
     "id": "RK-M0-0008",
     "title": "Wire client shell actions to first-slice backend contracts",
     "description": "Add a thin client adapter layer so settlement tick, build, and train actions invoke backend-first-slice contract endpoints/stubs and update mock state/event feed.",
@@ -256,45 +183,6 @@
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss"
-  },
-  {
-    "id": "RK-M1-0005-F02-F01",
-    "title": "Add automated a11y and mobile viewport smoke checks for client shell",
-    "description": "Add a lightweight browser-based smoke test (keyboard tab sequence + focus-visible assertions + 360px/390px viewport snapshots) for the client shell wireframe so future UI changes do not regress accessibility or mobile usability.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0005-F02"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Automated check runs the client shell at 360px and 390px widths and verifies no horizontal overflow on the main shell container",
-      "Keyboard navigation test covers region tab activation and confirms visible focus styling on representative controls",
-      "Reduced-motion mode test confirms region navigation does not request smooth scrolling"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
-    "retry_count": 3,
-    "created_at": "2026-02-25T15:31:58.488198+00:00",
-    "updated_at": "2026-02-25T18:20:10.900132+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "sera-kest",
-    "generated_from_item_id": "RK-M1-0005-F02",
-    "assigned_agent": "sera-kest",
-    "recovered_from_stale_in_progress": true,
-    "last_failure_reason": "ERROR: {\"detail\":\"The 'codex-5.3' model is not supported when using Codex with a ChatGPT account.\"}",
-    "last_unblocked_reason": "automatic blocked revisit (1/2)",
-    "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'codex-5.3' model is not supported when using Codex with a ChatGPT account.\"}",
-    "blocked_revisit_count": 1
   },
   {
     "id": "RK-M1-0005-F02-F01-ESC-F01",
@@ -653,5 +541,73 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
+  },
+  {
+    "id": "RK-M0-0006-F01",
+    "title": "Integrate settlement resource projection service with backend tick runner composition",
+    "description": "Wire the new deterministic economy projection service into the app-level module tick orchestration path so resource projection output can be applied/saved and published through the in-process event bus during scheduled simulation ticks.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006"
+    ],
+    "inputs": [
+      "backend/src/modules/economy/application/settlement-resource-projection-service.ts",
+      "backend/src/app/composition.ts",
+      "backend/src/app/reference/in-memory-event-bus.ts"
+    ],
+    "acceptance_criteria": [
+      "App composition can resolve an economy tick service instance and invoke it for one settlement tick cycle",
+      "Projected placeholder economy tick events are published via the existing in-memory event bus contract",
+      "Integration remains first-slice bounded to a single settlement and starter resources only"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:38:07.112014+00:00",
+    "updated_at": "2026-02-25T18:38:07.112014+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M0-0006"
+  },
+  {
+    "id": "RK-M1-0005-F02-F01-ESC",
+    "title": "Escalation: Add automated a11y and mobile viewport smoke checks for client shell",
+    "description": "Investigate repeated failure for item RK-M1-0005-F02-F01. Reason: retry threshold exceeded",
+    "milestone": "M1",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "validating",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:49:40.934120+00:00",
+    "updated_at": "2026-02-25T18:52:05.806570+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M1-0005-F02-F01",
+    "assigned_agent": "mara-voss"
   }
 ]
