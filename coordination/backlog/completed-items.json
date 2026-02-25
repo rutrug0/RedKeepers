@@ -1559,5 +1559,39 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
     "assigned_agent": "rowan-hale",
     "commit_sha": "b715a748102e0106636f964141acca442a0af899"
+  },
+  {
+    "id": "RK-M0-0015",
+    "title": "Expand placeholder event templates for first-slice success and failure outcomes",
+    "description": "Add tokenized placeholder text templates for settlement loop positive/negative outcomes so UI and backend can display consistent feedback without introducing new narrative scope.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0010",
+      "RK-M0-0014"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "At least 12 placeholder templates are added across tick/build/train/scout flows, including success and failure variants",
+      "Templates use stable token names aligned with backend contract payload fields",
+      "Entries remain replaceable placeholders and avoid adding lore systems or mechanics outside first-slice scope"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-25T20:22:27.267172+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "No validation commands were run (per request there were no required validation commands).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
+    "assigned_agent": "nika-thorn",
+    "commit_sha": "4ba2e7fd7e57637940214f4831a5fea728d376b7"
   }
 ]
