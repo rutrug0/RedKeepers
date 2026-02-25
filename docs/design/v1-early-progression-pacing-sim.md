@@ -186,27 +186,83 @@ Checkpoint resource/rate snapshots (replayed against serialized inputs):
 | Checkpoint | Food | Wood | Stone | Iron | Food/h | Wood/h | Stone/h | Iron/h |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 30m | 36.4 | 26.8 | 89.4 | 126.6 | 68.8 | 62.2 | 22.0 | 17.0 |
-| 2h | 64.7 | 15.0 | 44.4 | 112.1 | 68.8 | 62.2 | 22.0 | 17.0 |
-| 6h | 55.0 | 33.6 | 60.4 | 160.1 | 68.8 | 62.2 | 22.0 | 17.0 |
+| 2h | 64.7 | 15.0 | 42.4 | 112.1 | 68.8 | 62.2 | 22.0 | 17.0 |
+| 6h | 0.1 | 0.7 | 8.4 | 140.1 | 68.8 | 62.2 | 22.0 | 17.0 |
 
 ### Timing markers
 
 - `barracks` L1 completion: `1h 48m 33s`
 - `first watch_levy` training start: `2h 4m 51s`
 - `first watch_levy` completion: `2h 5m 35s`
-- `rally_post` L1 completion: not reached within `6h` at current rally costs
+- `rally_post` L1 start: `5h 59m 57s`
+- `rally_post` L1 completion: not reached within `6h` at current rally costs (`6h 2m 27s` if started at `5h 59m 57s`)
 
 ### Target verification (RK-M1-0006-F02-F01-F02)
 
 - `barracks` before `2h`: `PASS` (`1h 48m 33s`)
 - first training cadence (within opening window): `PASS` (first start `2h 4m 51s`, first completion `2h 5m 35s`)
-- `rally_post` timing target (within `6h`): `FAIL` (still not reached)
+- `rally_post` timing target (within `6h`): `FAIL` (start `5h 59m 57s`, completion after `6h`)
 
 ### Micro-pass decision
 
-- `rally_post` cannot be approved yet under current serialized tuning.
+- `rally_post` still cannot be approved under current serialized tuning.
 - Keep narrow numeric follow-up scoped to rally/build costs only:
   - `rally_post.cost_food_l1`: `64 -> 55`
   - `rally_post.cost_wood_l1`: `64 -> 33`
   - `rally_post.cost_stone_l1`: `52 -> 52` (no change for this pass)
 - Re-run `RK-M1-0006-F02-F01-F02` after applying the above values and capture whether `rally_post` reaches L1 by `6h`.
+
+## Re-Run of RK-M1-0006-F02-F01-F01-F01 (Current Applied Rally Pass)
+
+Inputs used:
+
+- `backend/src/modules/economy/infra/seeds/v1/resource-definitions.json`
+- `backend/src/modules/buildings/infra/seeds/v1/building-lines.json`
+- `backend/src/modules/buildings/infra/seeds/v1/building-effects.json`
+- `backend/src/modules/units/infra/seeds/v1/unit-lines.json`
+- `backend/src/app/config/seeds/v1/civilizations/global-modifiers.json`
+
+Reference policy used:
+
+- Build queue: `grain_plot` L1 -> `timber_camp` L1 -> `stone_quarry` L1 -> `iron_pit` L1 -> `grain_plot` L2 -> `timber_camp` L2 -> `barracks` L1 -> `rally_post` L1
+- Train queue after barracks online: `watch_levy` x5, `bow_crew` x2, `trail_scout` x2
+
+Applied L1 rally costs (unchanged scope):
+
+- `rally_post.cost_food_l1`: `55` (from `70`)
+- `rally_post.cost_wood_l1`: `33` (from `70`)
+- `rally_post.cost_stone_l1`: `52` (kept)
+
+### Checkpoints
+
+| Checkpoint | Building State | Unit State | Notes |
+| --- | --- | --- | --- |
+| 30m | `grain_plot` L2, `timber_camp` L2, `stone_quarry` L1, `iron_pit` L1 | none | Queue still front-loaded in economy then barracks path |
+| 2h | Above + `barracks` L1 | none | `barracks` online; no completed unit yet |
+| 6h | `grain_plot` L2, `timber_camp` L2, `stone_quarry` L1, `iron_pit` L1, `barracks` L1 | 5x `watch_levy`, 2x `bow_crew`, 2x `trail_scout` | Rally post still incomplete |
+
+### Resource snapshots
+
+| Checkpoint | Food | Wood | Stone | Iron | Food/h | Wood/h | Stone/h | Iron/h |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 30m | 36.4 | 26.8 | 89.4 | 126.6 | 68.8 | 62.2 | 22.0 | 17.0 |
+| 2h | 64.7 | 15.0 | 42.4 | 112.1 | 68.8 | 62.2 | 22.0 | 17.0 |
+| 6h | 0.1 | 0.7 | 8.4 | 140.1 | 68.8 | 62.2 | 22.0 | 17.0 |
+
+### Timing
+
+- `barracks` L1 completion: `1h 48m 33s`
+- `first watch_levy` start: `2h 4m 51s`
+- `first watch_levy` completion: `2h 5m 35s`
+- `rally_post` L1 start: `5h 59m 57s`
+- `rally_post` L1 completion (if started at `5h 59m 57s`): `6h 2m 27s`
+
+### Target verification
+
+- `barracks` before `2h`: `PASS`
+- training cadence before/near opening window: `PASS`
+- `rally_post` by `6h`: `FAIL` (completion remains after `6h`)
+
+### Micro-pass decision
+
+- This narrowed pass is insufficient for the strict `6h` rally_post target; values remain in-spec by scope but fail timing gate.

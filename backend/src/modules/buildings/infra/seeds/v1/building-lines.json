@@ -82,9 +82,9 @@
       "max_level_v1": 10,
       "build_time_l1_s": 150,
       "build_time_mult_per_level": 1.52,
-      "cost_food_l1": 70,
-      "cost_wood_l1": 70,
-      "cost_stone_l1": 60,
+      "cost_food_l1": 55,
+      "cost_wood_l1": 33,
+      "cost_stone_l1": 52,
       "cost_iron_l1": 20,
       "cost_mult_per_level": 1.58,
       "slice_status": "playable_now"

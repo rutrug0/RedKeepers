@@ -1812,5 +1812,43 @@
     "generated_from_item_id": "RK-M0-0014",
     "assigned_agent": "tomas-grell",
     "commit_sha": "b4edaa6918d392e469c79cfd919a2467df081251"
+  },
+  {
+    "id": "RK-M0-0006-F01-F01",
+    "title": "Persist first-slice economy tick state in a repository-backed adapter",
+    "description": "Replace the in-memory first-slice settlement tick state holder in the economy tick module with a persistence adapter so ticked resource projections are durable and shared across module boundaries.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006-F01"
+    ],
+    "inputs": [
+      "backend/src/app/economy-tick-runner.ts",
+      "backend/src/modules/economy/application/settlement-resource-projection-service.ts"
+    ],
+    "acceptance_criteria": [
+      "A concrete economy tick state repository persists `tick_started_at`, `tick_ended_at`, and per-resource stock after each tick.",
+      "App-level tick state can be read back through an injectable token/service after a scheduled cycle.",
+      "Economy tick placeholder event emission remains unchanged by the persistence migration."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:24:01.776405+00:00",
+    "updated_at": "2026-02-25T20:44:33.091355+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "1. Run `python tools/orchestrator.py status` to confirm runtime status after this migration.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M0-0006-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "471962773ba56bcf7a744bfa35533de4745801cf"
   }
 ]

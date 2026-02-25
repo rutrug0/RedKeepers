@@ -8,6 +8,12 @@ import {
 } from "../domain";
 import { InMemoryWorldMapTileStateRepository } from "../infra";
 import {
+  createWorldMapTileSnapshotKey,
+  hydrateWorldMapTileStateRepositoryFromSeedRows,
+  indexWorldMapTileSnapshotsBySettlementAndTileId,
+  loadWorldMapSeedBundleV1,
+} from "../../../app/config/seeds/v1/world-map-seed-loaders";
+import {
   WorldMapTileInteractEndpointHandler,
   WorldMapTileInteractValidationError,
 } from "./world-map-tile-interact-endpoint";
@@ -199,4 +205,71 @@ test("POST /world-map/tiles/{tileId}/interact rejects invalid route payload mism
       error instanceof WorldMapTileInteractValidationError &&
       error.code === "tile_id_mismatch",
   );
+});
+
+test("fixture seed bundle can hydrate world-map repository and execute all three scout outcomes", async () => {
+  const fixtureBundle = await loadWorldMapSeedBundleV1();
+  const fixtureSnapshotsByTile =
+    indexWorldMapTileSnapshotsBySettlementAndTileId(fixtureBundle.world_map_tiles.rows);
+
+  const hostileKey = createWorldMapTileSnapshotKey("settlement_alpha", "tile_hostile_glade");
+  const quietKey = createWorldMapTileSnapshotKey("settlement_alpha", "tile_quiet_watch");
+
+  assert.equal(Object.keys(fixtureSnapshotsByTile).length, 3);
+  assert.equal(
+    fixtureSnapshotsByTile[hostileKey].tile_state,
+    "tile_state_hostile_hint",
+  );
+  assert.equal(
+    fixtureSnapshotsByTile[quietKey].target_tile_label,
+    "Black Reed March",
+  );
+
+  const repository = new InMemoryWorldMapTileStateRepository();
+  hydrateWorldMapTileStateRepositoryFromSeedRows(
+    repository,
+    fixtureBundle.world_map_tiles.rows,
+  );
+  const service = new DeterministicWorldMapScoutSelectService(repository);
+  const endpoint = new WorldMapTileInteractEndpointHandler(service);
+
+  const dispatchedResponse = endpoint.handlePostTileInteract({
+    path: { tileId: "tile_unknown_demo" },
+    body: {
+      settlement_id: "settlement_alpha",
+      tile_id: "tile_unknown_demo",
+      interaction_type: "scout",
+      flow_version: "v1",
+    },
+  });
+  const emptyResponse = endpoint.handlePostTileInteract({
+    path: { tileId: "tile_quiet_watch" },
+    body: {
+      settlement_id: "settlement_alpha",
+      tile_id: "tile_quiet_watch",
+      interaction_type: "scout",
+      flow_version: "v1",
+    },
+  });
+  const hostileResponse = endpoint.handlePostTileInteract({
+    path: { tileId: "tile_hostile_glade" },
+    body: {
+      settlement_id: "settlement_alpha",
+      tile_id: "tile_hostile_glade",
+      interaction_type: "scout",
+      flow_version: "v1",
+    },
+  });
+
+  assert.equal(dispatchedResponse.interaction_outcome, "outcome_scout_dispatched");
+  assert.equal(emptyResponse.interaction_outcome, "outcome_scout_report_empty");
+  assert.equal(hostileResponse.interaction_outcome, "outcome_scout_report_hostile");
+
+  assert.deepStrictEqual(emptyResponse.event.tokens, {
+    target_tile_label: "Black Reed March",
+  });
+  assert.deepStrictEqual(hostileResponse.event.tokens, {
+    target_tile_label: "Burnt Causeway",
+    hostile_force_estimate: "light raider column",
+  });
 });

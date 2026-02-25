@@ -407,113 +407,6 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
   },
   {
-    "id": "RK-M0-0006-F01-F01",
-    "title": "Persist first-slice economy tick state in a repository-backed adapter",
-    "description": "Replace the in-memory first-slice settlement tick state holder in the economy tick module with a persistence adapter so ticked resource projections are durable and shared across module boundaries.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0006-F01"
-    ],
-    "inputs": [
-      "backend/src/app/economy-tick-runner.ts",
-      "backend/src/modules/economy/application/settlement-resource-projection-service.ts"
-    ],
-    "acceptance_criteria": [
-      "A concrete economy tick state repository persists `tick_started_at`, `tick_ended_at`, and per-resource stock after each tick.",
-      "App-level tick state can be read back through an injectable token/service after a scheduled cycle.",
-      "Economy tick placeholder event emission remains unchanged by the persistence migration."
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T20:24:01.776405+00:00",
-    "updated_at": "2026-02-25T20:44:26.457939+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M0-0006-F01",
-    "assigned_agent": "ilya-fen"
-  },
-  {
-    "id": "RK-M1-0006-F02-F01-F02-F01",
-    "title": "Apply micro-pass rally cost delta and re-run RK-M1-0006-F02-F01-F02",
-    "description": "Apply narrow rally_post-only cost deltas and rerun the 30m/2h/6h reference simulation to validate rally_post reaches L1 by 6h.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006-F02-F01-F02"
-    ],
-    "inputs": [
-      "docs/design/v1-early-progression-pacing-sim.md",
-      "backend/src/modules/economy/infra/seeds/v1/resource-definitions.json",
-      "backend/src/modules/buildings/infra/seeds/v1/building-lines.json"
-    ],
-    "acceptance_criteria": [
-      "rally_post cost values updated to `rally_post.cost_food_l1: 64 -> 55`, `rally_post.cost_wood_l1: 64 -> 33`, and `rally_post.cost_stone_l1: 52 -> 52`",
-      "30m/2h/6h checkpoint tables are refreshed after the micro candidate is applied",
-      "Rally_post reaches L1 by or before 6h in the re-run"
-    ],
-    "validation_commands": [],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T20:26:15.617402+00:00",
-    "updated_at": "2026-02-25T20:26:15.617402+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M1-0006-F02-F01-F02"
-  },
-  {
-    "id": "RK-M1-0006-F02-F01-F01-F01-F01",
-    "title": "Apply narrow rally_post cost-only micro-pass and rerun KPIs",
-    "description": "Apply only rally_post L1 cost reductions to reach rally_post by 6h without introducing new mechanics, then re-run RK-M1-0006-F02-F01-F01-F01 acceptance checks.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006-F02-F01-F01-F01"
-    ],
-    "inputs": [
-      "backend/src/modules/buildings/infra/seeds/v1/building-lines.json",
-      "docs/design/v1-early-progression-pacing-sim.md"
-    ],
-    "acceptance_criteria": [
-      "Only rally_post L1 costs are changed in `backend/src/modules/buildings/infra/seeds/v1/building-lines.json`",
-      "Proposed values: cost_food_l1 70->55, cost_wood_l1 70->33, cost_stone_l1 remains at 52-equivalent target band",
-      "Re-run 30m/2h/6h checkpoints and confirm `rally_post` reaches L1 by 6h",
-      "No additional mechanics, multipliers, or non-rally building values are changed"
-    ],
-    "validation_commands": [],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T20:28:11.027166+00:00",
-    "updated_at": "2026-02-25T20:28:11.027166+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M1-0006-F02-F01-F01-F01"
-  },
-  {
     "id": "RK-M0-0009-F02-F01",
     "title": "Wire world-map scout seed fixtures into dev bootstrap/dev fixture loader",
     "description": "Add a lightweight fixture loader that hydrates the world-map tile state repository with rows from `world-map-tile-seed-fixtures.json` so local/dev runs can replay all three scout outcomes with deterministic fixture tile ids.",
@@ -539,17 +432,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T20:33:10.756351+00:00",
-    "updated_at": "2026-02-25T20:33:10.756351+00:00",
+    "updated_at": "2026-02-25T20:50:12.206180+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M0-0009-F02"
+    "generated_from_item_id": "RK-M0-0009-F02",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M0-0014-F01-F01",
@@ -587,5 +481,38 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "tomas-grell",
     "generated_from_item_id": "RK-M0-0014-F01"
+  },
+  {
+    "id": "RK-M0-0006-F01-F01-F01",
+    "title": "Add durable storage-backed settlement tick repository implementation",
+    "description": "Replace or supplement the in-memory first-slice settlement tick state repository with a persistence-backed implementation (file/db) so ticked stocks survive process restarts and can be shared across process boundaries.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006-F01-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Tick state reads and writes are persisted to a durable store and can be loaded after restart.",
+      "Existing module registration and token contracts remain unchanged.",
+      "Current in-memory implementation remains available for reference tests."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:44:33.100665+00:00",
+    "updated_at": "2026-02-25T20:44:33.100665+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M0-0006-F01-F01"
   }
 ]
