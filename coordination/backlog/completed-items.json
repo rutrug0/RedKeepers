@@ -411,5 +411,48 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
     "assigned_agent": "nika-thorn",
     "commit_sha": "689000acaae0400a0ee4a84d8a71c66019c7222d"
+  },
+  {
+    "id": "RK-M1-0008",
+    "title": "Add M1 scaffold smoke checks across backend, client, and design data",
+    "description": "Add lightweight QA checks and/or scripts that validate the presence and basic structure of the backend scaffold, client shell wireframe, and starter design data artifacts to reduce regressions during early implementation.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0004",
+      "RK-M1-0005",
+      "RK-M1-0006"
+    ],
+    "inputs": [
+      "tests/",
+      "backend/",
+      "client-web/",
+      "docs/design/v1-starter-data-tables.md",
+      "docs/architecture/client-cross-platform-strategy.md"
+    ],
+    "acceptance_criteria": [
+      "At least one automated check validates expected backend scaffold and client shell artifact paths/structure",
+      "QA check coverage includes a sanity check for the starter data tables artifact presence and basic schema/section expectations",
+      "Manual verification notes cover responsive layout checks and placeholder-art policy compliance for the client shell"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:20:08.432712+00:00",
+    "updated_at": "2026-02-25T15:21:48.479726+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/tomas-grell/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "d1757cfdb26afc54da7bb7ce01b7456fca36a8bd"
   }
 ]

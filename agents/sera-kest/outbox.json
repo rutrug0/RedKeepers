@@ -60,5 +60,34 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-25T15:27:36.6730499Z",
+    "item_id": "RK-M1-0005-F01",
+    "status": "completed",
+    "summary": "Replaced hard-coded settlement, map, and event panel values with a single local mock state model in client-web/app.js, adding per-panel loading/populated preview toggles and data-driven placeholder rendering without backend dependencies.",
+    "files": [
+      "client-web/index.html",
+      "client-web/styles.css",
+      "client-web/app.js",
+      "agents/sera-kest/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Add empty and error mock scenarios for client shell panels",
+        "owner_role": "frontend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Extend the local mock panel state model so settlement, world map, and event feed each include empty and error scenarios, with the existing mock-state toggles able to switch to them for UI iteration and QA.",
+        "acceptance_criteria": [
+          "Settlement, world map, and event feed mock state definitions each include empty and error scenarios in client-web/app.js (or a shared client-web mock state module)",
+          "Per-panel mock-state controls expose empty and error alongside loading and populated",
+          "Empty and error views remain placeholder-art-only and stay within the first vertical slice shell"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

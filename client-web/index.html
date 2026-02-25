@@ -46,82 +46,12 @@
             <p class="eyebrow">Settlement Management</p>
             <h2 id="settlement-title">Cinderwatch Hold</h2>
           </div>
-          <button type="button" class="ghost-btn">Open Queue</button>
+          <div class="inline-actions">
+            <div id="settlement-panel-state-controls" class="mock-state-controls" aria-label="Settlement mock state controls"></div>
+            <button type="button" class="ghost-btn">Open Queue</button>
+          </div>
         </header>
-
-        <div class="panel__content stack">
-          <section class="subpanel">
-            <h3>Resource Ledger</h3>
-            <div class="resource-grid" aria-label="Placeholder resource cards">
-              <article class="resource-card">
-                <p class="resource-card__label">Timber</p>
-                <p class="resource-card__value">1,240</p>
-                <div class="wire-bar"><span style="width:62%"></span></div>
-              </article>
-              <article class="resource-card">
-                <p class="resource-card__label">Stone</p>
-                <p class="resource-card__value">980</p>
-                <div class="wire-bar"><span style="width:49%"></span></div>
-              </article>
-              <article class="resource-card">
-                <p class="resource-card__label">Iron</p>
-                <p class="resource-card__value">715</p>
-                <div class="wire-bar"><span style="width:36%"></span></div>
-              </article>
-              <article class="resource-card">
-                <p class="resource-card__label">Grain</p>
-                <p class="resource-card__value">1,860</p>
-                <div class="wire-bar"><span style="width:78%"></span></div>
-              </article>
-            </div>
-          </section>
-
-          <section class="subpanel">
-            <div class="subpanel__head">
-              <h3>Build Queue</h3>
-              <button type="button" class="ghost-btn">Manage</button>
-            </div>
-            <ul class="wire-list" aria-label="Placeholder build queue">
-              <li>
-                <span class="wire-icon" aria-hidden="true">B1</span>
-                <div class="wire-list__body">
-                  <p>Granary Upgrade (Lv. 6)</p>
-                  <div class="wire-bar"><span style="width:45%"></span></div>
-                </div>
-                <span class="wire-time">08:14</span>
-              </li>
-              <li>
-                <span class="wire-icon" aria-hidden="true">B2</span>
-                <div class="wire-list__body">
-                  <p>Palisade Repair</p>
-                  <div class="wire-bar"><span style="width:12%"></span></div>
-                </div>
-                <span class="wire-time">19:30</span>
-              </li>
-              <li>
-                <span class="wire-icon" aria-hidden="true">B3</span>
-                <div class="wire-list__body">
-                  <p>Barracks Expansion (Lv. 4)</p>
-                  <div class="wire-bar"><span style="width:0%"></span></div>
-                </div>
-                <span class="wire-time">Queued</span>
-              </li>
-            </ul>
-          </section>
-
-          <section class="subpanel">
-            <div class="subpanel__head">
-              <h3>Garrison Snapshot</h3>
-              <button type="button" class="ghost-btn">Review</button>
-            </div>
-            <div class="unit-rows" aria-label="Placeholder unit rows">
-              <div class="unit-row"><span class="wire-silhouette" aria-hidden="true"></span><span>Levy Spear</span><span>120</span></div>
-              <div class="unit-row"><span class="wire-silhouette" aria-hidden="true"></span><span>Road Wardens</span><span>48</span></div>
-              <div class="unit-row"><span class="wire-silhouette" aria-hidden="true"></span><span>Slingers</span><span>64</span></div>
-              <div class="unit-row"><span class="wire-silhouette" aria-hidden="true"></span><span>Scout Riders</span><span>12</span></div>
-            </div>
-          </section>
-        </div>
+        <div id="settlement-panel-content" class="panel__content" aria-live="polite"></div>
       </section>
 
       <section id="worldmap-panel" class="panel map-panel" aria-labelledby="worldmap-title" tabindex="-1">
@@ -131,62 +61,12 @@
             <h2 id="worldmap-title">Frontier Region Map</h2>
           </div>
           <div class="inline-actions">
+            <div id="worldmap-panel-state-controls" class="mock-state-controls" aria-label="World map mock state controls"></div>
             <button type="button" class="ghost-btn">Scan</button>
             <button type="button" class="ghost-btn">Markers</button>
           </div>
         </header>
-
-        <div class="panel__content map-layout">
-          <div class="map-stage" role="img" aria-label="Placeholder world map viewport with grid and marker blocks">
-            <div class="map-overlay map-overlay--top-left">
-              <span class="chip chip--small">Coords: 412 / 198</span>
-              <span class="chip chip--small">Region: Black Reed March</span>
-            </div>
-
-            <div class="map-grid" aria-hidden="true">
-              <div class="map-marker settlement">Your Keep</div>
-              <div class="map-marker allied">Ally Camp</div>
-              <div class="map-marker hostile">Ruin Site</div>
-              <div class="route-line route-line--one"></div>
-              <div class="route-line route-line--two"></div>
-            </div>
-
-            <div class="map-overlay map-overlay--bottom-right">
-              <div class="map-controls" aria-label="Placeholder map controls">
-                <button type="button" class="control-btn" aria-label="Zoom in">+</button>
-                <button type="button" class="control-btn" aria-label="Zoom out">-</button>
-                <button type="button" class="control-btn" aria-label="Center on settlement">◎</button>
-              </div>
-            </div>
-          </div>
-
-          <aside class="map-side" aria-label="Map side panels">
-            <section class="subpanel compact">
-              <h3>Selected Tile</h3>
-              <div class="wire-fields">
-                <div><span>Type</span><strong>Neutral Forest</strong></div>
-                <div><span>Control</span><strong>Unclaimed</strong></div>
-                <div><span>Travel</span><strong>14m from Keep</strong></div>
-              </div>
-            </section>
-            <section class="subpanel compact">
-              <h3>Legend (Placeholder)</h3>
-              <ul class="legend-list">
-                <li><span class="legend-swatch settlement"></span>Your Settlements</li>
-                <li><span class="legend-swatch allied"></span>Friendly / Allied</li>
-                <li><span class="legend-swatch hostile"></span>Hostile / Points of Interest</li>
-              </ul>
-            </section>
-            <section class="subpanel compact">
-              <h3>Map Actions</h3>
-              <div class="stack-sm">
-                <button type="button" class="action-btn">Send Scouts (placeholder)</button>
-                <button type="button" class="action-btn">Plan Route (placeholder)</button>
-                <button type="button" class="action-btn">Set Rally Marker (placeholder)</button>
-              </div>
-            </section>
-          </aside>
-        </div>
+        <div id="worldmap-panel-content" class="panel__content" aria-live="polite"></div>
       </section>
 
       <section id="event-feed-panel" class="panel event-panel" aria-labelledby="event-feed-title" tabindex="-1">
@@ -195,55 +75,12 @@
             <p class="eyebrow">Player Event Feed</p>
             <h2 id="event-feed-title">Dispatches & Alerts</h2>
           </div>
-          <button type="button" class="ghost-btn">Filter</button>
+          <div class="inline-actions">
+            <div id="event-feed-panel-state-controls" class="mock-state-controls" aria-label="Event feed mock state controls"></div>
+            <button type="button" class="ghost-btn">Filter</button>
+          </div>
         </header>
-
-        <div class="panel__content stack">
-          <section class="subpanel compact">
-            <h3>Feed Controls</h3>
-            <div class="segment-row" role="group" aria-label="Placeholder event filters">
-              <button type="button" class="segment is-selected">All</button>
-              <button type="button" class="segment">Settlement</button>
-              <button type="button" class="segment">Military</button>
-              <button type="button" class="segment">World</button>
-            </div>
-          </section>
-
-          <section class="subpanel">
-            <h3>Recent Events</h3>
-            <ol class="event-list" aria-label="Placeholder event feed entries">
-              <li class="event-item priority-high">
-                <p class="event-item__title">Scout report returned from Black Reed March</p>
-                <p class="event-item__meta">2m ago · Map · Placeholder content</p>
-              </li>
-              <li class="event-item">
-                <p class="event-item__title">Granary upgrade reached 45% completion</p>
-                <p class="event-item__meta">8m ago · Settlement · Build queue</p>
-              </li>
-              <li class="event-item">
-                <p class="event-item__title">Road Wardens garrison upkeep reduced at home keep</p>
-                <p class="event-item__meta">14m ago · Military · Status effect</p>
-              </li>
-              <li class="event-item priority-medium">
-                <p class="event-item__title">Neighboring ruin site detected activity spike</p>
-                <p class="event-item__meta">23m ago · World · Watchlist trigger</p>
-              </li>
-              <li class="event-item">
-                <p class="event-item__title">Trade cart request queued (placeholder workflow)</p>
-                <p class="event-item__meta">29m ago · Settlement · Logistics</p>
-              </li>
-            </ol>
-          </section>
-
-          <section class="subpanel compact">
-            <h3>Queued Notifications</h3>
-            <div class="wire-tiles">
-              <div class="wire-tile">Raid warning banner slot</div>
-              <div class="wire-tile">Alliance message drawer slot</div>
-              <div class="wire-tile">Tutorial prompt slot</div>
-            </div>
-          </section>
-        </div>
+        <div id="event-feed-panel-content" class="panel__content" aria-live="polite"></div>
       </section>
     </main>
   </div>

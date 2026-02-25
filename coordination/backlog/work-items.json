@@ -1,47 +1,5 @@
 [
   {
-    "id": "RK-M1-0008",
-    "title": "Add M1 scaffold smoke checks across backend, client, and design data",
-    "description": "Add lightweight QA checks and/or scripts that validate the presence and basic structure of the backend scaffold, client shell wireframe, and starter design data artifacts to reduce regressions during early implementation.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0004",
-      "RK-M1-0005",
-      "RK-M1-0006"
-    ],
-    "inputs": [
-      "tests/",
-      "backend/",
-      "client-web/",
-      "docs/design/v1-starter-data-tables.md",
-      "docs/architecture/client-cross-platform-strategy.md"
-    ],
-    "acceptance_criteria": [
-      "At least one automated check validates expected backend scaffold and client shell artifact paths/structure",
-      "QA check coverage includes a sanity check for the starter data tables artifact presence and basic schema/section expectations",
-      "Manual verification notes cover responsive layout checks and placeholder-art policy compliance for the client shell"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T15:21:47.526510+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
-    "assigned_agent": "tomas-grell"
-  },
-  {
     "id": "RK-M1-0005-F01",
     "title": "Add mock data state to client shell wireframe",
     "description": "Replace hard-coded placeholder values in the settlement, map, and event panels with a local mock data model so future UI iterations can test empty/loading/error and selection states without backend dependencies.",
@@ -62,17 +20,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T14:27:22.682338+00:00",
-    "updated_at": "2026-02-25T14:27:22.682338+00:00",
+    "updated_at": "2026-02-25T15:28:19.664757+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "sera-kest",
-    "generated_from_item_id": "RK-M1-0005"
+    "generated_from_item_id": "RK-M1-0005",
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-M1-0005-F02",
@@ -315,5 +274,41 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "nika-thorn",
     "generated_from_item_id": "RK-M1-0007"
+  },
+  {
+    "id": "RK-M1-0008-F01",
+    "title": "Run browser-based visual smoke pass for M1 client shell breakpoints",
+    "description": "Execute the documented manual checklist for the client shell at desktop/tablet/mobile widths and confirm placeholder-art-only compliance with screenshots or notes.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0008"
+    ],
+    "inputs": [
+      "agents/tomas-grell/manual-verification-rk-m1-0008.md",
+      "client-web/index.html",
+      "client-web/styles.css",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "Manual verification checklist in agents/tomas-grell/manual-verification-rk-m1-0008.md is executed in a browser",
+      "Responsive behavior at >=1221px, 861-1220px, and <=860px is recorded with pass/fail notes",
+      "Placeholder-art policy compliance is explicitly confirmed or violations are logged"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:21:48.485313+00:00",
+    "updated_at": "2026-02-25T15:21:48.485313+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "tomas-grell",
+    "generated_from_item_id": "RK-M1-0008"
   }
 ]
