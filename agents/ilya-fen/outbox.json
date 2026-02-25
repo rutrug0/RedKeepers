@@ -280,5 +280,45 @@
     ],
     "blockers": [],
     "proposed_work_items": []
+  },
+  {
+    "timestamp_utc": "2026-02-25T18:37:15.9655230Z",
+    "agent_id": "ilya-fen",
+    "work_item_id": "RK-M0-0006",
+    "status": "done",
+    "summary": "Implemented a deterministic first-slice settlement resource tick/projection service for food/wood/stone/iron with bounded starter-content defaults, per-resource reason codes, and placeholder event payloads for client state/event-feed binding.",
+    "changed_files": [
+      "backend/src/modules/economy/application/settlement-resource-projection-service.ts",
+      "backend/src/modules/economy/application/settlement-resource-projection-service.test.ts",
+      "backend/src/modules/economy/application/index.ts",
+      "backend/src/modules/economy/index.ts",
+      "agents/ilya-fen/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Integrate settlement resource projection service with backend tick runner composition",
+        "owner_role": "backend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Wire the new deterministic economy projection service into the app-level module tick orchestration path so resource projection output can be applied/saved and published through the in-process event bus during scheduled simulation ticks.",
+        "acceptance_criteria": [
+          "App composition can resolve an economy tick service instance and invoke it for one settlement tick cycle",
+          "Projected placeholder economy tick events are published via the existing in-memory event bus contract",
+          "Integration remains first-slice bounded to a single settlement and starter resources only"
+        ],
+        "dependencies": [
+          "RK-M0-0006"
+        ],
+        "inputs": [
+          "backend/src/modules/economy/application/settlement-resource-projection-service.ts",
+          "backend/src/app/composition.ts",
+          "backend/src/app/reference/in-memory-event-bus.ts"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

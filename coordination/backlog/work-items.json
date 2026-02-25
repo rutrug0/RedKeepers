@@ -38,45 +38,6 @@
     "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0003",
-    "title": "Generate next backlog tranche",
-    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, and QA with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas.",
-    "milestone": "M0",
-    "type": "qa",
-    "priority": "high",
-    "owner_role": "lead",
-    "preferred_agent": "mara-voss",
-    "dependencies": [],
-    "inputs": [
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/completed-items.json",
-      "coordination/backlog/blocked-items.json",
-      "docs/design/first-vertical-slice.md",
-      "coordination/runtime/run-history.jsonl"
-    ],
-    "acceptance_criteria": [
-      "At least 3 new queued tasks are created or requeued",
-      "Each task has owner_role, dependencies, and acceptance criteria",
-      "Tasks reflect current project priorities and unblock progress",
-      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:11:22.363658+00:00",
-    "updated_at": "2026-02-25T18:32:24.928539+00:00",
-    "estimated_effort": "S",
-    "token_budget": 12000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "auto_generated": "backlog_refill",
-    "assigned_agent": "mara-voss",
-    "recovered_from_stale_in_progress": true
-  },
-  {
     "id": "RK-M0-0006",
     "title": "Implement first-slice settlement tick and resource projection service",
     "description": "Create a backend service to compute deterministic resource ticks for a single settlement using starter economy data and emit placeholder event payloads for UI/state sync.",
@@ -101,15 +62,16 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T18:15:22.000000+00:00",
-    "updated_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-25T18:38:04.317163+00:00",
     "estimated_effort": "M",
     "token_budget": 14000,
     "result_summary": null,
     "blocker_reason": null,
-    "escalation_target": "Mara Voss"
+    "escalation_target": "Mara Voss",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M0-0007",
@@ -492,5 +454,204 @@
     "last_unblocked_reason": "automatic blocked revisit (1/2)",
     "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'GPT-5.3-Codex-Spark' model is not supported when using Codex with a ChatGPT account.\"}",
     "blocked_revisit_count": 1
+  },
+  {
+    "id": "RK-M0-0012",
+    "title": "Expose first-slice settlement loop contract endpoints",
+    "description": "Implement backend-facing contract adapters for settlement tick, building upgrade, unit train, and scout actions so the client loop can call stable first-slice request/response shapes.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006",
+      "RK-M0-0007",
+      "RK-M0-0009"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Contract adapters expose deterministic request/response payloads for tick, upgrade, train, and scout actions",
+      "Responses include stable placeholder event keys and state deltas suitable for client binding",
+      "Failure paths map `insufficient_resources`, `cooldown`, and `unavailable_tile` to consistent error codes without adding PvP/diplomacy logic"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-25T18:32:27.509162+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
+  },
+  {
+    "id": "RK-M0-0013",
+    "title": "Add action availability gating and cooldown feedback in client shell",
+    "description": "Update settlement and map controls to react to backend contract state so build/train/scout actions show deterministic disabled states and placeholder reason feedback.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0008",
+      "RK-M0-0012",
+      "RK-M0-0010"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Build/train/scout controls disable when contract responses indicate insufficient resources, cooldown, or unavailable tile outcomes",
+      "Placeholder reason text is rendered from stable event/content keys rather than hard-coded strings",
+      "Control state and feedback behavior works at existing desktop and mobile breakpoints without adding new mechanics"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-25T18:32:27.509162+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
+  },
+  {
+    "id": "RK-M0-0014",
+    "title": "Publish first-slice progression target matrix for 15m/30m/60m loop",
+    "description": "Define clear timing and resource targets for first upgrade, first unit training, and first scout interaction so implementation and QA share the same first-slice pacing expectations.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006",
+      "RK-M0-0009"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Matrix defines target windows for resource stabilization, first building upgrade, first unit training, and one scout interaction",
+      "Each target includes measurable pass/fail bounds that QA can assert in smoke checks",
+      "Document explicitly confirms first-slice caps (1 settlement, 3-4 resources, 4-6 buildings, 3-5 units) and marks anything else as deferred"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-25T18:32:27.509162+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
+  },
+  {
+    "id": "RK-M0-0015",
+    "title": "Expand placeholder event templates for first-slice success and failure outcomes",
+    "description": "Add tokenized placeholder text templates for settlement loop positive/negative outcomes so UI and backend can display consistent feedback without introducing new narrative scope.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0010",
+      "RK-M0-0014"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "At least 12 placeholder templates are added across tick/build/train/scout flows, including success and failure variants",
+      "Templates use stable token names aligned with backend contract payload fields",
+      "Entries remain replaceable placeholders and avoid adding lore systems or mechanics outside first-slice scope"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-25T18:32:27.509162+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
+  },
+  {
+    "id": "RK-M0-0016",
+    "title": "Automate first-slice visual smoke baselines across desktop/tablet/mobile",
+    "description": "Run and integrate `tools/frontend_visual_smoke.py` for first-slice UI checks so multi-device screenshots and baseline diffs cover core settlement/map/feed interactions.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0011",
+      "RK-M0-0013"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Automated smoke run captures desktop, tablet, and mobile screenshots with baseline comparison output",
+      "Coverage includes at least one success path and one failure path for build/train/scout action feedback",
+      "Run output provides deterministic pass/fail summary and artifact paths for review"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-25T18:32:27.509162+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01",
+    "title": "Prototype hero unit system for multiple civilizations",
+    "description": "Deferred post-slice concept for hero units and civilization-specific active abilities, explicitly excluded from first vertical slice scope.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "first vertical slice sign-off"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Concept scope remains unqueued until first vertical slice is signed off",
+      "Design proposal identifies minimum onboarding/tutorial impact and associated UI changes",
+      "No implementation work starts during M0/M1 first-slice delivery"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-25T18:32:27.509162+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
   }
 ]
