@@ -101,3 +101,56 @@ This recommendation preserves first-slice constraints:
 - no new mechanics
 - no civ-specific UI/tutorial flow
 - stat/timing-only tuning compatible with data-table implementation
+
+## Serialized Seed Re-validation (RK-M1-0006-F02-F01, 2026-02-25 UTC)
+
+Re-validation source files (serialized seed values):
+
+- `backend/src/modules/economy/infra/seeds/v1/resource-definitions.json`
+- `backend/src/modules/buildings/infra/seeds/v1/building-lines.json`
+- `backend/src/modules/buildings/infra/seeds/v1/building-effects.json`
+- `backend/src/modules/units/infra/seeds/v1/unit-lines.json`
+- `backend/src/app/config/seeds/v1/civilizations/global-modifiers.json`
+
+Reference route/policy used for deterministic parity with the prior run:
+
+- Build queue: `grain_plot` L1 -> `timber_camp` L1 -> `stone_quarry` L1 -> `iron_pit` L1 -> `grain_plot` L2 -> `timber_camp` L2 -> `barracks` L1 -> `rally_post` L1
+- Train queue after `barracks` is online (single queue): 5x `watch_levy`, 2x `bow_crew`, 2x `trail_scout` as resources allow
+- Same slice assumptions as above (single queue per system, no quests/raids/boosts, Cinder home upkeep modifier)
+
+### Checkpoints (Serialized Seed Values)
+
+| Checkpoint | Building State | Unit State | Notes |
+| --- | --- | --- | --- |
+| 30m | `grain_plot` L2, `timber_camp` L1, `stone_quarry` L1, `iron_pit` L1 | none | Matches pre-pass baseline dead-zone pattern |
+| 2h | Same as 30m | none | Still pre-`barracks` |
+| 6h | `grain_plot` L2, `timber_camp` L2, `stone_quarry` L1, `iron_pit` L1, `barracks` L1 | 4x `watch_levy` | `rally_post` not reached |
+
+Serialized checkpoint resource/rate snapshots:
+
+| Checkpoint | Food | Wood | Stone | Iron | Food/h | Wood/h | Stone/h | Iron/h |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 30m | 44.3 | 9.8 | 88.4 | 126.6 | 66.8 | 28.0 | 22.0 | 17.0 |
+| 2h | 144.5 | 51.8 | 121.4 | 152.1 | 66.8 | 28.0 | 22.0 | 17.0 |
+| 6h | 101.8 | 17.6 | 58.4 | 180.1 | 63.4 | 60.2 | 22.0 | 17.0 |
+
+Key timing markers (serialized seeds):
+
+- `barracks` L1 completion: `4h 25m 42s`
+- First `watch_levy` training start: `4h 42m 39s`
+- First `watch_levy` completion: `4h 43m 23s`
+- `rally_post` L1 completion: not reached within `6h`
+
+### Target Verification (Against Tuned Pass A Intent)
+
+- `barracks` before `2h`: `FAIL` (`4h 25m 42s`)
+- First unit training cadence in/near the `2h` window: `FAIL` (first train start `4h 42m 39s`)
+- `rally_post` timing acceptable without extra pass: `FAIL` (not reached by `6h`)
+
+Conclusion: serialized seed/config values currently behave like the original pre-pass baseline, so the Pass A barracks improvement does not hold in serialized data yet. `rally_post` should not be approved on current serialized values.
+
+Proposed narrow follow-up (after Pass A serialization is present): run a rally/stone-only micro pass and recheck `6h` timing with unchanged core mechanics. Candidate deltas:
+
+- `rally_post.cost_food_l1`: `70 -> 64`
+- `rally_post.cost_wood_l1`: `70 -> 64`
+- `rally_post.cost_stone_l1`: `60 -> 52`

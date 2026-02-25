@@ -152,5 +152,63 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-25T19:27:48.5624646Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-M1-0006-F02-F01",
+    "status": "done",
+    "summary": "Re-ran the 30m/2h/6h pacing simulation directly from serialized starter seed JSON values and confirmed the run still matches pre-pass-A pacing: barracks and first training are both far past the 2h target window and rally_post is not reached by 6h.",
+    "changed_files": [
+      "docs/design/v1-early-progression-pacing-sim.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [
+      "Approved Pass A starter tuning values are not yet reflected in serialized backend seed/config files, so post-pass-A pacing cannot be validated on live serialized values."
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Apply approved Pass A starter tuning values into serialized backend seed config",
+        "owner_role": "backend",
+        "milestone": "M1",
+        "priority": "high",
+        "description": "Update serialized v1 starter seed JSON values to match the approved Pass A tuning set already documented in `docs/design/v1-early-progression-pacing-sim.md` (starting stock, base passive income, early producer cost multipliers, and barracks/rally food+wood costs).",
+        "dependencies": [
+          "RK-M1-0006-F02"
+        ],
+        "inputs": [
+          "docs/design/v1-early-progression-pacing-sim.md",
+          "backend/src/modules/economy/infra/seeds/v1/resource-definitions.json",
+          "backend/src/modules/buildings/infra/seeds/v1/building-lines.json"
+        ],
+        "acceptance_criteria": [
+          "Serialized resource and building seed values match the approved Pass A numbers from the design doc",
+          "Seed loader tests continue passing after value updates",
+          "No new mechanics are introduced and first-slice enablement remains unchanged"
+        ],
+        "validation_commands": []
+      },
+      {
+        "title": "Run post-serialization rally/stone micro-pass validation after Pass A is landed",
+        "owner_role": "design",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "After Pass A is serialized, rerun the 30m/2h/6h reference simulation and validate whether rally_post timing can be approved or needs a narrow rally/stone-only numeric tweak.",
+        "dependencies": [
+          "RK-M1-0006-F02-F01"
+        ],
+        "inputs": [
+          "docs/design/v1-early-progression-pacing-sim.md",
+          "backend/src/modules/economy/infra/seeds/v1/resource-definitions.json",
+          "backend/src/modules/buildings/infra/seeds/v1/building-lines.json"
+        ],
+        "acceptance_criteria": [
+          "Checkpoint/resource tables for 30m, 2h, and 6h are refreshed from serialized values",
+          "Barracks timing and first training cadence are explicitly checked against tuned targets",
+          "Rally_post timing is either approved or a narrow rally/stone-only delta is documented with explicit numeric values"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]

@@ -1187,5 +1187,37 @@
     "source_item_id": "RK-M1-0005-F02-F01",
     "assigned_agent": "mara-voss",
     "commit_sha": "eff49145de017accd774517d8d8532ddb0e55341"
+  },
+  {
+    "id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
+    "title": "Escalation: Treat frontend visual `STATUS: BLOCKED` validation results as block-state outcomes",
+    "description": "Investigate repeated failure for item RK-M1-0005-F02-F01-ESC-F03. Reason: retry threshold exceeded",
+    "milestone": "M1",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T19:19:20.252923+00:00",
+    "updated_at": "2026-02-25T19:22:20.972095+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": "- [agents/mara-voss/outbox.json](/D:/RedKeepers/agents/mara-voss/outbox.json#L598): added completion record for `RK-M1-0005-F02-F01-ESC-F03-ESC` with root cause, evidence, and one high-priority QA follow-up task.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M1-0005-F02-F01-ESC-F03",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "5379cdc8f39f72b7f099a836a668b4ed13bfce4b"
   }
 ]

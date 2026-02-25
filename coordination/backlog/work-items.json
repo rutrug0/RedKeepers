@@ -245,10 +245,10 @@
       "Rally_post timing is either approved or a small stone/rally-only tuning pass is proposed"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 3,
     "created_at": "2026-02-25T15:39:41.742815+00:00",
-    "updated_at": "2026-02-25T18:23:48.838954+00:00",
+    "updated_at": "2026-02-25T19:28:28.931331+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -618,34 +618,41 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC"
   },
   {
-    "id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
-    "title": "Escalation: Treat frontend visual `STATUS: BLOCKED` validation results as block-state outcomes",
-    "description": "Investigate repeated failure for item RK-M1-0005-F02-F01-ESC-F03. Reason: retry threshold exceeded",
+    "id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
+    "title": "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
+    "description": "Resolve existing unrelated failures in `tests/test_daemon_smoke_env.py` and `tests/test_m1_scaffold_smoke.py` so full regression validation is green and does not re-escalate completed feature work.",
     "milestone": "M1",
-    "type": "qa",
+    "type": "feature",
     "priority": "high",
-    "owner_role": "lead",
+    "owner_role": "qa",
     "preferred_agent": null,
-    "dependencies": [],
+    "dependencies": [
+      "RK-M1-0005-F02-F01-ESC-F03"
+    ],
     "inputs": [
-      "coordination/state/run-history.jsonl",
-      "coordination/backlog/work-items.json"
+      "tests/test_daemon_smoke_env.py",
+      "tests/test_m1_scaffold_smoke.py",
+      "tools/health_checks.py",
+      "client-web/index.html"
     ],
     "acceptance_criteria": [
-      "Root cause identified",
-      "Follow-up work items created or item unblocked"
+      "`python -m unittest discover -s tests` passes without failures in `tests/test_daemon_smoke_env.py`",
+      "`python -m unittest discover -s tests` passes without failures in `tests/test_m1_scaffold_smoke.py`",
+      "Updated assertions reflect current first-slice contract (runtime vs state required-file semantics, current placeholder shell markup) without expanding product scope"
     ],
-    "validation_commands": [],
-    "status": "validating",
+    "validation_commands": [
+      "python -m unittest discover -s tests"
+    ],
+    "status": "queued",
     "retry_count": 0,
-    "created_at": "2026-02-25T19:19:20.252923+00:00",
-    "updated_at": "2026-02-25T19:22:19.756017+00:00",
+    "created_at": "2026-02-25T19:22:20.979650+00:00",
+    "updated_at": "2026-02-25T19:22:20.979650+00:00",
     "estimated_effort": "S",
-    "token_budget": 6000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "source_item_id": "RK-M1-0005-F02-F01-ESC-F03",
-    "assigned_agent": "mara-voss"
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
   }
 ]
