@@ -1890,5 +1890,46 @@
     "generated_from_item_id": "RK-M0-0009-F02",
     "assigned_agent": "ilya-fen",
     "commit_sha": "3b0e0e66a811eb7e9b51a653994d40eff1e44884"
+  },
+  {
+    "id": "RK-M0-0014-F01-F01",
+    "title": "Source RK-M0-0014 smoke data from deterministic pipeline snapshot artifacts",
+    "description": "Connect `tests/test_m0_0014_progression_smoke.py` to the generated deterministic settlement and scout snapshot artifact used by automated first-slice progression runs, replacing manual fixture maintenance.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0014-F01"
+    ],
+    "inputs": [
+      "tests/test_m0_0014_progression_smoke.py",
+      "pipeline or generator that emits 15m/30m/60m settlement & scout snapshots",
+      "docs/design/first-slice-progression-target-matrix.md"
+    ],
+    "acceptance_criteria": [
+      "CI smoke command points test fixture path through environment variable to a generated snapshot artifact",
+      "Smoke test fails when matrix thresholds are violated in generated data and passes when thresholds hold",
+      "Runbook documents how to regenerate snapshot inputs when simulation seeds change"
+    ],
+    "validation_commands": [
+      "python -m unittest tests.test_m0_0014_progression_smoke.py"
+    ],
+    "status": "completed",
+    "retry_count": 2,
+    "created_at": "2026-02-25T20:42:01.038270+00:00",
+    "updated_at": "2026-02-25T21:11:21.903813+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Note: literal command `python -m unittest tests.test_m0_0014_progression_smoke.py` fails due `unittest` dotted-module `.py` suffix behavior; CI command now uses corrected module target.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "tomas-grell",
+    "generated_from_item_id": "RK-M0-0014-F01",
+    "assigned_agent": "tomas-grell",
+    "last_failure_reason": "validation failed or commit failed",
+    "recovered_from_stale_in_progress": true,
+    "commit_sha": "00ada426ad63240a85a2b87c12c200734fecd83e"
   }
 ]

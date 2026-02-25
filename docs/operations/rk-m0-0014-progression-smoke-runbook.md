@@ -27,6 +27,28 @@ Required top-level keys:
 - `event_scout_snapshots`
 - optional: `building_upgrades`, `buildings`, `unit_completions`
 
+## Generator entry point
+
+Use this deterministic generator to refresh the artifact after seed updates:
+
+```powershell
+python tools/rk_m0_0014_progression_profile.py
+```
+
+Equivalent wrapper:
+
+```powershell
+scripts/generate_rk_m0_0014_progression_profile.ps1
+```
+
+Default source for generation is:
+
+- `tests/fixtures/rk-m0-0014-progression-profile.json`
+
+Output is written deterministically to:
+
+- `coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json`
+
 ## CI smoke command
 
 Set the profile artifact path via environment variable:
@@ -50,7 +72,8 @@ This keeps the fixture source separated from generated CI input and ensures smok
 
 When simulation seeds change:
 
-1. Re-run the deterministic first-slice progression snapshot pipeline used by your automation lane so it emits a fresh `rk-m0-0014-progression-profile.json`.
+1. Re-run the deterministic generator:
+   `python tools/rk_m0_0014_progression_profile.py`
 2. Place the emitted artifact at:
    - `coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json`
 3. Re-run smoke against that artifact:
