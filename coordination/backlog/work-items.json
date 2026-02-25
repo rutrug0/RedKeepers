@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "id": "RK-AUTO-BACKLOG-0001",
+    "title": "Generate next backlog tranche",
+    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, and QA with dependencies and acceptance criteria.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/state/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "At least 3 new queued tasks are created or requeued",
+      "Each task has owner_role, dependencies, and acceptance criteria",
+      "Tasks reflect current project priorities and unblock progress"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "validating",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:15:00.270418+00:00",
+    "updated_at": "2026-02-25T14:20:07.344877+00:00",
+    "estimated_effort": "S",
+    "token_budget": 12000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "auto_generated": "backlog_refill",
+    "assigned_agent": "mara-voss"
+  }
+]

@@ -46,6 +46,28 @@ def _detect_blocked_output(stdout: str, stderr: str) -> bool:
     return any(any(line.startswith(prefix) for prefix in explicit_prefixes) for line in lines)
 
 
+def _detect_noop_completion_output(stdout: str, stderr: str) -> bool:
+    """Detect successful 'nothing to change' outcomes and treat them as completed."""
+    text = f"{stdout}\n{stderr}".lower()
+    phrases = (
+        "no changes were made",
+        "no changes made",
+        "no additional changes",
+        "no additional edits",
+        "required no additional edits",
+        "nothing to change",
+        "already implemented",
+        "already documented",
+        "already present",
+        "already covered",
+        "already satisfies",
+        "already satisfied",
+        "no code changes were necessary",
+        "no file changes were necessary",
+    )
+    return any(phrase in text for phrase in phrases)
+
+
 def _codex_override_hint() -> str:
     if os.name == "nt":
         return "Set REDKEEPERS_CODEX_COMMAND (Windows npm shim example: 'codex.cmd exec')."
@@ -186,6 +208,8 @@ def run_agent(
     status = "completed" if proc.returncode == 0 else "failed"
     if _detect_blocked_output(stdout, stderr):
         status = "blocked"
+        if proc.returncode == 0 and _detect_noop_completion_output(stdout, stderr):
+            status = "completed"
     return WorkerResult(
         status=status,
         summary=summary[:500],

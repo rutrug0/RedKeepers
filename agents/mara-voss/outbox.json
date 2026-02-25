@@ -43,5 +43,168 @@
       "agents/mara-voss/working-notes.md",
       "agents/mara-voss/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-25T14:19:31Z",
+    "item_id": "RK-AUTO-BACKLOG-0001",
+    "status": "completed",
+    "summary": "Generated a six-item backlog tranche covering QA unblock/reconciliation plus backend, frontend, design, content, and QA follow-on work aligned to current architecture and faction docs.",
+    "files": [
+      "coordination/backlog/work-items.json",
+      "agents/mara-voss/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "id": "RK-M0-0005",
+        "title": "Reconcile blocked items that already produced deliverables",
+        "owner_role": "qa",
+        "description": "Audit the bootstrap-incident requeued/blocked items against existing docs/tests/outbox evidence and normalize backlog state so completed work is marked completed and only real residual deltas remain queued/blocked.",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [],
+        "inputs": [
+          "coordination/backlog/work-items.json",
+          "coordination/backlog/completed-items.json",
+          "coordination/backlog/blocked-items.json",
+          "agents/ilya-fen/outbox.json",
+          "agents/sera-kest/outbox.json",
+          "agents/tomas-grell/outbox.json",
+          "docs/architecture/backend-modular-monolith.md",
+          "docs/architecture/client-cross-platform-strategy.md",
+          "tests/test_codex_preflight.py",
+          "tests/test_daemon_smoke_env.py"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ],
+        "acceptance_criteria": [
+          "Disposition is recorded for RK-M1-0001, RK-M1-0002, RK-M0-0002, and RK-M0-0003 (completed if acceptance is met, otherwise requeued as scoped delta work)",
+          "Backlog files reflect an audit trail explaining each disposition without recreating escalation-chain churn",
+          "python tools/orchestrator.py status runs successfully after backlog normalization"
+        ]
+      },
+      {
+        "id": "RK-M1-0004",
+        "title": "Bootstrap backend source tree from modular monolith spec",
+        "owner_role": "backend",
+        "description": "Create the initial framework-agnostic backend scaffold under backend/ matching the documented modular monolith package layout, including module template structure and placeholder files that make the intended boundaries explicit.",
+        "milestone": "M1",
+        "priority": "high",
+        "dependencies": [
+          "RK-M0-0005"
+        ],
+        "inputs": [
+          "backend/",
+          "docs/architecture/backend-modular-monolith.md",
+          "docs/architecture/system-overview.md"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ],
+        "acceptance_criteria": [
+          "backend scaffold includes src/app, src/shared, and src/modules directories aligned with the architecture spec",
+          "Planned modules (auth/player/settlement/world_map/economy/buildings/units/combat/events/telemetry) each have placeholder api/application/domain/ports/infra structure",
+          "A brief backend scaffold note maps the created structure back to the architecture spec and deferred framework choice"
+        ]
+      },
+      {
+        "id": "RK-M1-0005",
+        "title": "Build responsive client shell wireframe for settlement and world map",
+        "owner_role": "frontend",
+        "description": "Implement an initial web-first client shell in client-web/ with placeholder panels for settlement management, world-map viewport, and event feed, designed for desktop-first play with responsive mobile support and no final art dependencies.",
+        "milestone": "M1",
+        "priority": "high",
+        "dependencies": [
+          "RK-M0-0005",
+          "RK-M1-0003"
+        ],
+        "inputs": [
+          "client-web/",
+          "docs/architecture/client-cross-platform-strategy.md",
+          "docs/design/game-vision.md",
+          "docs/design/factions-and-civilizations.md"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ],
+        "acceptance_criteria": [
+          "Client shell includes navigable placeholder layout regions for settlement UI, world map view, and player event feed",
+          "Layout works on desktop and mobile breakpoints with basic keyboard/focus handling and touch-safe spacing",
+          "Placeholder art only (wireframes/neutral silhouettes/labeled mock blocks) with no final art assumptions baked into components"
+        ]
+      },
+      {
+        "id": "RK-M1-0006",
+        "title": "Define v1 starter economy, building, and unit data tables",
+        "owner_role": "design",
+        "description": "Translate the factions v1 concept into implementation-ready starter data tables for core resources, building families, unit lines, and civilization modifiers using the stat-driven asymmetry approach.",
+        "milestone": "M1",
+        "priority": "high",
+        "dependencies": [
+          "RK-M1-0003"
+        ],
+        "inputs": [
+          "docs/design/core-loops.md",
+          "docs/design/factions-and-civilizations.md",
+          "docs/architecture/backend-modular-monolith.md"
+        ],
+        "validation_commands": [],
+        "acceptance_criteria": [
+          "Document defines starter resource set, core building families, and baseline unit roster tables with costs/timings/stats (numeric or clearly normalized values)",
+          "Civilization differentiation is expressed as v1-safe stat/timing modifiers compatible with the existing complexity guardrails",
+          "Table fields are annotated for backend module ownership (economy/buildings/units) and frontend display needs"
+        ]
+      },
+      {
+        "id": "RK-M1-0007",
+        "title": "Create naming bible and placeholder narrative seed pack",
+        "owner_role": "content",
+        "description": "Produce original dark-fantasy naming rules and reusable placeholder text for civilization intros, starter settlements, unit/building labels, and early event feed messages tied to the v1 design outputs.",
+        "milestone": "M1",
+        "priority": "normal",
+        "dependencies": [
+          "RK-M1-0006"
+        ],
+        "inputs": [
+          "docs/design/game-vision.md",
+          "docs/design/factions-and-civilizations.md",
+          "docs/design/v1-starter-data-tables.md"
+        ],
+        "validation_commands": [],
+        "acceptance_criteria": [
+          "Naming/style guide defines tone, naming patterns, and anti-derivative guardrails for factions, places, and military labels",
+          "Placeholder text pack includes at least 3 civilization intros, 12 starter settlement names, and 20 event feed message strings",
+          "Entries are clearly marked replaceable placeholders and reference stable identifiers or categories from the design tables where applicable"
+        ]
+      },
+      {
+        "id": "RK-M1-0008",
+        "title": "Add M1 scaffold smoke checks across backend, client, and design data",
+        "owner_role": "qa",
+        "description": "Add lightweight QA checks and/or scripts that validate the presence and basic structure of the backend scaffold, client shell wireframe, and starter design data artifacts to reduce regressions during early implementation.",
+        "milestone": "M1",
+        "priority": "normal",
+        "dependencies": [
+          "RK-M1-0004",
+          "RK-M1-0005",
+          "RK-M1-0006"
+        ],
+        "inputs": [
+          "tests/",
+          "backend/",
+          "client-web/",
+          "docs/design/v1-starter-data-tables.md",
+          "docs/architecture/client-cross-platform-strategy.md"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ],
+        "acceptance_criteria": [
+          "At least one automated check validates expected backend scaffold and client shell artifact paths/structure",
+          "QA check coverage includes a sanity check for the starter data tables artifact presence and basic schema/section expectations",
+          "Manual verification notes cover responsive layout checks and placeholder-art policy compliance for the client shell"
+        ]
+      }
+    ]
   }
 ]
