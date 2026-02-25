@@ -74,6 +74,14 @@ class CodexPreflightTests(unittest.TestCase):
         stderr = "ERROR: {\"detail\":\"The 'codex-5.3' model is not supported when using Codex with a ChatGPT account.\"}"
         self.assertTrue(codex_worker._looks_like_model_access_error("", stderr))
 
+    def test_without_model_arg_strips_model_flags(self) -> None:
+        command = codex_worker._without_model_arg(["codex", "exec", "--model", "gpt-5-mini", "--json"])
+        self.assertEqual(command, ["codex", "exec", "--json"])
+
+    def test_normalize_model_name_lowercases_display_style(self) -> None:
+        self.assertEqual(codex_worker._normalize_model_name("GPT-5.3-Codex-Spark"), "gpt-5.3-codex-spark")
+        self.assertEqual(codex_worker._normalize_model_name("gpt-5-mini"), "gpt-5-mini")
+
 
 class HealthCheckPreflightIntegrationTests(unittest.TestCase):
     def test_validate_environment_includes_codex_preflight_error(self) -> None:

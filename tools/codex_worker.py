@@ -110,7 +110,15 @@ def _parse_and_resolve_codex_command(raw_command: str) -> tuple[list[str], str |
 
 
 def _command_has_model_flag(command: list[str]) -> bool:
-    return any(part in {"-m", "--model"} for part in command)
+    for idx, part in enumerate(command):
+        if part in {"-m", "--model"}:
+            return True
+        if part.startswith("--model="):
+            return True
+        if part.startswith("-m") and idx > 0 and len(part) > 2:
+            # Handles compact form like `-mgpt-5-mini`.
+            return True
+    return False
 
 
 def _with_model_arg(command: list[str], model: str | None) -> list[str]:
@@ -118,6 +126,37 @@ def _with_model_arg(command: list[str], model: str | None) -> list[str]:
     if not model or _command_has_model_flag(resolved):
         return resolved
     return [*resolved, "--model", model]
+
+
+def _without_model_arg(command: list[str]) -> list[str]:
+    out: list[str] = []
+    skip_next = False
+    for part in command:
+        if skip_next:
+            skip_next = False
+            continue
+        if part in {"-m", "--model"}:
+            skip_next = True
+            continue
+        if part.startswith("--model="):
+            continue
+        if part.startswith("-m") and len(part) > 2:
+            continue
+        out.append(part)
+    return out
+
+
+def _normalize_model_name(model: str | None) -> str | None:
+    if not model:
+        return None
+    text = model.strip()
+    if not text:
+        return None
+    # Codex/API model IDs are typically lowercase. Normalize display-style names
+    # (e.g. "GPT-5.3-Codex-Spark") to improve compatibility.
+    if " " not in text:
+        return text.lower()
+    return text
 
 
 def _looks_like_model_access_error(stdout: str, stderr: str) -> bool:
@@ -225,7 +264,8 @@ def run_agent(
     dry_run: bool = False,
 ) -> WorkerResult:
     requested_model = (model or "").strip() or None
-    fallback_model_clean = (fallback_model or "").strip() or None
+    selected_model = _normalize_model_name(requested_model)
+    fallback_model_clean = _normalize_model_name((fallback_model or "").strip() or None)
 
     if dry_run:
         return WorkerResult(
@@ -237,7 +277,7 @@ def run_agent(
             tokens_in_est=_estimate_tokens(prompt),
             tokens_out_est=0,
             requested_model=requested_model,
-            used_model=requested_model,
+            used_model=selected_model,
         )
 
     mode = os.environ.get("REDKEEPERS_WORKER_MODE", "").strip().lower()
@@ -251,7 +291,7 @@ def run_agent(
             tokens_in_est=_estimate_tokens(prompt),
             tokens_out_est=300,
             requested_model=requested_model,
-            used_model=requested_model,
+            used_model=selected_model,
         )
 
     raw_command = os.environ.get("REDKEEPERS_CODEX_COMMAND", DEFAULT_CODEX_COMMAND)
@@ -266,15 +306,16 @@ def run_agent(
             tokens_in_est=_estimate_tokens(prompt),
             blocker_reason=f"{command_error}. {_codex_override_hint()}",
             requested_model=requested_model,
-            used_model=requested_model,
+            used_model=selected_model,
         )
 
     tokens_in_est = _estimate_tokens(prompt)
-    selected_model = requested_model
-    used_model = requested_model
+    used_model = selected_model
     fallback_used = False
+    default_model_retry_used = False
 
     effective_command = _with_model_arg(command, selected_model)
+    executed_command = list(effective_command)
     proc, immediate_error = _execute_codex(
         command=effective_command,
         prompt=prompt,
@@ -318,10 +359,40 @@ def run_agent(
             stderr = (proc.stderr or "").strip()
             used_model = fallback_model_clean
             fallback_used = True
+            executed_command = list(retry_command)
+
+    can_retry_with_default = (
+        proc.returncode != 0
+        and selected_model is not None
+        and _looks_like_model_access_error(stdout, stderr)
+    )
+    if can_retry_with_default:
+        default_command = _without_model_arg(command)
+        if default_command and default_command != executed_command:
+            default_proc, default_error = _execute_codex(
+                command=default_command,
+                prompt=prompt,
+                project_root=project_root,
+                timeout_seconds=timeout_seconds,
+                tokens_in_est=tokens_in_est,
+            )
+            if default_error is not None:
+                default_error.requested_model = requested_model
+                default_error.used_model = None
+                default_error.fallback_used = fallback_used
+                return default_error
+            if default_proc is not None:
+                proc = default_proc
+                stdout = (proc.stdout or "").strip()
+                stderr = (proc.stderr or "").strip()
+                used_model = None
+                default_model_retry_used = True
 
     summary = stdout.splitlines()[-1] if stdout else (stderr.splitlines()[-1] if stderr else "No output")
     if fallback_used:
         summary = f"{summary} (fallback model used: {used_model})"
+    if default_model_retry_used:
+        summary = f"{summary} (default model retry used)"
     status = "completed" if proc.returncode == 0 else "failed"
     if _detect_blocked_output(stdout, stderr):
         status = "blocked"

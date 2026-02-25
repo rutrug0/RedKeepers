@@ -3,7 +3,7 @@
     "display_name": "Mara Voss",
     "role": "lead",
     "title": "Lead Producer / Systems Lead",
-    "model": "GPT-5.3-Codex-Spark",
+    "model": "gpt-5.3-codex-spark",
     "reasoning": "high",
     "responsibilities": [
       "Own milestone priorities and backlog sequencing",
@@ -16,7 +16,7 @@
     "display_name": "Ilya Fen",
     "role": "backend",
     "title": "Backend Engineer",
-    "model": "GPT-5.3-Codex-Spark",
+    "model": "gpt-5.3-codex-spark",
     "reasoning": "high",
     "responsibilities": [
       "Implement modular monolith backend modules",
@@ -28,7 +28,7 @@
     "display_name": "Sera Kest",
     "role": "frontend",
     "title": "Frontend / Game Client Engineer",
-    "model": "GPT-5.3-Codex-Spark",
+    "model": "gpt-5.3-codex-spark",
     "reasoning": "standard",
     "responsibilities": [
       "Build web-first client shell and UI",
@@ -40,7 +40,7 @@
     "display_name": "Rowan Hale",
     "role": "design",
     "title": "Game Designer / Balance Designer",
-    "model": "GPT-5.3-Codex-Spark",
+    "model": "gpt-5.3-codex-spark",
     "reasoning": "medium",
     "responsibilities": [
       "Define core loops and progression pacing",
@@ -52,7 +52,7 @@
     "display_name": "Nika Thorn",
     "role": "content",
     "title": "Content & Narrative Systems",
-    "model": "GPT-5.3-Codex-Spark",
+    "model": "gpt-5.3-codex-spark",
     "reasoning": "low",
     "responsibilities": [
       "Produce original dark-fantasy themed flavor content",
@@ -64,7 +64,7 @@
     "display_name": "Tomas Grell",
     "role": "qa",
     "title": "QA / Test Automation / Release Guard",
-    "model": "GPT-5.3-Codex-Spark",
+    "model": "gpt-5.3-codex-spark",
     "reasoning": "medium",
     "responsibilities": [
       "Write smoke tests and validation scripts",
