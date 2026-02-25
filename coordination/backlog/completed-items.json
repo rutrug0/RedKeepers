@@ -1451,5 +1451,43 @@
     "generated_from_item_id": "RK-AUTO-PLATFORM-0001",
     "assigned_agent": "juno-cairn",
     "commit_sha": "35cae81c327719ad51e31e5cb6d17250b9129b0b"
+  },
+  {
+    "id": "RK-M0-0009-F01",
+    "title": "Implement `world_map.scout_select_v1` endpoint and DTO contract",
+    "description": "Wire an API handler for `POST /world-map/tiles/{tileId}/interact` that emits one of the contract outcomes and returns a single `event.world.*` content key payload.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0009"
+    ],
+    "inputs": [
+      "docs/design/map-scout-interaction-contract.md",
+      "backend/src/modules/world_map"
+    ],
+    "acceptance_criteria": [
+      "Response payload includes `flow`, `tile_id`, `tile_state`, `interaction_outcome`, and `event.content_key`",
+      "Only the three contract outcome codes are returned in M0",
+      "Tile state transitions stay limited to unknown/quiet/hostile_hint values"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T19:42:43.440378+00:00",
+    "updated_at": "2026-02-25T20:00:36.919697+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/ilya-fen/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-M0-0009",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "974e3651256ae72096502c9529ae1549a70a7375"
   }
 ]

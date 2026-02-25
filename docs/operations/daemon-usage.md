@@ -18,6 +18,8 @@
 - `REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA=1|0` : runtime override for frontend visual QA validation gate (policy default is enabled)
 - `REDKEEPERS_PYTHON_CMD` : force validation command launcher (example: `py`)
 - `REDKEEPERS_USE_DEFAULT_MODEL=1` : do not pin `--model` in worker calls; use the Codex account default model (recommended when account/model entitlement differs from policy)
+- `REDKEEPERS_AGENT_HEARTBEAT_SECONDS` : override heartbeat interval (default `60`, minimum `5`)
+- `REDKEEPERS_COLOR_LOGS=auto|1|0` : colorize daemon event output (`auto` uses TTY detection; `NO_COLOR` disables colors)
 
 ## Smoke Validation (PowerShell)
 
@@ -55,6 +57,14 @@ Routing supports dependency-unlock prioritization via `coordination/policies/rou
 - boosts queued tasks that unlock downstream queued work,
 - prefers immediate unlocks by default,
 - keeps `critical` priority protected from being overtaken.
+
+## Human Inbox Workflow
+
+Use `Human/` as a direct operator inbox:
+- Drop an instruction file (for example `Human/2026-02-25-request.md`).
+- Daemon inspects `Human/` first and creates a critical `lead` triage work item per new file.
+- Lead decomposes the instruction into concrete backlog tasks for team lanes.
+- After successful completion of that triage item, daemon deletes the processed file.
 
 ## Monitoring Progress (PowerShell)
 

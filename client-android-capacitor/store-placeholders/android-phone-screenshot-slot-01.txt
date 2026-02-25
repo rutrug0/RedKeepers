@@ -1,0 +1,4 @@
+PLACEHOLDER: Android phone screenshot slot 01
+
+- Purpose: temporary screenshot marker for store metadata completeness.
+- Replaced later by final art pipeline output.

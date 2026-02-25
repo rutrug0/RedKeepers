@@ -25,6 +25,26 @@
       ]
     },
     {
+      "key": "event.tick.passive_income",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "tick"
+      ],
+      "related_ids": [
+        "resource_id:*"
+      ],
+      "event_category": "tick",
+      "template": "{settlement_name} stores rise: +{food_gain} Food, +{wood_gain} Wood, +{stone_gain} Stone, +{iron_gain} Iron.",
+      "tokens": [
+        "settlement_name",
+        "food_gain",
+        "wood_gain",
+        "stone_gain",
+        "iron_gain"
+      ]
+    },
+    {
       "key": "event.economy.storage_near_cap",
       "slice_status_scope": "playable_now",
       "categories": [
@@ -42,6 +62,23 @@
       ]
     },
     {
+      "key": "event.tick.storage_near_cap",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "tick"
+      ],
+      "related_ids": [
+        "resource_id:{resource_id}"
+      ],
+      "event_category": "tick",
+      "template": "{settlement_name} is nearly full on {resource_label}. Spend or upgrade production priorities before overflow wastes stock.",
+      "tokens": [
+        "settlement_name",
+        "resource_label"
+      ]
+    },
+    {
       "key": "event.economy.producer_unlocked_hint",
       "slice_status_scope": "playable_now",
       "categories": [
@@ -52,6 +89,24 @@
         "building_id:{building_id}"
       ],
       "event_category": "economy",
+      "template": "{building_label} can be improved to steady {resource_label} output in {settlement_name}.",
+      "tokens": [
+        "building_label",
+        "resource_label",
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.tick.producer_unlocked_hint",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "tick"
+      ],
+      "related_ids": [
+        "building_id:{building_id}"
+      ],
+      "event_category": "tick",
       "template": "{building_label} can be improved to steady {resource_label} output in {settlement_name}.",
       "tokens": [
         "building_label",
@@ -79,6 +134,25 @@
       ]
     },
     {
+      "key": "event.build.upgrade_started",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "build"
+      ],
+      "related_ids": [
+        "building_id:{building_id}"
+      ],
+      "event_category": "build",
+      "template": "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
+      "tokens": [
+        "settlement_name",
+        "building_label",
+        "from_level",
+        "to_level"
+      ]
+    },
+    {
       "key": "event.buildings.upgrade_completed",
       "slice_status_scope": "playable_now",
       "categories": [
@@ -89,6 +163,24 @@
         "building_id:{building_id}"
       ],
       "event_category": "buildings",
+      "template": "{settlement_name}: {building_label} reaches Lv.{new_level}. Crews return to regular duty.",
+      "tokens": [
+        "settlement_name",
+        "building_label",
+        "new_level"
+      ]
+    },
+    {
+      "key": "event.build.upgrade_completed",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "build"
+      ],
+      "related_ids": [
+        "building_id:{building_id}"
+      ],
+      "event_category": "build",
       "template": "{settlement_name}: {building_label} reaches Lv.{new_level}. Crews return to regular duty.",
       "tokens": [
         "settlement_name",
@@ -108,6 +200,24 @@
         "resource_id:*"
       ],
       "event_category": "buildings",
+      "template": "{settlement_name}: insufficient stores for {building_label}. Required materials have not been gathered.",
+      "tokens": [
+        "settlement_name",
+        "building_label"
+      ]
+    },
+    {
+      "key": "event.build.queue_blocked_resources",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "build"
+      ],
+      "related_ids": [
+        "building_id:{building_id}",
+        "resource_id:*"
+      ],
+      "event_category": "build",
       "template": "{settlement_name}: insufficient stores for {building_label}. Required materials have not been gathered.",
       "tokens": [
         "settlement_name",
@@ -168,6 +278,25 @@
       ]
     },
     {
+      "key": "event.train.started",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "train"
+      ],
+      "related_ids": [
+        "unit_id:{unit_id}",
+        "building_id:barracks"
+      ],
+      "event_category": "train",
+      "template": "{settlement_name}: training begins for {quantity} {unit_label}.",
+      "tokens": [
+        "settlement_name",
+        "quantity",
+        "unit_label"
+      ]
+    },
+    {
       "key": "event.units.training_completed",
       "slice_status_scope": "playable_now",
       "categories": [
@@ -186,6 +315,24 @@
       ]
     },
     {
+      "key": "event.train.completed",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "train"
+      ],
+      "related_ids": [
+        "unit_id:{unit_id}"
+      ],
+      "event_category": "train",
+      "template": "{settlement_name}: {quantity} {unit_label} report ready for orders.",
+      "tokens": [
+        "settlement_name",
+        "quantity",
+        "unit_label"
+      ]
+    },
+    {
       "key": "event.units.training_queue_full",
       "slice_status_scope": "playable_now",
       "categories": [
@@ -196,6 +343,22 @@
         "building_id:barracks"
       ],
       "event_category": "units",
+      "template": "{settlement_name}: barracks queue is full. Resolve current musters before issuing more training orders.",
+      "tokens": [
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.train.queue_full",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "train"
+      ],
+      "related_ids": [
+        "building_id:barracks"
+      ],
+      "event_category": "train",
       "template": "{settlement_name}: barracks queue is full. Resolve current musters before issuing more training orders.",
       "tokens": [
         "settlement_name"
@@ -272,6 +435,23 @@
       ]
     },
     {
+      "key": "event.scout.dispatched",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "scout"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "scout",
+      "template": "{settlement_name}: scouts ride out toward {target_tile_label}.",
+      "tokens": [
+        "settlement_name",
+        "target_tile_label"
+      ]
+    },
+    {
       "key": "event.world.scout_report_empty",
       "slice_status_scope": "playable_now",
       "categories": [
@@ -288,6 +468,22 @@
       ]
     },
     {
+      "key": "event.scout.report_empty",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "scout"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "scout",
+      "template": "Scout report from {target_tile_label}: no active host detected. The roads remain quiet for now.",
+      "tokens": [
+        "target_tile_label"
+      ]
+    },
+    {
       "key": "event.world.scout_report_hostile",
       "slice_status_scope": "playable_now",
       "categories": [
@@ -298,6 +494,23 @@
         "unit_id:trail_scout"
       ],
       "event_category": "world_map",
+      "template": "Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).",
+      "tokens": [
+        "target_tile_label",
+        "hostile_force_estimate"
+      ]
+    },
+    {
+      "key": "event.scout.report_hostile",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "scout"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "scout",
       "template": "Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).",
       "tokens": [
         "target_tile_label",

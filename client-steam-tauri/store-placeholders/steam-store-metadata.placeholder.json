@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "artifact_id": "redkeepers-steam-tauri-wrapper",
+  "release_channel": "vertical-slice-steam-wrapper",
+  "title": "RedKeepers Steam Wrapper Placeholder Build",
+  "description": "Placeholder-only Steam wrapper metadata for first-vertical-slice packaging.",
+  "art_status": "placeholder-only",
+  "placeholder_assets": [
+    {
+      "id": "steam_client_icon",
+      "kind": "icon",
+      "path": "store-placeholders/steam-client-icon-256.txt",
+      "status": "placeholder"
+    },
+    {
+      "id": "steam_capsule_main_616x353",
+      "kind": "capsule",
+      "path": "store-placeholders/steam-capsule-main-616x353.txt",
+      "status": "placeholder"
+    },
+    {
+      "id": "steam_screenshot_slot_01",
+      "kind": "screenshot",
+      "path": "store-placeholders/steam-screenshot-slot-01.txt",
+      "status": "placeholder"
+    }
+  ],
+  "notes": [
+    "Final Steam storefront art is intentionally deferred beyond first-vertical-slice scope.",
+    "Steamworks integrations are intentionally out of scope for this scaffold."
+  ]
+}

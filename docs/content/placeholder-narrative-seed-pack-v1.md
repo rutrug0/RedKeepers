@@ -109,9 +109,25 @@ These are replaceable text overlays for tooltips/cards. Do not replace stable ID
 | `event.settlement.new_settlement_founded` | `settlement` | `civ_id:{civ_id}` | `playable_now` | `A new holding is founded: {settlement_name}. Tents, stores, and watchfires are raised before dusk.` |
 | `event.settlement.name_assigned` | `settlement` | `category:starter_settlement_name_pool` | `playable_now` | `Surveyors record the new holding as {settlement_name}. The name enters the ledger.` |
 
+### Loop-Feature Outcome Alias Keys (UI/stability)
+
+| key | event_category | related_ids | slice_status_scope | template |
+| --- | --- | --- | --- | --- |
+| `event.tick.passive_income` | `tick` | `resource_id:*` | `playable_now` | `{settlement_name} stores rise: +{food_gain} Food, +{wood_gain} Wood, +{stone_gain} Stone, +{iron_gain} Iron.` |
+| `event.tick.storage_near_cap` | `tick` | `resource_id:{resource_id}` | `playable_now` | `{settlement_name} is nearly full on {resource_label}. Spend or upgrade production priorities before overflow wastes stock.` |
+| `event.tick.producer_unlocked_hint` | `tick` | `building_id:{building_id}` | `playable_now` | `{building_label} can be improved to steady {resource_label} output in {settlement_name}.` |
+| `event.build.upgrade_started` | `build` | `building_id:{building_id}` | `playable_now` | `{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).` |
+| `event.build.upgrade_completed` | `build` | `building_id:{building_id}` | `playable_now` | `{settlement_name}: {building_label} reaches Lv.{new_level}. Crews return to regular duty.` |
+| `event.build.queue_blocked_resources` | `build` | `building_id:{building_id};resource_id:*` | `playable_now` | `{settlement_name}: insufficient stores for {building_label}. Required materials have not been gathered.` |
+| `event.train.started` | `train` | `unit_id:{unit_id};building_id:barracks` | `playable_now` | `{settlement_name}: training begins for {quantity} {unit_label}.` |
+| `event.train.completed` | `train` | `unit_id:{unit_id}` | `playable_now` | `{settlement_name}: {quantity} {unit_label} report ready for orders.` |
+| `event.train.queue_full` | `train` | `building_id:barracks` | `playable_now` | `{settlement_name}: barracks queue is full. Resolve current musters before issuing more training orders.` |
+| `event.scout.dispatched` | `scout` | `unit_id:trail_scout` | `playable_now` | `{settlement_name}: scouts ride out toward {target_tile_label}.` |
+| `event.scout.report_empty` | `scout` | `unit_id:trail_scout` | `playable_now` | `Scout report from {target_tile_label}: no active host detected. The roads remain quiet for now.` |
+| `event.scout.report_hostile` | `scout` | `unit_id:trail_scout` | `playable_now` | `Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).` |
+
 ## 5. Integration Notes (M1)
 
 - Prioritize `playable_now` rows in the first slice UI/event feed.
 - `balance_stub` and `data_stub_post_slice` rows are present to stabilize keys and future content wiring.
 - If the frontend needs a smaller initial seed, keep keys unchanged and subset by `slice_status_scope`.
-

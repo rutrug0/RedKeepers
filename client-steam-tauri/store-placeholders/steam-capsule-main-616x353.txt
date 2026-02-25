@@ -1,0 +1,4 @@
+PLACEHOLDER ONLY
+Asset: Steam Capsule Main 616x353
+Purpose: Temporary Steam store capsule placeholder during first vertical slice.
+Final art intentionally deferred.

@@ -1,0 +1,4 @@
+PLACEHOLDER: Android TV banner (1280x720)
+
+- Purpose: temporary optional listing marker for packaging metadata checks.
+- Replaced later by final art pipeline output.

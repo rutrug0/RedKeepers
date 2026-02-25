@@ -1,0 +1,15 @@
+:root {
+  --rk-safe-top: env(safe-area-inset-top, 0px);
+  --rk-safe-right: env(safe-area-inset-right, 0px);
+  --rk-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --rk-safe-left: env(safe-area-inset-left, 0px);
+}
+
+body {
+  padding-top: var(--rk-safe-top);
+  padding-right: var(--rk-safe-right);
+  padding-bottom: calc(var(--rk-safe-bottom) + 12px);
+  padding-left: var(--rk-safe-left);
+  box-sizing: border-box;
+  min-height: 100vh;
+}

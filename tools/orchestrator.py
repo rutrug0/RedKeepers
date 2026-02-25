@@ -21,6 +21,7 @@ from render_status import render_status
 
 
 ROOT = Path(__file__).resolve().parents[1]
+HUMAN_DIR = ROOT / "Human"
 STATIC_STATE_DIR = ROOT / "coordination" / "state"
 RUNTIME_DIR = ROOT / "coordination" / "runtime"
 DAEMON_STATE_PATH = RUNTIME_DIR / "daemon-state.json"
@@ -28,12 +29,96 @@ LOCK_META_PATH = RUNTIME_DIR / "locks.json"
 LOCK_FILE = RUNTIME_DIR / "daemon.lock"
 EVENTS_LOG_PATH = RUNTIME_DIR / "daemon-events.jsonl"
 RUN_HISTORY_PATH = RUNTIME_DIR / "run-history.jsonl"
-AGENT_HEARTBEAT_SECONDS = 15
 LOW_QUEUE_WATERMARK = 2
 
 
 def _bool_env(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _int_env(name: str, default: int, *, min_value: int = 0) -> int:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        parsed = int(raw)
+    except ValueError:
+        return default
+    return max(min_value, parsed)
+
+
+AGENT_HEARTBEAT_SECONDS = _int_env("REDKEEPERS_AGENT_HEARTBEAT_SECONDS", 60, min_value=5)
+
+
+def _supports_color_output() -> bool:
+    if os.environ.get("NO_COLOR"):
+        return False
+    setting = os.environ.get("REDKEEPERS_COLOR_LOGS", "auto").strip().lower()
+    if setting in {"0", "false", "off", "no"}:
+        return False
+    if setting in {"1", "true", "on", "yes", "always"}:
+        return True
+    isatty = getattr(sys.stdout, "isatty", None)
+    return bool(isatty and isatty())
+
+
+COLOR_ENABLED = _supports_color_output()
+ANSI_RESET = "\x1b[0m"
+KIND_STYLE = {
+    "daemon_start": "1;36",
+    "daemon_stop": "1;36",
+    "select": "1;34",
+    "agent_start": "1;34",
+    "agent_end": "1;32",
+    "agent_heartbeat": "2;37",
+    "completed": "1;32",
+    "blocked": "1;33",
+    "failed": "1;31",
+    "validation_failed": "1;31",
+    "error": "1;31",
+    "commit": "1;32",
+    "followups": "1;35",
+    "followups_invalid": "1;33",
+}
+ROLE_STYLE = {
+    "lead": "1;35",
+    "backend": "1;34",
+    "frontend": "1;36",
+    "design": "1;33",
+    "content": "1;32",
+    "qa": "1;31",
+    "platform": "1;37",
+}
+RESULT_STYLE = {
+    "completed": "1;32",
+    "blocked": "1;33",
+    "failed": "1;31",
+    "dry_run": "1;36",
+}
+
+
+def _style(text: str, ansi_code: str | None) -> str:
+    if not COLOR_ENABLED or not ansi_code:
+        return text
+    return f"\x1b[{ansi_code}m{text}{ANSI_RESET}"
+
+
+def _format_event_field(key: str, value: Any) -> str:
+    if key == "role":
+        role = str(value).strip().lower()
+        return f"role={_style(role.upper(), ROLE_STYLE.get(role))}"
+    if key == "title":
+        return f"title={_style(repr(value), '1')}"
+    if key == "result":
+        result = str(value).strip().lower()
+        return f"result={_style(result.upper(), RESULT_STYLE.get(result))}"
+    if key == "agent_id":
+        return f"agent_id={_style(repr(value), '1;36')}"
+    if key == "item_id":
+        return f"item_id={_style(repr(value), '1;35')}"
+    if key in {"model", "model_requested", "model_used"}:
+        return f"{key}={_style(repr(value), '0;36')}"
+    return f"{key}={value!r}"
 
 
 def build_session_id(*, pid: int, started_at: str) -> str:
@@ -123,9 +208,10 @@ def migrate_legacy_runtime_files() -> None:
 
 def emit_event(kind: str, message: str, **fields: Any) -> None:
     ts = utc_now_iso()
-    line = f"[{ts}][{kind}] {message}"
+    kind_label = _style(kind, KIND_STYLE.get(kind))
+    line = f"[{ts}][{kind_label}] {message}"
     if fields:
-        ordered = " ".join(f"{key}={fields[key]!r}" for key in sorted(fields))
+        ordered = " ".join(_format_event_field(key, fields[key]) for key in sorted(fields))
         line = f"{line} | {ordered}"
     print(line, flush=True)
     append_jsonl(
@@ -217,6 +303,16 @@ def _next_auto_platform_item_id(queue: QueueManager) -> str:
     i = 1
     while True:
         candidate = f"RK-AUTO-PLATFORM-{i:04d}"
+        if candidate not in existing_ids:
+            return candidate
+        i += 1
+
+
+def _next_human_item_id(queue: QueueManager) -> str:
+    existing_ids = {item["id"] for item in queue.active} | {item["id"] for item in queue.completed} | {item["id"] for item in queue.blocked}
+    i = 1
+    while True:
+        candidate = f"RK-HUMAN-{i:04d}"
         if candidate not in existing_ids:
             return candidate
         i += 1
@@ -380,6 +476,121 @@ def ensure_platform_bootstrap_item(queue: QueueManager, agents: dict[str, dict[s
     queue.append_item(item)
     queue.save()
     return item
+
+
+def _safe_human_instruction_relpath(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    rel = value.strip().replace("\\", "/")
+    if not rel:
+        return None
+    path = Path(rel)
+    if path.is_absolute():
+        return None
+    parts = path.parts
+    if not parts or parts[0] != "Human":
+        return None
+    if any(part in {"..", ""} for part in parts):
+        return None
+    return Path(*parts).as_posix()
+
+
+def _resolved_human_instruction_path(rel_path: str) -> Path | None:
+    human_root = HUMAN_DIR.resolve()
+    candidate = (ROOT / rel_path).resolve()
+    if not candidate.is_relative_to(human_root):
+        return None
+    return candidate
+
+
+def ensure_human_instruction_items(queue: QueueManager, agents: dict[str, dict[str, Any]]) -> list[dict[str, str]]:
+    if "mara-voss" not in agents:
+        return []
+
+    HUMAN_DIR.mkdir(parents=True, exist_ok=True)
+    try:
+        files = [path for path in HUMAN_DIR.iterdir() if path.is_file()]
+    except Exception:
+        return []
+    files.sort(key=lambda p: p.name.lower())
+
+    tracked_paths: set[str] = set()
+    for item in [*queue.active, *queue.completed, *queue.blocked]:
+        tracked = _safe_human_instruction_relpath(item.get("human_instruction_file"))
+        if tracked:
+            tracked_paths.add(tracked.lower())
+
+    created: list[dict[str, str]] = []
+    for file_path in files:
+        if file_path.name.startswith(".") or file_path.name.lower().startswith("readme"):
+            continue
+        rel = file_path.relative_to(ROOT).as_posix()
+        if rel.lower() in tracked_paths:
+            continue
+
+        item = {
+            "id": _next_human_item_id(queue),
+            "title": f"Human instruction intake: {file_path.name}",
+            "description": (
+                "Parse the human instruction file, convert it into concrete backlog tasks with owners/dependencies/"
+                "acceptance criteria, and route work across agents while preserving first-slice scope."
+            ),
+            "milestone": "M0",
+            "type": "qa",
+            "priority": "critical",
+            "owner_role": "lead",
+            "preferred_agent": "mara-voss",
+            "dependencies": [],
+            "inputs": [
+                rel,
+                "coordination/backlog/work-items.json",
+                "coordination/backlog/completed-items.json",
+                "coordination/backlog/blocked-items.json",
+                "docs/design/first-vertical-slice.md",
+            ],
+            "acceptance_criteria": [
+                "Human instruction is decomposed into concrete implementation tasks with explicit owner_role assignments",
+                "New tasks include dependencies, acceptance criteria, and stay within first vertical slice scope",
+                "Lead outbox records a concise triage summary and generated follow-up tasks",
+            ],
+            "validation_commands": ["python tools/orchestrator.py status"],
+            "status": "queued",
+            "retry_count": 0,
+            "created_at": utc_now_iso(),
+            "updated_at": utc_now_iso(),
+            "estimated_effort": "S",
+            "token_budget": 12000,
+            "result_summary": None,
+            "blocker_reason": None,
+            "escalation_target": "Mara Voss",
+            "auto_generated": "human_instruction_intake",
+            "human_instruction_file": rel,
+        }
+        queue.append_item(item)
+        tracked_paths.add(rel.lower())
+        created.append({"item_id": item["id"], "file": rel})
+
+    if created:
+        queue.save()
+    return created
+
+
+def consume_human_instruction_file(item: dict[str, Any]) -> tuple[bool, str]:
+    rel = _safe_human_instruction_relpath(item.get("human_instruction_file"))
+    if not rel:
+        return False, "missing_or_invalid_human_instruction_file"
+    path = _resolved_human_instruction_path(rel)
+    if path is None:
+        return False, "path_outside_human_root"
+    if not path.exists():
+        return False, "already_missing"
+    if not path.is_file():
+        return False, "not_a_file"
+    try:
+        path.unlink()
+    except OSError as exc:
+        return False, f"delete_failed:{exc}"
+    return True, "deleted"
 
 
 def _parse_iso_datetime(value: Any) -> datetime | None:
@@ -1060,6 +1271,16 @@ def process_one(
     policies = load_policies(ROOT)
     queue = QueueManager(ROOT)
     queue.load()
+    human_inbox_created = ensure_human_instruction_items(queue, agents)
+    if human_inbox_created:
+        emit_event(
+            "human_inbox",
+            "Ingested human instruction files into lead triage queue",
+            count=len(human_inbox_created),
+            files=[entry["file"] for entry in human_inbox_created],
+            item_ids=[entry["item_id"] for entry in human_inbox_created],
+        )
+        queue.load()
     platform_bootstrap = ensure_platform_bootstrap_item(queue, agents)
     if platform_bootstrap is not None:
         emit_event(
@@ -1472,6 +1693,22 @@ def process_one(
                     agent_id=agent_id,
                     source_item_id=item["id"],
                     rejected_count=len(rejected_followups),
+                )
+            deleted_human_file, delete_reason = consume_human_instruction_file(item)
+            if deleted_human_file:
+                emit_event(
+                    "human_inbox_consumed",
+                    "Consumed processed human instruction file",
+                    item_id=item["id"],
+                    file=item.get("human_instruction_file"),
+                )
+            elif item.get("human_instruction_file"):
+                emit_event(
+                    "human_inbox_consumed",
+                    "Human instruction file not deleted",
+                    item_id=item["id"],
+                    file=item.get("human_instruction_file"),
+                    reason=delete_reason,
                 )
             record_run_stats(
                 "completed",

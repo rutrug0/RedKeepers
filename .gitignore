@@ -12,5 +12,13 @@ coordination/runtime/*
 backend/.env
 client-web/node_modules/
 client-web/dist/
+client-steam-tauri/node_modules/
+client-steam-tauri/src-tauri/target/
+client-android-capacitor/node_modules/
+client-android-capacitor/www/
+client-android-capacitor/android/.gradle/
+client-android-capacitor/android/build/
+client-android-capacitor/android/app/build/
+client-android-capacitor/android/local.properties
 .DS_Store
 Thumbs.db

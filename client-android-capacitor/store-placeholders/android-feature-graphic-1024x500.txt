@@ -1,0 +1,4 @@
+PLACEHOLDER: Android feature graphic (1024x500)
+
+- Purpose: temporary Play listing marker for M0/M1 wrapper lane.
+- Replaced later by final art pipeline output.

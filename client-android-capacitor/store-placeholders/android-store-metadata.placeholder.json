@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "artifact_id": "redkeepers-android-capacitor-wrapper",
+  "release_channel": "vertical-slice-android-wrapper",
+  "title": "RedKeepers Android Wrapper Placeholder Build",
+  "description": "Placeholder-only Android wrapper metadata for first-vertical-slice packaging.",
+  "art_status": "placeholder-only",
+  "placeholder_assets": [
+    {
+      "id": "android_app_icon_512",
+      "kind": "icon",
+      "path": "store-placeholders/android-app-icon-512.txt",
+      "status": "placeholder"
+    },
+    {
+      "id": "android_feature_graphic_1024x500",
+      "kind": "feature_graphic",
+      "path": "store-placeholders/android-feature-graphic-1024x500.txt",
+      "status": "placeholder"
+    },
+    {
+      "id": "android_splash_portrait_2048x2732",
+      "kind": "splash",
+      "path": "store-placeholders/android-splash-portrait-2048x2732.txt",
+      "status": "placeholder"
+    },
+    {
+      "id": "android_phone_screenshot_slot_01",
+      "kind": "screenshot",
+      "path": "store-placeholders/android-phone-screenshot-slot-01.txt",
+      "status": "placeholder"
+    },
+    {
+      "id": "android_tv_banner_1280x720",
+      "kind": "banner",
+      "path": "store-placeholders/android-tv-banner-1280x720.txt",
+      "status": "placeholder"
+    }
+  ],
+  "notes": [
+    "Final Android storefront art and localized listing assets are intentionally deferred beyond first-vertical-slice scope.",
+    "Capacitor wrapper remains web-first and does not introduce native gameplay mechanics in this phase."
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "redkeepers-android-capacitor-wrapper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Temporary Capacitor wrapper scaffold for RedKeepers Android vertical slice packaging.",
+  "scripts": {
+    "prepare:web": "python ../tools/android_capacitor_wrapper.py prepare --clean-web",
+    "sync:android": "python ../tools/android_capacitor_wrapper.py sync",
+    "dev": "python ../tools/android_capacitor_wrapper.py dev",
+    "build:debug": "python ../tools/android_capacitor_wrapper.py build-debug",
+    "build:release": "python ../tools/android_capacitor_wrapper.py build-release"
+  },
+  "dependencies": {
+    "@capacitor/app": "^6.0.1",
+    "@capacitor/core": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0"
+  }
+}

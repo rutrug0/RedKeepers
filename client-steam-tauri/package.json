@@ -1,0 +1,16 @@
+{
+  "name": "redkeepers-steam-tauri-wrapper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Temporary Tauri wrapper scaffold for RedKeepers Steam vertical slice packaging.",
+  "scripts": {
+    "prepare:web": "python ../tools/steam_tauri_wrapper.py prepare --clean-web",
+    "dev": "python ../tools/steam_tauri_wrapper.py dev",
+    "build": "python ../tools/steam_tauri_wrapper.py build",
+    "tauri:dev": "tauri dev --config src-tauri/tauri.conf.json",
+    "tauri:build": "tauri build --config src-tauri/tauri.conf.json"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

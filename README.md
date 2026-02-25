@@ -33,3 +33,29 @@ This repository is bootstrapped with the M0 orchestration foundation:
   - `python tools/web_vertical_slice_packaging.py smoke`
 - Runbook:
   - `docs/operations/web-vertical-slice-packaging.md`
+
+## Steam Tauri Wrapper Packaging (M0)
+
+- Prepare wrapper web assets from packaged web artifact:
+  - `python tools/steam_tauri_wrapper.py prepare --clean-web`
+- Run local wrapper session:
+  - `python tools/steam_tauri_wrapper.py dev`
+- Build Windows wrapper package:
+  - `python tools/steam_tauri_wrapper.py build`
+- Runbook:
+  - `docs/operations/steam-tauri-wrapper-packaging.md`
+
+## Android Capacitor Wrapper Packaging (M0)
+
+- Prepare wrapper web assets from packaged web artifact:
+  - `python tools/android_capacitor_wrapper.py prepare --clean-web`
+- Sync wrapper assets into Android project:
+  - `python tools/android_capacitor_wrapper.py sync`
+- Open Android project in configured IDE:
+  - `python tools/android_capacitor_wrapper.py dev`
+- Build Android debug wrapper package:
+  - `python tools/android_capacitor_wrapper.py build-debug`
+- Build Android release wrapper package:
+  - `python tools/android_capacitor_wrapper.py build-release`
+- Runbook:
+  - `docs/operations/android-capacitor-wrapper-packaging.md`

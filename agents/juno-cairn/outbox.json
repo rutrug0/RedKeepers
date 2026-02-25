@@ -137,5 +137,115 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-25T21:06:00Z",
+    "agent_id": "juno-cairn",
+    "work_item_id": "RK-AUTO-PLATFORM-0001-F02",
+    "status": "done",
+    "summary": "Scaffolded a Windows-first Steam Tauri wrapper lane with deterministic web-artifact preparation, documented local run/build commands, and explicit placeholder-only Steam store/build metadata.",
+    "changed_files": [
+      "tools/steam_tauri_wrapper.py",
+      "client-steam-tauri/package.json",
+      "client-steam-tauri/README.md",
+      "client-steam-tauri/src-tauri/Cargo.toml",
+      "client-steam-tauri/src-tauri/build.rs",
+      "client-steam-tauri/src-tauri/src/main.rs",
+      "client-steam-tauri/src-tauri/tauri.conf.json",
+      "client-steam-tauri/store-placeholders/steam-store-metadata.placeholder.json",
+      "client-steam-tauri/store-placeholders/steam-client-icon-256.txt",
+      "client-steam-tauri/store-placeholders/steam-capsule-main-616x353.txt",
+      "client-steam-tauri/store-placeholders/steam-screenshot-slot-01.txt",
+      "scripts/prepare_steam_tauri_wrapper.ps1",
+      "scripts/run_steam_tauri_wrapper_dev.ps1",
+      "scripts/package_steam_tauri_wrapper.ps1",
+      "docs/operations/steam-tauri-wrapper-packaging.md",
+      "README.md",
+      ".gitignore",
+      "agents/juno-cairn/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Add daemon guard validation for Steam Tauri wrapper preparation",
+        "owner_role": "platform",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Extend platform validation hooks so Steam wrapper tasks automatically run deterministic input preparation and surface actionable toolchain readiness failures before completion.",
+        "dependencies": [
+          "RK-AUTO-PLATFORM-0001-F02"
+        ],
+        "inputs": [
+          "tools/orchestrator.py",
+          "coordination/policies/commit-guard-rules.yaml",
+          "tools/steam_tauri_wrapper.py"
+        ],
+        "acceptance_criteria": [
+          "Daemon validation can run `python tools/steam_tauri_wrapper.py prepare --clean-web` automatically for Steam wrapper packaging items",
+          "Validation failures report actionable missing prerequisites (for example npm/rust toolchain) in command-result summaries",
+          "Successful validation records wrapper input manifest output at `coordination/runtime/steam-tauri-wrapper/wrapper-input-manifest.json`"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp_utc": "2026-02-25T21:14:48Z",
+    "agent_id": "juno-cairn",
+    "work_item_id": "RK-AUTO-PLATFORM-0001-F03",
+    "status": "done",
+    "summary": "Scaffolded an Android-first Capacitor wrapper lane with deterministic web-artifact preparation/sync flow, placeholder-only store metadata/assets, and baseline touch-safe configuration hooks for safe-area, back button, and portrait orientation.",
+    "changed_files": [
+      "tools/android_capacitor_wrapper.py",
+      "client-android-capacitor/README.md",
+      "client-android-capacitor/package.json",
+      "client-android-capacitor/capacitor.config.ts",
+      "client-android-capacitor/store-placeholders/android-store-metadata.placeholder.json",
+      "client-android-capacitor/store-placeholders/android-app-icon-512.txt",
+      "client-android-capacitor/store-placeholders/android-feature-graphic-1024x500.txt",
+      "client-android-capacitor/store-placeholders/android-splash-portrait-2048x2732.txt",
+      "client-android-capacitor/store-placeholders/android-phone-screenshot-slot-01.txt",
+      "client-android-capacitor/store-placeholders/android-tv-banner-1280x720.txt",
+      "client-android-capacitor/wrapper-overrides/safe-area-baseline.css",
+      "client-android-capacitor/wrapper-overrides/back-button-baseline.js",
+      "scripts/prepare_android_capacitor_wrapper.ps1",
+      "scripts/sync_android_capacitor_wrapper.ps1",
+      "scripts/run_android_capacitor_wrapper_dev.ps1",
+      "scripts/package_android_capacitor_wrapper.ps1",
+      "docs/operations/android-capacitor-wrapper-packaging.md",
+      "README.md",
+      ".gitignore",
+      "agents/juno-cairn/outbox.json"
+    ],
+    "blockers": [
+      "Local `sync/build` verification could not proceed before installing wrapper dependencies (`npm install` in `client-android-capacitor`), so only deterministic `prepare` and daemon status validation were executed in this run."
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Add daemon guard validation for Android Capacitor wrapper preparation",
+        "owner_role": "platform",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Extend platform validation hooks so Android wrapper tasks automatically run deterministic wrapper input preparation and fail fast with actionable toolchain/setup diagnostics.",
+        "dependencies": [
+          "RK-AUTO-PLATFORM-0001-F03"
+        ],
+        "inputs": [
+          "tools/orchestrator.py",
+          "coordination/policies/commit-guard-rules.yaml",
+          "tools/android_capacitor_wrapper.py"
+        ],
+        "acceptance_criteria": [
+          "Daemon validation can run `python tools/android_capacitor_wrapper.py prepare --clean-web` automatically for Android wrapper packaging items",
+          "Validation reports blocked outcomes with actionable setup guidance when Node/Android toolchain prerequisites are missing",
+          "Successful validation records wrapper input manifest output at `coordination/runtime/android-capacitor-wrapper/wrapper-input-manifest.json`"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

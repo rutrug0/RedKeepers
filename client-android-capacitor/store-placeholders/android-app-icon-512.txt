@@ -1,0 +1,4 @@
+PLACEHOLDER: Android launcher icon (512x512)
+
+- Purpose: temporary asset marker for wrapper packaging checks.
+- Replaced later by final art pipeline output.

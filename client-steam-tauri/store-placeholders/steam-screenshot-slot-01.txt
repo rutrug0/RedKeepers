@@ -1,0 +1,4 @@
+PLACEHOLDER ONLY
+Asset: Steam Screenshot Slot 01
+Purpose: Temporary screenshot placeholder for Steam store metadata.
+Final art intentionally deferred.

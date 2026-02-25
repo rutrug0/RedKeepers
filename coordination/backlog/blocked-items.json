@@ -425,5 +425,85 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC",
     "assigned_agent": "tomas-grell",
     "last_failure_reason": "validation failed or commit failed"
+  },
+  {
+    "id": "RK-AUTO-PLATFORM-0001-F02",
+    "title": "Scaffold Steam wrapper packaging lane using Tauri default",
+    "description": "Set up an initial Steam-targeted desktop wrapper path around the web client using the documented Tauri-first strategy, with reproducible build/run commands and deferred Steamworks/native integrations.",
+    "milestone": "M0",
+    "type": "infra",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-PLATFORM-0001",
+      "RK-AUTO-PLATFORM-0001-F01"
+    ],
+    "inputs": [
+      "docs/architecture/client-cross-platform-strategy.md",
+      "docs/design/first-vertical-slice.md",
+      "client-web/",
+      "scripts/"
+    ],
+    "acceptance_criteria": [
+      "A Tauri-based wrapper scaffold is added for Windows-first packaging of the web vertical-slice artifact",
+      "Wrapper docs/scripts define repeatable local run and packaged build commands without requiring Steamworks feature integration",
+      "Store/build placeholders (icon/capsule/metadata) are explicitly marked temporary and final art is not a blocker"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-25T19:47:49.867918+00:00",
+    "updated_at": "2026-02-25T20:07:20.991199+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "Note: there are unrelated pre-existing/daemon-updated working tree changes outside this task (left untouched).",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "juno-cairn",
+    "generated_from_item_id": "RK-AUTO-PLATFORM-0001",
+    "assigned_agent": "juno-cairn"
+  },
+  {
+    "id": "RK-AUTO-PLATFORM-0001-F03",
+    "title": "Scaffold Android wrapper packaging lane using Capacitor default",
+    "description": "Set up an initial Android packaging path around the web client via Capacitor/WebView with deterministic sync/build/run steps, touch-safe baseline configuration, and placeholder-only mobile store assets.",
+    "milestone": "M0",
+    "type": "infra",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-PLATFORM-0001",
+      "RK-AUTO-PLATFORM-0001-F01"
+    ],
+    "inputs": [
+      "docs/architecture/client-cross-platform-strategy.md",
+      "docs/design/first-vertical-slice.md",
+      "client-web/",
+      "scripts/"
+    ],
+    "acceptance_criteria": [
+      "A Capacitor/WebView wrapper scaffold is added with repeatable commands to sync web assets and produce an Android debug/release package",
+      "Wrapper configuration covers first-slice essentials (back button/orientation/safe-area baseline) without adding new game mechanics",
+      "Android icon/splash/store metadata are placeholder-only and explicitly non-blocking for final art"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-25T19:47:49.867918+00:00",
+    "updated_at": "2026-02-25T20:19:14.820146+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "- Appended `RK-AUTO-PLATFORM-0001-F03` completion entry with blocker note and one structured follow-up in `proposed_work_items` (daemon guard validation for Android wrapper preparation).",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "juno-cairn",
+    "generated_from_item_id": "RK-AUTO-PLATFORM-0001",
+    "assigned_agent": "juno-cairn"
   }
 ]

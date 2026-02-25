@@ -1,0 +1,4 @@
+PLACEHOLDER ONLY
+Asset: Steam Client Icon 256x256
+Purpose: Temporary desktop icon placeholder for wrapper packaging metadata.
+Final art intentionally deferred.
