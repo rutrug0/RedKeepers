@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-02-25T14:15:05.295636+00:00",
+  "generated_at": "2026-02-25T14:20:13.462389+00:00",
   "agents": {
     "mara-voss": {
       "display_name": "Mara Voss",
       "role": "lead",
-      "total_runs": 14,
-      "completed_items": 2,
+      "total_runs": 15,
+      "completed_items": 3,
       "blocked_items": 1,
       "failed_runs": 11,
-      "total_runtime_seconds": 361.3409999999858,
-      "avg_runtime_seconds": 25.810071428570414,
-      "estimated_tokens_in": 26218,
-      "estimated_tokens_out": 1018,
-      "last_active_at": "2026-02-25T14:07:00.284175+00:00",
-      "current_load_score": 8.102234999999975
+      "total_runtime_seconds": 664.4659999999858,
+      "avg_runtime_seconds": 44.29773333333239,
+      "estimated_tokens_in": 29425,
+      "estimated_tokens_out": 1327,
+      "last_active_at": "2026-02-25T14:20:08.436963+00:00",
+      "current_load_score": 9.60744333333331
     },
     "ilya-fen": {
       "display_name": "Ilya Fen",
@@ -87,10 +87,10 @@
     }
   },
   "totals": {
-    "completed_items": 3,
-    "queued_items": 1,
+    "completed_items": 4,
+    "queued_items": 6,
     "blocked_items": 8,
-    "runtime_seconds": 1482.763999999981,
-    "estimated_tokens_total": 46408
+    "runtime_seconds": 1785.888999999981,
+    "estimated_tokens_total": 49924
   }
 }

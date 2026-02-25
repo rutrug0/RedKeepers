@@ -1,43 +1,50 @@
 {
   "state": "validating",
-  "updated_at": "2026-02-25T14:20:07.349093+00:00",
+  "updated_at": "2026-02-25T14:23:24.016465+00:00",
   "active_item": {
-    "id": "RK-AUTO-BACKLOG-0001",
-    "title": "Generate next backlog tranche",
-    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, and QA with dependencies and acceptance criteria.",
+    "id": "RK-M0-0005",
+    "title": "Reconcile blocked items that already produced deliverables",
+    "description": "Audit the bootstrap-incident requeued/blocked items against existing docs/tests/outbox evidence and normalize backlog state so completed work is marked completed and only real residual deltas remain queued/blocked.",
     "milestone": "M0",
-    "type": "qa",
+    "type": "feature",
     "priority": "high",
-    "owner_role": "lead",
-    "preferred_agent": "mara-voss",
+    "owner_role": "qa",
+    "preferred_agent": null,
     "dependencies": [],
     "inputs": [
       "coordination/backlog/work-items.json",
       "coordination/backlog/completed-items.json",
       "coordination/backlog/blocked-items.json",
-      "coordination/state/run-history.jsonl"
+      "agents/ilya-fen/outbox.json",
+      "agents/sera-kest/outbox.json",
+      "agents/tomas-grell/outbox.json",
+      "docs/architecture/backend-modular-monolith.md",
+      "docs/architecture/client-cross-platform-strategy.md",
+      "tests/test_codex_preflight.py",
+      "tests/test_daemon_smoke_env.py"
     ],
     "acceptance_criteria": [
-      "At least 3 new queued tasks are created or requeued",
-      "Each task has owner_role, dependencies, and acceptance criteria",
-      "Tasks reflect current project priorities and unblock progress"
+      "Disposition is recorded for RK-M1-0001, RK-M1-0002, RK-M0-0002, and RK-M0-0003 (completed if acceptance is met, otherwise requeued as scoped delta work)",
+      "Backlog files reflect an audit trail explaining each disposition without recreating escalation-chain churn",
+      "python tools/orchestrator.py status runs successfully after backlog normalization"
     ],
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
     "status": "queued",
     "retry_count": 0,
-    "created_at": "2026-02-25T14:15:00.270418+00:00",
-    "updated_at": "2026-02-25T14:15:00.270418+00:00",
+    "created_at": "2026-02-25T14:20:08.432712+00:00",
+    "updated_at": "2026-02-25T14:20:08.432712+00:00",
     "estimated_effort": "S",
-    "token_budget": 12000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "backlog_refill",
-    "assigned_agent": "mara-voss"
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
+    "assigned_agent": "tomas-grell"
   },
   "last_error": null,
-  "last_run_summary": "No queued dependency-ready work item",
+  "last_run_summary": "RK-AUTO-BACKLOG-0001 completed by mara-voss",
   "lock_held": true
 }
