@@ -967,5 +967,44 @@
     "generated_from_item_id": "RK-M1-0007-F02",
     "assigned_agent": "ilya-fen",
     "commit_sha": "a13311dad789337229d364f3a0a19e0a32e16db6"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0002",
+    "title": "Generate next backlog tranche",
+    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, and QA with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-items.json",
+      "docs/design/first-vertical-slice.md",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "At least 3 new queued tasks are created or requeued",
+      "Each task has owner_role, dependencies, and acceptance criteria",
+      "Tasks reflect current project priorities and unblock progress",
+      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:04:37.527452+00:00",
+    "updated_at": "2026-02-25T18:05:07.461036+00:00",
+    "estimated_effort": "S",
+    "token_budget": 12000,
+    "result_summary": "1. If you want, I can now run `python tools/orchestrator.py status` to confirm the queue reflects these new M0 tasks.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "auto_generated": "backlog_refill",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "ac0c6149d7b738d42819e621d0b7bddf7050a9a6"
   }
 ]

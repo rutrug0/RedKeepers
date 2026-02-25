@@ -38,7 +38,7 @@
     "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0002",
+    "id": "RK-AUTO-BACKLOG-0003",
     "title": "Generate next backlog tranche",
     "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, and QA with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas.",
     "milestone": "M0",
@@ -63,16 +63,310 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "validating",
+    "status": "queued",
     "retry_count": 0,
-    "created_at": "2026-02-25T18:04:37.527452+00:00",
-    "updated_at": "2026-02-25T18:05:05.153015+00:00",
+    "created_at": "2026-02-25T18:11:22.363658+00:00",
+    "updated_at": "2026-02-25T18:14:16.089196+00:00",
     "estimated_effort": "S",
     "token_budget": 12000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "auto_generated": "backlog_refill",
-    "assigned_agent": "mara-voss"
+    "assigned_agent": "mara-voss",
+    "recovered_from_stale_in_progress": true
+  },
+  {
+    "id": "RK-M0-0006",
+    "title": "Implement first-slice settlement tick and resource projection service",
+    "description": "Create a backend service to compute deterministic resource ticks for a single settlement using starter economy data and emit placeholder event payloads for UI/state sync.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006-F01-F01"
+    ],
+    "inputs": [
+      "backend/src/modules/economy/",
+      "backend/src/app",
+      "docs/design/v1-starter-data-tables.md"
+    ],
+    "acceptance_criteria": [
+      "A deterministic tick function applies per-resource deltas for 3-4 first-slice resources and returns updated stock + reason codes",
+      "Tick math is bounded to one settlement and starter-enabled content only, with clear defaults for unavailable values",
+      "Output schema is suitable for client mock/state binding without PvP or diplomacy side effects"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-25T18:15:22.000000+00:00",
+    "estimated_effort": "M",
+    "token_budget": 14000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss"
+  },
+  {
+    "id": "RK-M0-0007",
+    "title": "Add first-slice upgrade and train command handlers",
+    "description": "Add backend handlers for one building upgrade and one unit train action using starter tables, including structured success/fail outcomes and placeholder event keys.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006",
+      "RK-M1-0006-F01"
+    ],
+    "inputs": [
+      "backend/src/modules/buildings/",
+      "backend/src/modules/units/",
+      "backend/src/modules/telemetry",
+      "docs/design/v1-starter-data-tables.md"
+    ],
+    "acceptance_criteria": [
+      "At least one building upgrade and one unit training command handler are implemented for first-slice IDs",
+      "Each handler returns structured results with `insufficient_resources`, `cooldown`, and `invalid_state` failure cases",
+      "Successful results emit placeholder event keys compatible with existing feed wiring and without combat/diplomacy dependencies"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-25T18:15:22.000000+00:00",
+    "estimated_effort": "M",
+    "token_budget": 16000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss"
+  },
+  {
+    "id": "RK-M0-0008",
+    "title": "Wire client shell actions to first-slice backend contracts",
+    "description": "Add a thin client adapter layer so settlement tick, build, and train actions invoke backend-first-slice contract endpoints/stubs and update mock state/event feed.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005",
+      "RK-M0-0006",
+      "RK-M0-0007"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "client-web/styles.css",
+      "client-web/index.html"
+    ],
+    "acceptance_criteria": [
+      "Tick/build/train buttons call a dedicated adapter method and reflect changed values in the settlement panel state",
+      "Client displays placeholder outcomes for success and failure paths from handler payloads",
+      "Event feed appends mapped event keys for backend action responses in placeholder format"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-25T18:15:22.000000+00:00",
+    "estimated_effort": "M",
+    "token_budget": 12000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss"
+  },
+  {
+    "id": "RK-M0-0009",
+    "title": "Define map scout interaction contract and tile outcome mapping",
+    "description": "Publish a concise first-slice map interaction spec and stable data contract for one scout/select flow with three tile outcomes and placeholder feedback mapping.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005",
+      "RK-M1-0007"
+    ],
+    "inputs": [
+      "client-web/",
+      "docs/design/first-vertical-slice.md",
+      "docs/design/v1-starter-data-tables.md"
+    ],
+    "acceptance_criteria": [
+      "Spec documents exactly one map interaction flow with 3 tile states and 3 outcomes",
+      "Spec maps each outcome to stable placeholder event/feed keys consumed by frontend",
+      "All interaction text and labels are replaceable placeholders and do not introduce new mechanics"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-25T18:15:22.000000+00:00",
+    "estimated_effort": "S",
+    "token_budget": 9000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss"
+  },
+  {
+    "id": "RK-M0-0010",
+    "title": "Create first-slice map/build/train placeholder content keys",
+    "description": "Add structured placeholder event and panel copy keys for tick, build, train, and scout outcomes so gameplay actions can render through stable identifiers.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0007",
+      "RK-M0-0009"
+    ],
+    "inputs": [
+      "docs/content/",
+      "client-web/",
+      "docs/design/v1-starter-data-tables.md"
+    ],
+    "acceptance_criteria": [
+      "Add at least 6 placeholder keys covering tick/build/train/scout outcomes with token fields",
+      "Keys are namespaced by loop feature (`tick`, `build`, `train`, `scout`) for stable client lookup",
+      "No additional mechanics or civ-specific exceptions are introduced beyond first-slice constraints"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-25T18:15:22.000000+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss"
+  },
+  {
+    "id": "RK-M0-0011",
+    "title": "Add first-slice loop smoke checks across backend contracts and client actions",
+    "description": "Create lightweight automated checks that assert the first-slice settlement tick/build/train/scout contracts are wired end-to-end with deterministic placeholders.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006",
+      "RK-M0-0007",
+      "RK-M0-0008",
+      "RK-M0-0010",
+      "RK-M0-0009"
+    ],
+    "inputs": [
+      "tests/",
+      "backend/",
+      "client-web/",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "At least one automated check validates each of tick, upgrade, train, and scout flow touchpoints",
+      "Negative-path assertion covers insufficient resources and one unavailable-state condition",
+      "Check output is deterministic and includes a simple pass/fail summary for the first-slice slice readiness"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-25T18:15:22.000000+00:00",
+    "estimated_effort": "M",
+    "token_budget": 12000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss"
+  },
+  {
+    "id": "RK-M1-0005-F02-F01",
+    "title": "Add automated a11y and mobile viewport smoke checks for client shell",
+    "description": "Add a lightweight browser-based smoke test (keyboard tab sequence + focus-visible assertions + 360px/390px viewport snapshots) for the client shell wireframe so future UI changes do not regress accessibility or mobile usability.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005-F02"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Automated check runs the client shell at 360px and 390px widths and verifies no horizontal overflow on the main shell container",
+      "Keyboard navigation test covers region tab activation and confirms visible focus styling on representative controls",
+      "Reduced-motion mode test confirms region navigation does not request smooth scrolling"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 3,
+    "created_at": "2026-02-25T15:31:58.488198+00:00",
+    "updated_at": "2026-02-25T18:20:10.900132+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-M1-0005-F02",
+    "assigned_agent": "sera-kest",
+    "recovered_from_stale_in_progress": true,
+    "last_failure_reason": "ERROR: {\"detail\":\"The 'codex-5.3' model is not supported when using Codex with a ChatGPT account.\"}",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'codex-5.3' model is not supported when using Codex with a ChatGPT account.\"}",
+    "blocked_revisit_count": 1
+  },
+  {
+    "id": "RK-M1-0005-F02-F01-ESC",
+    "title": "Escalation: Add automated a11y and mobile viewport smoke checks for client shell",
+    "description": "Investigate repeated failure for item RK-M1-0005-F02-F01. Reason: ERROR: {\"detail\":\"The 'codex-5.3' model is not supported when using Codex with a ChatGPT account.\"}",
+    "milestone": "M1",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "validating",
+    "retry_count": 3,
+    "created_at": "2026-02-25T17:41:15.007042+00:00",
+    "updated_at": "2026-02-25T18:23:42.100394+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M1-0005-F02-F01",
+    "assigned_agent": "mara-voss",
+    "last_failure_reason": "ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
+    "blocked_revisit_count": 1
   }
 ]

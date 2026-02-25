@@ -3,7 +3,7 @@
     "display_name": "Mara Voss",
     "role": "lead",
     "title": "Lead Producer / Systems Lead",
-    "model": "gpt-5.3-codex-spark",
+    "model": "default",
     "reasoning": "high",
     "responsibilities": [
       "Own milestone priorities and backlog sequencing",
@@ -16,7 +16,7 @@
     "display_name": "Ilya Fen",
     "role": "backend",
     "title": "Backend Engineer",
-    "model": "gpt-5.3-codex-spark",
+    "model": "default",
     "reasoning": "high",
     "responsibilities": [
       "Implement modular monolith backend modules",
@@ -64,7 +64,7 @@
     "display_name": "Tomas Grell",
     "role": "qa",
     "title": "QA / Test Automation / Release Guard",
-    "model": "gpt-5.3-codex-spark",
+    "model": "default",
     "reasoning": "medium",
     "responsibilities": [
       "Write smoke tests and validation scripts",

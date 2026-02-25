@@ -5,6 +5,7 @@ import os
 import sys
 import threading
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -319,6 +320,95 @@ def ensure_backlog_refill_item(queue: QueueManager) -> dict[str, Any] | None:
     return item
 
 
+def _parse_iso_datetime(value: Any) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    text = value.strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+def _matches_any_pattern(text: str, patterns: list[str]) -> bool:
+    lowered = text.lower()
+    return any(pattern and pattern in lowered for pattern in patterns)
+
+
+def revisit_recoverable_blocked_items(queue: QueueManager, retry_policy: dict[str, Any]) -> list[str]:
+    cfg = retry_policy.get("blocked_revisit", {}) if isinstance(retry_policy, dict) else {}
+    if not isinstance(cfg, dict):
+        return []
+
+    enabled_raw = cfg.get("enabled", True)
+    enabled = bool(enabled_raw) if isinstance(enabled_raw, bool) else str(enabled_raw).strip().lower() in {"1", "true", "yes", "on"}
+    if not enabled:
+        return []
+
+    try:
+        max_items_per_cycle = max(1, int(cfg.get("max_items_per_cycle", 1)))
+    except (TypeError, ValueError):
+        max_items_per_cycle = 1
+    try:
+        max_attempts_per_item = max(1, int(cfg.get("max_attempts_per_item", 2)))
+    except (TypeError, ValueError):
+        max_attempts_per_item = 2
+    try:
+        cooldown_seconds = max(0, int(cfg.get("cooldown_seconds", 1800)))
+    except (TypeError, ValueError):
+        cooldown_seconds = 1800
+
+    include_patterns = [str(p).strip().lower() for p in cfg.get("include_reason_patterns", []) if str(p).strip()]
+    exclude_patterns = [str(p).strip().lower() for p in cfg.get("exclude_reason_patterns", []) if str(p).strip()]
+
+    now = datetime.now(timezone.utc)
+    completed_ids = queue.completed_ids()
+    reopened_ids: list[str] = []
+
+    for item in list(queue.blocked):
+        if len(reopened_ids) >= max_items_per_cycle:
+            break
+        item_id = str(item.get("id", "")).strip()
+        if not item_id:
+            continue
+
+        attempts = int(item.get("blocked_revisit_count", 0))
+        if attempts >= max_attempts_per_item:
+            continue
+
+        dependencies = item.get("dependencies", [])
+        if isinstance(dependencies, list) and any(str(dep) not in completed_ids for dep in dependencies):
+            continue
+
+        reason = str(item.get("blocker_reason", "") or "")
+        if include_patterns and not _matches_any_pattern(reason, include_patterns):
+            continue
+        if exclude_patterns and _matches_any_pattern(reason, exclude_patterns):
+            continue
+
+        last_ts = _parse_iso_datetime(item.get("updated_at")) or _parse_iso_datetime(item.get("created_at"))
+        if last_ts is not None and cooldown_seconds > 0:
+            age_seconds = (now - last_ts).total_seconds()
+            if age_seconds < cooldown_seconds:
+                continue
+
+        did_requeue = queue.requeue_blocked(
+            item_id,
+            reason=f"automatic blocked revisit ({attempts + 1}/{max_attempts_per_item})",
+        )
+        if did_requeue:
+            reopened_ids.append(item_id)
+
+    if reopened_ids:
+        queue.save()
+    return reopened_ids
+
+
 def _coerce_string_list(value: Any, *, field: str, errors: list[str]) -> list[str]:
     if value is None:
         return []
@@ -480,7 +570,10 @@ def ingest_agent_follow_up_tasks(
     routing_rules: dict[str, Any],
 ) -> tuple[list[str], list[dict[str, Any]]]:
     outbox_path = ROOT / "agents" / agent_id / "outbox.json"
-    data = load_json(outbox_path, [])
+    try:
+        data = load_json(outbox_path, [])
+    except Exception as exc:
+        return [], [{"entry": source_item["id"], "errors": [f"failed reading outbox.json: {exc}"]}]
     if not isinstance(data, list):
         return [], [{"entry": "outbox_root", "errors": ["outbox.json root must be a list"]}]
 
@@ -576,6 +669,23 @@ def resolve_execution_profile(
     fallback_model = _clean(policy_cfg.get("fallback_model")) or _clean(model_policy.get("default_fallback_model"))
     selection_reason = "agent_policy"
 
+    def _effort_rank(value: Any) -> int | None:
+        if value is None:
+            return None
+        text = str(value).strip().upper()
+        if not text:
+            return None
+        ranks = {"XS": 0, "S": 1, "M": 2, "L": 3, "XL": 4}
+        return ranks.get(text)
+
+    def _as_int(value: Any) -> int | None:
+        if value is None:
+            return None
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
     if item is not None:
         retry_count_raw = item.get("retry_count", 0)
         try:
@@ -583,6 +693,47 @@ def resolve_execution_profile(
         except (TypeError, ValueError):
             retry_count = 0
         priority = str(item.get("priority", "")).strip().lower()
+        owner_role = str(item.get("owner_role", "")).strip().lower()
+
+        # Optional policy rule: use a cheaper/faster model only for lightweight tasks.
+        # This keeps lead/backend heavy work on stronger defaults while allowing Spark
+        # for small maintenance/spec chores.
+        light_cfg = model_policy.get("lightweight_task_override", {}) or {}
+        if isinstance(light_cfg, dict) and retry_count == 0 and priority != "critical":
+            applies_to_roles = light_cfg.get("apply_to_roles")
+            role_ok = True
+            if isinstance(applies_to_roles, list) and applies_to_roles:
+                role_ok = owner_role in {str(role).strip().lower() for role in applies_to_roles}
+
+            allowed_priorities_raw = light_cfg.get("allowed_priorities")
+            priority_ok = True
+            if isinstance(allowed_priorities_raw, list) and allowed_priorities_raw:
+                allowed_priorities = {str(p).strip().lower() for p in allowed_priorities_raw if str(p).strip()}
+                priority_ok = priority in allowed_priorities if allowed_priorities else True
+
+            max_effort_rank = _effort_rank(light_cfg.get("max_estimated_effort"))
+            item_effort_rank = _effort_rank(item.get("estimated_effort"))
+            effort_ok = (
+                max_effort_rank is None
+                or item_effort_rank is None
+                or item_effort_rank <= max_effort_rank
+            )
+
+            max_tokens = _as_int(light_cfg.get("max_token_budget"))
+            item_tokens = _as_int(item.get("token_budget"))
+            token_ok = max_tokens is None or item_tokens is None or item_tokens <= max_tokens
+
+            light_model = _clean(light_cfg.get("model"))
+            light_reasoning = _clean(light_cfg.get("reasoning"))
+            light_fallback = _clean(light_cfg.get("fallback_model"))
+            if role_ok and priority_ok and effort_ok and token_ok and light_model:
+                model = light_model
+                selection_reason = "lightweight_task_override"
+            if role_ok and priority_ok and effort_ok and token_ok and light_reasoning:
+                reasoning = light_reasoning
+            if role_ok and priority_ok and effort_ok and token_ok and light_fallback:
+                fallback_model = light_fallback
+
         should_upgrade = priority == "critical" or retry_count > 0
         escalation_cfg = (model_policy.get("escalation_upgrade", {}) or {}).get("critical_or_repeated_failure", {})
         if should_upgrade and isinstance(escalation_cfg, dict):
@@ -702,6 +853,24 @@ def process_one(
         completed_count=len(queue.completed),
     )
     stats_tracker.save(stats)
+
+    if not dry_run:
+        reopened_blocked = revisit_recoverable_blocked_items(queue, policies.get("retry", {}))
+        if reopened_blocked:
+            emit_event(
+                "blocked_revisit",
+                "Requeued recoverable blocked work items",
+                count=len(reopened_blocked),
+                item_ids=reopened_blocked,
+            )
+            queue.load()
+            stats_tracker.refresh_queue_totals(
+                stats,
+                queued_count=sum(1 for queued_item in queue.active if queued_item.get("status") == "queued"),
+                blocked_count=len(queue.blocked),
+                completed_count=len(queue.completed),
+            )
+            stats_tracker.save(stats)
 
     item = queue.select_next(policies["routing"], stats)
     if item is None:

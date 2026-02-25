@@ -154,6 +154,8 @@ def _normalize_model_name(model: str | None) -> str | None:
     text = model.strip()
     if not text:
         return None
+    if text.lower() in {"auto", "default", "none", "null"}:
+        return None
     # Codex/API model IDs are typically lowercase. Normalize display-style names
     # (e.g. "GPT-5.3-Codex-Spark") to improve compatibility.
     if " " not in text:
@@ -344,6 +346,8 @@ def run_agent(
     requested_model = (model or "").strip() or None
     selected_model = _normalize_model_name(requested_model)
     fallback_model_clean = _normalize_model_name((fallback_model or "").strip() or None)
+    force_default_model = os.environ.get("REDKEEPERS_USE_DEFAULT_MODEL", "").strip().lower() in {"1", "true", "yes", "on"}
+    precheck_forced_default = False
 
     if dry_run:
         return WorkerResult(
@@ -386,6 +390,16 @@ def run_agent(
             requested_model=requested_model,
             used_model=selected_model,
         )
+
+    if force_default_model:
+        selected_model = None
+        fallback_model_clean = None
+    elif selected_model:
+        precheck_error = codex_model_access_preflight_error(selected_model)
+        if precheck_error and _looks_like_model_access_error(precheck_error, ""):
+            precheck_forced_default = True
+            selected_model = None
+            fallback_model_clean = None
 
     tokens_in_est = _estimate_tokens(prompt)
     used_model = selected_model
@@ -471,6 +485,10 @@ def run_agent(
         summary = f"{summary} (fallback model used: {used_model})"
     if default_model_retry_used:
         summary = f"{summary} (default model retry used)"
+    if precheck_forced_default:
+        summary = f"{summary} (model precheck switched to default model)"
+    if force_default_model:
+        summary = f"{summary} (default model forced by REDKEEPERS_USE_DEFAULT_MODEL)"
     status = "completed" if proc.returncode == 0 else "failed"
     if _detect_blocked_output(stdout, stderr):
         status = "blocked"

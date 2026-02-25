@@ -53,7 +53,9 @@ def ensure_parent(path: Path) -> None:
 def load_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
-    with path.open("r", encoding="utf-8") as fh:
+    # Use utf-8-sig so files saved with a UTF-8 BOM (common on Windows tooling)
+    # are still accepted by json.load.
+    with path.open("r", encoding="utf-8-sig") as fh:
         return json.load(fh)
 
 
@@ -76,7 +78,7 @@ def append_jsonl(path: Path, record: dict[str, Any]) -> None:
 def load_yaml_like(path: Path, default: Any = None) -> Any:
     if not path.exists():
         return default
-    text = path.read_text(encoding="utf-8")
+    text = path.read_text(encoding="utf-8-sig")
     try:
         import yaml  # type: ignore
 
@@ -156,4 +158,3 @@ def default_agent_stats(agents: dict[str, dict[str, Any]]) -> dict[str, Any]:
             "estimated_tokens_total": 0,
         },
     }
-

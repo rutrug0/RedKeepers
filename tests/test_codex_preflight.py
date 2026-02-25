@@ -81,6 +81,8 @@ class CodexPreflightTests(unittest.TestCase):
     def test_normalize_model_name_lowercases_display_style(self) -> None:
         self.assertEqual(codex_worker._normalize_model_name("GPT-5.3-Codex-Spark"), "gpt-5.3-codex-spark")
         self.assertEqual(codex_worker._normalize_model_name("gpt-5-mini"), "gpt-5-mini")
+        self.assertIsNone(codex_worker._normalize_model_name("auto"))
+        self.assertIsNone(codex_worker._normalize_model_name("default"))
 
 
 class HealthCheckPreflightIntegrationTests(unittest.TestCase):
@@ -195,6 +197,31 @@ class HealthCheckPreflightIntegrationTests(unittest.TestCase):
                 errors = health_checks.validate_environment(root)
 
         self.assertIn("Codex command preflight failed: test", errors)
+
+    def test_validate_environment_ignores_non_definitive_model_precheck_timeouts(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._write_required_files(root)
+            model_policy_path = root / "coordination" / "policies" / "model-policy.yaml"
+            model_policy_path.write_text(
+                json.dumps(
+                    {
+                        "agent_models": {
+                            "mara-voss": {"model": "gpt-5.3-codex-spark"}
+                        }
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            with (
+                mock.patch.object(health_checks, "codex_command_preflight_error", return_value=None),
+                mock.patch.object(health_checks, "codex_model_access_preflight_error", return_value="Worker timed out after 20s"),
+            ):
+                errors = health_checks.validate_environment(root)
+
+        self.assertFalse(any("model 'gpt-5.3-codex-spark' is not accessible" in err for err in errors))
 
     @staticmethod
     def _write_required_files(root: Path) -> None:

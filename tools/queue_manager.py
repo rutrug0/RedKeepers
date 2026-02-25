@@ -119,6 +119,22 @@ class QueueManager:
         self.blocked.append(item)
         self.active = [candidate for candidate in self.active if candidate["id"] != item_id]
 
+    def requeue_blocked(self, item_id: str, *, reason: str) -> bool:
+        if any(item.get("id") == item_id for item in self.active):
+            return False
+        idx = next((i for i, item in enumerate(self.blocked) if item.get("id") == item_id), None)
+        if idx is None:
+            return False
+        item = self.blocked.pop(idx)
+        item["status"] = "queued"
+        item["updated_at"] = utc_now_iso()
+        item["last_unblocked_reason"] = reason
+        item["last_blocker_reason"] = item.get("blocker_reason")
+        item["blocker_reason"] = None
+        item["blocked_revisit_count"] = int(item.get("blocked_revisit_count", 0)) + 1
+        self.active.append(item)
+        return True
+
     def increment_retry(self, item_id: str, reason: str) -> int:
         item = self.get_active_item(item_id)
         if item is None:
@@ -171,4 +187,3 @@ class QueueManager:
         }
         self.active.append(new_item)
         return new_item
-

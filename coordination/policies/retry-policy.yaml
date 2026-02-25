@@ -1,5 +1,24 @@
 {
   "max_retries_per_item_per_agent": 2,
   "worker_timeout_seconds": 900,
-  "failure_policy": "auto_escalate_to_lead"
+  "failure_policy": "auto_escalate_to_lead",
+  "blocked_revisit": {
+    "enabled": true,
+    "max_items_per_cycle": 2,
+    "max_attempts_per_item": 2,
+    "cooldown_seconds": 900,
+    "include_reason_patterns": [
+      "not supported when using codex with a chatgpt account",
+      "unsupported",
+      "model preflight",
+      "worker timed out",
+      "timeout",
+      "bootstrap",
+      "codex cli command not found"
+    ],
+    "exclude_reason_patterns": [
+      "superseded escalation-chain artifact",
+      "retained for audit only"
+    ]
+  }
 }

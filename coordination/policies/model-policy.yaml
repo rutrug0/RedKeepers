@@ -5,12 +5,12 @@
   "default_provider": "openai",
   "agent_models": {
     "mara-voss": {
-      "model": "gpt-5.3-codex-spark",
+      "model": "default",
       "reasoning": "high",
       "daily_token_budget": 300000
     },
     "ilya-fen": {
-      "model": "gpt-5.3-codex-spark",
+      "model": "default",
       "reasoning": "high",
       "daily_token_budget": 300000
     },
@@ -30,14 +30,29 @@
       "daily_token_budget": 100000
     },
     "tomas-grell": {
-      "model": "gpt-5.3-codex-spark",
+      "model": "default",
       "reasoning": "medium",
       "daily_token_budget": 160000
     }
   },
+  "lightweight_task_override": {
+    "apply_to_roles": [
+      "lead",
+      "backend",
+      "qa"
+    ],
+    "allowed_priorities": [
+      "low",
+      "normal"
+    ],
+    "max_estimated_effort": "S",
+    "max_token_budget": 12000,
+    "model": "gpt-5.3-codex-spark",
+    "reasoning": "medium"
+  },
   "escalation_upgrade": {
     "critical_or_repeated_failure": {
-      "model": "gpt-5.3-codex-spark",
+      "model": "default",
       "reasoning": "high"
     }
   }

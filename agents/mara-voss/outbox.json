@@ -336,5 +336,46 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "ts":  "2026-02-25T18:22:55.3924437Z",
+        "item_id":  "RK-M1-0005-F02-F01-ESC",
+        "status":  "completed",
+        "summary":  "Root cause confirmed as unsupported model-policy routing (`codex-5.3` on source run and `gpt-5-mini` fallback on escalation), not a frontend test implementation defect. Source item is requeued/unblocked for retry under current policy.",
+        "root_cause":  "Execution profile selected models that this ChatGPT-backed Codex account cannot access, causing immediate unsupported-model failures before work could execute.",
+        "evidence":  {
+                         "run_history_source_failures":  "coordination/runtime/run-history.jsonl:51-53",
+                         "run_history_escalation_failures":  "coordination/runtime/run-history.jsonl:54-56",
+                         "frontend_selection_snapshot":  "coordination/runtime/daemon-events.jsonl:770-783 (model `codex-5.3`, no accessible fallback)",
+                         "escalation_selection_snapshot":  "coordination/runtime/daemon-events.jsonl:794-808 (fallback `gpt-5-mini`, also unsupported)",
+                         "unblock_signal":  "coordination/runtime/daemon-events.jsonl:1011-1013 (blocked revisit requeued source/escalation; escalation now selects `default`)"
+                     },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Add queued-item model-policy drift audit after policy updates",
+                                        "owner_role":  "qa",
+                                        "priority":  "high",
+                                        "milestone":  "M1",
+                                        "description":  "Add a lightweight daemon audit pass that scans queued items after model-policy changes and flags/remediates any item that would still resolve to unsupported model/fallback combinations.",
+                                        "dependencies":  [
+                                                             "RK-M1-0004-F01-F01-F01-ESC-F01",
+                                                             "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+                                                         ],
+                                        "inputs":  [
+                                                       "tools/orchestrator.py",
+                                                       "tools/codex_worker.py",
+                                                       "coordination/policies/model-policy.yaml",
+                                                       "coordination/runtime/run-history.jsonl"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Audit identifies queued items whose resolved model and fallback are both inaccessible in current account context",
+                                                                    "Daemon emits a clear remediation hint and avoids repeated retry loops for those items",
+                                                                    "At least one regression test covers a stale queued item created before a policy change"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
     }
 ]

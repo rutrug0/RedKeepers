@@ -17,6 +17,7 @@
 - `REDKEEPERS_WORKER_MODE=mock` : simulate successful agent runs for testing the daemon flow
 - `REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA=1|0` : runtime override for frontend visual QA validation gate (policy default is enabled)
 - `REDKEEPERS_PYTHON_CMD` : force validation command launcher (example: `py`)
+- `REDKEEPERS_USE_DEFAULT_MODEL=1` : do not pin `--model` in worker calls; use the Codex account default model (recommended when account/model entitlement differs from policy)
 
 ## Smoke Validation (PowerShell)
 
@@ -41,6 +42,10 @@ If preflight reports an unresolvable Codex command, override it explicitly:
 ## Output Philosophy
 
 Default CLI output is intentionally high-level. Detailed subprocess output is only shown with `--verbose`.
+
+## Blocked Work Revisit
+
+The daemon can automatically re-queue recoverable blocked items using `coordination/policies/retry-policy.yaml` `blocked_revisit` settings (cooldown, per-cycle cap, reason include/exclude patterns). This is intended for transient blockers like model-access/config incidents while keeping audit-only blocked artifacts untouched.
 
 ## Monitoring Progress (PowerShell)
 

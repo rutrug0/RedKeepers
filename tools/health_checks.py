@@ -43,6 +43,24 @@ def _validate_json_object(*, errors: list[str], path: Path, label: str) -> None:
         errors.append(f"{label} must contain an object")
 
 
+def _is_definitive_model_access_error(text: str | None) -> bool:
+    if not text:
+        return False
+    lowered = text.lower()
+    markers = (
+        "not supported",
+        "unsupported",
+        "unsupported model",
+        "does not have access",
+        "not authorized",
+        "not enabled",
+        "permission denied",
+        "invalid model",
+        "unknown model",
+    )
+    return any(marker in lowered for marker in markers)
+
+
 def _validate_model_profile_access(*, errors: list[str], model_policy: Any) -> None:
     if not isinstance(model_policy, dict):
         return
@@ -79,10 +97,15 @@ def _validate_model_profile_access(*, errors: list[str], model_policy: Any) -> N
         requested_error = codex_model_access_preflight_error(requested_model)
         if not requested_error:
             continue
+        if not _is_definitive_model_access_error(requested_error):
+            # Timeouts/transient transport failures should not hard-fail daemon startup.
+            continue
 
         if fallback_model:
             fallback_error = codex_model_access_preflight_error(fallback_model)
             if not fallback_error:
+                continue
+            if not _is_definitive_model_access_error(fallback_error):
                 continue
             errors.append(
                 (

@@ -93,6 +93,137 @@ class ExecutionProfileTests(unittest.TestCase):
         self.assertEqual(profile["reasoning"], "high")
         self.assertEqual(profile["selection_reason"], "escalation_upgrade")
 
+    def test_lightweight_override_applies_for_small_lead_task(self) -> None:
+        profile = orchestrator.resolve_execution_profile(
+            agent_id="mara-voss",
+            agent_cfg={"model": "default", "reasoning": "high"},
+            model_policy={
+                "agent_models": {
+                    "mara-voss": {
+                        "model": "default",
+                        "reasoning": "high",
+                    }
+                },
+                "lightweight_task_override": {
+                    "apply_to_roles": ["lead", "backend", "qa"],
+                    "max_estimated_effort": "S",
+                    "max_token_budget": 12000,
+                    "model": "gpt-5.3-codex-spark",
+                    "reasoning": "medium",
+                },
+            },
+            item={
+                "owner_role": "lead",
+                "priority": "normal",
+                "retry_count": 0,
+                "estimated_effort": "S",
+                "token_budget": 8000,
+            },
+        )
+        self.assertEqual(profile["model"], "gpt-5.3-codex-spark")
+        self.assertEqual(profile["reasoning"], "medium")
+        self.assertEqual(profile["selection_reason"], "lightweight_task_override")
+
+    def test_lightweight_override_skips_large_task(self) -> None:
+        profile = orchestrator.resolve_execution_profile(
+            agent_id="ilya-fen",
+            agent_cfg={"model": "default", "reasoning": "high"},
+            model_policy={
+                "agent_models": {
+                    "ilya-fen": {
+                        "model": "default",
+                        "reasoning": "high",
+                    }
+                },
+                "lightweight_task_override": {
+                    "apply_to_roles": ["lead", "backend", "qa"],
+                    "max_estimated_effort": "S",
+                    "max_token_budget": 12000,
+                    "model": "gpt-5.3-codex-spark",
+                    "reasoning": "medium",
+                },
+            },
+            item={
+                "owner_role": "backend",
+                "priority": "normal",
+                "retry_count": 0,
+                "estimated_effort": "M",
+                "token_budget": 18000,
+            },
+        )
+        self.assertEqual(profile["model"], "default")
+        self.assertEqual(profile["reasoning"], "high")
+        self.assertEqual(profile["selection_reason"], "agent_policy")
+
+    def test_escalation_takes_precedence_over_lightweight_override(self) -> None:
+        profile = orchestrator.resolve_execution_profile(
+            agent_id="mara-voss",
+            agent_cfg={"model": "default", "reasoning": "high"},
+            model_policy={
+                "agent_models": {
+                    "mara-voss": {
+                        "model": "default",
+                        "reasoning": "high",
+                    }
+                },
+                "lightweight_task_override": {
+                    "apply_to_roles": ["lead"],
+                    "max_estimated_effort": "S",
+                    "max_token_budget": 12000,
+                    "model": "gpt-5.3-codex-spark",
+                    "reasoning": "medium",
+                },
+                "escalation_upgrade": {
+                    "critical_or_repeated_failure": {
+                        "model": "default",
+                        "reasoning": "high",
+                    }
+                },
+            },
+            item={
+                "owner_role": "lead",
+                "priority": "critical",
+                "retry_count": 0,
+                "estimated_effort": "S",
+                "token_budget": 8000,
+            },
+        )
+        self.assertEqual(profile["model"], "default")
+        self.assertEqual(profile["reasoning"], "high")
+        self.assertEqual(profile["selection_reason"], "escalation_upgrade")
+
+    def test_lightweight_override_respects_allowed_priorities(self) -> None:
+        profile = orchestrator.resolve_execution_profile(
+            agent_id="mara-voss",
+            agent_cfg={"model": "default", "reasoning": "high"},
+            model_policy={
+                "agent_models": {
+                    "mara-voss": {
+                        "model": "default",
+                        "reasoning": "high",
+                    }
+                },
+                "lightweight_task_override": {
+                    "apply_to_roles": ["lead"],
+                    "allowed_priorities": ["low", "normal"],
+                    "max_estimated_effort": "S",
+                    "max_token_budget": 12000,
+                    "model": "gpt-5.3-codex-spark",
+                    "reasoning": "medium",
+                },
+            },
+            item={
+                "owner_role": "lead",
+                "priority": "high",
+                "retry_count": 0,
+                "estimated_effort": "S",
+                "token_budget": 8000,
+            },
+        )
+        self.assertEqual(profile["model"], "default")
+        self.assertEqual(profile["reasoning"], "high")
+        self.assertEqual(profile["selection_reason"], "agent_policy")
+
 
 if __name__ == "__main__":
     unittest.main()
