@@ -154,48 +154,6 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC"
   },
   {
-    "id": "RK-M1-0004-F01-F01-F01",
-    "title": "Add automated contract smoke tests for reference bootstrap adapters",
-    "description": "Add lightweight tests around the temporary reference `ServiceRegistry`, `InProcessEventBus`, and bootstrap composer to lock expected contract behavior (duplicate registration failure, subscribe/unsubscribe delivery, lifecycle hook collection) while the production runtime stack is still deferred.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "low",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0004-F01-F01"
-    ],
-    "inputs": [
-      "backend/src/app/reference/*.ts",
-      "backend/src/app/composition.ts",
-      "backend/src/shared/events.ts"
-    ],
-    "acceptance_criteria": [
-      "Tests cover successful placeholder module composition through `ReferenceApplicationBootstrap` with lifecycle hook collection",
-      "Tests verify `InMemoryEventBus` publish/subscribe and unsubscribe behavior for a single event type",
-      "Tests verify `InMemoryServiceRegistry` resolve/tryResolve behavior and duplicate registration failure"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 3,
-    "created_at": "2026-02-25T15:47:51.688098+00:00",
-    "updated_at": "2026-02-25T21:16:23.695095+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M1-0004-F01-F01",
-    "assigned_agent": "ilya-fen",
-    "last_failure_reason": "ERROR: {\"detail\":\"The 'GPT-5.3-Codex-Spark' model is not supported when using Codex with a ChatGPT account.\"}",
-    "last_unblocked_reason": "automatic blocked revisit (1/2)",
-    "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'GPT-5.3-Codex-Spark' model is not supported when using Codex with a ChatGPT account.\"}",
-    "blocked_revisit_count": 1
-  },
-  {
     "id": "RK-M0-0012",
     "title": "Expose first-slice settlement loop contract endpoints",
     "description": "Implement backend-facing contract adapters for settlement tick, building upgrade, unit train, and scout actions so the client loop can call stable first-slice request/response shapes.",
@@ -427,17 +385,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T20:44:33.100665+00:00",
-    "updated_at": "2026-02-25T20:44:33.100665+00:00",
+    "updated_at": "2026-02-25T21:17:18.135772+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M0-0006-F01-F01"
+    "generated_from_item_id": "RK-M0-0006-F01-F01",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M0-0014-F01-F01-F01-F01",
