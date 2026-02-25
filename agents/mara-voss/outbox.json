@@ -206,5 +206,61 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-25T17:58:19.810976Z",
+    "item_id": "RK-M1-0004-F01-F01-F01-ESC",
+    "status": "completed",
+    "summary": "Root cause confirmed for RK-M1-0004-F01-F01-F01: model selection is failing before any content changes because Codex rejects `GPT-5.3-Codex-Spark` on this ChatGPT account.",
+    "root_cause": "The active model policy resolves agent and escalation runs to `gpt-5.3-codex-spark`, which is rejected by Codex with explicit ChatGPT-account unsupported-model errors before work execution can begin.",
+    "evidence": {
+      "run_history_900_entry": "coordination/runtime/run-history.jsonl:72",
+      "run_history_901_entry": "coordination/runtime/run-history.jsonl:77",
+      "selection_source": "coordination/policies/model-policy.yaml.agent_models / escalation_upgrade.critical_or_repeated_failure.model",
+      "failure_signature": "ERROR: \"The 'GPT-5.3-Codex-Spark' model is not supported when using Codex with a ChatGPT account.\"",
+      "runtime_context": "tools/codex_worker.py passes selected model directly via --model; no viable fallback was available for this run."
+    },
+    "proposed_work_items": [
+      {
+        "title": "Add startup/model-policy compatibility preflight for Codex model access",
+        "owner_role": "qa",
+        "priority": "high",
+        "milestone": "M1",
+        "description": "Add an environment preflight that validates the configured model for the selected agent/escalation path against what the current ChatGPT account can access via Codex before queue execution begins.",
+        "inputs": [
+          "tools/health_checks.py",
+          "tools/orchestrator.py",
+          "tools/codex_worker.py",
+          "coordination/policies/model-policy.yaml"
+        ],
+        "acceptance_criteria": [
+          "Startup/validation fails fast when a configured model is unsupported in the current account and emits the exact unsupported-model reason",
+          "Preflight suggests remediation (policy update or explicitly configured fallback) instead of retrying repeatedly",
+          "run-history and model-stats record model-requested/model-used/fallback fields for blocked runs"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "title": "Add regression test that guards model-policy and runtime selection against unsupported models",
+        "owner_role": "qa",
+        "priority": "normal",
+        "milestone": "M1",
+        "description": "Add tests for `resolve_execution_profile` + model-policy contract so unsupported IDs are surfaced as a non-production-ready state, with explicit checks for escalation model path.",
+        "inputs": [
+          "tools/orchestrator.py",
+          "tools/codex_worker.py",
+          "coordination/policies/model-policy.yaml",
+          "tests/test_model_routing.py",
+          "tests/test_codex_preflight.py"
+        ],
+        "acceptance_criteria": [
+          "Escalation path to `gpt-5.3-codex-spark` is asserted when policy currently specifies it and can be flagged by contract smoke test",
+          "At least one test asserts that unsupported `model_requested` produces a deterministic block/fail summary before execution",
+          "Tests cover both standard and `escalation_upgrade` model selection paths"
+        ]
+      }
+    ]
   }
 ]

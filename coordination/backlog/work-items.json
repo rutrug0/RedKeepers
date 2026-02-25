@@ -1,177 +1,5 @@
 [
   {
-    "id": "RK-M1-0005-F01-F01",
-    "title": "Add empty and error mock scenarios for client shell panels",
-    "description": "Extend the local mock panel state model so settlement, world map, and event feed each include empty and error scenarios, with the existing mock-state toggles able to switch to them for UI iteration and QA.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0005-F01"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Settlement, world map, and event feed mock state definitions each include empty and error scenarios in client-web/app.js (or a shared client-web mock state module)",
-      "Per-panel mock-state controls expose empty and error alongside loading and populated",
-      "Empty and error views remain placeholder-art-only and stay within the first vertical slice shell"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:28:20.612766+00:00",
-    "updated_at": "2026-02-25T16:22:52.073047+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "sera-kest",
-    "generated_from_item_id": "RK-M1-0005-F01",
-    "assigned_agent": "sera-kest"
-  },
-  {
-    "id": "RK-M1-0005-F02-F01",
-    "title": "Add automated a11y and mobile viewport smoke checks for client shell",
-    "description": "Add a lightweight browser-based smoke test (keyboard tab sequence + focus-visible assertions + 360px/390px viewport snapshots) for the client shell wireframe so future UI changes do not regress accessibility or mobile usability.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0005-F02"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Automated check runs the client shell at 360px and 390px widths and verifies no horizontal overflow on the main shell container",
-      "Keyboard navigation test covers region tab activation and confirms visible focus styling on representative controls",
-      "Reduced-motion mode test confirms region navigation does not request smooth scrolling"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:31:58.488198+00:00",
-    "updated_at": "2026-02-25T15:31:58.488198+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "sera-kest",
-    "generated_from_item_id": "RK-M1-0005-F02"
-  },
-  {
-    "id": "RK-M1-0006-F02-F01",
-    "title": "Re-validate rally/stone pacing after starter Pass A tuning is serialized",
-    "description": "After backend seed/config data is updated with the approved starter tuning pass, rerun the 30m/2h/6h pacing simulation to confirm barracks timing improvement holds and determine whether rally_post/stone timing still needs a narrow follow-up adjustment.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "design",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006-F02"
-    ],
-    "inputs": [
-      "docs/design/v1-early-progression-pacing-sim.md",
-      "docs/design/v1-starter-data-tables.md"
-    ],
-    "acceptance_criteria": [
-      "Updated pacing checkpoints are documented for 30m, 2h, and 6h using serialized seed values",
-      "Barracks unlock and first unit training cadence are explicitly verified against the tuned target",
-      "Rally_post timing is either approved or a small stone/rally-only tuning pass is proposed"
-    ],
-    "validation_commands": [],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:39:41.742815+00:00",
-    "updated_at": "2026-02-25T15:39:41.742815+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M1-0006-F02"
-  },
-  {
-    "id": "RK-M1-0006-F03-F01",
-    "title": "Implement post-slice building activation threshold evaluation for storage/defense package",
-    "description": "Add seed/config support and runtime evaluation for `buildings.building_activation_thresholds` (including AND semantics per building + threshold phase) so `granary`, `warehouse`, `palisade`, `watchtower`, and `guardhouse` can be revealed/unlocked from data-defined thresholds.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006-F03"
-    ],
-    "inputs": [
-      "docs/design/v1-starter-data-tables.md"
-    ],
-    "acceptance_criteria": [
-      "Backend seed/config schema supports `building_activation_thresholds` rows and preserves all fields/IDs from the design table",
-      "Threshold evaluation supports `resource_stock_ratio`, `resource_stock_ratio_any`, and `building_level_min` with `gte` operation",
-      "Rows for the same `building_id` and `threshold_phase` are evaluated with AND semantics as documented",
-      "First-slice behavior remains unchanged when `data_stub_post_slice` rows are not enabled"
-    ],
-    "validation_commands": [],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:44:06.936180+00:00",
-    "updated_at": "2026-02-25T15:44:06.936180+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M1-0006-F03"
-  },
-  {
-    "id": "RK-M1-0004-F01-F01-F01",
-    "title": "Add automated contract smoke tests for reference bootstrap adapters",
-    "description": "Add lightweight tests around the temporary reference `ServiceRegistry`, `InProcessEventBus`, and bootstrap composer to lock expected contract behavior (duplicate registration failure, subscribe/unsubscribe delivery, lifecycle hook collection) while the production runtime stack is still deferred.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "low",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0004-F01-F01"
-    ],
-    "inputs": [
-      "backend/src/app/reference/*.ts",
-      "backend/src/app/composition.ts",
-      "backend/src/shared/events.ts"
-    ],
-    "acceptance_criteria": [
-      "Tests cover successful placeholder module composition through `ReferenceApplicationBootstrap` with lifecycle hook collection",
-      "Tests verify `InMemoryEventBus` publish/subscribe and unsubscribe behavior for a single event type",
-      "Tests verify `InMemoryServiceRegistry` resolve/tryResolve behavior and duplicate registration failure"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:47:51.688098+00:00",
-    "updated_at": "2026-02-25T15:47:51.688098+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M1-0004-F01-F01"
-  },
-  {
     "id": "RK-M1-0006-F01-F01-F01",
     "title": "Add backend tests for v1 starter seed loader validation and first-slice filtering",
     "description": "Add focused tests for the new v1 seed loader utilities covering malformed shape errors, duplicate IDs/rows, missing cross-references, and first-slice filtering behavior using the committed seed JSON fixtures.",
@@ -241,5 +69,37 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-M1-0007-F02"
+  },
+  {
+    "id": "RK-M1-0004-F01-F01-F01-ESC",
+    "title": "Escalation: Add automated contract smoke tests for reference bootstrap adapters",
+    "description": "Investigate repeated failure for item RK-M1-0004-F01-F01-F01. Reason: ERROR: {\"detail\":\"The 'GPT-5.3-Codex-Spark' model is not supported when using Codex with a ChatGPT account.\"}",
+    "milestone": "M1",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "validating",
+    "retry_count": 1,
+    "created_at": "2026-02-25T17:54:39.875482+00:00",
+    "updated_at": "2026-02-25T17:58:53.422145+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M1-0004-F01-F01-F01",
+    "assigned_agent": "mara-voss",
+    "last_failure_reason": "ERROR: {\"detail\":\"The 'GPT-5.3-Codex-Spark' model is not supported when using Codex with a ChatGPT account.\"}"
   }
 ]

@@ -745,5 +745,40 @@
     "generated_from_item_id": "RK-M1-0007",
     "assigned_agent": "ilya-fen",
     "commit_sha": "c967268ae35608d7455a644e2f11d072fbaa3515"
+  },
+  {
+    "id": "RK-M1-0005-F01-F01",
+    "title": "Add empty and error mock scenarios for client shell panels",
+    "description": "Extend the local mock panel state model so settlement, world map, and event feed each include empty and error scenarios, with the existing mock-state toggles able to switch to them for UI iteration and QA.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Settlement, world map, and event feed mock state definitions each include empty and error scenarios in client-web/app.js (or a shared client-web mock state module)",
+      "Per-panel mock-state controls expose empty and error alongside loading and populated",
+      "Empty and error views remain placeholder-art-only and stay within the first vertical slice shell"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:28:20.612766+00:00",
+    "updated_at": "2026-02-25T16:22:53.135015+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "   Appended completion summary entry for `RK-M1-0005-F01-F01` (no new proposed follow-up items added).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-M1-0005-F01",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "82bd2b2af9895068cf8407d09bdb0b02a132ff11"
   }
 ]
