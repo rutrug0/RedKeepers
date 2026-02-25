@@ -118,5 +118,39 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-25T15:43:12.2916888Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-M1-0006-F03",
+    "status": "done",
+    "summary": "Added post-slice storage and defense activation package data to the v1 starter tables: granary/warehouse/watchtower/guardhouse lines, storage/defense support effects, and M2 reveal/unlock threshold rows while keeping the first-slice enable set unchanged.",
+    "changed_files": [
+      "docs/design/v1-starter-data-tables.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Implement post-slice building activation threshold evaluation for storage/defense package",
+        "owner_role": "backend",
+        "milestone": "M2",
+        "priority": "medium",
+        "description": "Add seed/config support and runtime evaluation for `buildings.building_activation_thresholds` (including AND semantics per building + threshold phase) so `granary`, `warehouse`, `palisade`, `watchtower`, and `guardhouse` can be revealed/unlocked from data-defined thresholds.",
+        "dependencies": [
+          "RK-M1-0006-F03"
+        ],
+        "inputs": [
+          "docs/design/v1-starter-data-tables.md"
+        ],
+        "acceptance_criteria": [
+          "Backend seed/config schema supports `building_activation_thresholds` rows and preserves all fields/IDs from the design table",
+          "Threshold evaluation supports `resource_stock_ratio`, `resource_stock_ratio_any`, and `building_level_min` with `gte` operation",
+          "Rows for the same `building_id` and `threshold_phase` are evaluated with AND semantics as documented",
+          "First-slice behavior remains unchanged when `data_stub_post_slice` rows are not enabled"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]

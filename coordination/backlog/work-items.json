@@ -1,40 +1,5 @@
 [
   {
-    "id": "RK-M1-0006-F02",
-    "title": "Run early progression pacing simulation on starter economy and training values",
-    "description": "Validate the first 2-6 hours of settlement progression using the new starter tables (resource income, build cadence, unit training cadence) and propose numeric adjustments if bottlenecks feel too hard/soft.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "design",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006"
-    ],
-    "inputs": [
-      "docs/design/v1-starter-data-tables.md",
-      "docs/design/first-vertical-slice.md"
-    ],
-    "acceptance_criteria": [
-      "Documented pacing checkpoints for at least 30m, 2h, and 6h progression windows",
-      "At least one recommended tuning pass is proposed or current values are explicitly approved",
-      "Recommendations preserve first-slice complexity caps and stat-driven asymmetry approach"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:07:25.646762+00:00",
-    "updated_at": "2026-02-25T15:39:40.886920+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M1-0006",
-    "assigned_agent": "rowan-hale"
-  },
-  {
     "id": "RK-M1-0006-F03",
     "title": "Define post-slice storage and defense building activation package",
     "description": "Add the next building lines (storage/warehouse and defense support lines) and activation thresholds so the economy can move beyond flat base storage caps after the first playable slice.",
@@ -56,17 +21,18 @@
       "Updated values include backend/frontend field annotations matching existing table conventions"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T15:07:25.646762+00:00",
-    "updated_at": "2026-02-25T15:07:25.646762+00:00",
+    "updated_at": "2026-02-25T15:44:06.090780+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M1-0006"
+    "generated_from_item_id": "RK-M1-0006",
+    "assigned_agent": "rowan-hale"
   },
   {
     "id": "RK-M1-0004-F01-F01",
@@ -310,5 +276,39 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "sera-kest",
     "generated_from_item_id": "RK-M1-0005-F02"
+  },
+  {
+    "id": "RK-M1-0006-F02-F01",
+    "title": "Re-validate rally/stone pacing after starter Pass A tuning is serialized",
+    "description": "After backend seed/config data is updated with the approved starter tuning pass, rerun the 30m/2h/6h pacing simulation to confirm barracks timing improvement holds and determine whether rally_post/stone timing still needs a narrow follow-up adjustment.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006-F02"
+    ],
+    "inputs": [
+      "docs/design/v1-early-progression-pacing-sim.md",
+      "docs/design/v1-starter-data-tables.md"
+    ],
+    "acceptance_criteria": [
+      "Updated pacing checkpoints are documented for 30m, 2h, and 6h using serialized seed values",
+      "Barracks unlock and first unit training cadence are explicitly verified against the tuned target",
+      "Rally_post timing is either approved or a small stone/rally-only tuning pass is proposed"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:39:41.742815+00:00",
+    "updated_at": "2026-02-25T15:39:41.742815+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-M1-0006-F02"
   }
 ]

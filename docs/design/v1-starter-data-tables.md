@@ -27,7 +27,7 @@ This document converts the v1 faction concept into implementation-ready starter 
 | `short_label` | string | `economy` | compact HUD label | 3-8 chars |
 | `icon_key` | string | `economy` | icon lookup | Placeholder icon token |
 | `starting_stock` | int | `economy` | numeric value | New settlement start amount |
-| `base_storage_cap` | int | `economy` | numeric value | Slice uses flat base cap (no storage building yet) |
+| `base_storage_cap` | int | `economy` | numeric value | Slice uses flat base cap; post-slice storage lines add cap via building effects |
 | `base_passive_prod_per_h` | int | `economy` | rate display | Safety floor to prevent dead starts |
 | `producer_building_id` | string | `economy` | tooltip link | Cross-ref to `buildings` table |
 | `slice_status` | enum | `economy` | optional badge/filter | `playable_now`, `balance_stub` |
@@ -49,6 +49,24 @@ This document converts the v1 faction concept into implementation-ready starter 
 | `scaling_mode` | enum | `buildings` | hidden | `mult_per_level`, `add_per_level`, `step_levels` |
 | `scaling_value` | string/number | `buildings` | tooltip text | Numeric or step rule |
 | `slice_status` | enum | `buildings` | badge/filter | `playable_now`, `data_stub_post_slice` |
+
+### Building Activation Threshold Fields (`buildings`)
+
+Use this table for post-slice building reveal/unlock gates. All rows matching the same `building_id` + `threshold_phase` are ANDed together.
+
+| Field | Type | Backend Owner | Frontend Need | Notes |
+| --- | --- | --- | --- | --- |
+| `activation_rule_id` | string | `buildings` | hidden key | Stable enum/seed key |
+| `activation_package_id` | string | `buildings` | hidden (debug/admin) | Rollout grouping token (e.g. M2 package) |
+| `building_id` | string | `buildings` | locked card / tooltip link | Cross-ref to `buildings.building_lines` |
+| `threshold_phase` | enum | `buildings` | lock/reveal state | `reveal`, `unlock` |
+| `threshold_key` | string | `buildings` | progress label mapping | Stable rule key |
+| `scope` | string | `buildings` | hidden (debug/admin) | Selector target (`resource:food`, `building:palisade`) |
+| `operation` | enum | `buildings` | hidden | `gte`, `lte`, `eq` |
+| `value` | number | `buildings` | threshold value / progress target | Ratio/level numeric threshold |
+| `value_display_format` | enum | `buildings` | progress text formatting | `ratio`, `integer` |
+| `ui_locked_hint` | string | `buildings` | locked-card helper text token | Placeholder/localization key allowed |
+| `slice_status` | enum | `buildings` | badge/filter | `data_stub_post_slice` |
 
 ### Unit Tables Fields (`units`)
 
@@ -117,6 +135,10 @@ Level cost/time formulas:
 | `barracks` | Barracks | `military` | 10 | 180 | 1.55 | 90 | 120 | 80 | 40 | 1.60 | `playable_now` |
 | `rally_post` | Rally Post | `logistics` | 10 | 150 | 1.52 | 80 | 80 | 60 | 20 | 1.58 | `playable_now` |
 | `palisade` | Palisade | `defense` | 10 | 160 | 1.55 | 60 | 100 | 120 | 20 | 1.62 | `data_stub_post_slice` |
+| `granary` | Granary | `economy` | 10 | 170 | 1.53 | 70 | 60 | 90 | 20 | 1.60 | `data_stub_post_slice` |
+| `warehouse` | Warehouse | `economy` | 10 | 190 | 1.55 | 80 | 110 | 100 | 40 | 1.62 | `data_stub_post_slice` |
+| `watchtower` | Watchtower | `defense` | 10 | 220 | 1.57 | 90 | 140 | 120 | 60 | 1.64 | `data_stub_post_slice` |
+| `guardhouse` | Guardhouse | `defense` | 10 | 240 | 1.58 | 120 | 90 | 140 | 80 | 1.65 | `data_stub_post_slice` |
 
 ## Starter Building Effects (`buildings.building_effects`)
 
@@ -138,6 +160,38 @@ Effect formulas:
 | `rally_post` | `army_move_speed_mult` | 1.00 | `add_per_level` | 0.02 | `multiplier` | Applies to outgoing marches |
 | `palisade` | `wall_hp` | 220 | `mult_per_level` | 1.40 | `integer` | Defense family stub for post-slice |
 | `palisade` | `garrison_defense_mult` | 1.05 | `add_per_level` | 0.02 | `multiplier` | Clamp max 1.25 in code |
+| `granary` | `resource_storage_cap_food` | 1800 | `add_per_level` | 900 | `integer` | Added on top of `base_storage_cap`; post-slice storage line |
+| `warehouse` | `resource_storage_cap_wood` | 1500 | `add_per_level` | 750 | `integer` | Added on top of `base_storage_cap`; post-slice storage line |
+| `warehouse` | `resource_storage_cap_stone` | 1500 | `add_per_level` | 750 | `integer` | Added on top of `base_storage_cap`; post-slice storage line |
+| `warehouse` | `resource_storage_cap_iron` | 1500 | `add_per_level` | 750 | `integer` | Added on top of `base_storage_cap`; post-slice storage line |
+| `watchtower` | `incoming_march_warning_s` | 120 | `add_per_level` | 30 | `seconds` | Extra warning lead time for hostile march notifications |
+| `watchtower` | `settlement_vision_tiles` | 2 | `step_levels` | `+1@3,+1@6,+1@9` | `integer` | Post-slice map/alert support |
+| `guardhouse` | `garrison_capacity` | 80 | `add_per_level` | 40 | `integer` | Future garrison/reinforcement capacity support |
+| `guardhouse` | `defender_muster_time_mult` | 0.98 | `add_per_level` | -0.02 | `multiplier` | Clamp min 0.80 in code |
+
+## Post-Slice Building Activation Thresholds (`buildings.building_activation_thresholds`)
+
+These rows define reveal/unlock thresholds for storage and defense buildings after the first playable slice.
+They are data-only (`data_stub_post_slice`) and do not change the current slice enable list.
+
+| activation_rule_id | activation_package_id | building_id | threshold_phase | threshold_key | scope | operation | value | value_display_format | ui_locked_hint | slice_status |
+| --- | --- | --- | --- | --- | --- | --- | ---: | --- | --- | --- |
+| `act_granary_reveal_food_75` | `m2_storage_defense_activation` | `granary` | `reveal` | `resource_stock_ratio` | `resource:food` | `gte` | 0.75 | `ratio` | `hint_granary_reveal_food_near_cap` | `data_stub_post_slice` |
+| `act_granary_unlock_food_90` | `m2_storage_defense_activation` | `granary` | `unlock` | `resource_stock_ratio` | `resource:food` | `gte` | 0.90 | `ratio` | `hint_granary_unlock_food_cap_pressure` | `data_stub_post_slice` |
+| `act_granary_unlock_grain_plot_l4` | `m2_storage_defense_activation` | `granary` | `unlock` | `building_level_min` | `building:grain_plot` | `gte` | 4 | `integer` | `hint_granary_unlock_grain_plot_l4` | `data_stub_post_slice` |
+| `act_warehouse_reveal_nonfood_75` | `m2_storage_defense_activation` | `warehouse` | `reveal` | `resource_stock_ratio_any` | `resource_group:nonfood_core` | `gte` | 0.75 | `ratio` | `hint_warehouse_reveal_nonfood_near_cap` | `data_stub_post_slice` |
+| `act_warehouse_unlock_nonfood_90` | `m2_storage_defense_activation` | `warehouse` | `unlock` | `resource_stock_ratio_any` | `resource_group:nonfood_core` | `gte` | 0.90 | `ratio` | `hint_warehouse_unlock_nonfood_cap_pressure` | `data_stub_post_slice` |
+| `act_warehouse_unlock_timber_camp_l4` | `m2_storage_defense_activation` | `warehouse` | `unlock` | `building_level_min` | `building:timber_camp` | `gte` | 4 | `integer` | `hint_warehouse_unlock_timber_camp_l4` | `data_stub_post_slice` |
+| `act_warehouse_unlock_stone_quarry_l3` | `m2_storage_defense_activation` | `warehouse` | `unlock` | `building_level_min` | `building:stone_quarry` | `gte` | 3 | `integer` | `hint_warehouse_unlock_stone_quarry_l3` | `data_stub_post_slice` |
+| `act_palisade_reveal_barracks_l3` | `m2_storage_defense_activation` | `palisade` | `reveal` | `building_level_min` | `building:barracks` | `gte` | 3 | `integer` | `hint_palisade_reveal_barracks_l3` | `data_stub_post_slice` |
+| `act_palisade_unlock_barracks_l4` | `m2_storage_defense_activation` | `palisade` | `unlock` | `building_level_min` | `building:barracks` | `gte` | 4 | `integer` | `hint_palisade_unlock_barracks_l4` | `data_stub_post_slice` |
+| `act_palisade_unlock_rally_post_l2` | `m2_storage_defense_activation` | `palisade` | `unlock` | `building_level_min` | `building:rally_post` | `gte` | 2 | `integer` | `hint_palisade_unlock_rally_post_l2` | `data_stub_post_slice` |
+| `act_watchtower_reveal_palisade_l2` | `m2_storage_defense_activation` | `watchtower` | `reveal` | `building_level_min` | `building:palisade` | `gte` | 2 | `integer` | `hint_watchtower_reveal_palisade_l2` | `data_stub_post_slice` |
+| `act_watchtower_unlock_palisade_l4` | `m2_storage_defense_activation` | `watchtower` | `unlock` | `building_level_min` | `building:palisade` | `gte` | 4 | `integer` | `hint_watchtower_unlock_palisade_l4` | `data_stub_post_slice` |
+| `act_watchtower_unlock_rally_post_l4` | `m2_storage_defense_activation` | `watchtower` | `unlock` | `building_level_min` | `building:rally_post` | `gte` | 4 | `integer` | `hint_watchtower_unlock_rally_post_l4` | `data_stub_post_slice` |
+| `act_guardhouse_reveal_palisade_l3` | `m2_storage_defense_activation` | `guardhouse` | `reveal` | `building_level_min` | `building:palisade` | `gte` | 3 | `integer` | `hint_guardhouse_reveal_palisade_l3` | `data_stub_post_slice` |
+| `act_guardhouse_unlock_palisade_l5` | `m2_storage_defense_activation` | `guardhouse` | `unlock` | `building_level_min` | `building:palisade` | `gte` | 5 | `integer` | `hint_guardhouse_unlock_palisade_l5` | `data_stub_post_slice` |
+| `act_guardhouse_unlock_barracks_l5` | `m2_storage_defense_activation` | `guardhouse` | `unlock` | `building_level_min` | `building:barracks` | `gte` | 5 | `integer` | `hint_guardhouse_unlock_barracks_l5` | `data_stub_post_slice` |
 
 ## Baseline Starter Unit Roster (`units.unit_lines`)
 
