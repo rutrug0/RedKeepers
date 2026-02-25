@@ -596,5 +596,43 @@
     "generated_from_item_id": "RK-M1-0006",
     "assigned_agent": "rowan-hale",
     "commit_sha": "9fba1c397fbb83d6443d7db4f4aa30000e87df68"
+  },
+  {
+    "id": "RK-M1-0004-F01-F01",
+    "title": "Add reference in-memory service registry and event bus for bootstrap smoke tests",
+    "description": "Implement minimal in-memory adapters for the new `ServiceRegistry` and `InProcessEventBus` contracts plus a bootstrap smoke composition example to validate module registration flow before framework selection.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0004-F01"
+    ],
+    "inputs": [
+      "backend/src/app/composition.ts",
+      "backend/src/shared/events.ts"
+    ],
+    "acceptance_criteria": [
+      "Reference implementations depend only on backend shared/app contracts and no framework runtime",
+      "A simple bootstrap smoke path can compose at least one placeholder module using the contracts",
+      "Any notes/docs added describe the adapters as temporary reference implementations"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:10:05.559876+00:00",
+    "updated_at": "2026-02-25T15:47:51.682043+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/ilya-fen/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M1-0004-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "32c9b655b1c2da975ada9796071441c3e6f1c264"
   }
 ]

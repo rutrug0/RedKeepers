@@ -1,42 +1,5 @@
 [
   {
-    "id": "RK-M1-0004-F01-F01",
-    "title": "Add reference in-memory service registry and event bus for bootstrap smoke tests",
-    "description": "Implement minimal in-memory adapters for the new `ServiceRegistry` and `InProcessEventBus` contracts plus a bootstrap smoke composition example to validate module registration flow before framework selection.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0004-F01"
-    ],
-    "inputs": [
-      "backend/src/app/composition.ts",
-      "backend/src/shared/events.ts"
-    ],
-    "acceptance_criteria": [
-      "Reference implementations depend only on backend shared/app contracts and no framework runtime",
-      "A simple bootstrap smoke path can compose at least one placeholder module using the contracts",
-      "Any notes/docs added describe the adapters as temporary reference implementations"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:10:05.559876+00:00",
-    "updated_at": "2026-02-25T15:47:50.148635+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M1-0004-F01",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-M1-0006-F01-F01",
     "title": "Add typed seed loaders and validation for v1 starter config JSON",
     "description": "Implement framework-agnostic loader utilities and schema/shape validation for the new v1 JSON seed files so modules can consume starter config safely and enforce stable IDs plus first-slice filtering at startup.",
@@ -58,17 +21,18 @@
       "A first-slice filtering helper applies the enablement config and excludes balance/data stubs by default"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T15:14:18.513439+00:00",
-    "updated_at": "2026-02-25T15:14:18.513439+00:00",
+    "updated_at": "2026-02-25T16:00:56.599910+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M1-0006-F01"
+    "generated_from_item_id": "RK-M1-0006-F01",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M1-0007-F01",
@@ -310,5 +274,42 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-M1-0006-F03"
+  },
+  {
+    "id": "RK-M1-0004-F01-F01-F01",
+    "title": "Add automated contract smoke tests for reference bootstrap adapters",
+    "description": "Add lightweight tests around the temporary reference `ServiceRegistry`, `InProcessEventBus`, and bootstrap composer to lock expected contract behavior (duplicate registration failure, subscribe/unsubscribe delivery, lifecycle hook collection) while the production runtime stack is still deferred.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0004-F01-F01"
+    ],
+    "inputs": [
+      "backend/src/app/reference/*.ts",
+      "backend/src/app/composition.ts",
+      "backend/src/shared/events.ts"
+    ],
+    "acceptance_criteria": [
+      "Tests cover successful placeholder module composition through `ReferenceApplicationBootstrap` with lifecycle hook collection",
+      "Tests verify `InMemoryEventBus` publish/subscribe and unsubscribe behavior for a single event type",
+      "Tests verify `InMemoryServiceRegistry` resolve/tryResolve behavior and duplicate registration failure"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:47:51.688098+00:00",
+    "updated_at": "2026-02-25T15:47:51.688098+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M1-0004-F01-F01"
   }
 ]
