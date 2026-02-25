@@ -210,5 +210,60 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-25T19:50:00.0000000Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-M0-0009",
+    "status": "done",
+    "summary": "Added a stable one-flow map scout/select contract with three tile states, three interaction outcomes, and explicit placeholder event-feed key mapping for frontend integration.",
+    "changed_files": [
+      "docs/design/map-scout-interaction-contract.md"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Implement `world_map.scout_select_v1` endpoint and DTO contract",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "high",
+        "description": "Wire an API handler for `POST /world-map/tiles/{tileId}/interact` that emits one of the contract outcomes and returns a single `event.world.*` content key payload.",
+        "dependencies": [
+          "RK-M0-0009"
+        ],
+        "inputs": [
+          "docs/design/map-scout-interaction-contract.md",
+          "backend/src/modules/world_map"
+        ],
+        "acceptance_criteria": [
+          "Response payload includes `flow`, `tile_id`, `tile_state`, `interaction_outcome`, and `event.content_key`",
+          "Only the three contract outcome codes are returned in M0",
+          "Tile state transitions stay limited to unknown/quiet/hostile_hint values"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "title": "Add placeholder map tile seeds and event-token fixtures for the scout-select flow",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Create minimal static tile seed rows for unknown/quiet/hostile_hint states and token fixtures for `target_tile_label` and `hostile_force_estimate` on scout outcomes.",
+        "dependencies": [
+          "RK-M0-0009"
+        ],
+        "inputs": [
+          "docs/design/map-scout-interaction-contract.md",
+          "backend/src/app/config/seeds"
+        ],
+        "acceptance_criteria": [
+          "Seed data can produce all three scout outcomes in a deterministic dev fixture setup",
+          "Fixture event tokens are placeholder-only and do not introduce new mechanics",
+          "No additional map interaction flow is introduced beyond scout/select"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]

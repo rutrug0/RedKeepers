@@ -1296,5 +1296,45 @@
     "generated_from_item_id": "RK-M1-0006-F02-F01",
     "assigned_agent": "ilya-fen",
     "commit_sha": "a98e59a71518562b39bee7854490c684ec34178c"
+  },
+  {
+    "id": "RK-M1-0006-F03-F01",
+    "title": "Implement post-slice building activation threshold evaluation for storage/defense package",
+    "description": "Add seed/config support and runtime evaluation for `buildings.building_activation_thresholds` (including AND semantics per building + threshold phase) so `granary`, `warehouse`, `palisade`, `watchtower`, and `guardhouse` can be revealed/unlocked from data-defined thresholds.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006-F03"
+    ],
+    "inputs": [
+      "docs/design/v1-starter-data-tables.md"
+    ],
+    "acceptance_criteria": [
+      "Backend seed/config schema supports `building_activation_thresholds` rows and preserves all fields/IDs from the design table",
+      "Threshold evaluation supports `resource_stock_ratio`, `resource_stock_ratio_any`, and `building_level_min` with `gte` operation",
+      "Rows for the same `building_id` and `threshold_phase` are evaluated with AND semantics as documented",
+      "First-slice behavior remains unchanged when `data_stub_post_slice` rows are not enabled"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 3,
+    "created_at": "2026-02-25T15:44:06.936180+00:00",
+    "updated_at": "2026-02-25T19:41:09.168910+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `/D:/RedKeepers/agents/ilya-fen/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-M1-0006-F03",
+    "assigned_agent": "ilya-fen",
+    "last_failure_reason": "ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
+    "blocked_revisit_count": 1,
+    "commit_sha": "5fa073defdb158701258c3f4cfa8ddfbc39061fe"
   }
 ]
