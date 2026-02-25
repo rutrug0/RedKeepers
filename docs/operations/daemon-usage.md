@@ -15,7 +15,8 @@
 
 - `REDKEEPERS_CODEX_COMMAND` : command used to invoke Codex CLI (default `codex exec`)
 - `REDKEEPERS_WORKER_MODE=mock` : simulate successful agent runs for testing the daemon flow
-- `REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA=1` : append strict visual smoke validation command for frontend-owned work items during daemon validation
+- `REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA=1|0` : runtime override for frontend visual QA validation gate (policy default is enabled)
+- `REDKEEPERS_PYTHON_CMD` : force validation command launcher (example: `py`)
 
 ## Smoke Validation (PowerShell)
 

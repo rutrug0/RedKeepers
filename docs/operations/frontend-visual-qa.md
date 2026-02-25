@@ -45,12 +45,14 @@ python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-pe
 
 ## Daemon Integration (Optional Gate)
 
-By default, daemon validation does not auto-run visual smoke checks.
+Daemon validation now auto-runs visual smoke checks for frontend-owned work items via `coordination/policies/commit-guard-rules.yaml` (`frontend_visual_qa.enabled=true`).
 
-To enforce it for frontend-owned work items:
+You can still override at runtime:
 
 ```powershell
-$env:REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA='1'
+$env:REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA='1'   # force on
+# or
+$env:REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA='0'   # force off
 python tools/orchestrator.py run
 ```
 
@@ -59,3 +61,12 @@ The daemon will append:
 - `python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5`
 
 to frontend validation commands.
+
+## Python Launcher Note (`py` vs `python`)
+
+Validation commands normalize `python`/`py` launchers to the active interpreter automatically.
+If you want to force launcher style, set:
+
+```powershell
+$env:REDKEEPERS_PYTHON_CMD='py'
+```

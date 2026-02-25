@@ -621,10 +621,39 @@ def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]
     item_cmds = item.get("validation_commands", [])
     if isinstance(item_cmds, list):
         commands.extend([str(cmd) for cmd in item_cmds if str(cmd).strip()])
-    if item.get("owner_role") == "frontend" and _bool_env("REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA"):
-        commands.append(
-            "python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5"
-        )
+
+    def _boolish(value: Any, default: bool) -> bool:
+        if value is None:
+            return default
+        if isinstance(value, bool):
+            return value
+        text = str(value).strip().lower()
+        if text in {"1", "true", "yes", "on"}:
+            return True
+        if text in {"0", "false", "no", "off"}:
+            return False
+        return default
+
+    visual_cfg = commit_rules.get("frontend_visual_qa", {})
+    if not isinstance(visual_cfg, dict):
+        visual_cfg = {}
+    enabled = _boolish(visual_cfg.get("enabled"), False)
+    env_visual = os.environ.get("REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA")
+    if env_visual is not None:
+        enabled = _boolish(env_visual, enabled)
+
+    if item.get("owner_role") == "frontend" and enabled:
+        strict = _boolish(visual_cfg.get("strict"), True)
+        max_overflow_px = int(visual_cfg.get("max_overflow_px", 0))
+        max_diff_percent = float(visual_cfg.get("max_diff_percent", 0.5))
+        visual_cmd_parts = [
+            "python tools/frontend_visual_smoke.py",
+            f"--max-overflow-px {max_overflow_px}",
+            f"--max-diff-percent {max_diff_percent}",
+        ]
+        if strict:
+            visual_cmd_parts.append("--strict")
+        commands.append(" ".join(visual_cmd_parts))
     return commands
 
 

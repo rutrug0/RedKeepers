@@ -27,6 +27,20 @@ class FrontendValidationCommandTests(unittest.TestCase):
         self.assertIn("python tools/orchestrator.py status", commands)
         self.assertTrue(any("frontend_visual_smoke.py" in cmd for cmd in commands))
 
+    def test_frontend_visual_validation_enabled_via_commit_policy(self) -> None:
+        item = {"owner_role": "frontend", "validation_commands": []}
+        rules = {
+            "default_validation_commands": [],
+            "frontend_visual_qa": {
+                "enabled": True,
+                "strict": True,
+                "max_overflow_px": 0,
+                "max_diff_percent": 0.5,
+            },
+        }
+        commands = orchestrator.build_validation_commands(item, rules)
+        self.assertTrue(any("frontend_visual_smoke.py" in cmd for cmd in commands))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,5 +1,11 @@
 {
   "commit_enabled": true,
   "require_branch": "main",
-  "default_validation_commands": []
+  "default_validation_commands": [],
+  "frontend_visual_qa": {
+    "enabled": true,
+    "strict": true,
+    "max_overflow_px": 0,
+    "max_diff_percent": 0.5
+  }
 }

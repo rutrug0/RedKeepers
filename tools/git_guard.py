@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import os
+import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +17,36 @@ def _run(command: str, cwd: Path) -> subprocess.CompletedProcess[str]:
         shell=True,
         check=False,
     )
+
+
+def _quote_if_needed(raw: str) -> str:
+    text = raw.strip()
+    if not text:
+        return text
+    if text.startswith('"') and text.endswith('"'):
+        return text
+    if " " in text:
+        return f'"{text}"'
+    return text
+
+
+def _preferred_python_command() -> str:
+    override = os.environ.get("REDKEEPERS_PYTHON_CMD", "").strip()
+    if override:
+        return override
+    executable = (sys.executable or "").strip()
+    if executable:
+        return _quote_if_needed(executable)
+    return "python"
+
+
+def _normalize_validation_command(command: str) -> str:
+    # Normalize leading python launcher so validation commands work whether
+    # operators use `python`, `py`, or a specific interpreter path.
+    pattern = re.compile(r"^\s*(python(?:\.exe)?|py(?:\.exe)?)\b", re.IGNORECASE)
+    if pattern.search(command):
+        return pattern.sub(lambda _match: _preferred_python_command(), command, count=1)
+    return command
 
 
 def is_git_repo(root: Path) -> bool:
@@ -43,10 +76,12 @@ def changed_files(root: Path) -> list[str]:
 def run_validation_commands(root: Path, commands: list[str]) -> tuple[bool, list[dict[str, Any]]]:
     results: list[dict[str, Any]] = []
     for command in commands:
-        proc = _run(command, root)
+        effective_command = _normalize_validation_command(command)
+        proc = _run(effective_command, root)
         results.append(
             {
                 "command": command,
+                "effective_command": effective_command,
                 "exit_code": proc.returncode,
                 "stdout_tail": (proc.stdout or "")[-1000:],
                 "stderr_tail": (proc.stderr or "")[-1000:],
@@ -76,4 +111,3 @@ def commit_changes(root: Path, message: str) -> tuple[bool, str]:
     if sha_proc.returncode != 0:
         return True, "UNKNOWN_SHA"
     return True, sha_proc.stdout.strip()
-
