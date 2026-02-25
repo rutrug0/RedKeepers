@@ -391,5 +391,19 @@
                          "current_selection":  "coordination/runtime/daemon-events.jsonl:1034-1036 (model `default`, fallback `null`)",
                          "backlog_state":  "coordination/backlog/work-items.json (`RK-M1-0006-F02-F01` queued, `RK-M1-0006-F02-F01-ESC` running); coordination/backlog/blocked-items.json (not present)"
                      }
+    },
+    {
+        "ts":  "2026-02-25T18:27:02.4178925Z",
+        "item_id":  "RK-M1-0006-F03-F01-ESC",
+        "status":  "completed",
+        "summary":  "Root cause confirmed as stale unsupported-model routing (`GPT-5.3-Codex-Spark` primary with `gpt-5-mini` fallback) during earlier retries; source and escalation items were requeued and escalation now resolves to `default`.",
+        "root_cause":  "Earlier retry/escalation attempts ran under an inaccessible model pair for this ChatGPT-backed Codex account, causing immediate unsupported-model failures before backend work execution.",
+        "evidence":  {
+                         "run_history_failures":  "coordination/runtime/run-history.jsonl:63-68",
+                         "daemon_failure_snapshot":  "coordination/runtime/daemon-events.jsonl:843-874",
+                         "unblock_requeue_signal":  "coordination/runtime/daemon-events.jsonl:1048",
+                         "current_selection":  "coordination/runtime/daemon-events.jsonl:1049-1050 (model `default`, fallback `null`)",
+                         "backlog_state":  "coordination/backlog/work-items.json (`RK-M1-0006-F03-F01` queued, `RK-M1-0006-F03-F01-ESC` running); coordination/backlog/blocked-items.json (not present)"
+                     }
     }
 ]
