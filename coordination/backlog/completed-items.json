@@ -1410,5 +1410,46 @@
     "auto_generated": "platform_bootstrap",
     "assigned_agent": "juno-cairn",
     "commit_sha": "abd8ac17e53cbc5a58d982f4d00279be06fbc4e3"
+  },
+  {
+    "id": "RK-AUTO-PLATFORM-0001-F01",
+    "title": "Create reproducible web vertical-slice packaging and run scripts",
+    "description": "Define and implement a deterministic web packaging path for the first vertical slice, including a single-command build/package flow, local run smoke command, and placeholder-only release metadata/artifact manifest.",
+    "milestone": "M0",
+    "type": "infra",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-PLATFORM-0001"
+    ],
+    "inputs": [
+      "docs/design/first-vertical-slice.md",
+      "docs/architecture/client-cross-platform-strategy.md",
+      "docs/operations/daemon-usage.md",
+      "client-web/",
+      "scripts/"
+    ],
+    "acceptance_criteria": [
+      "A repo-documented command sequence can produce a repeatable web-first vertical-slice artifact from `client-web`",
+      "Packaging flow includes placeholder-only release metadata/asset references and does not depend on final art",
+      "A local run/smoke command is documented and executes against the packaged artifact"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T19:47:49.867918+00:00",
+    "updated_at": "2026-02-25T19:52:52.911548+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Outbox update includes this completed item and one follow-up `proposed_work_items` entry for daemon-gated platform packaging smoke validation.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "juno-cairn",
+    "generated_from_item_id": "RK-AUTO-PLATFORM-0001",
+    "assigned_agent": "juno-cairn",
+    "commit_sha": "35cae81c327719ad51e31e5cb6d17250b9129b0b"
   }
 ]

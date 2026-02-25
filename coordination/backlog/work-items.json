@@ -670,17 +670,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T19:42:43.440378+00:00",
-    "updated_at": "2026-02-25T19:42:43.440378+00:00",
+    "updated_at": "2026-02-25T20:00:33.173049+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M0-0009"
+    "generated_from_item_id": "RK-M0-0009",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M0-0009-F02",
@@ -715,46 +716,6 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-M0-0009"
-  },
-  {
-    "id": "RK-AUTO-PLATFORM-0001-F01",
-    "title": "Create reproducible web vertical-slice packaging and run scripts",
-    "description": "Define and implement a deterministic web packaging path for the first vertical slice, including a single-command build/package flow, local run smoke command, and placeholder-only release metadata/artifact manifest.",
-    "milestone": "M0",
-    "type": "infra",
-    "priority": "high",
-    "owner_role": "platform",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-PLATFORM-0001"
-    ],
-    "inputs": [
-      "docs/design/first-vertical-slice.md",
-      "docs/architecture/client-cross-platform-strategy.md",
-      "docs/operations/daemon-usage.md",
-      "client-web/",
-      "scripts/"
-    ],
-    "acceptance_criteria": [
-      "A repo-documented command sequence can produce a repeatable web-first vertical-slice artifact from `client-web`",
-      "Packaging flow includes placeholder-only release metadata/asset references and does not depend on final art",
-      "A local run/smoke command is documented and executes against the packaged artifact"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T19:47:49.867918+00:00",
-    "updated_at": "2026-02-25T19:52:49.803513+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "juno-cairn",
-    "generated_from_item_id": "RK-AUTO-PLATFORM-0001",
-    "assigned_agent": "juno-cairn"
   },
   {
     "id": "RK-AUTO-PLATFORM-0001-F02",
@@ -833,5 +794,42 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "juno-cairn",
     "generated_from_item_id": "RK-AUTO-PLATFORM-0001"
+  },
+  {
+    "id": "RK-AUTO-PLATFORM-0001-F01-F01",
+    "title": "Gate platform lane with packaged web artifact smoke validation",
+    "description": "Add daemon validation hooks for platform-owned web packaging items so deterministic package build and packaged-artifact smoke commands run automatically before completion.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-PLATFORM-0001-F01"
+    ],
+    "inputs": [
+      "tools/orchestrator.py",
+      "coordination/policies/commit-guard-rules.yaml",
+      "tools/web_vertical_slice_packaging.py"
+    ],
+    "acceptance_criteria": [
+      "Platform validation can run `python tools/web_vertical_slice_packaging.py package --clean` automatically for matching work items",
+      "Platform validation can run `python tools/web_vertical_slice_packaging.py smoke` against the produced artifact",
+      "Blocked/success outcomes are surfaced in daemon command-result summaries"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T19:52:52.919873+00:00",
+    "updated_at": "2026-02-25T19:52:52.919873+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "juno-cairn",
+    "generated_from_item_id": "RK-AUTO-PLATFORM-0001-F01"
   }
 ]

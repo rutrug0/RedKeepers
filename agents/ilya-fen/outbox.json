@@ -445,4 +445,29 @@
       }
     ]
   }
+  ,
+  {
+    "timestamp_utc": "2026-02-25T19:59:22.6365064Z",
+    "agent_id": "ilya-fen",
+    "work_item_id": "RK-M0-0009-F01",
+    "status": "done",
+    "summary": "Implemented `world_map.scout_select_v1` endpoint contract wiring for `POST /world-map/tiles/{tileId}/interact` with a deterministic first-slice scout-select service, strict M0 request gating (`scout` + `v1`), and response DTOs constrained to the three contract outcomes and stable tile states.",
+    "changed_files": [
+      "backend/src/modules/world_map/domain/world-map-scout-contract.ts",
+      "backend/src/modules/world_map/domain/index.ts",
+      "backend/src/modules/world_map/ports/world-map-tile-state-repository.ts",
+      "backend/src/modules/world_map/ports/index.ts",
+      "backend/src/modules/world_map/application/world-map-scout-select-service.ts",
+      "backend/src/modules/world_map/application/index.ts",
+      "backend/src/modules/world_map/infra/in-memory-world-map-tile-state-repository.ts",
+      "backend/src/modules/world_map/infra/index.ts",
+      "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.ts",
+      "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.test.ts",
+      "backend/src/modules/world_map/api/index.ts",
+      "backend/src/modules/world_map/index.ts",
+      "agents/ilya-fen/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": []
+  }
 ]
