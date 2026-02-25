@@ -117,5 +117,15 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-25T16:03:23.1218819Z",
+    "item_id": "RK-M1-0007-F01",
+    "status": "completed",
+    "summary": "Wired a subset of placeholder narrative seed keys into client-web mock state, rendering event feed rows through template token substitution (`event.*`) and adding a civ intro briefing block backed by a stable `civ_intro.*` key.",
+    "files": [
+      "client-web/app.js",
+      "agents/sera-kest/outbox.json"
+    ]
   }
 ]

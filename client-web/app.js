@@ -4,6 +4,20 @@
     typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
       : null;
+  const placeholderNarrativeSeedTemplates = Object.freeze({
+    "civ_intro.cinder_throne_legates":
+      "The Cinder Throne Legates hold the frontier by ash, ration, and decree. Their magistrates build roads before monuments, and their branded levies turn every settlement into a hard post that is costly to break.",
+    "event.buildings.upgrade_started":
+      "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
+    "event.units.training_started":
+      "{settlement_name}: training begins for {quantity} {unit_label}.",
+    "event.units.upkeep_reduced_garrison":
+      "{settlement_name}: garrison ration discipline reduces stationed troop upkeep.",
+    "event.world.scout_report_hostile":
+      "Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).",
+    "event.settlement.name_assigned":
+      "Surveyors record the new holding as {settlement_name}. The name enters the ledger.",
+  });
 
   const mockClientShellState = {
     panelModes: {
@@ -40,6 +54,11 @@
               { unit: "Slingers", count: 64 },
               { unit: "Scout Riders", count: 12 },
             ],
+            civIntro: {
+              civId: "cinder_throne_legates",
+              displayName: "Cinder Throne Legates",
+              contentKey: "civ_intro.cinder_throne_legates",
+            },
           },
         },
       },
@@ -111,28 +130,49 @@
             selectedFilter: "All",
             events: [
               {
-                title: "Scout report returned from Black Reed March",
+                contentKey: "event.world.scout_report_hostile",
+                tokens: {
+                  target_tile_label: "Black Reed March",
+                  hostile_force_estimate: "light raider column",
+                },
                 meta: "2m ago | Map | Placeholder content",
                 priority: "high",
               },
               {
-                title: "Granary upgrade reached 45% completion",
+                contentKey: "event.buildings.upgrade_started",
+                tokens: {
+                  settlement_name: "Cinderwatch Hold",
+                  building_label: "Granary Upgrade",
+                  from_level: 5,
+                  to_level: 6,
+                },
                 meta: "8m ago | Settlement | Build queue",
                 priority: "normal",
               },
               {
-                title: "Road Wardens garrison upkeep reduced at home keep",
+                contentKey: "event.units.upkeep_reduced_garrison",
+                tokens: {
+                  settlement_name: "Cinderwatch Hold",
+                },
                 meta: "14m ago | Military | Status effect",
                 priority: "normal",
               },
               {
-                title: "Neighboring ruin site detected activity spike",
-                meta: "23m ago | World | Watchlist trigger",
+                contentKey: "event.units.training_started",
+                tokens: {
+                  settlement_name: "Cinderwatch Hold",
+                  quantity: 12,
+                  unit_label: "Road Wardens",
+                },
+                meta: "23m ago | Military | Training order",
                 priority: "medium",
               },
               {
-                title: "Trade cart request queued (placeholder workflow)",
-                meta: "29m ago | Settlement | Logistics",
+                contentKey: "event.settlement.name_assigned",
+                tokens: {
+                  settlement_name: "Brandwatch",
+                },
+                meta: "29m ago | Settlement | Founding ledger",
                 priority: "normal",
               },
             ],
@@ -176,6 +216,19 @@
   const formatNumber = (value) => numberFormatter.format(value);
 
   const clampPercent = (value) => Math.max(0, Math.min(100, Number(value) || 0));
+  const fillTemplateTokens = (template, tokens = {}) =>
+    String(template).replace(/\{([a-z0-9_]+)\}/gi, (match, tokenName) =>
+      Object.prototype.hasOwnProperty.call(tokens, tokenName) ? String(tokens[tokenName]) : match,
+    );
+  const getNarrativeText = (contentKey, tokens) => {
+    const template = placeholderNarrativeSeedTemplates[contentKey];
+
+    if (!template) {
+      return contentKey ? `[Missing placeholder template: ${contentKey}]` : "";
+    }
+
+    return fillTemplateTokens(template, tokens);
+  };
 
   const getPanelScenario = (panelKey) => {
     const panel = mockClientShellState.panels[panelKey];
@@ -288,6 +341,15 @@
             </div>
             <div class="unit-rows" aria-label="Loading garrison placeholders">${unitRows}</div>
           </section>
+          <section class="subpanel compact">
+            <h3>Civilization Briefing</h3>
+            <p class="loading-copy">Loading placeholder civ intro copy from stable mock content keys...</p>
+            <div aria-hidden="true">
+              <div class="skeleton-line" style="width: 42%;"></div>
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line" style="width: 88%;"></div>
+            </div>
+          </section>
         </div>
       `;
 
@@ -332,6 +394,8 @@
         `,
       )
       .join("");
+    const civIntroTitle = scenario.civIntro?.displayName || "Civilization";
+    const civIntroText = getNarrativeText(scenario.civIntro?.contentKey, scenario.civIntro?.tokens);
 
     refs.content.innerHTML = `
       <div class="stack">
@@ -352,6 +416,12 @@
             <button type="button" class="ghost-btn">Review</button>
           </div>
           <div class="unit-rows" aria-label="Mock unit rows">${garrison}</div>
+        </section>
+        <section class="subpanel compact">
+          <h3>Civilization Briefing</h3>
+          <p class="subpanel-note">Placeholder intro copy is keyed to the narrative seed pack.</p>
+          <p><strong>${escapeHtml(civIntroTitle)}</strong></p>
+          <p>${escapeHtml(civIntroText)}</p>
         </section>
       </div>
     `;
@@ -552,9 +622,12 @@
     const events = (scenario.events || [])
       .map((item) => {
         const priorityClass = priorityClassByValue[item.priority] || "";
+        const title = item.contentKey
+          ? getNarrativeText(item.contentKey, item.tokens)
+          : item.title || "[Missing event title]";
         return `
-          <li class="event-item${priorityClass}">
-            <p class="event-item__title">${escapeHtml(item.title)}</p>
+          <li class="event-item${priorityClass}"${item.contentKey ? ` data-content-key="${escapeHtml(item.contentKey)}"` : ""}>
+            <p class="event-item__title">${escapeHtml(title)}</p>
             <p class="event-item__meta">${escapeHtml(item.meta)}</p>
           </li>
         `;
