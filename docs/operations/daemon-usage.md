@@ -49,6 +49,8 @@ Default CLI output is intentionally high-level. Detailed subprocess output is on
 
 The daemon can automatically re-queue recoverable blocked items using `coordination/policies/retry-policy.yaml` `blocked_revisit` settings (cooldown, per-cycle cap, reason include/exclude patterns). This is intended for transient blockers like model-access/config incidents while keeping audit-only blocked artifacts untouched.
 
+For backlog hygiene, daemon can also archive clearly non-actionable blocked items into `coordination/backlog/blocked-archived-items.json` via `retry-policy.yaml` `blocked_archive` rules. `blocked-items.json` should remain actionable.
+
 When the `platform` agent exists but no platform/release items exist in active/completed/blocked backlog, daemon also seeds a one-time `platform_bootstrap` queued item so cross-platform delivery work is represented in the lane.
 
 ## Scheduling Priority Notes
@@ -85,6 +87,7 @@ Queue and progress state:
 - `coordination\\backlog\\work-items.json`
 - `coordination\\backlog\\completed-items.json`
 - `coordination\\backlog\\blocked-items.json`
+- `coordination\\backlog\\blocked-archived-items.json`
 - `coordination\\runtime\\progress-summary.json`
 - `coordination\\runtime\\agent-stats.json`
 - `coordination\\runtime\\model-stats.json`

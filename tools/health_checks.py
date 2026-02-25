@@ -162,6 +162,12 @@ def validate_environment(root: Path) -> list[str]:
         label="blocked-items.json",
         validate_items=True,
     )
+    _validate_json_list(
+        errors=errors,
+        path=root / "coordination" / "backlog" / "blocked-archived-items.json",
+        label="blocked-archived-items.json",
+        validate_items=True,
+    )
     _validate_json_object(
         errors=errors,
         path=root / "coordination" / "state" / "daemon-state.json",

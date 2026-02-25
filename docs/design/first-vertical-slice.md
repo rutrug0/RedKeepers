@@ -2,6 +2,8 @@
 
 This document defines the first playable vertical slice boundary for RedKeepers. Agents must treat it as a hard scope guard.
 
+For binary release criteria, see `docs/design/vertical-slice-done-v1.md`.
+
 ## Goal
 
 Deliver one end-to-end playable prototype loop that proves:
@@ -23,6 +25,10 @@ This slice should prove direction, not completeness.
   - building upgrade flow (small subset)
   - unit training flow (small subset)
 - World map panel/view with limited interaction (e.g. scout/select/inspect placeholder tiles)
+- One basic hostile interaction loop on map:
+  - at least one foreign settlement/profile present in the map state (non-primary player)
+  - send an attack from primary player settlement
+  - resolve combat with a simple deterministic/placeholder combat outcome
 - Event feed / notifications as placeholder text
 - Basic validation/smoke checks for the above
 
@@ -32,7 +38,7 @@ This slice should prove direction, not completeness.
 - No civilization-specific core mechanics requiring custom tutorials or bespoke UI flows
 - No alliances/guild systems
 - No diplomacy systems beyond placeholders/text stubs
-- No real PvP combat system (combat may be deferred or represented as a simplified placeholder outcome)
+- No deep PvP systems (matchmaking/alliance wars/multi-leg combat). Only one simplified attack/resolve flow is required in-slice.
 - No monetization/shop/inventory systems
 - No chat/social systems
 - No final art/audio pipeline work
@@ -69,6 +75,7 @@ The first vertical slice is successful when a tester can:
 5. Train at least one unit type
 6. View the world map panel and perform one simple interaction
 7. See event/log feedback reflecting those actions
+8. Send an attack against a foreign map target and see a combat outcome resolution in event/log feedback
 
 ## Deferred Features (Track as Follow-Ups)
 

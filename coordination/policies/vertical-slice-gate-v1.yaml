@@ -1,0 +1,52 @@
+{
+  "version": "v1",
+  "platform_gate_mode": "B_moderate",
+  "gates": {
+    "playable_loop": {
+      "required": true,
+      "requirements": [
+        "browser_shell_settlement_map_feed",
+        "resource_tick_progression",
+        "building_upgrade_flow",
+        "unit_training_flow",
+        "map_interaction_flow",
+        "foreign_target_present",
+        "attack_send_flow",
+        "combat_resolve_event_feedback"
+      ]
+    },
+    "scope": {
+      "required": true,
+      "source_of_truth": "docs/design/first-vertical-slice.md"
+    },
+    "quality": {
+      "required": true,
+      "requirements": [
+        "golden_path_smoke_pass",
+        "required_validation_pass",
+        "no_actionable_critical_blockers"
+      ]
+    },
+    "platform": {
+      "required": true,
+      "mode": "B_moderate",
+      "requirements": [
+        "web_reproducible_build_run",
+        "steam_wrapper_scaffold_reproducible_commands",
+        "android_wrapper_scaffold_reproducible_commands"
+      ]
+    },
+    "release_readiness": {
+      "required": true,
+      "requirements": [
+        "slice_checklist_complete",
+        "known_issues_logged",
+        "local_reproduction_runbook"
+      ]
+    }
+  },
+  "player_identity": {
+    "required_for_v1": "local_or_guest_profile",
+    "auth_login_required": false
+  }
+}

@@ -20,5 +20,25 @@
       "superseded escalation-chain artifact",
       "retained for audit only"
     ]
+  },
+  "blocked_archive": {
+    "enabled": true,
+    "max_items_per_cycle": 10,
+    "include_reason_patterns": [
+      "retained for audit only",
+      "no changes were made",
+      "required no additional edits",
+      "already present",
+      "parses successfully",
+      "already documented"
+    ],
+    "exclude_reason_patterns": [
+      "repeated failure",
+      "retry threshold exceeded",
+      "model preflight",
+      "not supported when using codex with a chatgpt account",
+      "timeout",
+      "bootstrap"
+    ]
   }
 }

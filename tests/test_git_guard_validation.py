@@ -28,6 +28,15 @@ class GitGuardValidationCommandTests(unittest.TestCase):
         original = "git status --short"
         self.assertEqual(git_guard._normalize_validation_command(original), original)
 
+    def test_normalizes_unittest_dotted_target_with_py_suffix(self) -> None:
+        cmd = git_guard._normalize_validation_command("python -m unittest tests.test_m0_0014_progression_smoke.py")
+        self.assertIn("tests.test_m0_0014_progression_smoke", cmd)
+        self.assertNotIn("tests.test_m0_0014_progression_smoke.py", cmd)
+
+    def test_keeps_unittest_path_style_target_unchanged(self) -> None:
+        cmd = git_guard._normalize_validation_command("python -m unittest tests/test_m0_0014_progression_smoke.py")
+        self.assertIn("tests/test_m0_0014_progression_smoke.py", cmd)
+
 
 if __name__ == "__main__":
     unittest.main()

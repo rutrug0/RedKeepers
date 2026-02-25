@@ -1,0 +1,606 @@
+{
+  "buildings": {
+    "grain_plot": {
+      "family": "economy"
+    },
+    "timber_camp": {
+      "family": "economy"
+    },
+    "stone_quarry": {
+      "family": "economy"
+    },
+    "iron_pit": {
+      "family": "economy"
+    },
+    "barracks": {
+      "family": "military"
+    },
+    "rally_post": {
+      "family": "logistics"
+    }
+  },
+  "settlement_snapshots": [
+    {
+      "time_minutes": 0,
+      "resources": {
+        "food": {
+          "amount": -1,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 80,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 100,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 40,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 1
+        },
+        "timber_camp": {
+          "level": 1
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 5,
+      "resources": {
+        "food": {
+          "amount": 72,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 84,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 98,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 42,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 1
+        },
+        "timber_camp": {
+          "level": 1
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 10,
+      "resources": {
+        "food": {
+          "amount": 74,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 88,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 96,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 44,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 1
+        },
+        "timber_camp": {
+          "level": 1
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 15,
+      "resources": {
+        "food": {
+          "amount": 76,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 90,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 95,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 46,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 2
+        },
+        "timber_camp": {
+          "level": 1
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 20,
+      "resources": {
+        "food": {
+          "amount": 77,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 88,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 97,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 42,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 2
+        },
+        "timber_camp": {
+          "level": 1
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 25,
+      "resources": {
+        "food": {
+          "amount": 79,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 87,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 100,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 43,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 2
+        },
+        "timber_camp": {
+          "level": 1
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 30,
+      "resources": {
+        "food": {
+          "amount": 82,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 89,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 102,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 44,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 2
+        },
+        "timber_camp": {
+          "level": 2
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 35,
+      "resources": {
+        "food": {
+          "amount": 85,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 92,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 105,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 46,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 2
+        },
+        "timber_camp": {
+          "level": 2
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 40,
+      "resources": {
+        "food": {
+          "amount": 87,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 96,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 109,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 48,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 2
+        },
+        "timber_camp": {
+          "level": 2
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 45,
+      "resources": {
+        "food": {
+          "amount": 91,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 98,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 112,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 50,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 2
+        },
+        "timber_camp": {
+          "level": 2
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 50,
+      "resources": {
+        "food": {
+          "amount": 96,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 101,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 116,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 55,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 2
+        },
+        "timber_camp": {
+          "level": 2
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 0
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 55,
+      "resources": {
+        "food": {
+          "amount": 100,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 104,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 120,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 60,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 2
+        },
+        "timber_camp": {
+          "level": 2
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 1
+        },
+        "rally_post": {
+          "level": 0
+        }
+      }
+    },
+    {
+      "time_minutes": 60,
+      "resources": {
+        "food": {
+          "amount": 105,
+          "base_storage_cap": 180
+        },
+        "wood": {
+          "amount": 108,
+          "base_storage_cap": 220
+        },
+        "stone": {
+          "amount": 123,
+          "base_storage_cap": 220
+        },
+        "iron": {
+          "amount": 68,
+          "base_storage_cap": 150
+        }
+      },
+      "buildings": {
+        "grain_plot": {
+          "level": 2
+        },
+        "timber_camp": {
+          "level": 2
+        },
+        "stone_quarry": {
+          "level": 1
+        },
+        "iron_pit": {
+          "level": 1
+        },
+        "barracks": {
+          "level": 1
+        },
+        "rally_post": {
+          "level": 1
+        }
+      }
+    }
+  ],
+  "building_upgrades": [
+    {
+      "time_minutes": 12,
+      "building_id": "grain_plot",
+      "to_level": 2,
+      "playable_family": "economy"
+    },
+    {
+      "time_minutes": 28,
+      "building_id": "timber_camp",
+      "to_level": 2,
+      "playable_family": "economy"
+    },
+    {
+      "time_minutes": 50,
+      "building_id": "barracks",
+      "to_level": 1,
+      "playable_family": "military"
+    }
+  ],
+  "unit_completions": [
+    {
+      "time_minutes": 56,
+      "unit_id": "watch_levy"
+    }
+  ],
+  "event_scout_snapshots": [
+    {
+      "time_minutes": 4,
+      "interaction_outcome": "outcome_scout_dispatched",
+      "event": {
+        "content_key": "event.world.scout_dispatched"
+      }
+    },
+    {
+      "time_minutes": 18,
+      "interaction_outcome": "outcome_scout_report_empty",
+      "event": {
+        "content_key": "event.world.scout_report_empty"
+      }
+    },
+    {
+      "time_minutes": 55,
+      "interaction_outcome": "outcome_scout_report_hostile",
+      "event": {
+        "content_key": "event.world.scout_report_hostile"
+      }
+    }
+  ]
+}

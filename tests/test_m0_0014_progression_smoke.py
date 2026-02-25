@@ -8,8 +8,9 @@ from typing import Optional
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_PROFILE_PATH = ROOT / "tests" / "fixtures" / "rk-m0-0014-progression-profile.json"
 PROFILE_ENV = "RK_M0_0014_PROGRESSION_PROFILE"
+PIPELINE_PROFILE_PATH = ROOT / "coordination" / "runtime" / "first-slice-progression" / "rk-m0-0014-progression-profile.json"
+DEFAULT_PROFILE_PATH = ROOT / "tests" / "fixtures" / "rk-m0-0014-progression-profile.json"
 
 CORE_RESOURCES = ("food", "wood", "stone", "iron")
 ALLOWED_SCOUT_OUTCOMES = {
@@ -175,7 +176,16 @@ class RKM0ProgressionSmokeTests(unittest.TestCase):
         return issues
 
     def _load_profile(self) -> dict:
-        path = Path(os.environ.get(PROFILE_ENV, str(DEFAULT_PROFILE_PATH)))
+        env_path = os.environ.get(PROFILE_ENV)
+        if env_path:
+            path = Path(env_path)
+            if not path.is_absolute():
+                path = ROOT / path
+        else:
+            if PIPELINE_PROFILE_PATH.exists():
+                path = PIPELINE_PROFILE_PATH
+            else:
+                path = DEFAULT_PROFILE_PATH
         self.assertTrue(path.exists(), f"progression profile not found: {path}")
         data = json.loads(path.read_text(encoding="utf-8"))
         self.assertIsInstance(data, dict)

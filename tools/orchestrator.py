@@ -22,6 +22,7 @@ from render_status import render_status
 
 ROOT = Path(__file__).resolve().parents[1]
 HUMAN_DIR = ROOT / "Human"
+BLOCKED_ARCHIVED_PATH = ROOT / "coordination" / "backlog" / "blocked-archived-items.json"
 STATIC_STATE_DIR = ROOT / "coordination" / "state"
 RUNTIME_DIR = ROOT / "coordination" / "runtime"
 DAEMON_STATE_PATH = RUNTIME_DIR / "daemon-state.json"
@@ -680,6 +681,70 @@ def revisit_recoverable_blocked_items(queue: QueueManager, retry_policy: dict[st
     if reopened_ids:
         queue.save()
     return reopened_ids
+
+
+def archive_non_actionable_blocked_items(queue: QueueManager, retry_policy: dict[str, Any]) -> list[str]:
+    cfg = retry_policy.get("blocked_archive", {}) if isinstance(retry_policy, dict) else {}
+    if not isinstance(cfg, dict):
+        return []
+
+    enabled_raw = cfg.get("enabled", False)
+    enabled = bool(enabled_raw) if isinstance(enabled_raw, bool) else str(enabled_raw).strip().lower() in {"1", "true", "yes", "on"}
+    if not enabled:
+        return []
+
+    try:
+        max_items_per_cycle = max(1, int(cfg.get("max_items_per_cycle", 10)))
+    except (TypeError, ValueError):
+        max_items_per_cycle = 10
+
+    include_patterns = [str(p).strip().lower() for p in cfg.get("include_reason_patterns", []) if str(p).strip()]
+    exclude_patterns = [str(p).strip().lower() for p in cfg.get("exclude_reason_patterns", []) if str(p).strip()]
+    if not include_patterns:
+        return []
+
+    archived_rows = load_json(BLOCKED_ARCHIVED_PATH, [])
+    if not isinstance(archived_rows, list):
+        archived_rows = []
+
+    archived_items: list[dict[str, Any]] = []
+    remaining_blocked: list[dict[str, Any]] = []
+    moved_ids: list[str] = []
+
+    for item in queue.blocked:
+        if len(moved_ids) >= max_items_per_cycle:
+            remaining_blocked.append(item)
+            continue
+        reason = str(item.get("blocker_reason", "") or "")
+        lowered_reason = reason.lower()
+        if not _matches_any_pattern(lowered_reason, include_patterns):
+            remaining_blocked.append(item)
+            continue
+        if exclude_patterns and _matches_any_pattern(lowered_reason, exclude_patterns):
+            remaining_blocked.append(item)
+            continue
+        item_id = str(item.get("id", "")).strip()
+        if not item_id:
+            remaining_blocked.append(item)
+            continue
+
+        archived = dict(item)
+        archived["archived_at"] = utc_now_iso()
+        archived["archive_reason"] = "non_actionable_blocked"
+        archived_items.append(archived)
+        moved_ids.append(item_id)
+
+    if not moved_ids:
+        return []
+
+    moved_set = {item_id for item_id in moved_ids}
+    preserved_archived = [row for row in archived_rows if str(row.get("id", "")).strip() not in moved_set]
+    preserved_archived.extend(archived_items)
+    save_json_atomic(BLOCKED_ARCHIVED_PATH, preserved_archived)
+
+    queue.blocked = remaining_blocked
+    queue.save()
+    return moved_ids
 
 
 def _dedupe_by_item_id(items: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[str]]:
@@ -1392,6 +1457,17 @@ def process_one(
     policies = load_policies(ROOT)
     queue = QueueManager(ROOT)
     queue.load()
+    if not dry_run:
+        archived_blocked_ids = archive_non_actionable_blocked_items(queue, policies.get("retry", {}))
+        if archived_blocked_ids:
+            emit_event(
+                "blocked_archive",
+                "Archived non-actionable blocked items",
+                count=len(archived_blocked_ids),
+                item_ids=archived_blocked_ids,
+                archive_path=str(BLOCKED_ARCHIVED_PATH.relative_to(ROOT).as_posix()),
+            )
+            queue.load()
     human_inbox_created = ensure_human_instruction_items(queue, agents)
     if human_inbox_created:
         emit_event(

@@ -282,5 +282,73 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-25T20:50:20.914129Z",
+    "item_id": "RK-M0-0014-F01-F01",
+    "status": "completed",
+    "summary": "Wired RK-M0-0014 progression smoke to read a deterministic pipeline artifact path (falling back to the fixture), updated work-item metadata to inject that path via environment variable during CI smoke runs, and documented snapshot refresh/reseed steps in a runbook.",
+    "checks": [
+      "tests/test_m0_0014_progression_smoke.py: default profile resolution now prefers coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json, with RK_M0_0014_PROGRESSION_PROFILE env override"
+    ],
+    "changed_files": [
+      "tests/test_m0_0014_progression_smoke.py",
+      "coordination/backlog/work-items.json",
+      "docs/operations/rk-m0-0014-progression-smoke-runbook.md",
+      "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
+    "ts": "2026-02-25T21:07:00Z",
+    "item_id": "RK-M0-0014-F01-F01",
+    "status": "completed",
+    "summary": "Fixed the smoke validation command to use env-var artifact injection with the correct unittest module target (no `.py` suffix), aligned runbook commands, and re-validated pass/fail behavior against generated-profile inputs.",
+    "checks": [
+      "python subprocess(shell=True) command: set \"RK_M0_0014_PROGRESSION_PROFILE=coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json\" && python -m unittest tests.test_m0_0014_progression_smoke (pass)",
+      "$env:RK_M0_0014_PROGRESSION_PROFILE=coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json; python -m unittest tests.test_m0_0014_progression_smoke (pass)",
+      "$env:RK_M0_0014_PROGRESSION_PROFILE=agents/tomas-grell/artifacts/rk-m0-0014-f01-f01/rk-m0-0014-progression-profile-fail.json; python -m unittest tests.test_m0_0014_progression_smoke (fails as expected on threshold violation)"
+    ],
+    "changed_files": [
+      "coordination/backlog/work-items.json",
+      "docs/operations/rk-m0-0014-progression-smoke-runbook.md",
+      "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
+    "ts": "2026-02-25T21:09:26Z",
+    "item_id": "RK-M0-0014-F01-F01",
+    "status": "completed",
+    "summary": "Aligned RK-M0-0014 CI validation to use env-var artifact injection for the generated progression snapshot path, updated runbook profile-resolution and reseed steps, and re-verified smoke pass/fail behavior with generated and threshold-violating artifacts.",
+    "checks": [
+      "$env:RK_M0_0014_PROGRESSION_PROFILE='coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json'; python -m unittest tests.test_m0_0014_progression_smoke (pass)",
+      "$env:RK_M0_0014_PROGRESSION_PROFILE='agents/tomas-grell/artifacts/rk-m0-0014-f01-f01/rk-m0-0014-progression-profile-fail.json'; python -m unittest tests.test_m0_0014_progression_smoke (fails as expected)"
+    ],
+    "changed_files": [
+      "coordination/backlog/work-items.json",
+      "docs/operations/rk-m0-0014-progression-smoke-runbook.md",
+      "agents/tomas-grell/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Publish explicit RK-M0-0014 snapshot generator command",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "normal",
+        "description": "Add a discoverable deterministic generator entry point (script/command) for RK-M0-0014 progression artifacts so reseed instructions can reference a concrete local command instead of lane-specific CI automation.",
+        "acceptance_criteria": [
+          "A single documented command generates coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json from current seeds",
+          "Generator output remains deterministic for fixed seeds",
+          "Runbook references the concrete generator command"
+        ],
+        "inputs": [
+          "coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json",
+          "docs/operations/rk-m0-0014-progression-smoke-runbook.md",
+          "pipeline or generator that emits 15m/30m/60m settlement & scout snapshots"
+        ],
+        "validation_commands": [
+          "python -m unittest tests.test_m0_0014_progression_smoke"
+        ]
+      }
+    ]
   }
 ]

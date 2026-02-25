@@ -44,9 +44,20 @@ def _normalize_validation_command(command: str) -> str:
     # Normalize leading python launcher so validation commands work whether
     # operators use `python`, `py`, or a specific interpreter path.
     pattern = re.compile(r"^\s*(python(?:\.exe)?|py(?:\.exe)?)\b", re.IGNORECASE)
-    if pattern.search(command):
-        return pattern.sub(lambda _match: _preferred_python_command(), command, count=1)
-    return command
+    normalized = command
+    if pattern.search(normalized):
+        normalized = pattern.sub(lambda _match: _preferred_python_command(), normalized, count=1)
+
+    # Agents sometimes emit dotted unittest module targets with a trailing `.py`,
+    # e.g. `python -m unittest tests.some_test.py`, which unittest interprets as
+    # module `tests.some_test` attribute `py` and fails. Normalize to module form.
+    if re.search(r"(?:^|\s)-m\s+unittest(?:\s|$)", normalized, re.IGNORECASE):
+        normalized = re.sub(
+            r"\b((?:[A-Za-z_]\w*\.)+[A-Za-z_]\w*)\.py\b",
+            r"\1",
+            normalized,
+        )
+    return normalized
 
 
 def is_git_repo(root: Path) -> bool:
