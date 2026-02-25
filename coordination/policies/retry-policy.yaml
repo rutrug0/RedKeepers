@@ -1,0 +1,5 @@
+{
+  "max_retries_per_item_per_agent": 2,
+  "worker_timeout_seconds": 900,
+  "failure_policy": "auto_escalate_to_lead"
+}

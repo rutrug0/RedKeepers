@@ -1,0 +1,23 @@
+{
+  "id": "RK-MX-0000",
+  "title": "Short title",
+  "description": "Detailed description",
+  "milestone": "M0",
+  "type": "feature",
+  "priority": "normal",
+  "owner_role": "backend",
+  "preferred_agent": null,
+  "dependencies": [],
+  "inputs": [],
+  "acceptance_criteria": [],
+  "validation_commands": [],
+  "status": "queued",
+  "retry_count": 0,
+  "created_at": "<utc-iso>",
+  "updated_at": "<utc-iso>",
+  "estimated_effort": "M",
+  "token_budget": 10000,
+  "result_summary": null,
+  "blocker_reason": null,
+  "escalation_target": "Mara Voss"
+}

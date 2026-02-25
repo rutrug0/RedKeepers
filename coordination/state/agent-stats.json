@@ -1,0 +1,96 @@
+{
+  "generated_at": "2026-02-25T13:01:30.629507+00:00",
+  "agents": {
+    "mara-voss": {
+      "display_name": "Mara Voss",
+      "role": "lead",
+      "total_runs": 0,
+      "completed_items": 0,
+      "blocked_items": 0,
+      "failed_runs": 0,
+      "total_runtime_seconds": 0.0,
+      "avg_runtime_seconds": 0.0,
+      "estimated_tokens_in": 0,
+      "estimated_tokens_out": 0,
+      "last_active_at": null,
+      "current_load_score": 0.0
+    },
+    "ilya-fen": {
+      "display_name": "Ilya Fen",
+      "role": "backend",
+      "total_runs": 0,
+      "completed_items": 0,
+      "blocked_items": 0,
+      "failed_runs": 0,
+      "total_runtime_seconds": 0.0,
+      "avg_runtime_seconds": 0.0,
+      "estimated_tokens_in": 0,
+      "estimated_tokens_out": 0,
+      "last_active_at": null,
+      "current_load_score": 0.0
+    },
+    "sera-kest": {
+      "display_name": "Sera Kest",
+      "role": "frontend",
+      "total_runs": 0,
+      "completed_items": 0,
+      "blocked_items": 0,
+      "failed_runs": 0,
+      "total_runtime_seconds": 0.0,
+      "avg_runtime_seconds": 0.0,
+      "estimated_tokens_in": 0,
+      "estimated_tokens_out": 0,
+      "last_active_at": null,
+      "current_load_score": 0.0
+    },
+    "rowan-hale": {
+      "display_name": "Rowan Hale",
+      "role": "design",
+      "total_runs": 0,
+      "completed_items": 0,
+      "blocked_items": 0,
+      "failed_runs": 0,
+      "total_runtime_seconds": 0.0,
+      "avg_runtime_seconds": 0.0,
+      "estimated_tokens_in": 0,
+      "estimated_tokens_out": 0,
+      "last_active_at": null,
+      "current_load_score": 0.0
+    },
+    "nika-thorn": {
+      "display_name": "Nika Thorn",
+      "role": "content",
+      "total_runs": 0,
+      "completed_items": 0,
+      "blocked_items": 0,
+      "failed_runs": 0,
+      "total_runtime_seconds": 0.0,
+      "avg_runtime_seconds": 0.0,
+      "estimated_tokens_in": 0,
+      "estimated_tokens_out": 0,
+      "last_active_at": null,
+      "current_load_score": 0.0
+    },
+    "tomas-grell": {
+      "display_name": "Tomas Grell",
+      "role": "qa",
+      "total_runs": 0,
+      "completed_items": 0,
+      "blocked_items": 0,
+      "failed_runs": 0,
+      "total_runtime_seconds": 0.0,
+      "avg_runtime_seconds": 0.0,
+      "estimated_tokens_in": 0,
+      "estimated_tokens_out": 0,
+      "last_active_at": null,
+      "current_load_score": 0.0
+    }
+  },
+  "totals": {
+    "completed_items": 0,
+    "queued_items": 5,
+    "blocked_items": 0,
+    "runtime_seconds": 0.0,
+    "estimated_tokens_total": 0
+  }
+}

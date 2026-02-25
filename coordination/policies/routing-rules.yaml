@@ -1,0 +1,11 @@
+{
+  "owner_role_map": {
+    "lead": "mara-voss",
+    "backend": "ilya-fen",
+    "frontend": "sera-kest",
+    "design": "rowan-hale",
+    "content": "nika-thorn",
+    "qa": "tomas-grell"
+  },
+  "fallback_agent": "mara-voss"
+}

@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.env
+coordination/state/*.tmp
+coordination/state/daemon.lock
+coordination/state/run-logs/
+backend/.env
+client-web/node_modules/
+client-web/dist/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,5 @@
+{
+  "commit_enabled": true,
+  "require_branch": "main",
+  "default_validation_commands": []
+}

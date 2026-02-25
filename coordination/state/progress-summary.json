@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-02-25T13:01:17.669127+00:00",
+  "daemon_state": "idle",
+  "active_item": null,
+  "queue_counts": {
+    "queued": 0,
+    "running": 0,
+    "blocked": 0,
+    "completed": 0
+  },
+  "milestone_progress": {}
+}

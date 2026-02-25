@@ -1,0 +1,15 @@
+# RedKeepers Agent Coordination Notes
+
+This repository is operated by a head daemon that schedules one AI agent at a time.
+
+## Core Rules
+
+- Single active agent slot, no parallel execution.
+- Work must be represented as structured backlog items.
+- Agents keep role-specific context in `agents/<agent-id>/`.
+- Commits to `main` are performed only through daemon guardrails.
+- Blockers and repeated failures are escalated to Mara Voss.
+
+## Primary Runtime
+
+Use `python tools/orchestrator.py run` to process the queue.
