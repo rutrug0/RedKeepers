@@ -213,5 +213,43 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-25T16:08:31.7890620Z",
+    "agent_id": "ilya-fen",
+    "work_item_id": "RK-M1-0007-F02",
+    "status": "done",
+    "summary": "Defined a machine-readable V1 narrative placeholder seed format (JSON tables + JSON schema) for civilization intros, starter settlement name pools, and event feed messages with stable keys, slice scope flags, related selectors, and explicit token lists.",
+    "changed_files": [
+      "backend/src/app/config/seeds/v1/narrative/README.md",
+      "backend/src/app/config/seeds/v1/narrative/narrative-template-table.schema.json",
+      "backend/src/app/config/seeds/v1/narrative/civilization-intros.json",
+      "backend/src/app/config/seeds/v1/narrative/starter-settlement-name-pool.json",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "agents/ilya-fen/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Add typed backend loaders and validation helpers for v1 narrative seed tables",
+        "owner_role": "backend",
+        "milestone": "M1",
+        "priority": "low",
+        "description": "Implement framework-agnostic loader/parser utilities for the new narrative JSON tables and enforce the shared narrative row shape (required fields, unique keys per table, token list consistency with template placeholders) at startup or in tests.",
+        "acceptance_criteria": [
+          "Backend exposes typed loaders/parsers for `civilization-intros.json`, `starter-settlement-name-pool.json`, and `event-feed-messages.json`",
+          "Validation rejects missing required narrative fields (`key`, `slice_status_scope`, `categories`, `related_ids`, `template`, `tokens`) and duplicate row keys within a table",
+          "Validation checks template token placeholders match the declared `tokens` array order/uniqueness",
+          "No gameplay mechanics are added; work remains data loading/validation only"
+        ],
+        "dependencies": [
+          "RK-M1-0007-F02"
+        ],
+        "inputs": [
+          "backend/src/app/config/seeds/v1/narrative/*.json",
+          "backend/src/app/config/seeds/v1/narrative/narrative-template-table.schema.json"
+        ]
+      }
+    ]
   }
 ]

@@ -1,0 +1,429 @@
+{
+  "schema_version": "rk-v1-narrative-seed",
+  "source_doc": "docs/content/placeholder-narrative-seed-pack-v1.md",
+  "source_section": "4. Event Feed Message Templates (Placeholder, Replaceable)",
+  "table_id": "narrative.event_feed_messages",
+  "rows": [
+    {
+      "key": "event.economy.tick_passive_income",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "economy"
+      ],
+      "related_ids": [
+        "resource_id:*"
+      ],
+      "event_category": "economy",
+      "template": "{settlement_name} stores rise: +{food_gain} Food, +{wood_gain} Wood, +{stone_gain} Stone, +{iron_gain} Iron.",
+      "tokens": [
+        "settlement_name",
+        "food_gain",
+        "wood_gain",
+        "stone_gain",
+        "iron_gain"
+      ]
+    },
+    {
+      "key": "event.economy.storage_near_cap",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "economy"
+      ],
+      "related_ids": [
+        "resource_id:{resource_id}"
+      ],
+      "event_category": "economy",
+      "template": "{settlement_name} is nearly full on {resource_label}. Spend or upgrade production priorities before overflow wastes stock.",
+      "tokens": [
+        "settlement_name",
+        "resource_label"
+      ]
+    },
+    {
+      "key": "event.economy.producer_unlocked_hint",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "economy"
+      ],
+      "related_ids": [
+        "building_id:{building_id}"
+      ],
+      "event_category": "economy",
+      "template": "{building_label} can be improved to steady {resource_label} output in {settlement_name}.",
+      "tokens": [
+        "building_label",
+        "resource_label",
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.buildings.upgrade_started",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "buildings"
+      ],
+      "related_ids": [
+        "building_id:{building_id}"
+      ],
+      "event_category": "buildings",
+      "template": "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
+      "tokens": [
+        "settlement_name",
+        "building_label",
+        "from_level",
+        "to_level"
+      ]
+    },
+    {
+      "key": "event.buildings.upgrade_completed",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "buildings"
+      ],
+      "related_ids": [
+        "building_id:{building_id}"
+      ],
+      "event_category": "buildings",
+      "template": "{settlement_name}: {building_label} reaches Lv.{new_level}. Crews return to regular duty.",
+      "tokens": [
+        "settlement_name",
+        "building_label",
+        "new_level"
+      ]
+    },
+    {
+      "key": "event.buildings.queue_blocked_resources",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "buildings"
+      ],
+      "related_ids": [
+        "building_id:{building_id}",
+        "resource_id:*"
+      ],
+      "event_category": "buildings",
+      "template": "{settlement_name}: insufficient stores for {building_label}. Required materials have not been gathered.",
+      "tokens": [
+        "settlement_name",
+        "building_label"
+      ]
+    },
+    {
+      "key": "event.buildings.family_military_ready",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "buildings"
+      ],
+      "related_ids": [
+        "family_id:military",
+        "building_id:barracks"
+      ],
+      "event_category": "buildings",
+      "template": "{settlement_name}: the Barracks yard is ready for fresh musters.",
+      "tokens": [
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.buildings.family_logistics_ready",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "buildings"
+      ],
+      "related_ids": [
+        "family_id:logistics",
+        "building_id:rally_post"
+      ],
+      "event_category": "buildings",
+      "template": "{settlement_name}: the Rally Post is staffed. Routes and march orders can be issued.",
+      "tokens": [
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.units.training_started",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "units"
+      ],
+      "related_ids": [
+        "unit_id:{unit_id}",
+        "building_id:barracks"
+      ],
+      "event_category": "units",
+      "template": "{settlement_name}: training begins for {quantity} {unit_label}.",
+      "tokens": [
+        "settlement_name",
+        "quantity",
+        "unit_label"
+      ]
+    },
+    {
+      "key": "event.units.training_completed",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "units"
+      ],
+      "related_ids": [
+        "unit_id:{unit_id}"
+      ],
+      "event_category": "units",
+      "template": "{settlement_name}: {quantity} {unit_label} report ready for orders.",
+      "tokens": [
+        "settlement_name",
+        "quantity",
+        "unit_label"
+      ]
+    },
+    {
+      "key": "event.units.training_queue_full",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "units"
+      ],
+      "related_ids": [
+        "building_id:barracks"
+      ],
+      "event_category": "units",
+      "template": "{settlement_name}: barracks queue is full. Resolve current musters before issuing more training orders.",
+      "tokens": [
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.units.variant_available_cinder",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "units"
+      ],
+      "related_ids": [
+        "civ_id:cinder_throne_legates",
+        "variant_unit_id:{variant_unit_id}"
+      ],
+      "event_category": "units",
+      "template": "Cinder Tribunal notice: {variant_label} are now authorized for recruitment in {settlement_name}.",
+      "tokens": [
+        "variant_label",
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.units.upkeep_warning_field_army",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "units"
+      ],
+      "related_ids": [
+        "civ_id:{civ_id}",
+        "resource_id:food"
+      ],
+      "event_category": "units",
+      "template": "{army_name} is straining {settlement_name}'s food stores while deployed. Field upkeep remains at full rate.",
+      "tokens": [
+        "army_name",
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.units.upkeep_reduced_garrison",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "units"
+      ],
+      "related_ids": [
+        "civ_id:cinder_throne_legates",
+        "resource_id:food"
+      ],
+      "event_category": "units",
+      "template": "{settlement_name}: garrison ration discipline reduces stationed troop upkeep.",
+      "tokens": [
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.world.scout_dispatched",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "world_map",
+      "template": "{settlement_name}: scouts ride out toward {target_tile_label}.",
+      "tokens": [
+        "settlement_name",
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.world.scout_report_empty",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "world_map",
+      "template": "Scout report from {target_tile_label}: no active host detected. The roads remain quiet for now.",
+      "tokens": [
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.world.scout_report_hostile",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "world_map",
+      "template": "Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).",
+      "tokens": [
+        "target_tile_label",
+        "hostile_force_estimate"
+      ]
+    },
+    {
+      "key": "event.world.march_started",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:*",
+        "building_id:rally_post"
+      ],
+      "event_category": "world_map",
+      "template": "{army_name} marches from {origin_settlement_name} toward {target_tile_label}.",
+      "tokens": [
+        "army_name",
+        "origin_settlement_name",
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.world.march_returned",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "{army_name} returns to {settlement_name} with {haul_summary}.",
+      "tokens": [
+        "army_name",
+        "settlement_name",
+        "haul_summary"
+      ]
+    },
+    {
+      "key": "event.world.road_warden_speed_bonus",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "civ_id:cinder_throne_legates",
+        "modifier_key:army_move_speed_mult"
+      ],
+      "event_category": "world_map",
+      "template": "Road Wardens shorten the march. {army_name} gains speed on the route between owned settlements.",
+      "tokens": [
+        "army_name"
+      ]
+    },
+    {
+      "key": "event.combat.placeholder_skirmish_win",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "combat_placeholder"
+      ],
+      "related_ids": [
+        "unit_id:*"
+      ],
+      "event_category": "combat_placeholder",
+      "template": "{army_name} wins a brief skirmish near {target_tile_label}. Losses are light; survivors regroup for orders.",
+      "tokens": [
+        "army_name",
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.combat.placeholder_skirmish_loss",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "combat_placeholder"
+      ],
+      "related_ids": [
+        "unit_id:*"
+      ],
+      "event_category": "combat_placeholder",
+      "template": "{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.",
+      "tokens": [
+        "army_name",
+        "target_tile_label",
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.settlement.new_settlement_founded",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "settlement"
+      ],
+      "related_ids": [
+        "civ_id:{civ_id}"
+      ],
+      "event_category": "settlement",
+      "template": "A new holding is founded: {settlement_name}. Tents, stores, and watchfires are raised before dusk.",
+      "tokens": [
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.settlement.name_assigned",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "settlement"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool"
+      ],
+      "event_category": "settlement",
+      "template": "Surveyors record the new holding as {settlement_name}. The name enters the ledger.",
+      "tokens": [
+        "settlement_name"
+      ]
+    }
+  ]
+}

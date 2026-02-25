@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rk-v1-narrative-template-table.schema.json",
+  "title": "RedKeepers V1 Narrative Template Table",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_doc",
+    "source_section",
+    "table_id",
+    "rows"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "rk-v1-narrative-seed"
+    },
+    "source_doc": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_section": {
+      "type": "string",
+      "minLength": 1
+    },
+    "table_id": {
+      "type": "string",
+      "enum": [
+        "narrative.civilization_intros",
+        "narrative.starter_settlement_name_pool",
+        "narrative.event_feed_messages"
+      ]
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/narrativeRow"
+      }
+    }
+  },
+  "$defs": {
+    "sliceStatusScope": {
+      "type": "string",
+      "enum": [
+        "playable_now",
+        "balance_stub",
+        "data_stub_post_slice"
+      ]
+    },
+    "stableTokenName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "narrativeRow": {
+      "type": "object",
+      "required": [
+        "key",
+        "slice_status_scope",
+        "categories",
+        "related_ids",
+        "template",
+        "tokens"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:[._][a-z0-9]+)*$"
+        },
+        "slice_status_scope": {
+          "$ref": "#/$defs/sliceStatusScope"
+        },
+        "categories": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          }
+        },
+        "related_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z_]+:.+$"
+          }
+        },
+        "template": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tokens": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stableTokenName"
+          }
+        },
+        "civ_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+        },
+        "name_category": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+        },
+        "event_category": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": "rk-v1-narrative-seed",
+  "source_doc": "docs/content/placeholder-narrative-seed-pack-v1.md",
+  "source_section": "1. Civilization Intro Copy (Placeholder)",
+  "table_id": "narrative.civilization_intros",
+  "rows": [
+    {
+      "key": "civ_intro.cinder_throne_legates",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "civilization_intro"
+      ],
+      "related_ids": [
+        "civ_id:cinder_throne_legates"
+      ],
+      "civ_id": "cinder_throne_legates",
+      "template": "The Cinder Throne Legates hold the frontier by ash, ration, and decree. Their magistrates build roads before monuments, and their branded levies turn every settlement into a hard post that is costly to break.",
+      "tokens": []
+    },
+    {
+      "key": "civ_intro.mirebound_covenant",
+      "slice_status_scope": "balance_stub",
+      "categories": [
+        "civilization_intro"
+      ],
+      "related_ids": [
+        "civ_id:mirebound_covenant"
+      ],
+      "civ_id": "mirebound_covenant",
+      "template": "The Mirebound Covenant survives where maps rot at the edges. Reed-cloaked bands move through drowned paths, trading open battles for patience, poison, and sudden strikes from bad ground.",
+      "tokens": []
+    },
+    {
+      "key": "civ_intro.graveforge_clans",
+      "slice_status_scope": "balance_stub",
+      "categories": [
+        "civilization_intro"
+      ],
+      "related_ids": [
+        "civ_id:graveforge_clans"
+      ],
+      "civ_id": "graveforge_clans",
+      "template": "The Graveforge Clans carve keeps from dead hills and pay their oaths in iron. Slow to rise and harder to move, their hosts grow into relentless armies once the forges burn steady.",
+      "tokens": []
+    }
+  ]
+}

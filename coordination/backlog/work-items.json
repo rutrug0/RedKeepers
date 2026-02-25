@@ -1,42 +1,5 @@
 [
   {
-    "id": "RK-M1-0007-F01",
-    "title": "Wire placeholder narrative seed keys into client event feed mock state",
-    "description": "Load a subset of `docs/content/placeholder-narrative-seed-pack-v1.md` templates into the client shell mock data so event feed rows and civ intro panels use stable content keys instead of hard-coded strings.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0007"
-    ],
-    "inputs": [
-      "client-web/app.js",
-      "docs/content/placeholder-narrative-seed-pack-v1.md"
-    ],
-    "acceptance_criteria": [
-      "Client mock state references stable `event.*` and `civ_intro.*` keys from the placeholder seed pack",
-      "At least one settlement action, unit training action, and scout/world-map action render feed text via templated string substitution",
-      "Implementation keeps placeholder text replaceable without changing UI component structure"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:18:45.966375+00:00",
-    "updated_at": "2026-02-25T16:03:59.672871+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "nika-thorn",
-    "generated_from_item_id": "RK-M1-0007",
-    "assigned_agent": "sera-kest"
-  },
-  {
     "id": "RK-M1-0007-F02",
     "title": "Define machine-readable narrative seed format for content placeholders",
     "description": "Create a JSON seed/schema for narrative placeholder strings (civ intros, settlement name pools, event templates) so client/backend can consume stable keys and tokenized templates without parsing markdown.",
@@ -59,17 +22,18 @@
       "No first-slice mechanics are added; work is limited to data serialization and validation shape"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T15:18:45.966375+00:00",
-    "updated_at": "2026-02-25T15:18:45.966375+00:00",
+    "updated_at": "2026-02-25T16:09:18.998896+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "nika-thorn",
-    "generated_from_item_id": "RK-M1-0007"
+    "generated_from_item_id": "RK-M1-0007",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M1-0008-F01",

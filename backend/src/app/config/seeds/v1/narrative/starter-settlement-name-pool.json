@@ -1,0 +1,212 @@
+{
+  "schema_version": "rk-v1-narrative-seed",
+  "source_doc": "docs/content/placeholder-narrative-seed-pack-v1.md",
+  "source_section": "2. Starter Settlement Name Pools (12 Placeholder Names)",
+  "table_id": "narrative.starter_settlement_name_pool",
+  "rows": [
+    {
+      "key": "starter_settlement_name.cinder_01",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:cinder_throne_legates"
+      ],
+      "civ_id": "cinder_throne_legates",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Ashgate",
+      "tokens": [],
+      "notes": "Fortified road junction tone"
+    },
+    {
+      "key": "starter_settlement_name.cinder_02",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:cinder_throne_legates"
+      ],
+      "civ_id": "cinder_throne_legates",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Brandwatch",
+      "tokens": [],
+      "notes": "Garrison/watchpost tone"
+    },
+    {
+      "key": "starter_settlement_name.cinder_03",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:cinder_throne_legates"
+      ],
+      "civ_id": "cinder_throne_legates",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Cinder Toll",
+      "tokens": [],
+      "notes": "Administrative frontier tone"
+    },
+    {
+      "key": "starter_settlement_name.cinder_04",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:cinder_throne_legates"
+      ],
+      "civ_id": "cinder_throne_legates",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Ration Ford",
+      "tokens": [],
+      "notes": "Logistics/discipline tone"
+    },
+    {
+      "key": "starter_settlement_name.mire_01",
+      "slice_status_scope": "balance_stub",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:mirebound_covenant"
+      ],
+      "civ_id": "mirebound_covenant",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Reedwake",
+      "tokens": [],
+      "notes": "Wetland route tone"
+    },
+    {
+      "key": "starter_settlement_name.mire_02",
+      "slice_status_scope": "balance_stub",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:mirebound_covenant"
+      ],
+      "civ_id": "mirebound_covenant",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Fen Lantern",
+      "tokens": [],
+      "notes": "Marsh outpost tone"
+    },
+    {
+      "key": "starter_settlement_name.mire_03",
+      "slice_status_scope": "balance_stub",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:mirebound_covenant"
+      ],
+      "civ_id": "mirebound_covenant",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Silt Hollow",
+      "tokens": [],
+      "notes": "Drowned-ground settlement tone"
+    },
+    {
+      "key": "starter_settlement_name.mire_04",
+      "slice_status_scope": "balance_stub",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:mirebound_covenant"
+      ],
+      "civ_id": "mirebound_covenant",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Moss Sluice",
+      "tokens": [],
+      "notes": "Water-control settlement tone"
+    },
+    {
+      "key": "starter_settlement_name.graveforge_01",
+      "slice_status_scope": "balance_stub",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:graveforge_clans"
+      ],
+      "civ_id": "graveforge_clans",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Forgecut",
+      "tokens": [],
+      "notes": "Quarry/forge settlement tone"
+    },
+    {
+      "key": "starter_settlement_name.graveforge_02",
+      "slice_status_scope": "balance_stub",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:graveforge_clans"
+      ],
+      "civ_id": "graveforge_clans",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Blackpit Hold",
+      "tokens": [],
+      "notes": "Defensive quarry tone"
+    },
+    {
+      "key": "starter_settlement_name.graveforge_03",
+      "slice_status_scope": "balance_stub",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:graveforge_clans"
+      ],
+      "civ_id": "graveforge_clans",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Tithe Quarry",
+      "tokens": [],
+      "notes": "Clan-industry tone"
+    },
+    {
+      "key": "starter_settlement_name.graveforge_04",
+      "slice_status_scope": "balance_stub",
+      "categories": [
+        "starter_settlement_name_pool",
+        "settlement_name"
+      ],
+      "related_ids": [
+        "category:starter_settlement_name_pool",
+        "civ_id:graveforge_clans"
+      ],
+      "civ_id": "graveforge_clans",
+      "name_category": "starter_settlement_name_pool",
+      "template": "Chain Anvil",
+      "tokens": [],
+      "notes": "Forge-war host tone"
+    }
+  ]
+}
