@@ -407,42 +407,6 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
   },
   {
-    "id": "RK-M1-0006-F02-F01-F02",
-    "title": "Run post-serialization rally/stone micro-pass validation after Pass A is landed",
-    "description": "After Pass A is serialized, rerun the 30m/2h/6h reference simulation and validate whether rally_post timing can be approved or needs a narrow rally/stone-only numeric tweak.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "design",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006-F02-F01"
-    ],
-    "inputs": [
-      "docs/design/v1-early-progression-pacing-sim.md",
-      "backend/src/modules/economy/infra/seeds/v1/resource-definitions.json",
-      "backend/src/modules/buildings/infra/seeds/v1/building-lines.json"
-    ],
-    "acceptance_criteria": [
-      "Checkpoint/resource tables for 30m, 2h, and 6h are refreshed from serialized values",
-      "Barracks timing and first training cadence are explicitly checked against tuned targets",
-      "Rally_post timing is either approved or a narrow rally/stone-only delta is documented with explicit numeric values"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T19:28:29.875797+00:00",
-    "updated_at": "2026-02-25T20:26:14.713552+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M1-0006-F02-F01",
-    "assigned_agent": "rowan-hale"
-  },
-  {
     "id": "RK-M1-0006-F02-F01-F01-F01",
     "title": "Re-run early progression sim against serialized Pass A seeds and evaluate rally micro-pass",
     "description": "Run the first 2-6h pacing simulation using the updated serialized seed bundle to confirm barracks timing target (<2h) and determine whether a narrow rally_post/stone cost micro-pass is still required without adding mechanics.",
@@ -465,17 +429,18 @@
       "If rally_post remains outside target, proposed deltas are limited to narrow numeric cost changes and captured as a separate backlog item"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T19:32:13.117596+00:00",
-    "updated_at": "2026-02-25T19:32:13.117596+00:00",
+    "updated_at": "2026-02-25T20:28:10.230912+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M1-0006-F02-F01-F01"
+    "generated_from_item_id": "RK-M1-0006-F02-F01-F01",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M1-0006-F03-F01-F01",
@@ -719,5 +684,40 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-M0-0006-F01"
+  },
+  {
+    "id": "RK-M1-0006-F02-F01-F02-F01",
+    "title": "Apply micro-pass rally cost delta and re-run RK-M1-0006-F02-F01-F02",
+    "description": "Apply narrow rally_post-only cost deltas and rerun the 30m/2h/6h reference simulation to validate rally_post reaches L1 by 6h.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006-F02-F01-F02"
+    ],
+    "inputs": [
+      "docs/design/v1-early-progression-pacing-sim.md",
+      "backend/src/modules/economy/infra/seeds/v1/resource-definitions.json",
+      "backend/src/modules/buildings/infra/seeds/v1/building-lines.json"
+    ],
+    "acceptance_criteria": [
+      "rally_post cost values updated to `rally_post.cost_food_l1: 64 -> 55`, `rally_post.cost_wood_l1: 64 -> 33`, and `rally_post.cost_stone_l1: 52 -> 52`",
+      "30m/2h/6h checkpoint tables are refreshed after the micro candidate is applied",
+      "Rally_post reaches L1 by or before 6h in the re-run"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:26:15.617402+00:00",
+    "updated_at": "2026-02-25T20:26:15.617402+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-M1-0006-F02-F01-F02"
   }
 ]
