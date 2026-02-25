@@ -1,41 +1,5 @@
 [
   {
-    "id": "RK-M1-0007",
-    "title": "Create naming bible and placeholder narrative seed pack",
-    "description": "Produce original dark-fantasy naming rules and reusable placeholder text for civilization intros, starter settlements, unit/building labels, and early event feed messages tied to the v1 design outputs.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "content",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006"
-    ],
-    "inputs": [
-      "docs/design/game-vision.md",
-      "docs/design/factions-and-civilizations.md",
-      "docs/design/v1-starter-data-tables.md"
-    ],
-    "acceptance_criteria": [
-      "Naming/style guide defines tone, naming patterns, and anti-derivative guardrails for factions, places, and military labels",
-      "Placeholder text pack includes at least 3 civilization intros, 12 starter settlement names, and 20 event feed message strings",
-      "Entries are clearly marked replaceable placeholders and reference stable identifiers or categories from the design tables where applicable"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T15:18:45.060663+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
-    "assigned_agent": "nika-thorn"
-  },
-  {
     "id": "RK-M1-0008",
     "title": "Add M1 scaffold smoke checks across backend, client, and design data",
     "description": "Add lightweight QA checks and/or scripts that validate the presence and basic structure of the backend scaffold, client shell wireframe, and starter design data artifacts to reduce regressions during early implementation.",
@@ -64,17 +28,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T14:20:08.432712+00:00",
+    "updated_at": "2026-02-25T15:21:47.526510+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0001"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
+    "assigned_agent": "tomas-grell"
   },
   {
     "id": "RK-M1-0005-F01",
@@ -279,5 +244,76 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-M1-0006-F01"
+  },
+  {
+    "id": "RK-M1-0007-F01",
+    "title": "Wire placeholder narrative seed keys into client event feed mock state",
+    "description": "Load a subset of `docs/content/placeholder-narrative-seed-pack-v1.md` templates into the client shell mock data so event feed rows and civ intro panels use stable content keys instead of hard-coded strings.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0007"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "docs/content/placeholder-narrative-seed-pack-v1.md"
+    ],
+    "acceptance_criteria": [
+      "Client mock state references stable `event.*` and `civ_intro.*` keys from the placeholder seed pack",
+      "At least one settlement action, unit training action, and scout/world-map action render feed text via templated string substitution",
+      "Implementation keeps placeholder text replaceable without changing UI component structure"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:18:45.966375+00:00",
+    "updated_at": "2026-02-25T15:18:45.966375+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-M1-0007"
+  },
+  {
+    "id": "RK-M1-0007-F02",
+    "title": "Define machine-readable narrative seed format for content placeholders",
+    "description": "Create a JSON seed/schema for narrative placeholder strings (civ intros, settlement name pools, event templates) so client/backend can consume stable keys and tokenized templates without parsing markdown.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0007"
+    ],
+    "inputs": [
+      "docs/content/naming-bible-v1.md",
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "backend/src/app/config/seeds/"
+    ],
+    "acceptance_criteria": [
+      "Machine-readable content seed files include stable keys, scope flags, and tokenized templates for civ intros, settlement names, and event feed messages",
+      "Schema or validation notes define required fields (`key`, scope/status, related IDs/categories, template/tokens)",
+      "No first-slice mechanics are added; work is limited to data serialization and validation shape"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:18:45.966375+00:00",
+    "updated_at": "2026-02-25T15:18:45.966375+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-M1-0007"
   }
 ]

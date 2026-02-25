@@ -374,5 +374,42 @@
     "generated_from_item_id": "RK-M1-0006",
     "assigned_agent": "ilya-fen",
     "commit_sha": "5c011746a852edd7717dbcb38ba67a2049421fe6"
+  },
+  {
+    "id": "RK-M1-0007",
+    "title": "Create naming bible and placeholder narrative seed pack",
+    "description": "Produce original dark-fantasy naming rules and reusable placeholder text for civilization intros, starter settlements, unit/building labels, and early event feed messages tied to the v1 design outputs.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006"
+    ],
+    "inputs": [
+      "docs/design/game-vision.md",
+      "docs/design/factions-and-civilizations.md",
+      "docs/design/v1-starter-data-tables.md"
+    ],
+    "acceptance_criteria": [
+      "Naming/style guide defines tone, naming patterns, and anti-derivative guardrails for factions, places, and military labels",
+      "Placeholder text pack includes at least 3 civilization intros, 12 starter settlement names, and 20 event feed message strings",
+      "Entries are clearly marked replaceable placeholders and reference stable identifiers or categories from the design tables where applicable"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:20:08.432712+00:00",
+    "updated_at": "2026-02-25T15:18:45.961090+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Note: I observed unrelated pre-existing modifications in `coordination/backlog/*.json` and did not change them.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
+    "assigned_agent": "nika-thorn",
+    "commit_sha": "689000acaae0400a0ee4a84d8a71c66019c7222d"
   }
 ]

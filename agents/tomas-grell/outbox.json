@@ -55,5 +55,40 @@
       "coordination/backlog/completed-items.json",
       "agents/tomas-grell/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-25T15:21:02.5938324Z",
+    "item_id": "RK-M1-0008",
+    "status": "completed",
+    "summary": "Added M1 scaffold smoke coverage for backend/client/design-data artifacts and documented manual client-shell verification checks for responsive layout and placeholder-art compliance.",
+    "checks": [
+      "python -m unittest tests.test_m1_scaffold_smoke (pass)",
+      "python tools/orchestrator.py status (pass)"
+    ],
+    "changed_files": [
+      "tests/test_m1_scaffold_smoke.py",
+      "agents/tomas-grell/manual-verification-rk-m1-0008.md",
+      "agents/tomas-grell/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Run browser-based visual smoke pass for M1 client shell breakpoints",
+        "owner_role": "qa",
+        "milestone": "M1",
+        "priority": "normal",
+        "description": "Execute the documented manual checklist for the client shell at desktop/tablet/mobile widths and confirm placeholder-art-only compliance with screenshots or notes.",
+        "acceptance_criteria": [
+          "Manual verification checklist in agents/tomas-grell/manual-verification-rk-m1-0008.md is executed in a browser",
+          "Responsive behavior at >=1221px, 861-1220px, and <=860px is recorded with pass/fail notes",
+          "Placeholder-art policy compliance is explicitly confirmed or violations are logged"
+        ],
+        "inputs": [
+          "agents/tomas-grell/manual-verification-rk-m1-0008.md",
+          "client-web/index.html",
+          "client-web/styles.css",
+          "docs/design/first-vertical-slice.md"
+        ]
+      }
+    ]
   }
 ]
