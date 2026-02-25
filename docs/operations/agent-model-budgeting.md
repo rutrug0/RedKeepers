@@ -3,8 +3,8 @@
 Model assignments and token budgets are defined in `coordination/policies/model-policy.yaml`.
 
 Guidelines:
-- Reserve high-reasoning `codex-5.3` for lead/backend and escalations
-- Use `GPT-5.3-Codex-Spark` for lower-risk, high-throughput roles (design/content/QA), with fallback to `gpt-5-mini`
+- Use `GPT-5.3-Codex-Spark` as primary model across roles for ChatGPT-account Codex compatibility, with fallback to `gpt-5-mini`
+- Keep high reasoning on lead/backend/escalation paths, but avoid unsupported model IDs in account-constrained environments
 - Track estimated token usage in `coordination/runtime/agent-stats.json`
 
 Runtime behavior:

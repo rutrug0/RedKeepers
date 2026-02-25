@@ -3,7 +3,7 @@
     "display_name": "Mara Voss",
     "role": "lead",
     "title": "Lead Producer / Systems Lead",
-    "model": "codex-5.3",
+    "model": "GPT-5.3-Codex-Spark",
     "reasoning": "high",
     "responsibilities": [
       "Own milestone priorities and backlog sequencing",
@@ -16,7 +16,7 @@
     "display_name": "Ilya Fen",
     "role": "backend",
     "title": "Backend Engineer",
-    "model": "codex-5.3",
+    "model": "GPT-5.3-Codex-Spark",
     "reasoning": "high",
     "responsibilities": [
       "Implement modular monolith backend modules",
@@ -28,7 +28,7 @@
     "display_name": "Sera Kest",
     "role": "frontend",
     "title": "Frontend / Game Client Engineer",
-    "model": "codex-5.3",
+    "model": "GPT-5.3-Codex-Spark",
     "reasoning": "standard",
     "responsibilities": [
       "Build web-first client shell and UI",
