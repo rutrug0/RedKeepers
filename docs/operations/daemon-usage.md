@@ -8,7 +8,7 @@
 - `python tools/orchestrator.py run` : persistent daemon mode (keeps polling for new/unblocked work)
 - `python tools/orchestrator.py run --until-idle` : exit when queue becomes idle or stalled (one-shot queue drain mode)
 - `python tools/smoke_daemon_env.py` : read-only smoke validation for queue/policy/state files
-- `python tools/render_stats_html.py` : generate runtime dashboard HTML (global + per-session agent/model stats)
+- `python tools/render_stats_html.py` : generate runtime dashboard HTML (global + per-session agent/model stats + backlog section)
 
 ## Environment Variables
 
@@ -65,3 +65,7 @@ Queue and progress state:
 Generate dashboard:
 
 `python tools/render_stats_html.py --output coordination\\runtime\\stats-dashboard.html`
+
+Optional explicit backlog inputs:
+
+`python tools/render_stats_html.py --work-items coordination\\backlog\\work-items.json --completed-items coordination\\backlog\\completed-items.json --blocked-items coordination\\backlog\\blocked-items.json --output coordination\\runtime\\stats-dashboard.html`

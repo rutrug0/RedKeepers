@@ -12,6 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_AGENT_STATS = ROOT / "coordination" / "runtime" / "agent-stats.json"
 DEFAULT_MODEL_STATS = ROOT / "coordination" / "runtime" / "model-stats.json"
 DEFAULT_OUTPUT = ROOT / "coordination" / "runtime" / "stats-dashboard.html"
+DEFAULT_WORK_ITEMS = ROOT / "coordination" / "backlog" / "work-items.json"
+DEFAULT_COMPLETED_ITEMS = ROOT / "coordination" / "backlog" / "completed-items.json"
+DEFAULT_BLOCKED_ITEMS = ROOT / "coordination" / "backlog" / "blocked-items.json"
 
 
 def _fmt_int(value: Any) -> str:
@@ -38,6 +41,29 @@ def _fmt_duration(seconds: Any) -> str:
     hours = minutes // 60
     mins = minutes % 60
     return f"{hours}h {mins:02d}m {rem:02d}s"
+
+
+def _trim(text: Any, limit: int = 96) -> str:
+    raw = str(text or "")
+    if len(raw) <= limit:
+        return raw
+    return raw[: max(0, limit - 3)] + "..."
+
+
+def _coerce_item_list(raw: Any) -> list[dict[str, Any]]:
+    if not isinstance(raw, list):
+        return []
+    return [entry for entry in raw if isinstance(entry, dict)]
+
+
+def _count_by(items: list[dict[str, Any]], key: str) -> list[dict[str, Any]]:
+    counts: dict[str, int] = {}
+    for item in items:
+        value = str(item.get(key, "unknown") or "unknown")
+        counts[value] = counts.get(value, 0) + 1
+    rows = [{"label": label, "count": count} for label, count in counts.items()]
+    rows.sort(key=lambda row: row["count"], reverse=True)
+    return rows
 
 
 def _render_stat_cards(cards: list[tuple[str, str]]) -> str:
@@ -182,7 +208,103 @@ def _render_session_panels(model_stats: dict[str, Any]) -> str:
     return "".join(parts)
 
 
-def build_html(*, title: str, agent_stats: dict[str, Any], model_stats: dict[str, Any]) -> str:
+def _render_backlog_section(
+    *,
+    queued_items: list[dict[str, Any]],
+    completed_items: list[dict[str, Any]],
+    blocked_items: list[dict[str, Any]],
+) -> str:
+    all_items = [*queued_items, *completed_items, *blocked_items]
+
+    by_role_rows = _count_by(all_items, "owner_role")
+    by_milestone_rows = _count_by(all_items, "milestone")
+    by_type_rows = _count_by(all_items, "type")
+
+    cards = _render_stat_cards(
+        [
+            ("Queued Items", _fmt_int(len(queued_items))),
+            ("Completed Items", _fmt_int(len(completed_items))),
+            ("Blocked Items", _fmt_int(len(blocked_items))),
+            ("Total Tracked", _fmt_int(len(all_items))),
+        ]
+    )
+
+    def render_items_table(title: str, items: list[dict[str, Any]]) -> str:
+        rows = sorted(items, key=lambda item: str(item.get("updated_at", "")), reverse=True)
+        rows = rows[:40]
+        table_rows = [
+            [
+                str(item.get("id", "")),
+                _trim(item.get("title", ""), 64),
+                str(item.get("owner_role", "")),
+                str(item.get("priority", "")),
+                str(item.get("milestone", "")),
+                _fmt_int(item.get("retry_count", 0)),
+                _trim(item.get("blocker_reason", ""), 72),
+                str(item.get("updated_at", "")),
+            ]
+            for item in rows
+        ]
+        subtitle = f"Showing {len(rows)} of {len(items)} items"
+        return (
+            "<section class='panel'>"
+            f"<h2>{html.escape(title)}</h2>"
+            f"<p>{html.escape(subtitle)}</p>"
+            + _render_table(
+                ["ID", "Title", "Role", "Priority", "Milestone", "Retries", "Blocker", "Updated (UTC)"],
+                table_rows,
+            )
+            + "</section>"
+        )
+
+    role_chart = _render_bar_chart(
+        title="Work Items by Owner Role",
+        rows=by_role_rows,
+        label_key="label",
+        value_key="count",
+        value_formatter=_fmt_int,
+        color_class="bar alt2",
+    )
+    milestone_chart = _render_bar_chart(
+        title="Work Items by Milestone",
+        rows=by_milestone_rows,
+        label_key="label",
+        value_key="count",
+        value_formatter=_fmt_int,
+        color_class="bar alt",
+    )
+    type_chart = _render_bar_chart(
+        title="Work Items by Type",
+        rows=by_type_rows,
+        label_key="label",
+        value_key="count",
+        value_formatter=_fmt_int,
+    )
+
+    return (
+        "<section class='panel'>"
+        "<h2>Work Items Backlog</h2>"
+        "<p>Queue/completed/blocked backlog state snapshot.</p>"
+        "</section>"
+        + cards
+        + role_chart
+        + milestone_chart
+        + type_chart
+        + render_items_table("Queued Work Items", queued_items)
+        + render_items_table("Blocked Work Items", blocked_items)
+        + render_items_table("Completed Work Items", completed_items)
+    )
+
+
+def build_html(
+    *,
+    title: str,
+    agent_stats: dict[str, Any],
+    model_stats: dict[str, Any],
+    queued_items: list[dict[str, Any]],
+    completed_items: list[dict[str, Any]],
+    blocked_items: list[dict[str, Any]],
+) -> str:
     generated_at = model_stats.get("generated_at") or agent_stats.get("generated_at") or "n/a"
     queue_totals = agent_stats.get("totals", {})
     lifetime = model_stats.get("lifetime", {})
@@ -277,6 +399,11 @@ def build_html(*, title: str, agent_stats: dict[str, Any], model_stats: dict[str
         value_key="total_runs",
         value_formatter=_fmt_int,
         color_class="bar alt2",
+    )
+    backlog_section = _render_backlog_section(
+        queued_items=queued_items,
+        completed_items=completed_items,
+        blocked_items=blocked_items,
     )
 
     return f"""<!DOCTYPE html>
@@ -437,6 +564,7 @@ def build_html(*, title: str, agent_stats: dict[str, Any], model_stats: dict[str
     </section>
     {agent_runs_chart}
     {_render_session_panels(model_stats)}
+    {backlog_section}
   </main>
 </body>
 </html>
@@ -447,6 +575,9 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Render RedKeepers runtime stats dashboard HTML.")
     parser.add_argument("--agent-stats", type=Path, default=DEFAULT_AGENT_STATS)
     parser.add_argument("--model-stats", type=Path, default=DEFAULT_MODEL_STATS)
+    parser.add_argument("--work-items", type=Path, default=DEFAULT_WORK_ITEMS)
+    parser.add_argument("--completed-items", type=Path, default=DEFAULT_COMPLETED_ITEMS)
+    parser.add_argument("--blocked-items", type=Path, default=DEFAULT_BLOCKED_ITEMS)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="RedKeepers Runtime Dashboard")
     return parser.parse_args()
@@ -457,12 +588,25 @@ def main() -> int:
 
     agent_stats = load_json(args.agent_stats, {})
     model_stats = load_json(args.model_stats, {})
+    queued_items_raw = load_json(args.work_items, [])
+    completed_items_raw = load_json(args.completed_items, [])
+    blocked_items_raw = load_json(args.blocked_items, [])
     if not isinstance(agent_stats, dict):
         agent_stats = {}
     if not isinstance(model_stats, dict):
         model_stats = {}
+    queued_items = _coerce_item_list(queued_items_raw)
+    completed_items = _coerce_item_list(completed_items_raw)
+    blocked_items = _coerce_item_list(blocked_items_raw)
 
-    html_text = build_html(title=args.title, agent_stats=agent_stats, model_stats=model_stats)
+    html_text = build_html(
+        title=args.title,
+        agent_stats=agent_stats,
+        model_stats=model_stats,
+        queued_items=queued_items,
+        completed_items=completed_items,
+        blocked_items=blocked_items,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(html_text, encoding="utf-8")
     print(f"Dashboard written: {args.output}")

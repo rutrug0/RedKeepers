@@ -21,6 +21,9 @@ class RenderStatsHtmlTests(unittest.TestCase):
             root = Path(tmpdir)
             agent_stats_path = root / "agent-stats.json"
             model_stats_path = root / "model-stats.json"
+            work_items_path = root / "work-items.json"
+            completed_items_path = root / "completed-items.json"
+            blocked_items_path = root / "blocked-items.json"
             output_path = root / "dashboard.html"
 
             agent_stats_path.write_text(
@@ -80,6 +83,58 @@ class RenderStatsHtmlTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            work_items_path.write_text(
+                json.dumps(
+                    [
+                        {
+                            "id": "RK-001",
+                            "title": "Queued task",
+                            "owner_role": "frontend",
+                            "priority": "normal",
+                            "milestone": "M1",
+                            "type": "feature",
+                            "retry_count": 0,
+                            "updated_at": "2026-02-25T00:00:00+00:00",
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            completed_items_path.write_text(
+                json.dumps(
+                    [
+                        {
+                            "id": "RK-002",
+                            "title": "Completed task",
+                            "owner_role": "backend",
+                            "priority": "high",
+                            "milestone": "M1",
+                            "type": "qa",
+                            "retry_count": 1,
+                            "updated_at": "2026-02-25T00:00:00+00:00",
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            blocked_items_path.write_text(
+                json.dumps(
+                    [
+                        {
+                            "id": "RK-003",
+                            "title": "Blocked task",
+                            "owner_role": "lead",
+                            "priority": "high",
+                            "milestone": "M0",
+                            "type": "infra",
+                            "retry_count": 2,
+                            "blocker_reason": "dependency waiting",
+                            "updated_at": "2026-02-25T00:00:00+00:00",
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
 
             argv = [
                 "render_stats_html.py",
@@ -87,6 +142,12 @@ class RenderStatsHtmlTests(unittest.TestCase):
                 str(agent_stats_path),
                 "--model-stats",
                 str(model_stats_path),
+                "--work-items",
+                str(work_items_path),
+                "--completed-items",
+                str(completed_items_path),
+                "--blocked-items",
+                str(blocked_items_path),
                 "--output",
                 str(output_path),
                 "--title",
@@ -100,6 +161,9 @@ class RenderStatsHtmlTests(unittest.TestCase):
             self.assertIn("RK Dashboard Test", html_text)
             self.assertIn("Global Runs by Model", html_text)
             self.assertIn("Per Session Model Usage", html_text)
+            self.assertIn("Work Items Backlog", html_text)
+            self.assertIn("Queued Work Items", html_text)
+            self.assertIn("Blocked Work Items", html_text)
             self.assertIn("sess-1", html_text)
             self.assertIn("GPT-5.3-Codex-Spark", html_text)
 
