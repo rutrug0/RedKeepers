@@ -1,32 +1,29 @@
 {
   "state": "validating",
-  "updated_at": "2026-02-25T14:23:24.016465+00:00",
+  "updated_at": "2026-02-25T14:27:21.455112+00:00",
   "active_item": {
-    "id": "RK-M0-0005",
-    "title": "Reconcile blocked items that already produced deliverables",
-    "description": "Audit the bootstrap-incident requeued/blocked items against existing docs/tests/outbox evidence and normalize backlog state so completed work is marked completed and only real residual deltas remain queued/blocked.",
-    "milestone": "M0",
+    "id": "RK-M1-0005",
+    "title": "Build responsive client shell wireframe for settlement and world map",
+    "description": "Implement an initial web-first client shell in client-web/ with placeholder panels for settlement management, world-map viewport, and event feed, designed for desktop-first play with responsive mobile support and no final art dependencies.",
+    "milestone": "M1",
     "type": "feature",
     "priority": "high",
-    "owner_role": "qa",
+    "owner_role": "frontend",
     "preferred_agent": null,
-    "dependencies": [],
+    "dependencies": [
+      "RK-M0-0005",
+      "RK-M1-0003"
+    ],
     "inputs": [
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/completed-items.json",
-      "coordination/backlog/blocked-items.json",
-      "agents/ilya-fen/outbox.json",
-      "agents/sera-kest/outbox.json",
-      "agents/tomas-grell/outbox.json",
-      "docs/architecture/backend-modular-monolith.md",
+      "client-web/",
       "docs/architecture/client-cross-platform-strategy.md",
-      "tests/test_codex_preflight.py",
-      "tests/test_daemon_smoke_env.py"
+      "docs/design/game-vision.md",
+      "docs/design/factions-and-civilizations.md"
     ],
     "acceptance_criteria": [
-      "Disposition is recorded for RK-M1-0001, RK-M1-0002, RK-M0-0002, and RK-M0-0003 (completed if acceptance is met, otherwise requeued as scoped delta work)",
-      "Backlog files reflect an audit trail explaining each disposition without recreating escalation-chain churn",
-      "python tools/orchestrator.py status runs successfully after backlog normalization"
+      "Client shell includes navigable placeholder layout regions for settlement UI, world map view, and player event feed",
+      "Layout works on desktop and mobile breakpoints with basic keyboard/focus handling and touch-safe spacing",
+      "Placeholder art only (wireframes/neutral silhouettes/labeled mock blocks) with no final art assumptions baked into components"
     ],
     "validation_commands": [
       "python tools/orchestrator.py status"
@@ -42,9 +39,9 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
-    "assigned_agent": "tomas-grell"
+    "assigned_agent": "sera-kest"
   },
   "last_error": null,
-  "last_run_summary": "RK-AUTO-BACKLOG-0001 completed by mara-voss",
+  "last_run_summary": "RK-M0-0005 completed by tomas-grell",
   "lock_held": true
 }

@@ -16,5 +16,49 @@
     "files": [
       "agents/sera-kest/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-25T14:26:42.7261130Z",
+    "item_id": "RK-M1-0005",
+    "status": "completed",
+    "summary": "Built a web-first responsive client shell wireframe with placeholder settlement management, world map viewport, and player event feed panels, including keyboard-focusable region navigation and mobile-safe spacing.",
+    "files": [
+      "client-web/index.html",
+      "client-web/styles.css",
+      "client-web/app.js",
+      "agents/sera-kest/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Add mock data state to client shell wireframe",
+        "owner_role": "frontend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Replace hard-coded placeholder values in the settlement, map, and event panels with a local mock data model so future UI iterations can test empty/loading/error and selection states without backend dependencies.",
+        "acceptance_criteria": [
+          "Client shell reads panel content from a single mock state source in client-web/",
+          "At least loading and populated placeholder states are demonstrated for all three regions",
+          "Components remain art-agnostic and use placeholder assets/blocks only"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "title": "Frontend QA pass for accessibility and mobile shell interactions",
+        "owner_role": "frontend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Run a focused QA pass on the client shell wireframe for keyboard navigation, focus visibility, reduced-motion behavior, and common mobile viewport sizes, then patch issues found.",
+        "acceptance_criteria": [
+          "Region navigation is operable with keyboard only across desktop and mobile layouts",
+          "No clipped content or unusable controls at common mobile widths (360px and 390px)",
+          "Focus indicators remain visible on all interactive placeholder controls"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

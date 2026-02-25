@@ -1,48 +1,5 @@
 [
   {
-    "id": "RK-M0-0005",
-    "title": "Reconcile blocked items that already produced deliverables",
-    "description": "Audit the bootstrap-incident requeued/blocked items against existing docs/tests/outbox evidence and normalize backlog state so completed work is marked completed and only real residual deltas remain queued/blocked.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/completed-items.json",
-      "coordination/backlog/blocked-items.json",
-      "agents/ilya-fen/outbox.json",
-      "agents/sera-kest/outbox.json",
-      "agents/tomas-grell/outbox.json",
-      "docs/architecture/backend-modular-monolith.md",
-      "docs/architecture/client-cross-platform-strategy.md",
-      "tests/test_codex_preflight.py",
-      "tests/test_daemon_smoke_env.py"
-    ],
-    "acceptance_criteria": [
-      "Disposition is recorded for RK-M1-0001, RK-M1-0002, RK-M0-0002, and RK-M0-0003 (completed if acceptance is met, otherwise requeued as scoped delta work)",
-      "Backlog files reflect an audit trail explaining each disposition without recreating escalation-chain churn",
-      "python tools/orchestrator.py status runs successfully after backlog normalization"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T14:23:24.012418+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
-    "assigned_agent": "tomas-grell"
-  },
-  {
     "id": "RK-M1-0004",
     "title": "Bootstrap backend source tree from modular monolith spec",
     "description": "Create the initial framework-agnostic backend scaffold under backend/ matching the documented modular monolith package layout, including module template structure and placeholder files that make the intended boundaries explicit.",
@@ -106,17 +63,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T14:20:08.432712+00:00",
+    "updated_at": "2026-02-25T14:27:21.451076+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0001"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-M1-0006",
