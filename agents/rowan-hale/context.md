@@ -18,3 +18,4 @@ Design brief (primary responsibility):
 - Civilization differences should be mostly stat-based (numbers, timings, strengths/weaknesses), not different core mechanics
 - Hero units are planned for later milestones, not current scope; each civilization can eventually have distinct hero units
 - Civilization flavor units remain part of v1 identity, but should operate inside shared core combat systems
+- Enforce `docs/design/first-vertical-slice.md`: keep the first playable slice small, stat-driven, and data-table friendly; defer extra mechanics as follow-up tasks

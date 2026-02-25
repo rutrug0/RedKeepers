@@ -75,6 +75,7 @@ Validation Commands:
 
 ## Output Requirements
 - Start your final response with one explicit status line: `STATUS: COMPLETED` or `STATUS: BLOCKED`.
+- Respect the first vertical slice scope (`docs/design/first-vertical-slice.md`). If you identify useful but out-of-scope work, defer it into `proposed_work_items` rather than implementing it now.
 - Make only the changes needed for this work item.
 - If blocked, explain the blocker clearly and propose follow-up tasks.
 - If you identify follow-up work, append/update your `agents/{agent_id}/outbox.json` entry for this item with a `proposed_work_items` array (structured tasks for daemon ingestion).

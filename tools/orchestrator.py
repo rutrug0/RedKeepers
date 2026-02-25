@@ -269,7 +269,8 @@ def ensure_backlog_refill_item(queue: QueueManager) -> dict[str, Any] | None:
         "title": "Generate next backlog tranche",
         "description": (
             "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation "
-            "tasks across backend, frontend, design, content, and QA with dependencies and acceptance criteria."
+            "tasks across backend, frontend, design, content, and QA with dependencies and acceptance criteria. "
+            "Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas."
         ),
         "milestone": "M0",
         "type": "qa",
@@ -281,12 +282,14 @@ def ensure_backlog_refill_item(queue: QueueManager) -> dict[str, Any] | None:
             "coordination/backlog/work-items.json",
             "coordination/backlog/completed-items.json",
             "coordination/backlog/blocked-items.json",
+            "docs/design/first-vertical-slice.md",
             "coordination/runtime/run-history.jsonl",
         ],
         "acceptance_criteria": [
             "At least 3 new queued tasks are created or requeued",
             "Each task has owner_role, dependencies, and acceptance criteria",
             "Tasks reflect current project priorities and unblock progress",
+            "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred",
         ],
         "validation_commands": ["python tools/orchestrator.py status"],
         "status": "queued",
