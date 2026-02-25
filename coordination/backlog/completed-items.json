@@ -1078,5 +1078,41 @@
     "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
     "blocked_revisit_count": 1,
     "commit_sha": "3ee5f64d28a2a3f71ce5519dfc36c68c7c1a26f1"
+  },
+  {
+    "id": "RK-M1-0006-F03-F01-ESC",
+    "title": "Escalation: Implement post-slice building activation threshold evaluation for storage/defense package",
+    "description": "Investigate repeated failure for item RK-M1-0006-F03-F01. Reason: ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
+    "milestone": "M2",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 3,
+    "created_at": "2026-02-25T17:46:27.124727+00:00",
+    "updated_at": "2026-02-25T18:27:56.047854+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": "- `agents/mara-voss/outbox.json`: appended structured completion record with summary, root cause, and evidence for `RK-M1-0006-F03-F01-ESC`.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M1-0006-F03-F01",
+    "assigned_agent": "mara-voss",
+    "last_failure_reason": "ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
+    "blocked_revisit_count": 1,
+    "commit_sha": "936fba09025dbdca8df7991151387a70ac26706c"
   }
 ]
