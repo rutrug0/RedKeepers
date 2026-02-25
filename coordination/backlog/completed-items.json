@@ -1525,5 +1525,39 @@
     "escalation_target": "Mara Voss",
     "assigned_agent": "nika-thorn",
     "commit_sha": "e4c83e86db8f334532fc288fd1904da9d363cbc3"
+  },
+  {
+    "id": "RK-M0-0014",
+    "title": "Publish first-slice progression target matrix for 15m/30m/60m loop",
+    "description": "Define clear timing and resource targets for first upgrade, first unit training, and first scout interaction so implementation and QA share the same first-slice pacing expectations.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006",
+      "RK-M0-0009"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Matrix defines target windows for resource stabilization, first building upgrade, first unit training, and one scout interaction",
+      "Each target includes measurable pass/fail bounds that QA can assert in smoke checks",
+      "Document explicitly confirms first-slice caps (1 settlement, 3-4 resources, 4-6 buildings, 3-5 units) and marks anything else as deferred"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-25T20:21:05.098926+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/rowan-hale/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
+    "assigned_agent": "rowan-hale",
+    "commit_sha": "b715a748102e0106636f964141acca442a0af899"
   }
 ]

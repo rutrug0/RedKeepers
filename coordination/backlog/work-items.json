@@ -266,39 +266,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
   },
   {
-    "id": "RK-M0-0014",
-    "title": "Publish first-slice progression target matrix for 15m/30m/60m loop",
-    "description": "Define clear timing and resource targets for first upgrade, first unit training, and first scout interaction so implementation and QA share the same first-slice pacing expectations.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "design",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006",
-      "RK-M0-0009"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Matrix defines target windows for resource stabilization, first building upgrade, first unit training, and one scout interaction",
-      "Each target includes measurable pass/fail bounds that QA can assert in smoke checks",
-      "Document explicitly confirms first-slice caps (1 settlement, 3-4 resources, 4-6 buildings, 3-5 units) and marks anything else as deferred"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:32:27.509162+00:00",
-    "updated_at": "2026-02-25T20:21:04.211054+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
-    "assigned_agent": "rowan-hale"
-  },
-  {
     "id": "RK-M0-0015",
     "title": "Expand placeholder event templates for first-slice success and failure outcomes",
     "description": "Add tokenized placeholder text templates for settlement loop positive/negative outcomes so UI and backend can display consistent feedback without introducing new narrative scope.",
@@ -318,17 +285,18 @@
       "Entries remain replaceable placeholders and avoid adding lore systems or mechanics outside first-slice scope"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T18:32:27.509162+00:00",
-    "updated_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-25T20:22:26.009305+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
+    "assigned_agent": "nika-thorn"
   },
   {
     "id": "RK-M0-0016",
@@ -716,5 +684,36 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "nika-thorn",
     "generated_from_item_id": "RK-M0-0010"
+  },
+  {
+    "id": "RK-M0-0014-F01",
+    "title": "Add M0 smoke assertions for first-slice progression targets",
+    "description": "Add a deterministic smoke check that evaluates 15m/30m/60m snapshot bounds from RK-M0-0014 and fails when matrix thresholds are not met.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0014"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "A single smoke check reads settlement and event-scout snapshots at >=15m, >=30m, and >=60m",
+      "The run asserts matrix bounds for resource caps/ranges, first L2 upgrade window, first unit completion by <=60m, and at least one valid scout outcome",
+      "Test output clearly marks which matrix row failed and emits pass/fail in CI-readable form"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:21:05.106609+00:00",
+    "updated_at": "2026-02-25T20:21:05.106609+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-M0-0014"
   }
 ]

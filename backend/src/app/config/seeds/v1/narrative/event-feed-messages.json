@@ -115,6 +115,74 @@
       ]
     },
     {
+      "key": "event.tick.passive_gain_success",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "tick"
+      ],
+      "related_ids": [
+        "resource_id:*"
+      ],
+      "event_category": "tick",
+      "template": "{settlement_name}: the harvest cycle clears after {duration_ms}ms, and stores are restocked without incident.",
+      "tokens": [
+        "settlement_name",
+        "duration_ms"
+      ]
+    },
+    {
+      "key": "event.tick.passive_gain_reasoned",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "tick"
+      ],
+      "related_ids": [
+        "resource_id:*"
+      ],
+      "event_category": "tick",
+      "template": "{settlement_name}: tick logic resolved with {reason_codes} over {duration_ms}ms.",
+      "tokens": [
+        "settlement_name",
+        "duration_ms",
+        "reason_codes"
+      ]
+    },
+    {
+      "key": "event.tick.passive_gain_stalled",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "tick"
+      ],
+      "related_ids": [
+        "resource_id:*"
+      ],
+      "event_category": "tick",
+      "template": "{settlement_name}: this {duration_ms}ms tick produced no gain; the ledger held steady under poor harvest timing.",
+      "tokens": [
+        "settlement_name",
+        "duration_ms"
+      ]
+    },
+    {
+      "key": "event.tick.passive_gain_capped",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "tick"
+      ],
+      "related_ids": [
+        "resource_id:*"
+      ],
+      "event_category": "tick",
+      "template": "{settlement_name}: storage limits clipped this tick, and excess yield is marked as waste.",
+      "tokens": [
+        "settlement_name"
+      ]
+    },
+    {
       "key": "event.buildings.upgrade_started",
       "slice_status_scope": "playable_now",
       "categories": [
@@ -225,6 +293,79 @@
       ]
     },
     {
+      "key": "event.build.success",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "build"
+      ],
+      "related_ids": [
+        "building_id:{building_id}"
+      ],
+      "event_category": "build",
+      "template": "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
+      "tokens": [
+        "settlement_name",
+        "building_label",
+        "from_level",
+        "to_level"
+      ]
+    },
+    {
+      "key": "event.build.failure_insufficient_resources",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "build"
+      ],
+      "related_ids": [
+        "building_id:{building_id}"
+      ],
+      "event_category": "build",
+      "template": "{building_id}: upgrade halted. Missing stores {missing_resources_by_id}; needed {required_cost_by_id}, on hand {available_stock_by_id}.",
+      "tokens": [
+        "building_id",
+        "required_cost_by_id",
+        "available_stock_by_id",
+        "missing_resources_by_id"
+      ]
+    },
+    {
+      "key": "event.build.failure_cooldown",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "build"
+      ],
+      "related_ids": [
+        "building_id:{building_id}"
+      ],
+      "event_category": "build",
+      "template": "{building_id}: work crews are still turning to complete prior orders; new orders resume at {cooldown_ends_at}.",
+      "tokens": [
+        "building_id",
+        "cooldown_ends_at",
+        "cooldown_remaining_ms"
+      ]
+    },
+    {
+      "key": "event.build.failure_invalid_state",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "build"
+      ],
+      "related_ids": [
+        "building_id:{building_id}"
+      ],
+      "event_category": "build",
+      "template": "{building_id}: command rejected while the builder's ledger reports {invalid_reason}.",
+      "tokens": [
+        "building_id",
+        "invalid_reason"
+      ]
+    },
+    {
       "key": "event.buildings.family_military_ready",
       "slice_status_scope": "playable_now",
       "categories": [
@@ -330,6 +471,79 @@
         "settlement_name",
         "quantity",
         "unit_label"
+      ]
+    },
+    {
+      "key": "event.train.success",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "train"
+      ],
+      "related_ids": [
+        "unit_id:{unit_id}"
+      ],
+      "event_category": "train",
+      "template": "{settlement_name}: training begins for {quantity} {unit_label}.",
+      "tokens": [
+        "settlement_name",
+        "quantity",
+        "unit_label"
+      ]
+    },
+    {
+      "key": "event.train.failure_insufficient_resources",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "train"
+      ],
+      "related_ids": [
+        "unit_id:{unit_id}"
+      ],
+      "event_category": "train",
+      "template": "{unit_id}: muster delayed; missing resources {missing_resources_by_id} against required {required_cost_by_id}.",
+      "tokens": [
+        "unit_id",
+        "quantity",
+        "required_cost_by_id",
+        "available_stock_by_id",
+        "missing_resources_by_id"
+      ]
+    },
+    {
+      "key": "event.train.failure_cooldown",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "train"
+      ],
+      "related_ids": [
+        "unit_id:{unit_id}"
+      ],
+      "event_category": "train",
+      "template": "{unit_id}: barracks queue is locked until {queue_available_at}, {cooldown_remaining_ms}ms remaining.",
+      "tokens": [
+        "unit_id",
+        "queue_available_at",
+        "cooldown_remaining_ms"
+      ]
+    },
+    {
+      "key": "event.train.failure_invalid_state",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "train"
+      ],
+      "related_ids": [
+        "unit_id:{unit_id}"
+      ],
+      "event_category": "train",
+      "template": "{unit_id}: muster rejected as state contract reads {invalid_reason}.",
+      "tokens": [
+        "unit_id",
+        "invalid_reason"
       ]
     },
     {
@@ -512,6 +726,56 @@
       ],
       "event_category": "scout",
       "template": "Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).",
+      "tokens": [
+        "target_tile_label",
+        "hostile_force_estimate"
+      ]
+    },
+    {
+      "key": "event.scout.dispatched_success",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "scout"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "scout",
+      "template": "{settlement_name}: scouts ride out toward {target_tile_label} and report on first contact within the cycle.",
+      "tokens": [
+        "settlement_name",
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.scout.return_empty",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "scout"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "scout",
+      "template": "Scouting returns to quiet from {target_tile_label}; no active host disturbed the roads.",
+      "tokens": [
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.scout.return_hostile",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "scout"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "scout",
+      "template": "Scouts from {target_tile_label} report hostile movement ({hostile_force_estimate}); garrisons should tighten watch.",
       "tokens": [
         "target_tile_label",
         "hostile_force_estimate"

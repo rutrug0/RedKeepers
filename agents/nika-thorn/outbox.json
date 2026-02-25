@@ -82,4 +82,39 @@
       }
     ]
   }
+  ,
+  {
+    "timestamp_utc": "2026-02-25T20:21:10.160723Z",
+    "agent_id": "nika-thorn",
+    "work_item_id": "RK-M0-0015",
+    "status": "done",
+    "summary": "Expanded first-slice placeholder event templates with additional tick/build/train/scout outcome variants, including failure-state variants aligned to existing command result payload fields.",
+    "changed_files": [
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "agents/nika-thorn/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Wire new loop outcome keys into event feed rendering pipeline",
+        "owner_role": "frontend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Map new `event.tick.*`, `event.build.*`, `event.train.*`, and `event.scout.*` keys to rendering tokens/strings in the client so both success and failure flow variants are visible in the event feed UI.",
+        "inputs": [
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+          "client-web/app.js"
+        ],
+        "acceptance_criteria": [
+          "At least one `event.tick.*` success and one failure template renders correctly in the feed",
+          "At least one `event.build.*` failure template renders with dynamic tokens for missing resources or cooldown",
+          "At least one `event.train.*` failure template renders with dynamic tokens for cooldown or invalid state",
+          "Scout outcomes remain backward-compatible with `event.scout.dispatched`, `event.scout.report_empty`, and `event.scout.report_hostile`"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
+  }
 ]
