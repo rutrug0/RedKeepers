@@ -1001,4 +1001,48 @@
 
                      ]
     }
+    ,
+    {
+        "timestamp_utc":  "2026-02-25T21:17:25.927725+00:00",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-M0-0014-F01-F01-F01-F01",
+        "status":  "done",
+        "summary":  "Updated RK-M0-0014 profile generation to resolve replay/serialized seed source before fixture fallback while keeping generator command and output path stable.",
+        "changed_files":  [
+                              "tools/rk_m0_0014_progression_profile.py",
+                              "scripts/generate_rk_m0_0014_progression_profile.ps1",
+                              "docs/operations/rk-m0-0014-progression-smoke-runbook.md",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "python tools/rk_m0_0014_progression_profile.py --output coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json"
+                                ],
+        "results":  {
+                        "source_resolution":  [
+                                                 "coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.replay.json (if present)",
+                                                 "tests/fixtures/rk-m0-0014-progression-profile.json"
+                                             ],
+                        "determinism":  "Byte-stable output for unchanged source payload via deterministic JSON serialization path."
+                    },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Wire RK-M0-0014 generator to true backend seed replay pipeline output",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M0",
+                                        "priority":  "low",
+                                        "description":  "Replace the current replay fallback contract with the actual backend replay payload contract/output artifact once backend seed replay pipeline is available.",
+                                        "acceptance_criteria":  [
+                                                                    "Generator reads from a backend-produced RK-M0-0014 progression replay artifact path without wrapper/user-specified seed path.",
+                                                                    "Replay artifacts include deterministic settlement and scout snapshots that match backend policy logic outputs.",
+                                                                    "Smoke profile still regenerates via the same command invocation and remains byte-for-byte deterministic for unchanged replay payloads."
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/rk_m0_0014_progression_profile.py --seed-profile <backend_replay_path>"
+                                                                ]
+                                    }
+                                ]
+    }
 ]

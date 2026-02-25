@@ -365,40 +365,6 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
   },
   {
-    "id": "RK-M0-0006-F01-F01-F01",
-    "title": "Add durable storage-backed settlement tick repository implementation",
-    "description": "Replace or supplement the in-memory first-slice settlement tick state repository with a persistence-backed implementation (file/db) so ticked stocks survive process restarts and can be shared across process boundaries.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "low",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0006-F01-F01"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Tick state reads and writes are persisted to a durable store and can be loaded after restart.",
-      "Existing module registration and token contracts remain unchanged.",
-      "Current in-memory implementation remains available for reference tests."
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T20:44:33.100665+00:00",
-    "updated_at": "2026-02-25T21:17:18.135772+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M0-0006-F01-F01",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-M0-0014-F01-F01-F01-F01",
     "title": "Generate RK-M0-0014 profile directly from backend seed replay",
     "description": "Replace fixture-as-seed copy behavior with deterministic replay from first-slice backend seed fixtures when that pipeline is introduced, so profile regeneration remains tied to source seed tables and policy logic.",
@@ -417,16 +383,17 @@
       "Rerunning generation with unchanged seeds produces byte-for-byte identical output."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T21:12:49.642701+00:00",
-    "updated_at": "2026-02-25T21:12:49.642701+00:00",
+    "updated_at": "2026-02-25T21:19:04.310543+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M0-0014-F01-F01-F01"
+    "generated_from_item_id": "RK-M0-0014-F01-F01-F01",
+    "assigned_agent": "ilya-fen"
   }
 ]

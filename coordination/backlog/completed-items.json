@@ -2013,5 +2013,40 @@
     "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'GPT-5.3-Codex-Spark' model is not supported when using Codex with a ChatGPT account.\"}",
     "blocked_revisit_count": 1,
     "commit_sha": "3ff1820de99673118cd4bc67059bb8ab708811e8"
+  },
+  {
+    "id": "RK-M0-0006-F01-F01-F01",
+    "title": "Add durable storage-backed settlement tick repository implementation",
+    "description": "Replace or supplement the in-memory first-slice settlement tick state repository with a persistence-backed implementation (file/db) so ticked stocks survive process restarts and can be shared across process boundaries.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006-F01-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Tick state reads and writes are persisted to a durable store and can be loaded after restart.",
+      "Existing module registration and token contracts remain unchanged.",
+      "Current in-memory implementation remains available for reference tests."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:44:33.100665+00:00",
+    "updated_at": "2026-02-25T21:17:20.872418+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Would you like me to add a follow-up task to add explicit file corruption recovery behavior (e.g., graceful fallback if persisted JSON is malformed)?",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M0-0006-F01-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "77651738208b7b4a43f2537a8e1429f397e21056"
   }
 ]

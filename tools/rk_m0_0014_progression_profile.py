@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,6 +12,17 @@ DEFAULT_SEED_PROFILE_PATH = (
     / "tests"
     / "fixtures"
     / "rk-m0-0014-progression-profile.json"
+)
+DEFAULT_REPLAY_PROFILE_PATH = (
+    ROOT
+    / "coordination"
+    / "runtime"
+    / "first-slice-progression"
+    / "rk-m0-0014-progression-profile.replay.json"
+)
+DEFAULT_SOURCE_PROFILE_PATHS = (
+    DEFAULT_REPLAY_PROFILE_PATH,
+    DEFAULT_SEED_PROFILE_PATH,
 )
 DEFAULT_OUTPUT_PROFILE_PATH = (
     ROOT
@@ -33,21 +44,60 @@ def _resolve_repo_relative_path(raw_path: str) -> Path:
     return ROOT / path
 
 
+def _is_profile_payload(data: dict[str, Any]) -> bool:
+    for key in REQUIRED_TOP_LEVEL_KEYS:
+        if key not in data:
+            return False
+        if not isinstance(data[key], list):
+            return False
+    return True
+
+
+def _extract_profile_payload(data: Any, source_path: Path) -> dict[str, Any]:
+    if isinstance(data, dict) and _is_profile_payload(data):
+        return data
+
+    if not isinstance(data, dict):
+        raise ValueError(f"seed source must be a JSON object: {source_path}")
+
+    for key in ("profile", "payload", "seed_profile", "replay", "replay_payload", "result", "data"):
+        nested = data.get(key)
+        if isinstance(nested, dict) and _is_profile_payload(nested):
+            return nested
+
+    raise ValueError(f"seed source is not a progression profile payload: {source_path}")
+
+
+def _resolve_seed_profile_path(raw_path: Optional[str]) -> Path:
+    if raw_path is not None:
+        path = raw_path.strip()
+        if path:
+            resolved = _resolve_repo_relative_path(path)
+            if not resolved.is_file():
+                raise ValueError(f"seed profile not found: {resolved}")
+            return resolved
+
+    for candidate in DEFAULT_SOURCE_PROFILE_PATHS:
+        if candidate.is_file():
+            return candidate
+
+    raise ValueError(
+        "No progression profile source found. Checked:\n"
+        f"- {DEFAULT_REPLAY_PROFILE_PATH} (replay output)\n"
+        f"- {DEFAULT_SEED_PROFILE_PATH} (legacy fixture)"
+    )
+
+
 def _load_profile(source_path: Path) -> dict[str, Any]:
     if not source_path.is_file():
         raise ValueError(f"seed profile not found: {source_path}")
 
     data = json.loads(source_path.read_text(encoding="utf-8"))
-    if not isinstance(data, dict):
-        raise ValueError(f"seed profile must be a JSON object: {source_path}")
+    profile = _extract_profile_payload(data, source_path)
+    if not _is_profile_payload(profile):
+        raise ValueError(f"seed profile missing required key(s) {REQUIRED_TOP_LEVEL_KEYS}: {source_path}")
 
-    for key in REQUIRED_TOP_LEVEL_KEYS:
-        if key not in data:
-            raise ValueError(f"seed profile missing required key '{key}': {source_path}")
-        if not isinstance(data[key], list):
-            raise ValueError(f"seed profile key '{key}' must be a list: {source_path}")
-
-    return data
+    return profile
 
 
 def _write_profile(profile: dict[str, Any], output_path: Path, *, indent: int) -> None:
@@ -66,8 +116,11 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--seed-profile",
-        default=str(DEFAULT_SEED_PROFILE_PATH),
-        help="Path to the source progression profile seed file.",
+        default=None,
+        help=(
+            "Optional path to source progression profile seed/replay output."
+            " If omitted, the command prefers replay output then falls back to fixture seed."
+        ),
     )
     parser.add_argument(
         "--output",
@@ -86,7 +139,7 @@ def _parse_args() -> argparse.Namespace:
 def main() -> int:
     args = _parse_args()
     try:
-        seed_profile_path = _resolve_repo_relative_path(args.seed_profile)
+        seed_profile_path = _resolve_seed_profile_path(args.seed_profile)
         output_profile_path = _resolve_repo_relative_path(args.output)
         profile = _load_profile(seed_profile_path)
         _write_profile(profile, output_profile_path, indent=max(int(args.indent), 0))

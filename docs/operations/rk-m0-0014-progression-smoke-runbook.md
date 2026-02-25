@@ -41,9 +41,10 @@ Equivalent wrapper:
 scripts/generate_rk_m0_0014_progression_profile.ps1
 ```
 
-Default source for generation is:
+Default source for generation is resolved in this order:
 
-- `tests/fixtures/rk-m0-0014-progression-profile.json`
+- `coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.replay.json` (pipeline/replay output)
+- `tests/fixtures/rk-m0-0014-progression-profile.json` (legacy fixture fallback)
 
 Output is written deterministically to:
 
