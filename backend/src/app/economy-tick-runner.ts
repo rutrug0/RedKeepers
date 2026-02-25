@@ -1,16 +1,22 @@
 import { err, ok } from "../shared";
 import type {
   AppError,
-  Instant,
   Result,
 } from "../shared";
-import type { BackendModule, ModuleRegistrationContext, ServiceToken } from "./composition";
+import type {
+  BackendModule,
+  ModuleRegistrationContext,
+  ServiceToken,
+} from "./composition";
 import {
   createSettlementResourceProjectionServiceFromStarterData,
-  type FirstSliceResourceId,
   type SettlementResourceProjectionService,
   type SettlementResourceTickProjection,
-  type SettlementResourceTickReasonCode,
+} from "../modules/economy";
+import {
+  InMemoryFirstSliceEconomyTickStateRepository,
+  type FirstSliceEconomyTickState,
+  type FirstSliceEconomyTickStateRepository,
 } from "../modules/economy";
 
 const DEFAULT_TICK_INTERVAL_MS = 60_000;
@@ -31,19 +37,8 @@ export const FIRST_SLICE_SETTLEMENT_ECONOMY_TICK_STATE_TOKEN: ServiceToken<
 > = {
   key: "app.economy.first_slice_settlement_tick_state",
   description:
-    "In-memory first-slice settlement economy resource state for app-level tick integration tests and stubs.",
+    "Repository-backed first-slice settlement economy state for app-level tick integration.",
 };
-
-export interface FirstSliceEconomyTickState {
-  readonly settlement_id: string;
-  readonly settlement_name: string;
-  readonly tick_started_at: Instant;
-  readonly tick_ended_at: Instant;
-  readonly duration_ms: number;
-  readonly resource_stock_by_id: Readonly<Record<FirstSliceResourceId, number>>;
-  readonly resource_delta_by_id: Readonly<Record<FirstSliceResourceId, number>>;
-  readonly projection_reason_codes: readonly SettlementResourceTickReasonCode[];
-}
 
 export interface FirstSliceEconomyTickStateService {
   getLatestState(): FirstSliceEconomyTickState;
@@ -55,20 +50,9 @@ export interface FirstSliceEconomyTickModuleOptions {
   readonly tickIntervalMs?: number;
 }
 
-interface MutableFirstSliceEconomyTickState {
-  settlement_id: string;
-  settlement_name: string;
-  tick_started_at: Instant;
-  tick_ended_at: Instant;
-  duration_ms: number;
-  resource_stock_by_id: Record<FirstSliceResourceId, number>;
-  resource_delta_by_id: Record<FirstSliceResourceId, number>;
-  projection_reason_codes: readonly SettlementResourceTickReasonCode[];
-}
-
 const createFirstSliceEconomyTickStateFromProjection = (
   projection: SettlementResourceTickProjection,
-): MutableFirstSliceEconomyTickState => ({
+): FirstSliceEconomyTickState => ({
   settlement_id: projection.settlement_id,
   settlement_name: projection.settlement_name,
   tick_started_at: projection.tick_started_at,
@@ -79,19 +63,6 @@ const createFirstSliceEconomyTickStateFromProjection = (
   projection_reason_codes: projection.projection_reason_codes,
 });
 
-const cloneSnapshot = (
-  state: MutableFirstSliceEconomyTickState,
-): FirstSliceEconomyTickState => ({
-  settlement_id: state.settlement_id,
-  settlement_name: state.settlement_name,
-  tick_started_at: state.tick_started_at,
-  tick_ended_at: state.tick_ended_at,
-  duration_ms: state.duration_ms,
-  resource_stock_by_id: { ...state.resource_stock_by_id },
-  resource_delta_by_id: { ...state.resource_delta_by_id },
-  projection_reason_codes: [...state.projection_reason_codes],
-});
-
 const clampPositiveInteger = (value: number | undefined): number => {
   if (!Number.isFinite(value) || value < 1) {
     return 1;
@@ -99,16 +70,19 @@ const clampPositiveInteger = (value: number | undefined): number => {
   return Math.trunc(value);
 };
 
-const applyProjection = (
-  state: MutableFirstSliceEconomyTickState,
-  projection: SettlementResourceTickProjection,
-): void => {
-  state.tick_started_at = projection.tick_started_at;
-  state.tick_ended_at = projection.tick_ended_at;
-  state.duration_ms = projection.duration_ms;
-  state.resource_stock_by_id = { ...projection.resource_stock_by_id };
-  state.resource_delta_by_id = { ...projection.resource_delta_by_id };
-  state.projection_reason_codes = projection.projection_reason_codes;
+const readLatestStateFromRepository = (
+  settlementId: string,
+  repository: FirstSliceEconomyTickStateRepository,
+): FirstSliceEconomyTickState => {
+  const state = repository.readLatestTickState({
+    settlement_id: settlementId,
+  });
+
+  if (state === null) {
+    throw new Error(`Missing tick state for settlement '${settlementId}'.`);
+  }
+
+  return state;
 };
 
 export const createFirstSliceEconomyTickModule = (
@@ -118,30 +92,32 @@ export const createFirstSliceEconomyTickModule = (
   const settlementName = options?.settlementName?.trim() || DEFAULT_SETTLEMENT_NAME;
   const intervalMs = clampPositiveInteger(options?.tickIntervalMs ?? DEFAULT_TICK_INTERVAL_MS);
 
-  const projectionService = createSettlementResourceProjectionServiceFromStarterData(
-    {
-      entries_by_id: {},
-    },
-    {
-      default_settlement_name: settlementName,
-    },
-  );
+  const projectionService = createSettlementResourceProjectionServiceFromStarterData({
+    entries_by_id: {},
+  }, {
+    default_settlement_name: settlementName,
+  });
 
   return {
     moduleId: MODULE_ID,
     register: (context: ModuleRegistrationContext): Result<void, AppError> => {
       const seedNow = context.clock.now();
-      const state = createFirstSliceEconomyTickStateFromProjection(
-        projectionService.tickSettlementResources({
-          settlement_id: settlementId,
-          settlement_name: settlementName,
-          tick_started_at: seedNow,
-          tick_ended_at: seedNow,
-        }),
-      );
+      const tickStateRepository = new InMemoryFirstSliceEconomyTickStateRepository();
       const stateService: FirstSliceEconomyTickStateService = {
-        getLatestState: () => cloneSnapshot(state),
+        getLatestState: () =>
+          readLatestStateFromRepository(settlementId, tickStateRepository),
       };
+
+      tickStateRepository.saveTickState(
+        createFirstSliceEconomyTickStateFromProjection(
+          projectionService.tickSettlementResources({
+            settlement_id: settlementId,
+            settlement_name: settlementName,
+            tick_started_at: seedNow,
+            tick_ended_at: seedNow,
+          }),
+        ),
+      );
 
       try {
         context.services.register(SETTLEMENT_RESOURCE_PROJECTION_SERVICE_TOKEN, projectionService);
@@ -166,15 +142,22 @@ export const createFirstSliceEconomyTickModule = (
 
         tickInProgress = true;
         try {
+          const currentState = readLatestStateFromRepository(
+            settlementId,
+            tickStateRepository,
+          );
+
           const nextTick = projectionService.tickSettlementResources({
             settlement_id: settlementId,
             settlement_name: settlementName,
-            tick_started_at: state.tick_ended_at,
+            tick_started_at: currentState.tick_ended_at,
             tick_ended_at: context.clock.now(),
-            resource_stock: state.resource_stock_by_id,
+            resource_stock: currentState.resource_stock_by_id,
           });
 
-          applyProjection(state, nextTick);
+          tickStateRepository.saveTickState(
+            createFirstSliceEconomyTickStateFromProjection(nextTick),
+          );
 
           for (const placeholderEvent of nextTick.placeholder_events) {
             await context.eventBus.publish(placeholderEvent);

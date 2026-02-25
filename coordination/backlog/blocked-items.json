@@ -577,5 +577,43 @@
     "generated_by_agent": "nika-thorn",
     "generated_from_item_id": "RK-M0-0010",
     "assigned_agent": "sera-kest"
+  },
+  {
+    "id": "RK-M0-0015-F01",
+    "title": "Wire new loop outcome keys into event feed rendering pipeline",
+    "description": "Map new `event.tick.*`, `event.build.*`, `event.train.*`, and `event.scout.*` keys to rendering tokens/strings in the client so both success and failure flow variants are visible in the event feed UI.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0015"
+    ],
+    "inputs": [
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "client-web/app.js"
+    ],
+    "acceptance_criteria": [
+      "At least one `event.tick.*` success and one failure template renders correctly in the feed",
+      "At least one `event.build.*` failure template renders with dynamic tokens for missing resources or cooldown",
+      "At least one `event.train.*` failure template renders with dynamic tokens for cooldown or invalid state",
+      "Scout outcomes remain backward-compatible with `event.scout.dispatched`, `event.scout.report_empty`, and `event.scout.report_hostile`"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:22:27.276337+00:00",
+    "updated_at": "2026-02-25T20:43:00.927121+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "Frontend visual smoke blocked by environment: playwright import failed: No module named 'playwright'",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-M0-0015",
+    "assigned_agent": "sera-kest"
   }
 ]

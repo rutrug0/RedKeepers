@@ -1779,5 +1779,38 @@
     "generated_from_item_id": "RK-M0-0009",
     "assigned_agent": "ilya-fen",
     "commit_sha": "0472b0d0e1d1e6a1f459c1226fccaaf07f18428c"
+  },
+  {
+    "id": "RK-M0-0014-F01",
+    "title": "Add M0 smoke assertions for first-slice progression targets",
+    "description": "Add a deterministic smoke check that evaluates 15m/30m/60m snapshot bounds from RK-M0-0014 and fails when matrix thresholds are not met.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0014"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "A single smoke check reads settlement and event-scout snapshots at >=15m, >=30m, and >=60m",
+      "The run asserts matrix bounds for resource caps/ranges, first L2 upgrade window, first unit completion by <=60m, and at least one valid scout outcome",
+      "Test output clearly marks which matrix row failed and emits pass/fail in CI-readable form"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:21:05.106609+00:00",
+    "updated_at": "2026-02-25T20:42:01.029447+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Checks run: none requested by this item, and per scope instructions I did not run tests.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-M0-0014",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "b4edaa6918d392e469c79cfd919a2467df081251"
   }
 ]

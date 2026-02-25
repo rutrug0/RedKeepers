@@ -160,5 +160,31 @@
       "client-android-capacitor/www/app.js",
       "agents/sera-kest/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-25T20:47:11.0000000Z",
+    "item_id": "RK-M0-0015-F01",
+    "status": "completed",
+    "summary": "Wired new event.tick.*, event.build.*, event.train.*, and event.scout.* placeholders into the client feed renderer, and updated mock feed events to show both success and failure variants with dynamic tokens.",
+    "files": [
+      "client-web/app.js",
+      "agents/sera-kest/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Add richer token rendering for object/array narrative values",
+        "owner_role": "frontend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Handle non-scalar event token values (for example resource requirement dictionaries) with stable, readable rendering in feed templates.",
+        "acceptance_criteria": [
+          "Nested token payloads for resource maps render as ordered, human-readable strings in event feed rows",
+          "No placeholder placeholders remain for supported token keys used by tick/build/train/scout failure templates"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

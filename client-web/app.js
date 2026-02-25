@@ -9,20 +9,58 @@
       "The Cinder Throne Legates hold the frontier by ash, ration, and decree. Their magistrates build roads before monuments, and their branded levies turn every settlement into a hard post that is costly to break.",
     "event.tick.passive_income":
       "{settlement_name} stores rise: +{food_gain} Food, +{wood_gain} Wood, +{stone_gain} Stone, +{iron_gain} Iron.",
+    "event.tick.passive_gain_success":
+      "{settlement_name}: the harvest cycle clears after {duration_ms}ms, and stores are restocked without incident.",
+    "event.tick.passive_gain_reasoned":
+      "{settlement_name}: tick logic resolved with {reason_codes} over {duration_ms}ms.",
+    "event.tick.passive_gain_stalled":
+      "{settlement_name}: this {duration_ms}ms tick produced no gain; the ledger held steady under poor harvest timing.",
+    "event.tick.passive_gain_capped":
+      "{settlement_name}: storage limits clipped this tick, and excess yield is marked as waste.",
     "event.buildings.upgrade_started":
       "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
     "event.build.upgrade_started":
       "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
+    "event.build.upgrade_completed":
+      "{settlement_name}: {building_label} reaches Lv.{new_level}. Crews return to regular duty.",
+    "event.build.success":
+      "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
+    "event.build.failure_insufficient_resources":
+      "{building_id}: upgrade halted. Missing stores {missing_resources_by_id}; needed {required_cost_by_id}, on hand {available_stock_by_id}.",
+    "event.build.failure_cooldown":
+      "{building_id}: work crews are still turning to complete prior orders; new orders resume at {cooldown_ends_at}.",
+    "event.build.failure_invalid_state":
+      "{building_id}: command rejected while the builder's ledger reports {invalid_reason}.",
     "event.units.training_started":
       "{settlement_name}: training begins for {quantity} {unit_label}.",
     "event.train.started":
       "{settlement_name}: training begins for {quantity} {unit_label}.",
+    "event.train.completed":
+      "{settlement_name}: {quantity} {unit_label} report ready for orders.",
+    "event.train.success":
+      "{settlement_name}: training begins for {quantity} {unit_label}.",
+    "event.train.failure_insufficient_resources":
+      "{unit_id}: muster delayed; missing resources {missing_resources_by_id} against required {required_cost_by_id}.",
+    "event.train.failure_cooldown":
+      "{unit_id}: barracks queue is locked until {queue_available_at}, {cooldown_remaining_ms}ms remaining.",
+    "event.train.failure_invalid_state":
+      "{unit_id}: muster rejected as state contract reads {invalid_reason}.",
     "event.units.upkeep_reduced_garrison":
       "{settlement_name}: garrison ration discipline reduces stationed troop upkeep.",
+    "event.scout.dispatched_success":
+      "{settlement_name}: scouts ride out toward {target_tile_label} and report on first contact within the cycle.",
     "event.scout.dispatched":
       "{settlement_name}: scouts ride out toward {target_tile_label}.",
+    "event.scout.report_empty":
+      "Scout report from {target_tile_label}: no active host detected. The roads remain quiet for now.",
     "event.world.scout_report_hostile":
       "Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).",
+    "event.scout.report_hostile":
+      "Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).",
+    "event.scout.return_empty":
+      "Scouting returns to quiet from {target_tile_label}; no active host disturbed the roads.",
+    "event.scout.return_hostile":
+      "Scouts from {target_tile_label} report hostile movement ({hostile_force_estimate}); garrisons should tighten watch.",
     "event.settlement.name_assigned":
       "Surveyors record the new holding as {settlement_name}. The name enters the ledger.",
   });
@@ -201,19 +239,25 @@
             selectedFilter: "All",
             events: [
               {
-                contentKey: "event.tick.passive_income",
+                contentKey: "event.tick.passive_gain_success",
                 tokens: {
                   settlement_name: "Cinderwatch Hold",
-                  food_gain: 16,
-                  wood_gain: 10,
-                  stone_gain: 6,
-                  iron_gain: 5,
+                  duration_ms: 250,
                 },
                 meta: "2m ago | Economy | Tick",
                 priority: "high",
               },
               {
-                contentKey: "event.build.upgrade_started",
+                contentKey: "event.tick.passive_gain_stalled",
+                tokens: {
+                  settlement_name: "Cinderwatch Hold",
+                  duration_ms: 240,
+                },
+                meta: "6m ago | Economy | Tick",
+                priority: "normal",
+              },
+              {
+                contentKey: "event.build.success",
                 tokens: {
                   settlement_name: "Cinderwatch Hold",
                   building_label: "Granary Upgrade",
@@ -224,13 +268,41 @@
                 priority: "normal",
               },
               {
-                contentKey: "event.train.started",
+                contentKey: "event.build.failure_insufficient_resources",
                 tokens: {
-                  settlement_name: "Cinderwatch Hold",
-                  quantity: 12,
-                  unit_label: "Road Wardens",
+                  building_id: "granary",
+                  missing_resources_by_id: "Wood: 4, Stone: 2",
+                  required_cost_by_id: "Wood: 12, Stone: 5",
+                  available_stock_by_id: "Wood: 8, Stone: 3",
+                },
+                meta: "12m ago | Settlement | Build loop",
+                priority: "normal",
+              },
+              {
+                contentKey: "event.train.failure_cooldown",
+                tokens: {
+                  unit_id: "road_wardens",
+                  queue_available_at: "08:42",
+                  cooldown_remaining_ms: 4200,
                 },
                 meta: "16m ago | Military | Train loop",
+                priority: "normal",
+              },
+              {
+                contentKey: "event.scout.report_empty",
+                tokens: {
+                  target_tile_label: "Black Reed March",
+                },
+                meta: "21m ago | World | Scout loop",
+                priority: "normal",
+              },
+              {
+                contentKey: "event.scout.report_hostile",
+                tokens: {
+                  target_tile_label: "Ruin Site",
+                  hostile_force_estimate: "3-5 squads",
+                },
+                meta: "23m ago | World | Scout loop",
                 priority: "normal",
               },
               {
@@ -239,7 +311,17 @@
                   settlement_name: "Cinderwatch Hold",
                   target_tile_label: "Black Reed March",
                 },
-                meta: "21m ago | World | Scout loop",
+                meta: "25m ago | World | Scout loop",
+                priority: "normal",
+              },
+              {
+                contentKey: "event.train.success",
+                tokens: {
+                  settlement_name: "Cinderwatch Hold",
+                  quantity: 12,
+                  unit_label: "Road Wardens",
+                },
+                meta: "31m ago | Military | Train loop",
                 priority: "normal",
               },
               {
