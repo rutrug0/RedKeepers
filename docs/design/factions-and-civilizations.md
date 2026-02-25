@@ -5,7 +5,7 @@ This draft defines the first playable civilization set for RedKeepers. It target
 ## V1 Design Goals
 
 - Deliver strong faction identity without requiring players to relearn the whole game per civilization.
-- Keep early progression readable: one signature mechanic active in the first hours, additional nuance unlocked later.
+- Keep early progression readable by favoring stat/timing differences over unique mechanics.
 - Support classic MMORTS decision-making (timing, scouting, logistics, diplomacy) with civilization-specific strengths and liabilities.
 
 ## Shared Rules (Onboarding Guardrails)
@@ -17,12 +17,17 @@ All civilizations in v1 share:
 - Same combat model fundamentals (infantry/ranged/cavalry/siege/counter relationships)
 
 Civilization asymmetry is introduced through:
-- 1 economy/logistics trait
-- 1 military doctrine trait
-- 1 unique settlement structure
+- Stat-biased economy/logistics profiles (production rates, upkeep, movement, training speed, etc.)
+- Stat-biased military profiles (durability, speed, carry capacity, siege efficiency, etc.)
+- Limited civ flavor bonuses and flavor units (same core systems, different numbers/weights)
 - 3-4 signature units (not full bespoke rosters in v1)
 
 This keeps cognitive load moderate while still creating meaningful faction choice.
+
+Hero units (future, not v1):
+- Hero units are explicitly deferred for now.
+- Later milestones will add hero units, with a different hero roster/theme per civilization.
+- Hero design must not introduce large civilization-exclusive core mechanics in early onboarding.
 
 ## Civilization Set (V1)
 
@@ -35,11 +40,11 @@ Playstyle summary:
 - Best for players who want reliable progression and durable settlements
 - Lower raid burst than faster/skirmish-oriented factions
 
-Core asymmetry:
+Core asymmetry (v1 implementation should remain mostly stat-driven):
 - `Ration Law` (economy/logistics trait): Garrisoned troops consume less upkeep while stationed at home settlements; field armies consume normal upkeep.
 - `Road Wardens` (military/logistics trait): Reinforcements move faster between owned settlements connected by road infrastructure.
 
-Unique structure:
+Flavor structure (v1 should prefer numeric bonuses and simple toggles over new subsystems):
 - `Cinder Tribunal`:
   - Boosts public order / reduces early unrest penalties
   - Unlocks levy-to-regular infantry upgrade line
@@ -72,11 +77,11 @@ Playstyle summary:
 - Rewards timing, map reading, and selective engagements
 - More fragile in direct siege races
 
-Core asymmetry:
+Core asymmetry (v1 implementation should remain mostly stat-driven):
 - `Drowned Paths` (logistics trait): Armies suffer reduced movement penalties in swamp/wetland regions; scouts gain improved vision in those regions.
 - `Spoilcraft` (economy trait): Raids return a small amount of preserved supplies (bonus resource yield) even when the main haul is modest.
 
-Unique structure:
+Flavor structure (v1 should prefer numeric bonuses and simple toggles over new subsystems):
 - `Fen Reliquary`:
   - Converts a portion of raid gains into ritual stores used for poison/ambush upgrades
   - Improves scout recovery time
@@ -109,11 +114,11 @@ Playstyle summary:
 - Slower early tempo, stronger scaling through production efficiency
 - Favours organized alliance roles and planned offensives
 
-Core asymmetry:
+Core asymmetry (v1 implementation should remain mostly stat-driven):
 - `Stonebound Works` (economy trait): Building upgrades for military/defense structures cost less stone/iron but take slightly longer.
 - `Clan Muster` (military trait): Heavy infantry train slower individually, but batch training queues are more efficient.
 
-Unique structure:
+Flavor structure (v1 should prefer numeric bonuses and simple toggles over new subsystems):
 - `Ancestor Forge`:
   - Improves heavy infantry equipment quality
   - Unlocks one-time settlement forge choices (offense-focused or defense-focused)
@@ -141,6 +146,11 @@ Complexity rating: Medium (economy timing focused)
 
 The v1 balance target is "different answers to the same problems," not radically different game rules.
 
+Implementation constraint (important):
+- Civilization identity should come primarily from stat profiles, pacing, and flavor unit mixes.
+- Avoid civilization-specific mechanics that require separate tutorials or bespoke UI flows in v1.
+- If a civilization bonus can be expressed as a clear numeric modifier, prefer that approach.
+
 - Cinder Throne Legates: safest opener, strongest defensive logistics
 - Mirebound Covenant: best scouting/harassment and terrain exploitation
 - Graveforge Clans: best scaling infrastructure and heavy army quality
@@ -155,6 +165,7 @@ Each civilization should remain viable for:
 To protect onboarding readability, v1 deliberately avoids:
 - Civilization-exclusive resource types at game start
 - Entirely unique combat subsystems per civilization
+- Hero units (deferred to later milestone)
 - Large rosters with overlapping specialist units
 - Multi-step ritual/crafting trees before players learn core settlement play
 
@@ -170,3 +181,4 @@ This keeps civilization choice meaningful on day one while preserving room for d
 - Add a 4th civilization only after v1 matchup clarity is validated
 - Expand regional terrain interactions beyond wetlands (snow, ashlands, broken roads)
 - Add advanced civilization doctrines as opt-in midgame choices rather than baseline complexity
+- Add civilization-specific hero units (one per civ to start), after core faction balance is stable

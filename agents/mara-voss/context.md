@@ -14,3 +14,4 @@ Product brief (must preserve across planning and task routing):
 - Core gameplay direction is most similar to Travian / Tribal Wars style persistent strategy MMOs
 - Target depth is meaningful but not overwhelming (accessible onboarding, strategic midgame)
 - Theme is dark fantasy with original worldbuilding; inspiration may include George R. R. Martin-like tone/political harshness, but all lore/factions/names/content must be flavor-unique and non-derivative
+- Until a dedicated art pipeline/lead artist is added, all teams must use replaceable placeholder art only and avoid blocking work on final visuals

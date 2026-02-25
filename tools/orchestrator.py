@@ -140,6 +140,105 @@ def queue_counts(queue: QueueManager) -> dict[str, int]:
     }
 
 
+def _queued_items_with_unmet_dependencies(queue: QueueManager) -> list[dict[str, Any]]:
+    completed_ids = {item["id"] for item in queue.completed}
+    blocked_ids = {item["id"] for item in queue.blocked}
+    rows: list[dict[str, Any]] = []
+    for item in queue.active:
+        if item.get("status") != "queued":
+            continue
+        deps = list(item.get("dependencies", []))
+        unmet = [dep for dep in deps if dep not in completed_ids]
+        if unmet:
+            rows.append(
+                {
+                    "item_id": item["id"],
+                    "title": item.get("title"),
+                    "unmet_dependencies": unmet,
+                    "blocked_dependencies": [dep for dep in unmet if dep in blocked_ids],
+                }
+            )
+    return rows
+
+
+def _next_auto_stall_item_id(queue: QueueManager) -> str:
+    existing_ids = {item["id"] for item in queue.active} | {item["id"] for item in queue.completed} | {item["id"] for item in queue.blocked}
+    i = 1
+    while True:
+        candidate = f"RK-AUTO-STALL-{i:04d}"
+        if candidate not in existing_ids:
+            return candidate
+        i += 1
+
+
+def ensure_queue_stall_recovery_item(queue: QueueManager) -> dict[str, Any] | None:
+    stalled = _queued_items_with_unmet_dependencies(queue)
+    if not stalled:
+        return None
+
+    # Avoid generating duplicates if one is already open.
+    for item in queue.active:
+        if item.get("status") == "queued" and item.get("auto_generated") == "queue_stall_recovery":
+            return None
+
+    blocked_dep_map = {row["item_id"]: row["blocked_dependencies"] for row in stalled if row["blocked_dependencies"]}
+    if not blocked_dep_map:
+        return None
+
+    item = {
+        "id": _next_auto_stall_item_id(queue),
+        "title": "Resolve queue dependency stall",
+        "description": (
+            "The daemon detected queued work items that are not dependency-ready because one or more dependencies "
+            "are currently blocked. Review blocked items, requeue/close obsolete items, and restore runnable work."
+        ),
+        "milestone": "M0",
+        "type": "qa",
+        "priority": "high",
+        "owner_role": "lead",
+        "preferred_agent": "mara-voss",
+        "dependencies": [],
+        "inputs": [
+            "coordination/backlog/work-items.json",
+            "coordination/backlog/blocked-items.json",
+            "coordination/state/run-history.jsonl",
+        ],
+        "acceptance_criteria": [
+            "At least one dependency-stalled queued item is made runnable or explicitly closed",
+            "Blocked/obsolete queue artifacts are documented or consolidated",
+            "Backlog no longer stalls immediately on next daemon run",
+        ],
+        "validation_commands": ["python tools/orchestrator.py status"],
+        "status": "queued",
+        "retry_count": 0,
+        "created_at": utc_now_iso(),
+        "updated_at": utc_now_iso(),
+        "estimated_effort": "S",
+        "token_budget": 10000,
+        "result_summary": None,
+        "blocker_reason": None,
+        "escalation_target": "Mara Voss",
+        "auto_generated": "queue_stall_recovery",
+        "stall_snapshot": stalled,
+    }
+    queue.append_item(item)
+    queue.save()
+    return item
+
+
+def recover_stale_in_progress_items(queue: QueueManager) -> list[str]:
+    recovered: list[str] = []
+    for item in queue.active:
+        if item.get("status") in {"assigned", "running", "validating"}:
+            item["status"] = "queued"
+            item["updated_at"] = utc_now_iso()
+            item["recovered_from_stale_in_progress"] = True
+            recovered.append(item["id"])
+    if recovered:
+        queue.save()
+    return recovered
+
+
 def build_status_payload(
     *,
     daemon_state: dict[str, Any],
@@ -563,6 +662,20 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool) -> 
     emit_event("daemon_start", "Daemon started and lock acquired", pid=os.getpid(), mode="once" if once else "run", dry_run=dry_run)
     set_daemon_state(lock_held=True, state="idle", last_error=None)
     try:
+        # If a previous daemon run crashed or was interrupted, items may be left in
+        # assigned/running/validating. With the lock acquired, no other daemon is active,
+        # so these can be safely requeued.
+        recovery_queue = QueueManager(ROOT)
+        recovery_queue.load()
+        recovered_items = recover_stale_in_progress_items(recovery_queue)
+        if recovered_items:
+            emit_event(
+                "recovery",
+                "Recovered stale in-progress items to queued state",
+                count=len(recovered_items),
+                item_ids=recovered_items,
+            )
+
         if once:
             return process_one(dry_run=dry_run, verbose=verbose)
         while True:
@@ -576,8 +689,39 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool) -> 
             if not any(item.get("status") == "queued" for item in queue.active):
                 emit_event("daemon_stop", "Queue idle; daemon run completed")
                 return 0
+            agents = load_agent_catalog(ROOT)
+            policies = load_policies(ROOT)
+            stats = StatsTracker(ROOT, agents).load()
+            next_ready = queue.select_next(policies["routing"], stats)
+            if next_ready is None:
+                auto_recovery = ensure_queue_stall_recovery_item(queue)
+                if auto_recovery is not None:
+                    emit_event(
+                        "stall_recovery",
+                        "Created automatic queue stall recovery item",
+                        item_id=auto_recovery["id"],
+                        title=auto_recovery["title"],
+                    )
+                    continue
+                set_daemon_state(
+                    state="idle",
+                    active_item=None,
+                    last_run_summary="Queue stalled: queued items exist but none are dependency-ready",
+                    lock_held=True,
+                )
+                emit_event("daemon_stop", "Queue stalled; queued items exist but none are dependency-ready")
+                return 0
             emit_event("sleep", "Sleeping before next scheduling cycle", seconds=sleep_seconds)
             time.sleep(sleep_seconds)
+    except KeyboardInterrupt:
+        set_daemon_state(
+            state="idle",
+            active_item=None,
+            last_run_summary="Daemon interrupted by user",
+            lock_held=True,
+        )
+        emit_event("daemon_interrupt", "KeyboardInterrupt received; stopping daemon")
+        return 130
     finally:
         set_daemon_state(lock_held=False, active_item=None, state="idle")
         lock.release()

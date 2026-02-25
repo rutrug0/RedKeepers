@@ -1,23 +1,23 @@
 {
-  "generated_at": "2026-02-25T13:24:36.208230+00:00",
-  "daemon_state": "blocked",
+  "generated_at": "2026-02-25T13:58:35.239330+00:00",
+  "daemon_state": "idle",
   "active_item": null,
   "queue_counts": {
-    "queued": 3,
-    "running": 1,
-    "blocked": 6,
-    "completed": 1
+    "queued": 1,
+    "running": 0,
+    "blocked": 8,
+    "completed": 2
   },
   "milestone_progress": {
     "M0": {
-      "active": 2,
+      "active": 1,
       "completed": 1,
-      "blocked": 1
+      "blocked": 2
     },
     "M1": {
-      "active": 2,
-      "completed": 0,
-      "blocked": 5
+      "active": 0,
+      "completed": 1,
+      "blocked": 6
     }
   }
 }

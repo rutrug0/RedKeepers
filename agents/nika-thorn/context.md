@@ -8,3 +8,7 @@ Known constraints:
 - Single active agent slot across the whole project
 - Direct commits to `main` only through daemon validation
 - Preserve token efficiency by using targeted file context
+
+Content asset policy (current phase):
+- Provide text-first content and placeholder art briefs/captions only
+- Assume all visual assets are temporary placeholders until a lead artist/art pipeline is added

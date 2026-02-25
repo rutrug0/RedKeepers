@@ -9,6 +9,7 @@ This repository is operated by a head daemon that schedules one AI agent at a ti
 - Agents keep role-specific context in `agents/<agent-id>/`.
 - Commits to `main` are performed only through daemon guardrails.
 - Blockers and repeated failures are escalated to Mara Voss.
+- Use placeholder art only for now (wireframes, temporary icons, neutral silhouettes, labeled mock images). Final art production is deferred and may replace placeholders later.
 
 ## Primary Runtime
 

@@ -1,61 +1,61 @@
 {
-  "generated_at": "2026-02-25T13:24:41.215778+00:00",
+  "generated_at": "2026-02-25T14:03:58.444667+00:00",
   "agents": {
     "mara-voss": {
       "display_name": "Mara Voss",
       "role": "lead",
-      "total_runs": 12,
+      "total_runs": 13,
       "completed_items": 1,
-      "blocked_items": 0,
+      "blocked_items": 1,
       "failed_runs": 11,
-      "total_runtime_seconds": 0.9669999999750871,
-      "avg_runtime_seconds": 0.08058333333125726,
-      "estimated_tokens_in": 21978,
-      "estimated_tokens_out": 300,
-      "last_active_at": "2026-02-25T13:11:28.507051+00:00",
-      "current_load_score": 6.5016116666666255
+      "total_runtime_seconds": 179.49799999997776,
+      "avg_runtime_seconds": 13.807538461536751,
+      "estimated_tokens_in": 23849,
+      "estimated_tokens_out": 627,
+      "last_active_at": "2026-02-25T13:39:13.012914+00:00",
+      "current_load_score": 6.799163333333296
     },
     "ilya-fen": {
       "display_name": "Ilya Fen",
       "role": "backend",
-      "total_runs": 3,
+      "total_runs": 4,
       "completed_items": 0,
-      "blocked_items": 0,
+      "blocked_items": 1,
       "failed_runs": 3,
-      "total_runtime_seconds": 0.01600000000325963,
-      "avg_runtime_seconds": 0.005333333334419876,
-      "estimated_tokens_in": 1572,
-      "estimated_tokens_out": 0,
-      "last_active_at": "2026-02-25T13:10:33.147208+00:00",
-      "current_load_score": 1.5000266666666722
+      "total_runtime_seconds": 156.23500000000058,
+      "avg_runtime_seconds": 39.058750000000146,
+      "estimated_tokens_in": 2096,
+      "estimated_tokens_out": 266,
+      "last_active_at": "2026-02-25T13:55:55.997662+00:00",
+      "current_load_score": 1.7603916666666677
     },
     "sera-kest": {
       "display_name": "Sera Kest",
       "role": "frontend",
-      "total_runs": 3,
+      "total_runs": 4,
       "completed_items": 0,
-      "blocked_items": 1,
+      "blocked_items": 2,
       "failed_runs": 2,
-      "total_runtime_seconds": 94.78099999998813,
-      "avg_runtime_seconds": 31.59366666666271,
-      "estimated_tokens_in": 1632,
-      "estimated_tokens_out": 174,
-      "last_active_at": "2026-02-25T13:24:36.203071+00:00",
-      "current_load_score": 1.1579683333333135
+      "total_runtime_seconds": 158.0159999999887,
+      "avg_runtime_seconds": 39.50399999999718,
+      "estimated_tokens_in": 2788,
+      "estimated_tokens_out": 364,
+      "last_active_at": "2026-02-25T13:53:14.738321+00:00",
+      "current_load_score": 1.2633599999999812
     },
     "rowan-hale": {
       "display_name": "Rowan Hale",
       "role": "design",
-      "total_runs": 2,
-      "completed_items": 0,
+      "total_runs": 3,
+      "completed_items": 1,
       "blocked_items": 0,
       "failed_runs": 2,
-      "total_runtime_seconds": 0.01600000000325963,
-      "avg_runtime_seconds": 0.008000000001629815,
-      "estimated_tokens_in": 1724,
-      "estimated_tokens_out": 0,
-      "last_active_at": "2026-02-25T13:10:23.099546+00:00",
-      "current_load_score": 1.0000266666666722
+      "total_runtime_seconds": 109.46900000001187,
+      "avg_runtime_seconds": 36.48966666667062,
+      "estimated_tokens_in": 2586,
+      "estimated_tokens_out": 272,
+      "last_active_at": "2026-02-25T13:26:30.682611+00:00",
+      "current_load_score": 2.1824483333333533
     },
     "nika-thorn": {
       "display_name": "Nika Thorn",
@@ -74,23 +74,23 @@
     "tomas-grell": {
       "display_name": "Tomas Grell",
       "role": "qa",
-      "total_runs": 3,
+      "total_runs": 6,
       "completed_items": 0,
-      "blocked_items": 1,
+      "blocked_items": 4,
       "failed_runs": 2,
-      "total_runtime_seconds": 218.125,
-      "avg_runtime_seconds": 72.70833333333333,
-      "estimated_tokens_in": 3961,
-      "estimated_tokens_out": 425,
-      "last_active_at": "2026-02-25T13:22:56.414376+00:00",
-      "current_load_score": 1.3635416666666667
+      "total_runtime_seconds": 697.7029999999941,
+      "avg_runtime_seconds": 116.28383333333234,
+      "estimated_tokens_in": 9455,
+      "estimated_tokens_out": 1345,
+      "last_active_at": "2026-02-25T13:58:11.371731+00:00",
+      "current_load_score": 2.1628383333333234
     }
   },
   "totals": {
-    "completed_items": 1,
-    "queued_items": 3,
-    "blocked_items": 6,
-    "runtime_seconds": 313.90499999996973,
-    "estimated_tokens_total": 31766
+    "completed_items": 2,
+    "queued_items": 1,
+    "blocked_items": 8,
+    "runtime_seconds": 1300.920999999973,
+    "estimated_tokens_total": 43648
   }
 }

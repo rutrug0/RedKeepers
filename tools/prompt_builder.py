@@ -74,10 +74,10 @@ Validation Commands:
 {chr(10).join(input_sections) if input_sections else '[No input files listed]'}
 
 ## Output Requirements
+- Start your final response with one explicit status line: `STATUS: COMPLETED` or `STATUS: BLOCKED`.
 - Make only the changes needed for this work item.
 - If blocked, explain the blocker clearly and propose follow-up tasks.
 - Summarize changed files and results at the end.
 - Do not print long chain-of-thought; provide concise action/results.
 """
     return prompt
-

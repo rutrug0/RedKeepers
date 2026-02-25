@@ -6,11 +6,22 @@
 - `python tools/orchestrator.py once --dry-run` : select next item without running an agent
 - `python tools/orchestrator.py once` : process one item
 - `python tools/orchestrator.py run` : run until queue is idle
+- `python tools/smoke_daemon_env.py` : read-only smoke validation for queue/policy/state files
 
 ## Environment Variables
 
 - `REDKEEPERS_CODEX_COMMAND` : command used to invoke Codex CLI (default `codex exec`)
 - `REDKEEPERS_WORKER_MODE=mock` : simulate successful agent runs for testing the daemon flow
+
+## Smoke Validation (PowerShell)
+
+Run the fuller read-only environment smoke checks (queue, policy, and state file parsing/types):
+
+`python tools/smoke_daemon_env.py`
+
+If Codex CLI is not installed yet and you only want repository/state validation, bypass Codex preflight for the smoke run:
+
+`$env:REDKEEPERS_WORKER_MODE='mock'; python tools/smoke_daemon_env.py`
 
 ### Codex CLI Preflight (Windows npm shim note)
 

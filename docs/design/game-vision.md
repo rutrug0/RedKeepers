@@ -12,3 +12,8 @@ Design principles:
 - Persistent world consequences
 - Strong faction identity and grim atmosphere
 - Original setting inspired by dark fantasy, not derivative worldbuilding
+
+Art production policy (current phase):
+- Use placeholder art assets only during M0/M1/M2 prototyping
+- Placeholder art should be easy to replace (stable file names/IDs and manifest references)
+- Do not block gameplay, UI, or systems work on final art generation

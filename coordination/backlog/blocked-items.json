@@ -1,36 +1,5 @@
 [
   {
-    "id": "RK-M1-0001",
-    "title": "Backend modular monolith scaffold spec",
-    "description": "Draft initial backend module layout and interfaces for auth, world, economy, and combat under a single service deployable.",
-    "milestone": "M1",
-    "type": "design",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": "ilya-fen",
-    "dependencies": [],
-    "inputs": [
-      "docs/architecture/backend-modular-monolith.md"
-    ],
-    "acceptance_criteria": [
-      "Module boundaries and interfaces listed",
-      "M1 bootstrap implementation steps defined",
-      "Assumptions and deferred decisions documented"
-    ],
-    "validation_commands": [],
-    "status": "blocked",
-    "retry_count": 3,
-    "created_at": "2026-02-25T13:01:17.669127+00:00",
-    "updated_at": "2026-02-25T13:10:33.143783+00:00",
-    "estimated_effort": "M",
-    "token_budget": 12000,
-    "result_summary": null,
-    "blocker_reason": "Repeated failure: Codex CLI command not found: codex",
-    "escalation_target": "Mara Voss",
-    "assigned_agent": "ilya-fen",
-    "last_failure_reason": "Codex CLI command not found: codex"
-  },
-  {
     "id": "RK-M1-0001-ESC",
     "title": "Escalation: Backend modular monolith scaffold spec",
     "description": "Investigate repeated failure for item RK-M1-0001. Reason: Codex CLI command not found: codex",
@@ -52,15 +21,16 @@
     "status": "blocked",
     "retry_count": 3,
     "created_at": "2026-02-25T13:10:33.143783+00:00",
-    "updated_at": "2026-02-25T13:10:48.285708+00:00",
+    "updated_at": "2026-02-25T13:45:50.881931+00:00",
     "estimated_effort": "S",
     "token_budget": 6000,
     "result_summary": null,
-    "blocker_reason": "Repeated failure: Codex CLI command not found: codex",
+    "blocker_reason": "Superseded escalation-chain artifact from pre-Codex-bootstrap-fix incident; retained for audit only.",
     "escalation_target": "Mara Voss",
     "source_item_id": "RK-M1-0001",
     "assigned_agent": "mara-voss",
-    "last_failure_reason": "Codex CLI command not found: codex"
+    "last_failure_reason": "Codex CLI command not found: codex",
+    "superseded_by": "RK-M0-0004"
   },
   {
     "id": "RK-M1-0001-ESC-ESC",
@@ -84,15 +54,16 @@
     "status": "blocked",
     "retry_count": 3,
     "created_at": "2026-02-25T13:10:48.285708+00:00",
-    "updated_at": "2026-02-25T13:11:03.380870+00:00",
+    "updated_at": "2026-02-25T13:45:50.881931+00:00",
     "estimated_effort": "S",
     "token_budget": 6000,
     "result_summary": null,
-    "blocker_reason": "Repeated failure: Codex CLI command not found: codex",
+    "blocker_reason": "Superseded escalation-chain artifact from pre-Codex-bootstrap-fix incident; retained for audit only.",
     "escalation_target": "Mara Voss",
     "source_item_id": "RK-M1-0001-ESC",
     "assigned_agent": "mara-voss",
-    "last_failure_reason": "Codex CLI command not found: codex"
+    "last_failure_reason": "Codex CLI command not found: codex",
+    "superseded_by": "RK-M0-0004"
   },
   {
     "id": "RK-M1-0001-ESC-ESC-ESC",
@@ -116,15 +87,50 @@
     "status": "blocked",
     "retry_count": 3,
     "created_at": "2026-02-25T13:11:03.380870+00:00",
-    "updated_at": "2026-02-25T13:11:18.456863+00:00",
+    "updated_at": "2026-02-25T13:45:50.881931+00:00",
     "estimated_effort": "S",
     "token_budget": 6000,
     "result_summary": null,
-    "blocker_reason": "Repeated failure: Codex CLI command not found: codex",
+    "blocker_reason": "Superseded escalation-chain artifact from pre-Codex-bootstrap-fix incident; retained for audit only.",
     "escalation_target": "Mara Voss",
     "source_item_id": "RK-M1-0001-ESC-ESC",
     "assigned_agent": "mara-voss",
-    "last_failure_reason": "Codex CLI command not found: codex"
+    "last_failure_reason": "Codex CLI command not found: codex",
+    "superseded_by": "RK-M0-0004"
+  },
+  {
+    "id": "RK-M1-0001-ESC-ESC-ESC-ESC",
+    "title": "Escalation: Escalation: Escalation: Escalation: Backend modular monolith scaffold spec",
+    "description": "Investigate repeated failure for item RK-M1-0001-ESC-ESC-ESC. Reason: Codex CLI command not found: codex",
+    "milestone": "M1",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "blocked",
+    "retry_count": 2,
+    "created_at": "2026-02-25T13:11:18.456863+00:00",
+    "updated_at": "2026-02-25T13:45:50.881931+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": null,
+    "blocker_reason": "Superseded escalation-chain artifact from pre-Codex-bootstrap-fix incident; retained for audit only.",
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M1-0001-ESC-ESC-ESC",
+    "assigned_agent": "mara-voss",
+    "last_failure_reason": "Codex CLI command not found: codex",
+    "recovered_from_stale_in_progress": true,
+    "superseded_by": "RK-M0-0004"
   },
   {
     "id": "RK-M0-0003",
@@ -154,14 +160,15 @@
     "status": "blocked",
     "retry_count": 0,
     "created_at": "2026-02-25T13:17:16.1177208Z",
-    "updated_at": "2026-02-25T13:22:56.410789+00:00",
+    "updated_at": "2026-02-25T13:52:06.474119+00:00",
     "estimated_effort": "S",
     "token_budget": 7000,
     "result_summary": null,
-    "blocker_reason": "- `tools/orchestrator.py` had unrelated existing worktree changes; I only added the `cmd_status()` preflight block for this item.",
+    "blocker_reason": "- The Windows npm shim documentation was already present in `docs/operations/daemon-usage.md` and required no additional edits.",
     "escalation_target": "Mara Voss",
     "assigned_agent": "tomas-grell",
-    "last_failure_reason": null
+    "last_failure_reason": null,
+    "requeue_reason": "Requeued after Codex CLI Windows bootstrap fixes and backlog cleanup"
   },
   {
     "id": "RK-M1-0002",
@@ -183,15 +190,85 @@
     ],
     "validation_commands": [],
     "status": "blocked",
-    "retry_count": 2,
+    "retry_count": 0,
     "created_at": "2026-02-25T13:01:17.669127+00:00",
-    "updated_at": "2026-02-25T13:24:36.199318+00:00",
+    "updated_at": "2026-02-25T13:53:14.734785+00:00",
     "estimated_effort": "S",
     "token_budget": 9000,
     "result_summary": null,
-    "blocker_reason": "- Diff verified: only the two intended files were modified.",
+    "blocker_reason": "- `agents/sera-kest/outbox.json` parses successfully (`ConvertFrom-Json`)",
     "escalation_target": "Mara Voss",
     "assigned_agent": "sera-kest",
-    "last_failure_reason": "Codex CLI command not found: codex"
+    "last_failure_reason": "Codex CLI command not found: codex",
+    "requeue_reason": "Requeued after Codex CLI Windows bootstrap fixes and backlog cleanup"
+  },
+  {
+    "id": "RK-M1-0001",
+    "title": "Backend modular monolith scaffold spec",
+    "description": "Draft initial backend module layout and interfaces for auth, world, economy, and combat under a single service deployable.",
+    "milestone": "M1",
+    "type": "design",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": "ilya-fen",
+    "dependencies": [],
+    "inputs": [
+      "docs/architecture/backend-modular-monolith.md"
+    ],
+    "acceptance_criteria": [
+      "Module boundaries and interfaces listed",
+      "M1 bootstrap implementation steps defined",
+      "Assumptions and deferred decisions documented"
+    ],
+    "validation_commands": [],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-25T13:01:17.669127+00:00",
+    "updated_at": "2026-02-25T13:55:55.993625+00:00",
+    "estimated_effort": "M",
+    "token_budget": 12000,
+    "result_summary": null,
+    "blocker_reason": "- None",
+    "escalation_target": "Mara Voss",
+    "assigned_agent": "ilya-fen",
+    "last_failure_reason": "Codex CLI command not found: codex",
+    "requeue_reason": "Requeued after Codex CLI Windows bootstrap fixes and backlog cleanup"
+  },
+  {
+    "id": "RK-M0-0002",
+    "title": "Add daemon smoke checks for environment validation",
+    "description": "Expand health checks and add a small smoke test script or documented manual checks for queue/policy/state validation.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": "tomas-grell",
+    "dependencies": [
+      "RK-M0-0001"
+    ],
+    "inputs": [
+      "tools/health_checks.py",
+      "docs/operations/daemon-usage.md"
+    ],
+    "acceptance_criteria": [
+      "Health checks validate required files",
+      "Smoke validation path documented or scripted",
+      "No change to high-level CLI output defaults"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-25T13:01:17.669127+00:00",
+    "updated_at": "2026-02-25T13:58:11.368201+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "- No changes were made to high-level CLI output defaults.",
+    "escalation_target": "Mara Voss",
+    "assigned_agent": "tomas-grell",
+    "last_failure_reason": "Codex CLI command not found: codex",
+    "requeue_reason": "Requeued after Codex CLI Windows bootstrap fixes and backlog cleanup"
   }
 ]

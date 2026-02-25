@@ -28,6 +28,24 @@ def _estimate_tokens(text: str) -> int:
     return max(1, len(text) // 4)
 
 
+def _detect_blocked_output(stdout: str, stderr: str) -> bool:
+    """Return True only for explicit blocked markers, not incidental words."""
+    text = f"{stdout}\n{stderr}"
+    lines = [line.strip().lower() for line in text.splitlines() if line.strip()]
+    if not lines:
+        return False
+
+    explicit_prefixes = (
+        "status: blocked",
+        "result: blocked",
+        "blocked:",
+        "blocker:",
+        "blockers:",
+        "[blocked]",
+    )
+    return any(any(line.startswith(prefix) for prefix in explicit_prefixes) for line in lines)
+
+
 def _codex_override_hint() -> str:
     if os.name == "nt":
         return "Set REDKEEPERS_CODEX_COMMAND (Windows npm shim example: 'codex.cmd exec')."
@@ -134,6 +152,8 @@ def run_agent(
             command,
             input=prompt,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             capture_output=True,
             cwd=project_root,
             timeout=timeout_seconds,
@@ -164,8 +184,7 @@ def run_agent(
     stderr = (proc.stderr or "").strip()
     summary = stdout.splitlines()[-1] if stdout else (stderr.splitlines()[-1] if stderr else "No output")
     status = "completed" if proc.returncode == 0 else "failed"
-    lower_text = f"{stdout}\n{stderr}".lower()
-    if "blocked" in lower_text:
+    if _detect_blocked_output(stdout, stderr):
         status = "blocked"
     return WorkerResult(
         status=status,

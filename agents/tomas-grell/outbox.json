@@ -1,5 +1,27 @@
 [
   {
+    "ts": "2026-02-25T13:57:40.668562Z",
+    "item_id": "RK-M0-0002",
+    "status": "completed",
+    "summary": "Added QA regression coverage for daemon environment smoke validation, including required-file health-check failures and smoke-script queue/policy/state pass/fail behavior.",
+    "checks": [
+      "python -m unittest discover -s tests -p test_daemon_smoke_env.py (pass)",
+      "python tools/orchestrator.py status (pass)",
+      "REDKEEPERS_WORKER_MODE=mock python tools/smoke_daemon_env.py (pass)"
+    ]
+  },
+  {
+    "ts": "2026-02-25T13:49:58.996146Z",
+    "item_id": "RK-M0-0003",
+    "status": "completed",
+    "summary": "Added QA regression coverage for Codex command preflight, including Windows codex.cmd shim resolution and environment-validation integration.",
+    "checks": [
+      "python -m unittest discover -s tests -p test_codex_preflight.py (pass)",
+      "python tools/orchestrator.py status (pass)",
+      "REDKEEPERS_CODEX_COMMAND='__rk_missing_codex_for_test__ exec' + python tools/orchestrator.py status (fails preflight with override hint)"
+    ]
+  },
+  {
     "ts": "2026-02-25T13:22:02.0528209Z",
     "item_id": "RK-M0-0003",
     "status": "completed",
@@ -7,6 +29,17 @@
     "checks": [
       "python tools/orchestrator.py status (pass)",
       "REDKEEPERS_CODEX_COMMAND='definitely-missing-codex exec' + python tools/orchestrator.py status (fails preflight with override hint)"
+    ]
+  },
+  {
+    "ts": "2026-02-25T13:31:00Z",
+    "item_id": "RK-M0-0002",
+    "status": "completed",
+    "summary": "Expanded daemon environment health checks for queue/state files and added a read-only smoke validator for queue/policy/state parsing.",
+    "checks": [
+      "python tools/orchestrator.py status (pass)",
+      "REDKEEPERS_WORKER_MODE=mock python tools/smoke_daemon_env.py (pass)",
+      "python -m py_compile tools/health_checks.py tools/smoke_daemon_env.py (pass)"
     ]
   }
 ]

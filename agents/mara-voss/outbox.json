@@ -1,18 +1,47 @@
 [
   {
-    "ts": "2026-02-25T13:17:16.1177208Z",
+    "ts": "2026-02-25T13:37:46.7968877Z",
     "item_id": "RK-M1-0001-ESC-ESC-ESC-ESC",
     "status": "completed",
-    "summary": "Root cause confirmed: Windows Python subprocess cannot launch npm shim `codex` without `.cmd`; `codex.cmd` succeeds. Follow-ups queued for preflight validation and queue recovery.",
+    "summary": "Root cause verified locally: Windows Python subprocess cannot launch npm shim `codex` (PowerShell resolves to `codex.ps1`), while `codex.cmd` runs. Follow-up hardening/recovery items are already queued.",
     "root_cause": "Windows command resolution mismatch for npm shim (`codex` vs `codex.cmd`) when launched via Python subprocess",
     "evidence": {
-      "get_command_codex": "present (PowerShell ExternalScript)",
+      "get_command_codex": "codex.ps1 (PowerShell ExternalScript)",
+      "python_shutil_which_codex": "C:\\Users\\Patrik\\AppData\\Roaming\\npm\\codex.CMD",
       "python_subprocess_codex": "FileNotFoundError [WinError 2]",
-      "python_subprocess_codex_cmd": "exit_code=0"
+      "python_subprocess_codex_cmd": "exit_code=0 (codex-cli 0.104.0)"
     },
     "follow_up_item_ids": [
       "RK-M0-0003",
       "RK-M0-0004"
+    ]
+  },
+  {
+    "ts": "2026-02-25T14:06:13.937212+00:00",
+    "item_id": "RK-M0-0004",
+    "status": "completed",
+    "summary": "Recovered backlog after Codex bootstrap incident by removing stale RK-M1-0001 escalation-chain artifacts, requeueing four eligible blocked items, and recording the Windows subprocess npm shim root cause in Mara coordination notes.",
+    "root_cause": "Windows subprocess npm shim resolution behavior on Windows (`codex` vs `codex.cmd`) caused bootstrap false negatives.",
+    "queue_recovery": {
+      "requeued_item_ids": [
+        "RK-M0-0003",
+        "RK-M1-0002",
+        "RK-M1-0001",
+        "RK-M0-0002"
+      ],
+      "removed_escalation_chain_ids": [
+        "RK-M1-0001-ESC",
+        "RK-M1-0001-ESC-ESC",
+        "RK-M1-0001-ESC-ESC-ESC",
+        "RK-M1-0001-ESC-ESC-ESC-ESC"
+      ],
+      "blocked_items_remaining": 0
+    },
+    "files": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "agents/mara-voss/working-notes.md",
+      "agents/mara-voss/outbox.json"
     ]
   }
 ]

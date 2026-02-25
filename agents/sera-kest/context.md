@@ -8,3 +8,8 @@ Known constraints:
 - Single active agent slot across the whole project
 - Direct commits to `main` only through daemon validation
 - Preserve token efficiency by using targeted file context
+
+Visual implementation policy (current phase):
+- Use placeholder art only (temporary icons, silhouettes, labeled boxes, stock-safe placeholders if needed)
+- Build UI/components so art assets can be swapped later without refactoring logic
+- Do not wait for final art to progress client UX, layout, or interaction work
