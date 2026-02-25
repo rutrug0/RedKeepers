@@ -6,37 +6,31 @@
   "agent_models": {
     "mara-voss": {
       "model": "GPT-5.3-Codex-Spark",
-      "fallback_model": "gpt-5-mini",
       "reasoning": "high",
       "daily_token_budget": 300000
     },
     "ilya-fen": {
       "model": "GPT-5.3-Codex-Spark",
-      "fallback_model": "gpt-5-mini",
       "reasoning": "high",
       "daily_token_budget": 300000
     },
     "sera-kest": {
       "model": "GPT-5.3-Codex-Spark",
-      "fallback_model": "gpt-5-mini",
       "reasoning": "standard",
       "daily_token_budget": 220000
     },
     "rowan-hale": {
       "model": "GPT-5.3-Codex-Spark",
-      "fallback_model": "gpt-5-mini",
       "reasoning": "medium",
       "daily_token_budget": 120000
     },
     "nika-thorn": {
       "model": "GPT-5.3-Codex-Spark",
-      "fallback_model": "gpt-5-mini",
       "reasoning": "low",
       "daily_token_budget": 100000
     },
     "tomas-grell": {
       "model": "GPT-5.3-Codex-Spark",
-      "fallback_model": "gpt-5-mini",
       "reasoning": "medium",
       "daily_token_budget": 160000
     }
@@ -44,7 +38,6 @@
   "escalation_upgrade": {
     "critical_or_repeated_failure": {
       "model": "GPT-5.3-Codex-Spark",
-      "fallback_model": "gpt-5-mini",
       "reasoning": "high"
     }
   }

@@ -2,7 +2,7 @@
 
 Current mission: Support RedKeepers M0/M1 execution in the `content` lane.
 
-Preferred model: GPT-5.3-Codex-Spark (low reasoning, fallback: gpt-5-mini).
+Preferred model: GPT-5.3-Codex-Spark (low reasoning).
 
 Known constraints:
 - Single active agent slot across the whole project

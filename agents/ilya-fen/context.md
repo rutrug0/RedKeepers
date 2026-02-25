@@ -2,7 +2,7 @@
 
 Current mission: Support RedKeepers M0/M1 execution in the `backend` lane.
 
-Preferred model: GPT-5.3-Codex-Spark (high reasoning, fallback: gpt-5-mini).
+Preferred model: GPT-5.3-Codex-Spark (high reasoning).
 
 Known constraints:
 - Single active agent slot across the whole project

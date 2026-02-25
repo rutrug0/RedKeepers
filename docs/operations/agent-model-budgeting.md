@@ -3,7 +3,7 @@
 Model assignments and token budgets are defined in `coordination/policies/model-policy.yaml`.
 
 Guidelines:
-- Use `GPT-5.3-Codex-Spark` as primary model across roles for ChatGPT-account Codex compatibility, with fallback to `gpt-5-mini`
+- Use `GPT-5.3-Codex-Spark` as primary model across roles for ChatGPT-account Codex compatibility
 - Keep high reasoning on lead/backend/escalation paths, but avoid unsupported model IDs in account-constrained environments
 - Track estimated token usage in `coordination/runtime/agent-stats.json`
 
@@ -14,4 +14,5 @@ Runtime behavior:
   - Per-task upgrade: if work item priority is `critical` or `retry_count > 0`, daemon applies `escalation_upgrade.critical_or_repeated_failure` when configured.
 - The worker passes the selected model to Codex CLI via `--model`.
 - If a configured model fails with model-access/model-availability errors and `fallback_model` is configured, the worker retries once with the fallback model.
+- In this ChatGPT-account setup, fallback model is intentionally unset because `gpt-5-mini` is not available via Codex for this account.
 - `coordination/runtime/run-history.jsonl` records `model_requested`, `model_used`, and `fallback_used` for each run.
