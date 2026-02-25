@@ -1,0 +1,81 @@
+{
+  "schema_version": "rk-v1-starter-seed",
+  "source_doc": "docs/design/v1-starter-data-tables.md",
+  "config_id": "first_slice_enablement",
+  "slice_id": "m1_first_playable",
+  "enabled_civilization_ids": [
+    "cinder_throne_legates"
+  ],
+  "default_visibility": {
+    "hide_slice_statuses": [
+      "balance_stub",
+      "data_stub_post_slice"
+    ],
+    "show_slice_statuses": [
+      "playable_now"
+    ]
+  },
+  "module_filters": {
+    "economy": {
+      "resource_definitions": {
+        "allowed_slice_statuses": [
+          "playable_now"
+        ]
+      }
+    },
+    "buildings": {
+      "building_families": {
+        "allowed_slice_statuses": [
+          "playable_now"
+        ]
+      },
+      "building_lines": {
+        "allowed_slice_statuses": [
+          "playable_now"
+        ]
+      },
+      "building_effects": {
+        "include_only_enabled_buildings": true
+      }
+    },
+    "units": {
+      "unit_lines": {
+        "allowed_slice_statuses": [
+          "playable_now"
+        ]
+      },
+      "unit_variants": {
+        "enabled_civilization_ids": [
+          "cinder_throne_legates"
+        ],
+        "allowed_slice_statuses": [
+          "playable_now"
+        ]
+      },
+      "unit_variant_modifiers": {
+        "enabled_civilization_ids": [
+          "cinder_throne_legates"
+        ],
+        "include_only_enabled_variants": true
+      }
+    },
+    "civilizations": {
+      "activation": {
+        "enabled_civilization_ids": [
+          "cinder_throne_legates"
+        ],
+        "allowed_first_slice_availability": [
+          "playable_now"
+        ]
+      },
+      "global_modifiers": {
+        "enabled_civilization_ids": [
+          "cinder_throne_legates"
+        ],
+        "allowed_slice_statuses": [
+          "playable_now"
+        ]
+      }
+    }
+  }
+}

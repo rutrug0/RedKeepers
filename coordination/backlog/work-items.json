@@ -142,43 +142,6 @@
     "generated_from_item_id": "RK-M1-0005"
   },
   {
-    "id": "RK-M1-0004-F01",
-    "title": "Define backend shared primitives and module bootstrap interfaces",
-    "description": "Add framework-agnostic starter code stubs in backend/src/shared and backend/src/app for core primitives (IDs, result/error type, clock abstraction, in-process event bus interface) plus a module registration/composition contract so module implementations can be added without breaking boundaries.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0004"
-    ],
-    "inputs": [
-      "backend/",
-      "docs/architecture/backend-modular-monolith.md"
-    ],
-    "acceptance_criteria": [
-      "backend/src/shared contains initial typed placeholder modules/files for IDs, result/error, and time abstraction responsibilities",
-      "backend/src/app contains a framework-agnostic composition/bootstrap contract that references modules through interfaces rather than concrete infra adapters",
-      "Module scaffold notes remain consistent with the new shared/app stubs and no framework-specific runtime dependency is introduced"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T14:50:23.374657+00:00",
-    "updated_at": "2026-02-25T15:10:03.949682+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M1-0004",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-M1-0006-F01",
     "title": "Serialize v1 starter tables into backend seed config format",
     "description": "Convert the markdown starter tables into machine-readable seed/config data for `economy`, `buildings`, and `units` modules without changing values or adding mechanics.",
@@ -200,17 +163,18 @@
       "First-slice enable list supports only cinder_throne_legates and hides balance/data stubs by default"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T15:07:25.646762+00:00",
-    "updated_at": "2026-02-25T15:07:25.646762+00:00",
+    "updated_at": "2026-02-25T15:14:16.183409+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M1-0006"
+    "generated_from_item_id": "RK-M1-0006",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M1-0006-F02",
@@ -279,5 +243,41 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-M1-0006"
+  },
+  {
+    "id": "RK-M1-0004-F01-F01",
+    "title": "Add reference in-memory service registry and event bus for bootstrap smoke tests",
+    "description": "Implement minimal in-memory adapters for the new `ServiceRegistry` and `InProcessEventBus` contracts plus a bootstrap smoke composition example to validate module registration flow before framework selection.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0004-F01"
+    ],
+    "inputs": [
+      "backend/src/app/composition.ts",
+      "backend/src/shared/events.ts"
+    ],
+    "acceptance_criteria": [
+      "Reference implementations depend only on backend shared/app contracts and no framework runtime",
+      "A simple bootstrap smoke path can compose at least one placeholder module using the contracts",
+      "Any notes/docs added describe the adapters as temporary reference implementations"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:10:05.559876+00:00",
+    "updated_at": "2026-02-25T15:10:05.559876+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M1-0004-F01"
   }
 ]

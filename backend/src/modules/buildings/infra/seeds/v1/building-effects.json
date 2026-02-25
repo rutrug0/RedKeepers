@@ -1,0 +1,98 @@
+{
+  "schema_version": "rk-v1-starter-seed",
+  "source_doc": "docs/design/v1-starter-data-tables.md",
+  "source_section": "Starter Building Effects (`buildings.building_effects`)",
+  "table_id": "buildings.building_effects",
+  "rows": [
+    {
+      "building_id": "grain_plot",
+      "stat_key": "resource_prod_food_per_h",
+      "value_l1": 26,
+      "scaling_mode": "mult_per_level",
+      "scaling_value": 1.34,
+      "display_format": "per_hour",
+      "notes": "Primary food source"
+    },
+    {
+      "building_id": "timber_camp",
+      "stat_key": "resource_prod_wood_per_h",
+      "value_l1": 24,
+      "scaling_mode": "mult_per_level",
+      "scaling_value": 1.34,
+      "display_format": "per_hour",
+      "notes": "Primary wood source"
+    },
+    {
+      "building_id": "stone_quarry",
+      "stat_key": "resource_prod_stone_per_h",
+      "value_l1": 20,
+      "scaling_mode": "mult_per_level",
+      "scaling_value": 1.33,
+      "display_format": "per_hour",
+      "notes": "Slower early ramp"
+    },
+    {
+      "building_id": "iron_pit",
+      "stat_key": "resource_prod_iron_per_h",
+      "value_l1": 16,
+      "scaling_mode": "mult_per_level",
+      "scaling_value": 1.32,
+      "display_format": "per_hour",
+      "notes": "Highest strategic bottleneck"
+    },
+    {
+      "building_id": "barracks",
+      "stat_key": "unit_train_time_mult_all",
+      "value_l1": 0.97,
+      "scaling_mode": "add_per_level",
+      "scaling_value": -0.03,
+      "display_format": "multiplier",
+      "notes": "Clamp min 0.70 in code"
+    },
+    {
+      "building_id": "barracks",
+      "stat_key": "unit_queue_capacity",
+      "value_l1": 2,
+      "scaling_mode": "step_levels",
+      "scaling_value": "+1@4,+1@7",
+      "display_format": "integer",
+      "notes": "Starter queue cap = 2"
+    },
+    {
+      "building_id": "rally_post",
+      "stat_key": "march_prep_time_s",
+      "value_l1": 30,
+      "scaling_mode": "add_per_level",
+      "scaling_value": -2,
+      "display_format": "seconds",
+      "notes": "Clamp min 10 in code"
+    },
+    {
+      "building_id": "rally_post",
+      "stat_key": "army_move_speed_mult",
+      "value_l1": 1.0,
+      "scaling_mode": "add_per_level",
+      "scaling_value": 0.02,
+      "display_format": "multiplier",
+      "notes": "Applies to outgoing marches"
+    },
+    {
+      "building_id": "palisade",
+      "stat_key": "wall_hp",
+      "value_l1": 220,
+      "scaling_mode": "mult_per_level",
+      "scaling_value": 1.4,
+      "display_format": "integer",
+      "notes": "Defense family stub for post-slice"
+    },
+    {
+      "building_id": "palisade",
+      "stat_key": "garrison_defense_mult",
+      "value_l1": 1.05,
+      "scaling_mode": "add_per_level",
+      "scaling_value": 0.02,
+      "display_format": "multiplier",
+      "notes": "Clamp max 1.25 in code"
+    }
+  ]
+}

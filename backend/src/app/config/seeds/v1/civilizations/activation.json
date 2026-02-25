@@ -1,0 +1,27 @@
+{
+  "schema_version": "rk-v1-starter-seed",
+  "source_doc": "docs/design/v1-starter-data-tables.md",
+  "source_section": "Civilization Activation and Slice Status (`economy/buildings/units`)",
+  "table_id": "civilizations.activation",
+  "key_field": "civ_id",
+  "entries_by_id": {
+    "cinder_throne_legates": {
+      "civ_id": "cinder_throne_legates",
+      "display_name": "Cinder Throne Legates",
+      "first_slice_availability": "playable_now",
+      "notes": "Primary onboarding civilization"
+    },
+    "mirebound_covenant": {
+      "civ_id": "mirebound_covenant",
+      "display_name": "Mirebound Covenant",
+      "first_slice_availability": "balance_stub",
+      "notes": "Data-complete modifiers/variants, UI locked in slice"
+    },
+    "graveforge_clans": {
+      "civ_id": "graveforge_clans",
+      "display_name": "Graveforge Clans",
+      "first_slice_availability": "balance_stub",
+      "notes": "Data-complete modifiers/variants, UI locked in slice"
+    }
+  }
+}

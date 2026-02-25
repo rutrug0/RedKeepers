@@ -1,0 +1,105 @@
+{
+  "schema_version": "rk-v1-starter-seed",
+  "source_doc": "docs/design/v1-starter-data-tables.md",
+  "source_section": "Civilization Flavor Unit Mapping (`units.unit_variants`)",
+  "table_id": "units.unit_variants",
+  "key_field": "variant_unit_id",
+  "entries_by_id": {
+    "brand_levies": {
+      "civ_id": "cinder_throne_legates",
+      "variant_unit_id": "brand_levies",
+      "display_name": "Brand Levies",
+      "base_unit_id": "watch_levy",
+      "role": "infantry",
+      "slice_status": "playable_now"
+    },
+    "tribunal_crossmen": {
+      "civ_id": "cinder_throne_legates",
+      "variant_unit_id": "tribunal_crossmen",
+      "display_name": "Tribunal Crossmen",
+      "base_unit_id": "bow_crew",
+      "role": "ranged",
+      "slice_status": "playable_now"
+    },
+    "ash_riders": {
+      "civ_id": "cinder_throne_legates",
+      "variant_unit_id": "ash_riders",
+      "display_name": "Ash Riders",
+      "base_unit_id": "light_raider",
+      "role": "cavalry",
+      "slice_status": "playable_now"
+    },
+    "ember_rams": {
+      "civ_id": "cinder_throne_legates",
+      "variant_unit_id": "ember_rams",
+      "display_name": "Ember Rams",
+      "base_unit_id": "ram_team",
+      "role": "siege",
+      "slice_status": "data_stub_post_slice"
+    },
+    "reed_stalkers": {
+      "civ_id": "mirebound_covenant",
+      "variant_unit_id": "reed_stalkers",
+      "display_name": "Reed Stalkers",
+      "base_unit_id": "trail_scout",
+      "role": "scout",
+      "slice_status": "balance_stub"
+    },
+    "bog_spearmen": {
+      "civ_id": "mirebound_covenant",
+      "variant_unit_id": "bog_spearmen",
+      "display_name": "Bog Spearmen",
+      "base_unit_id": "watch_levy",
+      "role": "infantry",
+      "slice_status": "balance_stub"
+    },
+    "rot_slingers": {
+      "civ_id": "mirebound_covenant",
+      "variant_unit_id": "rot_slingers",
+      "display_name": "Rot Slingers",
+      "base_unit_id": "bow_crew",
+      "role": "ranged",
+      "slice_status": "balance_stub"
+    },
+    "mire_hounds": {
+      "civ_id": "mirebound_covenant",
+      "variant_unit_id": "mire_hounds",
+      "display_name": "Mire Hounds",
+      "base_unit_id": "light_raider",
+      "role": "cavalry",
+      "slice_status": "balance_stub"
+    },
+    "pit_guard": {
+      "civ_id": "graveforge_clans",
+      "variant_unit_id": "pit_guard",
+      "display_name": "Pit Guard",
+      "base_unit_id": "watch_levy",
+      "role": "infantry",
+      "slice_status": "balance_stub"
+    },
+    "chainthrowers": {
+      "civ_id": "graveforge_clans",
+      "variant_unit_id": "chainthrowers",
+      "display_name": "Chainthrowers",
+      "base_unit_id": "bow_crew",
+      "role": "ranged",
+      "slice_status": "balance_stub"
+    },
+    "tithe_boars": {
+      "civ_id": "graveforge_clans",
+      "variant_unit_id": "tithe_boars",
+      "display_name": "Tithe Boars",
+      "base_unit_id": "light_raider",
+      "role": "cavalry",
+      "slice_status": "balance_stub"
+    },
+    "woe_trebuchet": {
+      "civ_id": "graveforge_clans",
+      "variant_unit_id": "woe_trebuchet",
+      "display_name": "Woe Trebuchet",
+      "base_unit_id": "ram_team",
+      "role": "siege",
+      "slice_status": "balance_stub"
+    }
+  }
+}

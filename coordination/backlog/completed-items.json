@@ -300,5 +300,43 @@
     "assigned_agent": "rowan-hale",
     "recovered_from_stale_in_progress": true,
     "commit_sha": "d7ef6f189d534b1b1a065c9f194ebd828e9652fa"
+  },
+  {
+    "id": "RK-M1-0004-F01",
+    "title": "Define backend shared primitives and module bootstrap interfaces",
+    "description": "Add framework-agnostic starter code stubs in backend/src/shared and backend/src/app for core primitives (IDs, result/error type, clock abstraction, in-process event bus interface) plus a module registration/composition contract so module implementations can be added without breaking boundaries.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0004"
+    ],
+    "inputs": [
+      "backend/",
+      "docs/architecture/backend-modular-monolith.md"
+    ],
+    "acceptance_criteria": [
+      "backend/src/shared contains initial typed placeholder modules/files for IDs, result/error, and time abstraction responsibilities",
+      "backend/src/app contains a framework-agnostic composition/bootstrap contract that references modules through interfaces rather than concrete infra adapters",
+      "Module scaffold notes remain consistent with the new shared/app stubs and no framework-specific runtime dependency is introduced"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:50:23.374657+00:00",
+    "updated_at": "2026-02-25T15:10:05.554603+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/ilya-fen/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M1-0004",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "047e1a6c12f13f41933ed5b045929c5323b1279c"
   }
 ]

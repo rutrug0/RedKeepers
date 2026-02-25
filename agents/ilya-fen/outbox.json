@@ -90,5 +90,47 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-25T15:13:20.4122972Z",
+    "agent_id": "ilya-fen",
+    "work_item_id": "RK-M1-0006-F01",
+    "status": "done",
+    "summary": "Serialized the v1 starter markdown economy/buildings/units tables into machine-readable backend JSON seed configs, including civ activation/modifiers, unit variants, variant modifiers, and an explicit first-slice enablement filter limited to cinder_throne_legates.",
+    "changed_files": [
+      "backend/src/modules/economy/infra/seeds/v1/resource-definitions.json",
+      "backend/src/modules/buildings/infra/seeds/v1/building-families.json",
+      "backend/src/modules/buildings/infra/seeds/v1/building-lines.json",
+      "backend/src/modules/buildings/infra/seeds/v1/building-effects.json",
+      "backend/src/modules/units/infra/seeds/v1/unit-lines.json",
+      "backend/src/modules/units/infra/seeds/v1/unit-variants.json",
+      "backend/src/modules/units/infra/seeds/v1/unit-variant-modifiers.json",
+      "backend/src/app/config/seeds/v1/civilizations/activation.json",
+      "backend/src/app/config/seeds/v1/civilizations/global-modifiers.json",
+      "backend/src/app/config/seeds/v1/first-slice-enablement.json",
+      "agents/ilya-fen/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Add typed seed loaders and validation for v1 starter config JSON",
+        "owner_role": "backend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Implement framework-agnostic loader utilities and schema/shape validation for the new v1 JSON seed files so modules can consume starter config safely and enforce stable IDs plus first-slice filtering at startup.",
+        "acceptance_criteria": [
+          "Backend includes typed loader functions for economy/buildings/units starter seed JSON files and civilization config files",
+          "Validation rejects malformed rows, duplicate IDs, and missing cross-references (e.g. producer_building_id, base_unit_id) with clear errors",
+          "A first-slice filtering helper applies the enablement config and excludes balance/data stubs by default"
+        ],
+        "dependencies": [
+          "RK-M1-0006-F01"
+        ],
+        "inputs": [
+          "backend/src/modules/*/infra/seeds/v1/*.json",
+          "backend/src/app/config/seeds/v1/first-slice-enablement.json"
+        ]
+      }
+    ]
   }
 ]

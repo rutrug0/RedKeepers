@@ -1,0 +1,188 @@
+{
+  "schema_version": "rk-v1-starter-seed",
+  "source_doc": "docs/design/v1-starter-data-tables.md",
+  "source_section": "Civilization Global Modifiers (`economy` / `buildings` / `units`)",
+  "table_id": "civilizations.global_modifiers",
+  "rows": [
+    {
+      "civ_id": "cinder_throne_legates",
+      "module_owner": "units",
+      "modifier_key": "unit_upkeep_food_per_h",
+      "scope": "all_units",
+      "operation": "mult",
+      "value": 0.85,
+      "condition": "stationed_at_home_settlement=true",
+      "slice_status": "playable_now"
+    },
+    {
+      "civ_id": "cinder_throne_legates",
+      "module_owner": "units",
+      "modifier_key": "army_move_speed_mult",
+      "scope": "all_armies",
+      "operation": "mult",
+      "value": 1.1,
+      "condition": "route_between_owned_settlements=true",
+      "slice_status": "playable_now"
+    },
+    {
+      "civ_id": "cinder_throne_legates",
+      "module_owner": "buildings",
+      "modifier_key": "structure_hp_mult",
+      "scope": "family:defense",
+      "operation": "mult",
+      "value": 1.1,
+      "condition": "always",
+      "slice_status": "playable_now"
+    },
+    {
+      "civ_id": "cinder_throne_legates",
+      "module_owner": "units",
+      "modifier_key": "structure_damage",
+      "scope": "role:siege",
+      "operation": "mult",
+      "value": 1.08,
+      "condition": "always",
+      "slice_status": "playable_now"
+    },
+    {
+      "civ_id": "cinder_throne_legates",
+      "module_owner": "units",
+      "modifier_key": "carry",
+      "scope": "role:cavalry",
+      "operation": "mult",
+      "value": 0.92,
+      "condition": "always",
+      "slice_status": "playable_now"
+    },
+    {
+      "civ_id": "mirebound_covenant",
+      "module_owner": "economy",
+      "modifier_key": "raid_resource_yield",
+      "scope": "raid_return_total",
+      "operation": "mult",
+      "value": 1.08,
+      "condition": "always",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "mirebound_covenant",
+      "module_owner": "units",
+      "modifier_key": "terrain_move_penalty_mult",
+      "scope": "all_armies",
+      "operation": "mult",
+      "value": 0.5,
+      "condition": "terrain=wetland",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "mirebound_covenant",
+      "module_owner": "units",
+      "modifier_key": "vision_tiles",
+      "scope": "role:scout",
+      "operation": "add",
+      "value": 1,
+      "condition": "terrain=wetland",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "mirebound_covenant",
+      "module_owner": "units",
+      "modifier_key": "structure_damage",
+      "scope": "role:siege",
+      "operation": "mult",
+      "value": 0.9,
+      "condition": "always",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "graveforge_clans",
+      "module_owner": "buildings",
+      "modifier_key": "building_cost_stone",
+      "scope": "family:military",
+      "operation": "mult",
+      "value": 0.9,
+      "condition": "always",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "graveforge_clans",
+      "module_owner": "buildings",
+      "modifier_key": "building_cost_iron",
+      "scope": "family:military",
+      "operation": "mult",
+      "value": 0.9,
+      "condition": "always",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "graveforge_clans",
+      "module_owner": "buildings",
+      "modifier_key": "building_cost_stone",
+      "scope": "family:defense",
+      "operation": "mult",
+      "value": 0.9,
+      "condition": "always",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "graveforge_clans",
+      "module_owner": "buildings",
+      "modifier_key": "building_cost_iron",
+      "scope": "family:defense",
+      "operation": "mult",
+      "value": 0.9,
+      "condition": "always",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "graveforge_clans",
+      "module_owner": "buildings",
+      "modifier_key": "build_time_mult",
+      "scope": "family:military",
+      "operation": "mult",
+      "value": 1.1,
+      "condition": "always",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "graveforge_clans",
+      "module_owner": "buildings",
+      "modifier_key": "build_time_mult",
+      "scope": "family:defense",
+      "operation": "mult",
+      "value": 1.1,
+      "condition": "always",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "graveforge_clans",
+      "module_owner": "units",
+      "modifier_key": "train_time_s",
+      "scope": "tag:heavy_infantry",
+      "operation": "mult",
+      "value": 1.12,
+      "condition": "queue_size<5",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "graveforge_clans",
+      "module_owner": "units",
+      "modifier_key": "train_time_s",
+      "scope": "tag:heavy_infantry",
+      "operation": "mult",
+      "value": 0.92,
+      "condition": "queue_size>=5",
+      "slice_status": "balance_stub"
+    },
+    {
+      "civ_id": "graveforge_clans",
+      "module_owner": "units",
+      "modifier_key": "hp",
+      "scope": "tag:heavy_infantry",
+      "operation": "mult",
+      "value": 1.12,
+      "condition": "always",
+      "slice_status": "balance_stub"
+    }
+  ]
+}

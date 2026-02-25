@@ -1,0 +1,53 @@
+{
+  "schema_version": "rk-v1-starter-seed",
+  "source_doc": "docs/design/v1-starter-data-tables.md",
+  "source_section": "Starter Resource Set (`economy.resource_definitions`)",
+  "table_id": "economy.resource_definitions",
+  "key_field": "resource_id",
+  "entries_by_id": {
+    "food": {
+      "resource_id": "food",
+      "display_name": "Food",
+      "short_label": "FOOD",
+      "icon_key": "res_food_placeholder",
+      "starting_stock": 300,
+      "base_storage_cap": 1000,
+      "base_passive_prod_per_h": 6,
+      "producer_building_id": "grain_plot",
+      "slice_status": "playable_now"
+    },
+    "wood": {
+      "resource_id": "wood",
+      "display_name": "Wood",
+      "short_label": "WOOD",
+      "icon_key": "res_wood_placeholder",
+      "starting_stock": 260,
+      "base_storage_cap": 1000,
+      "base_passive_prod_per_h": 4,
+      "producer_building_id": "timber_camp",
+      "slice_status": "playable_now"
+    },
+    "stone": {
+      "resource_id": "stone",
+      "display_name": "Stone",
+      "short_label": "STONE",
+      "icon_key": "res_stone_placeholder",
+      "starting_stock": 220,
+      "base_storage_cap": 1000,
+      "base_passive_prod_per_h": 2,
+      "producer_building_id": "stone_quarry",
+      "slice_status": "playable_now"
+    },
+    "iron": {
+      "resource_id": "iron",
+      "display_name": "Iron",
+      "short_label": "IRON",
+      "icon_key": "res_iron_placeholder",
+      "starting_stock": 140,
+      "base_storage_cap": 1000,
+      "base_passive_prod_per_h": 1,
+      "producer_building_id": "iron_pit",
+      "slice_status": "playable_now"
+    }
+  }
+}

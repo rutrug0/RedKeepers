@@ -1,0 +1,41 @@
+{
+  "schema_version": "rk-v1-starter-seed",
+  "source_doc": "docs/design/v1-starter-data-tables.md",
+  "source_section": "Core Building Families (`buildings.building_families`)",
+  "table_id": "buildings.building_families",
+  "key_field": "family_id",
+  "entries_by_id": {
+    "economy": {
+      "family_id": "economy",
+      "display_name": "Economy",
+      "purpose_summary": "Resource production and throughput",
+      "primary_backend_owner": "buildings",
+      "frontend_tab": "Economy",
+      "slice_status": "playable_now"
+    },
+    "military": {
+      "family_id": "military",
+      "display_name": "Military",
+      "purpose_summary": "Unit training and military efficiency",
+      "primary_backend_owner": "buildings",
+      "frontend_tab": "Military",
+      "slice_status": "playable_now"
+    },
+    "defense": {
+      "family_id": "defense",
+      "display_name": "Defense",
+      "purpose_summary": "Settlement durability and garrison strength",
+      "primary_backend_owner": "buildings",
+      "frontend_tab": "Defense",
+      "slice_status": "data_stub_post_slice"
+    },
+    "logistics": {
+      "family_id": "logistics",
+      "display_name": "Logistics",
+      "purpose_summary": "March readiness and world-map support",
+      "primary_backend_owner": "buildings",
+      "frontend_tab": "Logistics",
+      "slice_status": "playable_now"
+    }
+  }
+}
