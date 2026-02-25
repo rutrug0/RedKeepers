@@ -1,39 +1,5 @@
 [
   {
-    "id": "RK-M1-0005-F01",
-    "title": "Add mock data state to client shell wireframe",
-    "description": "Replace hard-coded placeholder values in the settlement, map, and event panels with a local mock data model so future UI iterations can test empty/loading/error and selection states without backend dependencies.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0005"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Client shell reads panel content from a single mock state source in client-web/",
-      "At least loading and populated placeholder states are demonstrated for all three regions",
-      "Components remain art-agnostic and use placeholder assets/blocks only"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T14:27:22.682338+00:00",
-    "updated_at": "2026-02-25T15:28:19.664757+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "sera-kest",
-    "generated_from_item_id": "RK-M1-0005",
-    "assigned_agent": "sera-kest"
-  },
-  {
     "id": "RK-M1-0005-F02",
     "title": "Frontend QA pass for accessibility and mobile shell interactions",
     "description": "Run a focused QA pass on the client shell wireframe for keyboard navigation, focus visibility, reduced-motion behavior, and common mobile viewport sizes, then patch issues found.",
@@ -54,17 +20,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T14:27:22.682841+00:00",
-    "updated_at": "2026-02-25T14:27:22.682841+00:00",
+    "updated_at": "2026-02-25T15:31:57.578710+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "sera-kest",
-    "generated_from_item_id": "RK-M1-0005"
+    "generated_from_item_id": "RK-M1-0005",
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-M1-0006-F02",
@@ -310,5 +277,38 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "tomas-grell",
     "generated_from_item_id": "RK-M1-0008"
+  },
+  {
+    "id": "RK-M1-0005-F01-F01",
+    "title": "Add empty and error mock scenarios for client shell panels",
+    "description": "Extend the local mock panel state model so settlement, world map, and event feed each include empty and error scenarios, with the existing mock-state toggles able to switch to them for UI iteration and QA.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Settlement, world map, and event feed mock state definitions each include empty and error scenarios in client-web/app.js (or a shared client-web mock state module)",
+      "Per-panel mock-state controls expose empty and error alongside loading and populated",
+      "Empty and error views remain placeholder-art-only and stay within the first vertical slice shell"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:28:20.612766+00:00",
+    "updated_at": "2026-02-25T15:28:20.612766+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-M1-0005-F01"
   }
 ]

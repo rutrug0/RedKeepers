@@ -89,5 +89,33 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-25T15:30:48.318477Z",
+    "item_id": "RK-M1-0005-F02",
+    "status": "completed",
+    "summary": "Ran a focused QA/fix pass on the client shell wireframe for keyboard navigation, focus visibility, reduced-motion scrolling, and narrow mobile layouts (360px/390px), patching tab scroll behavior, map viewport focus rings, and small-screen header/control wrapping.",
+    "files": [
+      "client-web/app.js",
+      "client-web/styles.css",
+      "agents/sera-kest/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Add automated a11y and mobile viewport smoke checks for client shell",
+        "owner_role": "frontend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Add a lightweight browser-based smoke test (keyboard tab sequence + focus-visible assertions + 360px/390px viewport snapshots) for the client shell wireframe so future UI changes do not regress accessibility or mobile usability.",
+        "acceptance_criteria": [
+          "Automated check runs the client shell at 360px and 390px widths and verifies no horizontal overflow on the main shell container",
+          "Keyboard navigation test covers region tab activation and confirms visible focus styling on representative controls",
+          "Reduced-motion mode test confirms region navigation does not request smooth scrolling"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

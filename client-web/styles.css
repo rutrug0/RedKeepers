@@ -16,6 +16,8 @@
   --radius: 14px;
   --gap: 14px;
   --touch-target: 44px;
+  --focus-ring: rgba(243, 237, 230, 0.95);
+  --focus-ring-accent: rgba(217, 122, 59, 0.92);
 }
 
 *,
@@ -43,6 +45,10 @@ button,
 input,
 select {
   font: inherit;
+}
+
+a {
+  color: inherit;
 }
 
 .skip-link {
@@ -280,6 +286,11 @@ select {
   flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
+  min-width: 0;
+}
+
+.inline-actions > * {
+  min-width: 0;
 }
 
 .mock-state-controls {
@@ -287,6 +298,7 @@ select {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .mock-state-btn {
@@ -567,6 +579,7 @@ select {
 .wire-fields div {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 10px;
   border-bottom: 1px dashed var(--line-soft);
   padding-bottom: 6px;
@@ -584,6 +597,9 @@ select {
 
 .wire-fields strong {
   font-size: 0.88rem;
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .legend-list {
@@ -830,9 +846,18 @@ select {
   gap: 8px;
 }
 
-button:focus-visible {
-  outline: 2px solid rgba(217, 122, 59, 0.7);
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(217, 122, 59, 0.38);
+}
+
+.control-btn:focus-visible {
+  outline-offset: 0;
+  box-shadow:
+    inset 0 0 0 2px var(--focus-ring),
+    inset 0 0 0 4px rgba(217, 122, 59, 0.55);
 }
 
 @media (max-width: 1220px) {
@@ -911,10 +936,65 @@ button:focus-visible {
 
   .inline-actions {
     width: 100%;
+    align-items: stretch;
   }
 
   .inline-actions .ghost-btn {
     flex: 1;
+  }
+
+  .mock-state-controls {
+    width: 100%;
+  }
+
+  .mock-state-label {
+    flex-basis: 100%;
+    margin-right: 0;
+  }
+
+  .mock-state-btn {
+    flex: 1 1 96px;
+    min-height: var(--touch-target);
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel__header {
+    gap: 8px;
+  }
+
+  .inline-actions .ghost-btn {
+    flex: 1 1 100%;
+  }
+
+  .wire-list li,
+  .skeleton-row {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+
+  .wire-list li > .wire-time {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .wire-list__body p {
+    overflow-wrap: anywhere;
+  }
+
+  .map-marker {
+    min-width: 76px;
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+
+  .route-line--one {
+    width: 150px;
+  }
+
+  .route-line--two {
+    width: 205px;
   }
 }
 

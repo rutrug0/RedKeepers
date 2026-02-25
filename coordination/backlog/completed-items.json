@@ -454,5 +454,40 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
     "assigned_agent": "tomas-grell",
     "commit_sha": "d1757cfdb26afc54da7bb7ce01b7456fca36a8bd"
+  },
+  {
+    "id": "RK-M1-0005-F01",
+    "title": "Add mock data state to client shell wireframe",
+    "description": "Replace hard-coded placeholder values in the settlement, map, and event panels with a local mock data model so future UI iterations can test empty/loading/error and selection states without backend dependencies.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Client shell reads panel content from a single mock state source in client-web/",
+      "At least loading and populated placeholder states are demonstrated for all three regions",
+      "Components remain art-agnostic and use placeholder assets/blocks only"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:27:22.682338+00:00",
+    "updated_at": "2026-02-25T15:28:20.606713+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- I observed unrelated daemon/backlog file changes in `coordination/backlog/*` and left them untouched.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-M1-0005",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "9a9fd46951a43cc4fc8ac7ff4b990d39d969626e"
   }
 ]

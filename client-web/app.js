@@ -1,5 +1,9 @@
 (() => {
   const numberFormatter = new Intl.NumberFormat("en-US");
+  const reducedMotionQuery =
+    typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
 
   const mockClientShellState = {
     panelModes: {
@@ -386,7 +390,7 @@
     if (mode === "loading") {
       refs.content.innerHTML = `
         <div class="map-layout">
-          <div class="map-stage is-loading" role="img" aria-label="Loading placeholder world map viewport">
+          <div class="map-stage is-loading" role="group" aria-label="Loading placeholder world map viewport">
             <div class="map-overlay map-overlay--top-left">
               <span class="chip chip--small">Coords: ${escapeHtml(scenario.coords)}</span>
               <span class="chip chip--small">Region: ${escapeHtml(scenario.region)}</span>
@@ -443,7 +447,7 @@
 
     refs.content.innerHTML = `
       <div class="map-layout">
-        <div class="map-stage" role="img" aria-label="Placeholder world map viewport with grid and marker blocks">
+        <div class="map-stage" role="group" aria-label="Placeholder world map viewport with grid and marker blocks">
           <div class="map-overlay map-overlay--top-left">
             <span class="chip chip--small">Coords: ${escapeHtml(scenario.coords)}</span>
             <span class="chip chip--small">Region: ${escapeHtml(scenario.region)}</span>
@@ -606,6 +610,14 @@
 
     mockClientShellState.panelModes[panelKey] = mode;
     renderPanels();
+
+    const replacementButton = document.querySelector(
+      `[data-mock-panel="${panelKey}"][data-mock-mode="${mode}"]`,
+    );
+
+    if (replacementButton instanceof HTMLButtonElement) {
+      replacementButton.focus({ preventScroll: true });
+    }
   });
 
   renderPanels();
@@ -631,8 +643,16 @@
       item.tabIndex = isActive ? 0 : -1;
     });
 
-    panel.focus({ preventScroll: true });
-    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    try {
+      panel.focus({ preventScroll: true });
+    } catch {
+      panel.focus();
+    }
+
+    panel.scrollIntoView({
+      behavior: reducedMotionQuery?.matches ? "auto" : "smooth",
+      block: "start",
+    });
   };
 
   tabs.forEach((tab, index) => {
