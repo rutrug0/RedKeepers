@@ -62,6 +62,14 @@ class CodexPreflightTests(unittest.TestCase):
         ):
             self.assertIsNone(codex_worker.codex_command_preflight_error())
 
+    def test_with_model_arg_appends_model_when_missing(self) -> None:
+        command = codex_worker._with_model_arg(["codex", "exec"], "GPT-5.3-Codex-Spark")
+        self.assertEqual(command, ["codex", "exec", "--model", "GPT-5.3-Codex-Spark"])
+
+    def test_with_model_arg_respects_existing_model_flag(self) -> None:
+        command = codex_worker._with_model_arg(["codex", "exec", "--model", "gpt-5-mini"], "codex-5.3")
+        self.assertEqual(command, ["codex", "exec", "--model", "gpt-5-mini"])
+
 
 class HealthCheckPreflightIntegrationTests(unittest.TestCase):
     def test_validate_environment_includes_codex_preflight_error(self) -> None:

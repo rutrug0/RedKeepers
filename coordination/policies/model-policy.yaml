@@ -20,17 +20,20 @@
       "daily_token_budget": 220000
     },
     "rowan-hale": {
-      "model": "gpt-5-mini",
+      "model": "GPT-5.3-Codex-Spark",
+      "fallback_model": "gpt-5-mini",
       "reasoning": "medium",
       "daily_token_budget": 120000
     },
     "nika-thorn": {
-      "model": "gpt-5-mini",
+      "model": "GPT-5.3-Codex-Spark",
+      "fallback_model": "gpt-5-mini",
       "reasoning": "low",
       "daily_token_budget": 100000
     },
     "tomas-grell": {
-      "model": "gpt-5-mini",
+      "model": "GPT-5.3-Codex-Spark",
+      "fallback_model": "gpt-5-mini",
       "reasoning": "medium",
       "daily_token_budget": 160000
     }

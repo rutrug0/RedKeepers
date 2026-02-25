@@ -2,7 +2,7 @@
 
 Current mission: Support RedKeepers M0/M1 execution in the `qa` lane.
 
-Preferred model: gpt-5-mini (medium reasoning).
+Preferred model: GPT-5.3-Codex-Spark (medium reasoning, fallback: gpt-5-mini).
 
 Known constraints:
 - Single active agent slot across the whole project

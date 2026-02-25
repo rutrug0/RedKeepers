@@ -544,6 +544,34 @@ def select_agent_for_item(item: dict[str, Any], agents: dict[str, dict[str, Any]
     return agent_id, agents[agent_id]
 
 
+def resolve_execution_profile(
+    *,
+    agent_id: str,
+    agent_cfg: dict[str, Any],
+    model_policy: dict[str, Any],
+) -> dict[str, str | None]:
+    def _clean(value: Any) -> str | None:
+        if value is None:
+            return None
+        text = str(value).strip()
+        return text or None
+
+    policy_agent_models = model_policy.get("agent_models", {})
+    policy_cfg = policy_agent_models.get(agent_id, {}) if isinstance(policy_agent_models, dict) else {}
+
+    model = _clean(policy_cfg.get("model")) or _clean(agent_cfg.get("model"))
+    reasoning = _clean(policy_cfg.get("reasoning")) or _clean(agent_cfg.get("reasoning"))
+    fallback_model = _clean(policy_cfg.get("fallback_model")) or _clean(model_policy.get("default_fallback_model"))
+    if fallback_model == model:
+        fallback_model = None
+
+    return {
+        "model": model,
+        "reasoning": reasoning,
+        "fallback_model": fallback_model,
+    }
+
+
 def commit_message(agent_name: str, item_id: str, title: str) -> str:
     short = title.strip().replace('"', "'")
     return f"[Agent:{agent_name}][Item:{item_id}] {short}"
@@ -609,6 +637,11 @@ def process_one(
         return 0
 
     agent_id, agent_cfg = select_agent_for_item(item, agents, policies["routing"])
+    execution_profile = resolve_execution_profile(
+        agent_id=agent_id,
+        agent_cfg=agent_cfg,
+        model_policy=policies.get("model", {}),
+    )
     emit_event(
         "select",
         "Selected work item",
@@ -617,6 +650,9 @@ def process_one(
         agent_id=agent_id,
         priority=item.get("priority"),
         milestone=item.get("milestone"),
+        model=execution_profile.get("model"),
+        reasoning=execution_profile.get("reasoning"),
+        fallback_model=execution_profile.get("fallback_model"),
     )
 
     if dry_run:
@@ -637,7 +673,16 @@ def process_one(
     stats_tracker.begin_run()
 
     prompt = build_prompt(ROOT, agent_id=agent_id, agent_cfg=agent_cfg, work_item=item)
-    emit_event("agent_start", "Agent execution started", item_id=item["id"], agent_id=agent_id, role=agent_cfg.get("role"))
+    emit_event(
+        "agent_start",
+        "Agent execution started",
+        item_id=item["id"],
+        agent_id=agent_id,
+        role=agent_cfg.get("role"),
+        model=execution_profile.get("model"),
+        reasoning=execution_profile.get("reasoning"),
+        fallback_model=execution_profile.get("fallback_model"),
+    )
     worker_started = time.monotonic()
     worker_timeout = int(policies.get("retry", {}).get("worker_timeout_seconds", 900))
     worker_box: dict[str, Any] = {}
@@ -648,6 +693,8 @@ def process_one(
                 project_root=ROOT,
                 agent_id=agent_id,
                 prompt=prompt,
+                model=execution_profile.get("model"),
+                fallback_model=execution_profile.get("fallback_model"),
                 timeout_seconds=worker_timeout,
                 dry_run=False,
             )
@@ -683,6 +730,9 @@ def process_one(
         result=worker.status,
         exit_code=worker.exit_code,
         elapsed_seconds=round(time.monotonic() - worker_started, 2),
+        model_requested=worker.requested_model,
+        model_used=worker.used_model,
+        fallback_used=worker.fallback_used,
     )
 
     if verbose and worker.stdout:
@@ -709,6 +759,9 @@ def process_one(
                 "agent_id": agent_id,
                 "result": "blocked",
                 "summary": worker.summary,
+                "model_requested": worker.requested_model,
+                "model_used": worker.used_model,
+                "fallback_used": worker.fallback_used,
             },
         )
     elif worker.status == "completed":
@@ -807,6 +860,9 @@ def process_one(
                     "summary": worker.summary,
                     "commit_sha": commit_sha,
                     "validation_results": validation_results,
+                    "model_requested": worker.requested_model,
+                    "model_used": worker.used_model,
+                    "fallback_used": worker.fallback_used,
                 },
             )
         else:
@@ -840,6 +896,9 @@ def process_one(
                     "result": "failed_validation",
                     "summary": worker.summary,
                     "validation_results": validation_results,
+                    "model_requested": worker.requested_model,
+                    "model_used": worker.used_model,
+                    "fallback_used": worker.fallback_used,
                 },
             )
     else:
@@ -866,6 +925,9 @@ def process_one(
                     "result": "failed_infrastructure",
                     "summary": worker.summary,
                     "exit_code": worker.exit_code,
+                    "model_requested": worker.requested_model,
+                    "model_used": worker.used_model,
+                    "fallback_used": worker.fallback_used,
                 },
             )
             queue.load()
@@ -920,6 +982,9 @@ def process_one(
                 "result": "failed",
                 "summary": worker.summary,
                 "exit_code": worker.exit_code,
+                "model_requested": worker.requested_model,
+                "model_used": worker.used_model,
+                "fallback_used": worker.fallback_used,
             },
         )
 
