@@ -57,14 +57,14 @@ class ExecutionProfileTests(unittest.TestCase):
                 },
                 "escalation_upgrade": {
                     "critical_or_repeated_failure": {
-                        "model": "codex-5.3",
+                        "model": "gpt-5.3-codex-spark",
                         "reasoning": "high",
                     }
                 },
             },
             item={"priority": "normal", "retry_count": 1},
         )
-        self.assertEqual(profile["model"], "codex-5.3")
+        self.assertEqual(profile["model"], "gpt-5.3-codex-spark")
         self.assertEqual(profile["reasoning"], "high")
         self.assertEqual(profile["selection_reason"], "escalation_upgrade")
 
@@ -82,14 +82,14 @@ class ExecutionProfileTests(unittest.TestCase):
                 },
                 "escalation_upgrade": {
                     "critical_or_repeated_failure": {
-                        "model": "codex-5.3",
+                        "model": "gpt-5.3-codex-spark",
                         "reasoning": "high",
                     }
                 },
             },
             item={"priority": "critical", "retry_count": 0},
         )
-        self.assertEqual(profile["model"], "codex-5.3")
+        self.assertEqual(profile["model"], "gpt-5.3-codex-spark")
         self.assertEqual(profile["reasoning"], "high")
         self.assertEqual(profile["selection_reason"], "escalation_upgrade")
 

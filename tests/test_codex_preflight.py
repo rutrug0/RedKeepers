@@ -84,6 +84,104 @@ class CodexPreflightTests(unittest.TestCase):
 
 
 class HealthCheckPreflightIntegrationTests(unittest.TestCase):
+    def test_validate_environment_flags_unsupported_model_requested_before_execution(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._write_required_files(root)
+            (root / "coordination" / "policies" / "model-policy.yaml").write_text(
+                json.dumps(
+                    {
+                        "agent_models": {
+                            "nika-thorn": {
+                                "model": "gpt-unsupported",
+                                "reasoning": "low",
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            def fake_model_preflight(model: str) -> str | None:
+                if model == "gpt-unsupported":
+                    return "model is unsupported for this account"
+                return None
+
+            with (
+                mock.patch.object(
+                    health_checks,
+                    "codex_model_access_preflight_error",
+                    side_effect=fake_model_preflight,
+                ),
+                mock.patch.object(
+                    health_checks,
+                    "codex_command_preflight_error",
+                    return_value=None,
+                ),
+            ):
+                errors = health_checks.validate_environment(root)
+
+        self.assertEqual(
+            errors,
+            [
+                "model 'gpt-unsupported' is not accessible: model is unsupported for this account. Remediation: "
+                "update model-policy.yaml to an accessible model, or configure an accessible fallback_model for this "
+                "agent/escalation path.",
+            ]
+        )
+
+    def test_validate_environment_flags_unsupported_escalation_model(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._write_required_files(root)
+            (root / "coordination" / "policies" / "model-policy.yaml").write_text(
+                json.dumps(
+                    {
+                        "agent_models": {
+                            "nika-thorn": {
+                                "model": "gpt-5.3-codex-spark",
+                                "reasoning": "low",
+                            }
+                        },
+                        "escalation_upgrade": {
+                            "critical_or_repeated_failure": {
+                                "model": "gpt-unsupported-escalation",
+                                "reasoning": "high",
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            def fake_model_preflight(model: str) -> str | None:
+                if model == "gpt-unsupported-escalation":
+                    return "escalation model is unsupported for this account"
+                return None
+
+            with (
+                mock.patch.object(
+                    health_checks,
+                    "codex_model_access_preflight_error",
+                    side_effect=fake_model_preflight,
+                ),
+                mock.patch.object(
+                    health_checks,
+                    "codex_command_preflight_error",
+                    return_value=None,
+                ),
+            ):
+                errors = health_checks.validate_environment(root)
+
+        self.assertEqual(
+            errors,
+            [
+                "model 'gpt-unsupported-escalation' is not accessible: escalation model is unsupported for this account. "
+                "Remediation: update model-policy.yaml to an accessible model, or configure an accessible fallback_model "
+                "for this agent/escalation path.",
+            ]
+        )
+
     def test_validate_environment_includes_codex_preflight_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

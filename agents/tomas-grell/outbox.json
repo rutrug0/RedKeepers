@@ -165,5 +165,17 @@
         "milestone": "M1"
       }
     ]
+  },
+  {
+    "ts": "2026-02-25T18:42:12Z",
+    "item_id": "RK-M1-0004-F01-F01-F01-ESC-F02",
+    "status": "completed",
+    "summary": "Added regression tests that assert escalation model resolution to gpt-5.3-codex-spark and validate model-policy accessibility for both standard and escalation paths, including a deterministic unsupported-model preflight fail condition before execution.",
+    "checks": [],
+    "changed_files": [
+      "tests/test_model_routing.py",
+      "tests/test_codex_preflight.py",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]
