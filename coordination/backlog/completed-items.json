@@ -560,5 +560,41 @@
     "generated_from_item_id": "RK-M1-0006",
     "assigned_agent": "rowan-hale",
     "commit_sha": "83bb6b036ad766797914c9d258bc22e22cfa258d"
+  },
+  {
+    "id": "RK-M1-0006-F03",
+    "title": "Define post-slice storage and defense building activation package",
+    "description": "Add the next building lines (storage/warehouse and defense support lines) and activation thresholds so the economy can move beyond flat base storage caps after the first playable slice.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006"
+    ],
+    "inputs": [
+      "docs/design/v1-starter-data-tables.md",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "Storage and defense line additions are expressed as data-table rows and effects, not bespoke mechanics",
+      "First-slice playable subset remains unchanged and clearly flagged",
+      "Updated values include backend/frontend field annotations matching existing table conventions"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:07:25.646762+00:00",
+    "updated_at": "2026-02-25T15:44:06.930136+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/rowan-hale/outbox.json` \u2014 appended completed work log entry + `proposed_work_items` follow-up.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-M1-0006",
+    "assigned_agent": "rowan-hale",
+    "commit_sha": "9fba1c397fbb83d6443d7db4f4aa30000e87df68"
   }
 ]

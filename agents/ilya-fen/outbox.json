@@ -132,5 +132,49 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-25T15:46:39.078518Z",
+    "agent_id": "ilya-fen",
+    "work_item_id": "RK-M1-0004-F01-F01",
+    "status": "done",
+    "summary": "Added temporary framework-agnostic reference adapters for in-memory service registry and event bus, a reference bootstrap composer, and a smoke helper that composes a placeholder module and validates service/event wiring.",
+    "changed_files": [
+      "backend/src/app/README.md",
+      "backend/src/app/index.ts",
+      "backend/src/app/reference/README.md",
+      "backend/src/app/reference/index.ts",
+      "backend/src/app/reference/in-memory-event-bus.ts",
+      "backend/src/app/reference/in-memory-service-registry.ts",
+      "backend/src/app/reference/reference-bootstrap.ts",
+      "backend/src/app/reference/smoke.ts",
+      "agents/ilya-fen/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Add automated contract smoke tests for reference bootstrap adapters",
+        "owner_role": "backend",
+        "milestone": "M1",
+        "priority": "low",
+        "description": "Add lightweight tests around the temporary reference `ServiceRegistry`, `InProcessEventBus`, and bootstrap composer to lock expected contract behavior (duplicate registration failure, subscribe/unsubscribe delivery, lifecycle hook collection) while the production runtime stack is still deferred.",
+        "acceptance_criteria": [
+          "Tests cover successful placeholder module composition through `ReferenceApplicationBootstrap` with lifecycle hook collection",
+          "Tests verify `InMemoryEventBus` publish/subscribe and unsubscribe behavior for a single event type",
+          "Tests verify `InMemoryServiceRegistry` resolve/tryResolve behavior and duplicate registration failure"
+        ],
+        "dependencies": [
+          "RK-M1-0004-F01-F01"
+        ],
+        "inputs": [
+          "backend/src/app/reference/*.ts",
+          "backend/src/app/composition.ts",
+          "backend/src/shared/events.ts"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]
