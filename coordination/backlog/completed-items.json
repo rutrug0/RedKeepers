@@ -1931,5 +1931,44 @@
     "last_failure_reason": "validation failed or commit failed",
     "recovered_from_stale_in_progress": true,
     "commit_sha": "00ada426ad63240a85a2b87c12c200734fecd83e"
+  },
+  {
+    "id": "RK-M0-0014-F01-F01-F01",
+    "title": "Publish explicit RK-M0-0014 snapshot generator command",
+    "description": "Add a discoverable deterministic generator entry point (script/command) for RK-M0-0014 progression artifacts so reseed instructions can reference a concrete local command instead of lane-specific CI automation.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0014-F01-F01"
+    ],
+    "inputs": [
+      "coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json",
+      "docs/operations/rk-m0-0014-progression-smoke-runbook.md",
+      "pipeline or generator that emits 15m/30m/60m settlement & scout snapshots"
+    ],
+    "acceptance_criteria": [
+      "A single documented command generates coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json from current seeds",
+      "Generator output remains deterministic for fixed seeds",
+      "Runbook references the concrete generator command"
+    ],
+    "validation_commands": [
+      "python -m unittest tests.test_m0_0014_progression_smoke"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T21:11:21.911887+00:00",
+    "updated_at": "2026-02-25T21:12:49.634008+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "2. `python -m unittest tests.test_m0_0014_progression_smoke`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "tomas-grell",
+    "generated_from_item_id": "RK-M0-0014-F01-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "d27821e9727380fc5a7245d99c22acc97365b587"
   }
 ]
