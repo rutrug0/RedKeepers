@@ -75,41 +75,6 @@
     "escalation_target": "Mara Voss"
   },
   {
-    "id": "RK-M0-0010",
-    "title": "Create first-slice map/build/train placeholder content keys",
-    "description": "Add structured placeholder event and panel copy keys for tick, build, train, and scout outcomes so gameplay actions can render through stable identifiers.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "content",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0007",
-      "RK-M0-0009"
-    ],
-    "inputs": [
-      "docs/content/",
-      "client-web/",
-      "docs/design/v1-starter-data-tables.md"
-    ],
-    "acceptance_criteria": [
-      "Add at least 6 placeholder keys covering tick/build/train/scout outcomes with token fields",
-      "Keys are namespaced by loop feature (`tick`, `build`, `train`, `scout`) for stable client lookup",
-      "No additional mechanics or civ-specific exceptions are introduced beyond first-slice constraints"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:15:22.000000+00:00",
-    "updated_at": "2026-02-25T20:20:21.743659+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "assigned_agent": "nika-thorn"
-  },
-  {
     "id": "RK-M0-0011",
     "title": "Add first-slice loop smoke checks across backend contracts and client actions",
     "description": "Create lightweight automated checks that assert the first-slice settlement tick/build/train/scout contracts are wired end-to-end with deterministic placeholders.",
@@ -320,17 +285,18 @@
       "Document explicitly confirms first-slice caps (1 settlement, 3-4 resources, 4-6 buildings, 3-5 units) and marks anything else as deferred"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T18:32:27.509162+00:00",
-    "updated_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-25T20:21:04.211054+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
+    "assigned_agent": "rowan-hale"
   },
   {
     "id": "RK-M0-0015",
@@ -717,5 +683,38 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "juno-cairn",
     "generated_from_item_id": "RK-AUTO-PLATFORM-0001-F01"
+  },
+  {
+    "id": "RK-M0-0010-F01",
+    "title": "Wire loop namespaced outcome keys into client key selection",
+    "description": "Add support for `event.tick.*`, `event.build.*`, `event.train.*`, and `event.scout.*` keys in client shell/event panel lookups with fallback to existing module keys.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0010"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Client renders at least one `tick` outcome via a `event.tick.*` key",
+      "Client renders at least one `build`, `train`, and `scout` outcome via the new loop namespace keys",
+      "Existing module keys remain supported until full migration is complete"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:20:25.957720+00:00",
+    "updated_at": "2026-02-25T20:20:25.957720+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-M0-0010"
   }
 ]

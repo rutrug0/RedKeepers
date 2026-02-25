@@ -266,4 +266,32 @@
       }
     ]
   }
+  ,
+  {
+    "timestamp_utc": "2026-02-25T20:20:31.014421+00:00",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-M0-0014",
+    "status": "done",
+    "summary": "Published a first-slice 15m/30m/60m progression target matrix with pass/fail bounds for resource stabilization, first L2 upgrade, first unit training, and scout interaction.",
+    "changed_files": [
+      "docs/design/first-slice-progression-target-matrix.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Add M0 smoke assertions for first-slice progression targets",
+        "owner_role": "qa",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Add a deterministic smoke check that evaluates 15m/30m/60m snapshot bounds from RK-M0-0014 and fails when matrix thresholds are not met.",
+        "acceptance_criteria": [
+          "A single smoke check reads settlement and event-scout snapshots at >=15m, >=30m, and >=60m",
+          "The run asserts matrix bounds for resource caps/ranges, first L2 upgrade window, first unit completion by <=60m, and at least one valid scout outcome",
+          "Test output clearly marks which matrix row failed and emits pass/fail in CI-readable form"
+        ],
+        "validation_commands": []
+      }
+    ]
+  }
 ]
