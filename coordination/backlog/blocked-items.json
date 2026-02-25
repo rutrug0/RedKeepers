@@ -10,7 +10,7 @@
     "preferred_agent": null,
     "dependencies": [],
     "inputs": [
-      "coordination/state/run-history.jsonl",
+      "coordination/runtime/run-history.jsonl",
       "coordination/backlog/work-items.json"
     ],
     "acceptance_criteria": [
@@ -43,7 +43,7 @@
     "preferred_agent": null,
     "dependencies": [],
     "inputs": [
-      "coordination/state/run-history.jsonl",
+      "coordination/runtime/run-history.jsonl",
       "coordination/backlog/work-items.json"
     ],
     "acceptance_criteria": [
@@ -76,7 +76,7 @@
     "preferred_agent": null,
     "dependencies": [],
     "inputs": [
-      "coordination/state/run-history.jsonl",
+      "coordination/runtime/run-history.jsonl",
       "coordination/backlog/work-items.json"
     ],
     "acceptance_criteria": [
@@ -109,7 +109,7 @@
     "preferred_agent": null,
     "dependencies": [],
     "inputs": [
-      "coordination/state/run-history.jsonl",
+      "coordination/runtime/run-history.jsonl",
       "coordination/backlog/work-items.json"
     ],
     "acceptance_criteria": [

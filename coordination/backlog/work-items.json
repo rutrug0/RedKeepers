@@ -1,43 +1,5 @@
 [
   {
-    "id": "RK-M1-0004",
-    "title": "Bootstrap backend source tree from modular monolith spec",
-    "description": "Create the initial framework-agnostic backend scaffold under backend/ matching the documented modular monolith package layout, including module template structure and placeholder files that make the intended boundaries explicit.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0005"
-    ],
-    "inputs": [
-      "backend/",
-      "docs/architecture/backend-modular-monolith.md",
-      "docs/architecture/system-overview.md"
-    ],
-    "acceptance_criteria": [
-      "backend scaffold includes src/app, src/shared, and src/modules directories aligned with the architecture spec",
-      "Planned modules (auth/player/settlement/world_map/economy/buildings/units/combat/events/telemetry) each have placeholder api/application/domain/ports/infra structure",
-      "A brief backend scaffold note maps the created structure back to the architecture spec and deferred framework choice"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T14:50:15.506942+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-M1-0006",
     "title": "Define v1 starter economy, building, and unit data tables",
     "description": "Translate the factions v1 concept into implementation-ready starter data tables for core resources, building families, unit lines, and civilization modifiers using the stat-driven asymmetry approach.",
@@ -63,14 +25,16 @@
     "status": "queued",
     "retry_count": 0,
     "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T14:20:08.432712+00:00",
+    "updated_at": "2026-02-25T14:56:20.031070+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0001"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
+    "assigned_agent": "rowan-hale",
+    "recovered_from_stale_in_progress": true
   },
   {
     "id": "RK-M1-0007",
@@ -213,5 +177,41 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "sera-kest",
     "generated_from_item_id": "RK-M1-0005"
+  },
+  {
+    "id": "RK-M1-0004-F01",
+    "title": "Define backend shared primitives and module bootstrap interfaces",
+    "description": "Add framework-agnostic starter code stubs in backend/src/shared and backend/src/app for core primitives (IDs, result/error type, clock abstraction, in-process event bus interface) plus a module registration/composition contract so module implementations can be added without breaking boundaries.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0004"
+    ],
+    "inputs": [
+      "backend/",
+      "docs/architecture/backend-modular-monolith.md"
+    ],
+    "acceptance_criteria": [
+      "backend/src/shared contains initial typed placeholder modules/files for IDs, result/error, and time abstraction responsibilities",
+      "backend/src/app contains a framework-agnostic composition/bootstrap contract that references modules through interfaces rather than concrete infra adapters",
+      "Module scaffold notes remain consistent with the new shared/app stubs and no framework-specific runtime dependency is introduced"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:50:23.374657+00:00",
+    "updated_at": "2026-02-25T14:50:23.374657+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M1-0004"
   }
 ]

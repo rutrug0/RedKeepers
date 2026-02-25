@@ -42,12 +42,12 @@ def _validate_json_object(*, errors: list[str], path: Path, label: str) -> None:
 
 def validate_environment(root: Path) -> list[str]:
     errors: list[str] = []
+    runtime_dir = root / "coordination" / "runtime"
 
     required_paths = [
         root / "coordination" / "backlog" / "work-items.json",
         root / "coordination" / "backlog" / "completed-items.json",
         root / "coordination" / "backlog" / "blocked-items.json",
-        root / "coordination" / "state" / "daemon-state.json",
         root / "coordination" / "state" / "agents.json",
         root / "coordination" / "policies" / "routing-rules.yaml",
         root / "coordination" / "policies" / "retry-policy.yaml",
@@ -87,13 +87,13 @@ def validate_environment(root: Path) -> list[str]:
         label="agents.json",
     )
 
-    for state_name in ["agent-stats.json", "progress-summary.json", "locks.json"]:
+    # Runtime files are generated on demand; validate them only if they already exist.
+    for state_name in ["daemon-state.json", "agent-stats.json", "progress-summary.json", "locks.json"]:
         _validate_json_object(
             errors=errors,
-            path=root / "coordination" / "state" / state_name,
+            path=runtime_dir / state_name,
             label=state_name,
         )
-
     for policy_name in [
         "routing-rules.yaml",
         "retry-policy.yaml",

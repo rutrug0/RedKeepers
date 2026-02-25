@@ -11,8 +11,8 @@ class StatsTracker:
     def __init__(self, root: Path, agents: dict[str, dict[str, Any]]):
         self.root = root
         self.agents_cfg = agents
-        self.path = root / "coordination" / "state" / "agent-stats.json"
-        self.progress_path = root / "coordination" / "state" / "progress-summary.json"
+        self.path = root / "coordination" / "runtime" / "agent-stats.json"
+        self.progress_path = root / "coordination" / "runtime" / "progress-summary.json"
         self._run_started_at: float | None = None
 
     def load(self) -> dict[str, Any]:
@@ -98,4 +98,3 @@ class StatsTracker:
             "milestone_progress": milestone_progress,
         }
         save_json_atomic(self.progress_path, payload)
-

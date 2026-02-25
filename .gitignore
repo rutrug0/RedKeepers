@@ -7,6 +7,8 @@ coordination/state/*.tmp
 coordination/state/daemon.lock
 coordination/state/daemon-events.jsonl
 coordination/state/run-logs/
+coordination/runtime/*
+!coordination/runtime/.gitkeep
 backend/.env
 client-web/node_modules/
 client-web/dist/

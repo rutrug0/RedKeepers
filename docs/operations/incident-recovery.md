@@ -6,10 +6,10 @@ If the daemon crashes and leaves `coordination/state/daemon.lock`, verify no dae
 
 ## State Files
 
-- `coordination/state/daemon-state.json`: current daemon status
-- `coordination/state/progress-summary.json`: compact project progress view
-- `coordination/state/agent-stats.json`: per-agent usage and workload metrics
-- `coordination/state/run-history.jsonl`: append-only run outcomes
+- `coordination/runtime/daemon-state.json`: current daemon status
+- `coordination/runtime/progress-summary.json`: compact project progress view
+- `coordination/runtime/agent-stats.json`: per-agent usage and workload metrics
+- `coordination/runtime/run-history.jsonl`: append-only run outcomes
 
 ## Common Failures
 

@@ -19,11 +19,13 @@ from render_status import render_status
 
 
 ROOT = Path(__file__).resolve().parents[1]
-STATE_DIR = ROOT / "coordination" / "state"
-DAEMON_STATE_PATH = STATE_DIR / "daemon-state.json"
-LOCK_META_PATH = STATE_DIR / "locks.json"
-LOCK_FILE = STATE_DIR / "daemon.lock"
-EVENTS_LOG_PATH = STATE_DIR / "daemon-events.jsonl"
+STATIC_STATE_DIR = ROOT / "coordination" / "state"
+RUNTIME_DIR = ROOT / "coordination" / "runtime"
+DAEMON_STATE_PATH = RUNTIME_DIR / "daemon-state.json"
+LOCK_META_PATH = RUNTIME_DIR / "locks.json"
+LOCK_FILE = RUNTIME_DIR / "daemon.lock"
+EVENTS_LOG_PATH = RUNTIME_DIR / "daemon-events.jsonl"
+RUN_HISTORY_PATH = RUNTIME_DIR / "run-history.jsonl"
 AGENT_HEARTBEAT_SECONDS = 15
 LOW_QUEUE_WATERMARK = 2
 
@@ -56,7 +58,7 @@ class DaemonLock:
         self.held = False
 
     def acquire(self) -> None:
-        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
         fd = None
         try:
             fd = os.open(LOCK_FILE, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
@@ -89,6 +91,22 @@ def default_daemon_state() -> dict[str, Any]:
         "last_run_summary": None,
         "lock_held": False,
     }
+
+
+def migrate_legacy_runtime_files() -> None:
+    RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
+    for name in [
+        "daemon-state.json",
+        "locks.json",
+        "agent-stats.json",
+        "progress-summary.json",
+        "run-history.jsonl",
+        "daemon-events.jsonl",
+    ]:
+        legacy = STATIC_STATE_DIR / name
+        target = RUNTIME_DIR / name
+        if legacy.exists() and not target.exists():
+            target.write_bytes(legacy.read_bytes())
 
 
 def emit_event(kind: str, message: str, **fields: Any) -> None:
@@ -212,7 +230,7 @@ def ensure_queue_stall_recovery_item(queue: QueueManager) -> dict[str, Any] | No
         "inputs": [
             "coordination/backlog/work-items.json",
             "coordination/backlog/blocked-items.json",
-            "coordination/state/run-history.jsonl",
+            "coordination/runtime/run-history.jsonl",
         ],
         "acceptance_criteria": [
             "At least one dependency-stalled queued item is made runnable or explicitly closed",
@@ -263,7 +281,7 @@ def ensure_backlog_refill_item(queue: QueueManager) -> dict[str, Any] | None:
             "coordination/backlog/work-items.json",
             "coordination/backlog/completed-items.json",
             "coordination/backlog/blocked-items.json",
-            "coordination/state/run-history.jsonl",
+            "coordination/runtime/run-history.jsonl",
         ],
         "acceptance_criteria": [
             "At least 3 new queued tasks are created or requeued",
@@ -285,6 +303,84 @@ def ensure_backlog_refill_item(queue: QueueManager) -> dict[str, Any] | None:
     queue.append_item(item)
     queue.save()
     return item
+
+
+def _coerce_string_list(value: Any, *, field: str, errors: list[str]) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        errors.append(f"{field} must be a list of strings")
+        return []
+    out: list[str] = []
+    for idx, item in enumerate(value):
+        if not isinstance(item, str):
+            errors.append(f"{field}[{idx}] must be a string")
+            continue
+        out.append(item)
+    return out
+
+
+def _validate_and_normalize_generated_task(
+    *,
+    raw: Any,
+    source_item: dict[str, Any],
+    agent_id: str,
+    queue: QueueManager,
+    valid_owner_roles: set[str],
+) -> tuple[dict[str, Any] | None, list[str]]:
+    if not isinstance(raw, dict):
+        return None, ["task entry must be an object"]
+
+    errors: list[str] = []
+    title = raw.get("title")
+    owner_role = raw.get("owner_role")
+    description = raw.get("description")
+    acceptance_criteria = raw.get("acceptance_criteria")
+
+    if not isinstance(title, str) or not title.strip():
+        errors.append("missing/invalid title")
+    if not isinstance(owner_role, str) or not owner_role.strip():
+        errors.append("missing/invalid owner_role")
+    elif owner_role.strip() not in valid_owner_roles:
+        errors.append(f"owner_role must be one of {sorted(valid_owner_roles)}")
+    if not isinstance(description, str) or not description.strip():
+        errors.append("missing/invalid description")
+    if not isinstance(acceptance_criteria, list) or not acceptance_criteria:
+        errors.append("missing/invalid acceptance_criteria (non-empty list required)")
+    elif not all(isinstance(item, str) and item.strip() for item in acceptance_criteria):
+        errors.append("acceptance_criteria entries must be non-empty strings")
+
+    deps = _coerce_string_list(raw.get("dependencies", [source_item["id"]]), field="dependencies", errors=errors)
+    inputs = _coerce_string_list(raw.get("inputs", []), field="inputs", errors=errors)
+    validations = _coerce_string_list(raw.get("validation_commands", []), field="validation_commands", errors=errors)
+
+    token_budget_raw = raw.get("token_budget", 8000)
+    try:
+        token_budget = int(token_budget_raw)
+    except Exception:
+        errors.append("token_budget must be an integer")
+        token_budget = 8000
+    if token_budget < 1:
+        errors.append("token_budget must be >= 1")
+        token_budget = 8000
+
+    if errors:
+        return None, errors
+
+    sanitized = dict(raw)
+    sanitized["title"] = str(title).strip()
+    sanitized["owner_role"] = str(owner_role).strip()
+    sanitized["description"] = str(description).strip()
+    sanitized["acceptance_criteria"] = [str(item).strip() for item in acceptance_criteria]
+    sanitized["dependencies"] = deps
+    sanitized["inputs"] = inputs
+    sanitized["validation_commands"] = validations
+    sanitized["token_budget"] = token_budget
+
+    normalized = _normalize_generated_task(source_item, agent_id, sanitized, queue)
+    if normalized is None:
+        return None, ["normalization failed"]
+    return normalized, []
 
 
 def _normalize_generated_task(source_item: dict[str, Any], agent_id: str, raw: dict[str, Any], queue: QueueManager) -> dict[str, Any] | None:
@@ -362,13 +458,20 @@ def _normalize_generated_task(source_item: dict[str, Any], agent_id: str, raw: d
     }
 
 
-def ingest_agent_follow_up_tasks(queue: QueueManager, *, agent_id: str, source_item: dict[str, Any]) -> list[str]:
+def ingest_agent_follow_up_tasks(
+    queue: QueueManager,
+    *,
+    agent_id: str,
+    source_item: dict[str, Any],
+    routing_rules: dict[str, Any],
+) -> tuple[list[str], list[dict[str, Any]]]:
     outbox_path = ROOT / "agents" / agent_id / "outbox.json"
     data = load_json(outbox_path, [])
     if not isinstance(data, list):
-        return []
+        return [], [{"entry": "outbox_root", "errors": ["outbox.json root must be a list"]}]
 
     candidates: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
     for entry in reversed(data):
         if not isinstance(entry, dict):
             continue
@@ -376,13 +479,27 @@ def ingest_agent_follow_up_tasks(queue: QueueManager, *, agent_id: str, source_i
         if entry_item_id != source_item["id"]:
             continue
         proposed = entry.get("proposed_work_items")
-        if isinstance(proposed, list):
-            candidates.extend([item for item in proposed if isinstance(item, dict)])
+        if proposed is None:
             break
+        if not isinstance(proposed, list):
+            rejected.append({"entry": entry_item_id, "errors": ["proposed_work_items must be a list"]})
+            break
+        candidates.extend(proposed)
+        break
 
     created_ids: list[str] = []
+    valid_owner_roles = set((routing_rules.get("owner_role_map") or {}).keys())
     for raw in candidates:
-        normalized = _normalize_generated_task(source_item, agent_id, raw, queue)
+        normalized, errors = _validate_and_normalize_generated_task(
+            raw=raw,
+            source_item=source_item,
+            agent_id=agent_id,
+            queue=queue,
+            valid_owner_roles=valid_owner_roles,
+        )
+        if errors:
+            rejected.append({"entry": raw if isinstance(raw, dict) else repr(raw), "errors": errors})
+            continue
         if not normalized:
             continue
         queue.append_item(normalized)
@@ -390,7 +507,7 @@ def ingest_agent_follow_up_tasks(queue: QueueManager, *, agent_id: str, source_i
 
     if created_ids:
         queue.save()
-    return created_ids
+    return created_ids, rejected
 
 
 def recover_stale_in_progress_items(queue: QueueManager) -> list[str]:
@@ -582,7 +699,7 @@ def process_one(
             lock_held=True,
         )
         append_jsonl(
-            ROOT / "coordination" / "state" / "run-history.jsonl",
+            RUN_HISTORY_PATH,
             {
                 "ts": utc_now_iso(),
                 "item_id": item["id"],
@@ -648,7 +765,12 @@ def process_one(
             emit_event("completed", "Work item completed", item_id=item["id"], agent_id=agent_id, commit_sha=commit_sha)
             queue.mark_completed(item["id"], worker.summary, commit_sha=commit_sha)
             queue.save()
-            generated_ids = ingest_agent_follow_up_tasks(queue, agent_id=agent_id, source_item=item)
+            generated_ids, rejected_followups = ingest_agent_follow_up_tasks(
+                queue,
+                agent_id=agent_id,
+                source_item=item,
+                routing_rules=policies["routing"],
+            )
             if generated_ids:
                 emit_event(
                     "followups",
@@ -656,6 +778,14 @@ def process_one(
                     agent_id=agent_id,
                     source_item_id=item["id"],
                     created_item_ids=generated_ids,
+                )
+            if rejected_followups:
+                emit_event(
+                    "followups_invalid",
+                    "Rejected invalid agent-generated follow-up tasks",
+                    agent_id=agent_id,
+                    source_item_id=item["id"],
+                    rejected_count=len(rejected_followups),
                 )
             stats_tracker.record_result(stats, agent_id=agent_id, outcome="completed", tokens_in=worker.tokens_in_est, tokens_out=worker.tokens_out_est)
             set_daemon_state(
@@ -665,7 +795,7 @@ def process_one(
                 lock_held=True,
             )
             append_jsonl(
-                ROOT / "coordination" / "state" / "run-history.jsonl",
+                RUN_HISTORY_PATH,
                 {
                     "ts": utc_now_iso(),
                     "item_id": item["id"],
@@ -699,7 +829,7 @@ def process_one(
                 lock_held=True,
             )
             append_jsonl(
-                ROOT / "coordination" / "state" / "run-history.jsonl",
+                RUN_HISTORY_PATH,
                 {
                     "ts": utc_now_iso(),
                     "item_id": item["id"],
@@ -725,7 +855,7 @@ def process_one(
                 lock_held=True,
             )
             append_jsonl(
-                ROOT / "coordination" / "state" / "run-history.jsonl",
+                RUN_HISTORY_PATH,
                 {
                     "ts": utc_now_iso(),
                     "item_id": item["id"],
@@ -779,7 +909,7 @@ def process_one(
             lock_held=True,
         )
         append_jsonl(
-            ROOT / "coordination" / "state" / "run-history.jsonl",
+            RUN_HISTORY_PATH,
             {
                 "ts": utc_now_iso(),
                 "item_id": item["id"],
@@ -814,6 +944,7 @@ def process_one(
 
 
 def cmd_status() -> int:
+    migrate_legacy_runtime_files()
     errors = validate_environment(ROOT)
     if errors:
         print("Environment validation failed:")
@@ -831,6 +962,7 @@ def cmd_status() -> int:
 
 
 def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool, keep_alive: bool) -> int:
+    migrate_legacy_runtime_files()
     lock = DaemonLock(os.getpid())
     try:
         lock.acquire()
