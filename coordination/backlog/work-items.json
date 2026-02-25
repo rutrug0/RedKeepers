@@ -245,10 +245,10 @@
       "First-slice behavior remains unchanged when `data_stub_post_slice` rows are not enabled"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 3,
     "created_at": "2026-02-25T15:44:06.936180+00:00",
-    "updated_at": "2026-02-25T18:25:48.878438+00:00",
+    "updated_at": "2026-02-25T19:41:07.156292+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -617,42 +617,6 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
   },
   {
-    "id": "RK-M1-0006-F02-F01-F01",
-    "title": "Apply approved Pass A starter tuning values into serialized backend seed config",
-    "description": "Update serialized v1 starter seed JSON values to match the approved Pass A tuning set already documented in `docs/design/v1-early-progression-pacing-sim.md` (starting stock, base passive income, early producer cost multipliers, and barracks/rally food+wood costs).",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006-F02"
-    ],
-    "inputs": [
-      "docs/design/v1-early-progression-pacing-sim.md",
-      "backend/src/modules/economy/infra/seeds/v1/resource-definitions.json",
-      "backend/src/modules/buildings/infra/seeds/v1/building-lines.json"
-    ],
-    "acceptance_criteria": [
-      "Serialized resource and building seed values match the approved Pass A numbers from the design doc",
-      "Seed loader tests continue passing after value updates",
-      "No new mechanics are introduced and first-slice enablement remains unchanged"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T19:28:29.875797+00:00",
-    "updated_at": "2026-02-25T19:32:10.702227+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M1-0006-F02-F01",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-M1-0006-F02-F01-F02",
     "title": "Run post-serialization rally/stone micro-pass validation after Pass A is landed",
     "description": "After Pass A is serialized, rerun the 30m/2h/6h reference simulation and validate whether rally_post timing can be approved or needs a narrow rally/stone-only numeric tweak.",
@@ -686,5 +650,40 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-M1-0006-F02-F01"
+  },
+  {
+    "id": "RK-M1-0006-F02-F01-F01-F01",
+    "title": "Re-run early progression sim against serialized Pass A seeds and evaluate rally micro-pass",
+    "description": "Run the first 2-6h pacing simulation using the updated serialized seed bundle to confirm barracks timing target (<2h) and determine whether a narrow rally_post/stone cost micro-pass is still required without adding mechanics.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006-F02-F01-F01"
+    ],
+    "inputs": [
+      "docs/design/v1-early-progression-pacing-sim.md",
+      "backend/src/modules/economy/infra/seeds/v1/resource-definitions.json",
+      "backend/src/modules/buildings/infra/seeds/v1/building-lines.json"
+    ],
+    "acceptance_criteria": [
+      "Simulation run consumes current serialized backend seed bundle values",
+      "Output reports barracks L1 completion timing and rally_post L1 reachability by 6h against documented targets",
+      "If rally_post remains outside target, proposed deltas are limited to narrow numeric cost changes and captured as a separate backlog item"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T19:32:13.117596+00:00",
+    "updated_at": "2026-02-25T19:32:13.117596+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M1-0006-F02-F01-F01"
   }
 ]

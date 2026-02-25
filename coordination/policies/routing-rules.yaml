@@ -8,5 +8,11 @@
     "qa": "tomas-grell",
     "platform": "juno-cairn"
   },
+  "dependency_unlock_priority": {
+    "enabled": true,
+    "critical_priority_protected": true,
+    "priority_boost_levels": 1,
+    "prefer_immediate_unblocks": true
+  },
   "fallback_agent": "mara-voss"
 }

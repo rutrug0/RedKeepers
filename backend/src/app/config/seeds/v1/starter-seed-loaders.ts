@@ -90,6 +90,28 @@ export interface BuildingEffectSeedV1 {
   readonly notes: string;
 }
 
+export type BuildingActivationThresholdPhase = "reveal" | "unlock";
+export type BuildingActivationThresholdKey =
+  | "resource_stock_ratio"
+  | "resource_stock_ratio_any"
+  | "building_level_min";
+export type BuildingActivationThresholdOperation = "gte" | "lte" | "eq";
+export type BuildingActivationThresholdValueDisplayFormat = "ratio" | "integer";
+
+export interface BuildingActivationThresholdSeedV1 {
+  readonly activation_rule_id: string;
+  readonly activation_package_id: string;
+  readonly building_id: string;
+  readonly threshold_phase: BuildingActivationThresholdPhase;
+  readonly threshold_key: BuildingActivationThresholdKey;
+  readonly scope: string;
+  readonly operation: BuildingActivationThresholdOperation;
+  readonly value: number;
+  readonly value_display_format: BuildingActivationThresholdValueDisplayFormat;
+  readonly ui_locked_hint: string;
+  readonly slice_status: SliceStatus;
+}
+
 export interface UnitLineSeedV1 {
   readonly unit_id: string;
   readonly display_name: string;
@@ -154,6 +176,8 @@ export type ResourceDefinitionsSeedTableV1 = KeyedSeedTable<ResourceDefinitionSe
 export type BuildingFamiliesSeedTableV1 = KeyedSeedTable<BuildingFamilySeedV1>;
 export type BuildingLinesSeedTableV1 = KeyedSeedTable<BuildingLineSeedV1>;
 export type BuildingEffectsSeedTableV1 = RowsSeedTable<BuildingEffectSeedV1>;
+export type BuildingActivationThresholdsSeedTableV1 =
+  RowsSeedTable<BuildingActivationThresholdSeedV1>;
 export type UnitLinesSeedTableV1 = KeyedSeedTable<UnitLineSeedV1>;
 export type UnitVariantsSeedTableV1 = KeyedSeedTable<UnitVariantSeedV1>;
 export type UnitVariantModifiersSeedTableV1 = RowsSeedTable<UnitVariantModifierSeedV1>;
@@ -186,6 +210,10 @@ export interface FirstSliceEnablementConfigV1 {
         readonly allowed_slice_statuses?: readonly SliceStatus[];
       };
       readonly building_effects?: {
+        readonly include_only_enabled_buildings?: boolean;
+      };
+      readonly building_activation_thresholds?: {
+        readonly allowed_slice_statuses?: readonly SliceStatus[];
         readonly include_only_enabled_buildings?: boolean;
       };
     };
@@ -223,6 +251,7 @@ export interface StarterSeedBundleV1 {
     readonly building_families: BuildingFamiliesSeedTableV1;
     readonly building_lines: BuildingLinesSeedTableV1;
     readonly building_effects: BuildingEffectsSeedTableV1;
+    readonly building_activation_thresholds: BuildingActivationThresholdsSeedTableV1;
   };
   readonly units: {
     readonly unit_lines: UnitLinesSeedTableV1;
@@ -240,6 +269,7 @@ export interface StarterSeedFilePathsV1 {
   readonly buildingsFamilies: string;
   readonly buildingsLines: string;
   readonly buildingsEffects: string;
+  readonly buildingsActivationThresholds: string;
   readonly unitsLines: string;
   readonly unitsVariants: string;
   readonly unitsVariantModifiers: string;
@@ -300,6 +330,22 @@ const BUILDING_EFFECT_DISPLAY_FORMATS: readonly BuildingEffectDisplayFormat[] = 
   "integer",
   "seconds",
 ];
+const BUILDING_ACTIVATION_THRESHOLD_PHASES: readonly BuildingActivationThresholdPhase[] = [
+  "reveal",
+  "unlock",
+];
+const BUILDING_ACTIVATION_THRESHOLD_KEYS: readonly BuildingActivationThresholdKey[] = [
+  "resource_stock_ratio",
+  "resource_stock_ratio_any",
+  "building_level_min",
+];
+const BUILDING_ACTIVATION_THRESHOLD_OPERATIONS: readonly BuildingActivationThresholdOperation[] = [
+  "gte",
+  "lte",
+  "eq",
+];
+const BUILDING_ACTIVATION_THRESHOLD_VALUE_DISPLAY_FORMATS: readonly BuildingActivationThresholdValueDisplayFormat[] =
+  ["ratio", "integer"];
 const CIVILIZATION_MODULE_OWNERS: readonly CivilizationModuleOwner[] = [
   "economy",
   "buildings",
@@ -337,6 +383,10 @@ export const createDefaultStarterSeedFilePathsV1 = (
   buildingsEffects: join(
     repositoryRoot,
     "backend/src/modules/buildings/infra/seeds/v1/building-effects.json",
+  ),
+  buildingsActivationThresholds: join(
+    repositoryRoot,
+    "backend/src/modules/buildings/infra/seeds/v1/building-activation-thresholds.json",
   ),
   unitsLines: join(
     repositoryRoot,
@@ -387,6 +437,12 @@ export const loadBuildingEffectsSeedV1 = async (
   readJson: JsonFileReader = defaultJsonFileReader,
 ): Promise<BuildingEffectsSeedTableV1> =>
   parseBuildingEffectsSeedV1(await readJson(filePath));
+
+export const loadBuildingActivationThresholdsSeedV1 = async (
+  filePath: string,
+  readJson: JsonFileReader = defaultJsonFileReader,
+): Promise<BuildingActivationThresholdsSeedTableV1> =>
+  parseBuildingActivationThresholdsSeedV1(await readJson(filePath));
 
 export const loadUnitLinesSeedV1 = async (
   filePath: string,
@@ -439,6 +495,10 @@ export const loadStarterSeedBundleV1 = async (
       building_families: await loadBuildingFamiliesSeedV1(paths.buildingsFamilies, readJson),
       building_lines: await loadBuildingLinesSeedV1(paths.buildingsLines, readJson),
       building_effects: await loadBuildingEffectsSeedV1(paths.buildingsEffects, readJson),
+      building_activation_thresholds: await loadBuildingActivationThresholdsSeedV1(
+        paths.buildingsActivationThresholds,
+        readJson,
+      ),
     },
     units: {
       unit_lines: await loadUnitLinesSeedV1(paths.unitsLines, readJson),
@@ -510,6 +570,16 @@ export const parseBuildingEffectsSeedV1 = (
     "buildings.building_effects",
     parseBuildingEffectSeedV1,
     (row) => `${row.building_id}::${row.stat_key}`,
+  );
+
+export const parseBuildingActivationThresholdsSeedV1 = (
+  raw: unknown,
+): BuildingActivationThresholdsSeedTableV1 =>
+  parseRowsSeedTable(
+    raw,
+    "buildings.building_activation_thresholds",
+    parseBuildingActivationThresholdSeedV1,
+    (row) => row.activation_rule_id,
   );
 
 export const parseUnitLinesSeedV1 = (raw: unknown): UnitLinesSeedTableV1 =>
@@ -643,6 +713,24 @@ export const parseFirstSliceEnablementConfigV1 = (
             ),
           }),
         ),
+        building_activation_thresholds: parseOptionalObject(
+          buildings,
+          "building_activation_thresholds",
+          "$.module_filters.buildings",
+          (row) => ({
+            allowed_slice_statuses: readOptionalEnumArray(
+              row,
+              "allowed_slice_statuses",
+              "$.module_filters.buildings.building_activation_thresholds",
+              SLICE_STATUSES,
+            ),
+            include_only_enabled_buildings: readOptionalBoolean(
+              row,
+              "include_only_enabled_buildings",
+              "$.module_filters.buildings.building_activation_thresholds",
+            ),
+          }),
+        ),
       })),
       units: parseOptionalObject(moduleFilters, "units", "$.module_filters", (units) => ({
         unit_lines: parseOptionalObject(units, "unit_lines", "$.module_filters.units", (row) => ({
@@ -737,6 +825,7 @@ export const parseFirstSliceEnablementConfigV1 = (
 };
 
 export const validateStarterSeedCrossReferencesV1 = (bundle: StarterSeedBundleV1): void => {
+  const resourceIds = new Set(Object.keys(bundle.economy.resource_definitions.entries_by_id));
   const buildingIds = new Set(Object.keys(bundle.buildings.building_lines.entries_by_id));
   const familyIds = new Set(Object.keys(bundle.buildings.building_families.entries_by_id));
   const unitIds = new Set(Object.keys(bundle.units.unit_lines.entries_by_id));
@@ -762,6 +851,55 @@ export const validateStarterSeedCrossReferencesV1 = (bundle: StarterSeedBundleV1
       stat_key: row.stat_key,
       field: "building_id",
     });
+  }
+
+  for (const row of bundle.buildings.building_activation_thresholds.rows) {
+    assertRef(buildingIds, row.building_id, "buildings.building_activation_thresholds", {
+      activation_rule_id: row.activation_rule_id,
+      field: "building_id",
+    });
+
+    if (row.threshold_key === "resource_stock_ratio") {
+      const resourceId = parseScopedReference(row.scope, "resource");
+      if (resourceId === undefined) {
+        throw new SeedValidationError(
+          `Invalid scope '${row.scope}' for threshold key '${row.threshold_key}' in 'buildings.building_activation_thresholds'.`,
+          { details: { activation_rule_id: row.activation_rule_id, field: "scope" } },
+        );
+      }
+      assertRef(
+        resourceIds,
+        resourceId,
+        "buildings.building_activation_thresholds",
+        { activation_rule_id: row.activation_rule_id, field: "scope" },
+      );
+    }
+
+    if (row.threshold_key === "resource_stock_ratio_any") {
+      const groupId = parseScopedReference(row.scope, "resource_group");
+      if (groupId === undefined) {
+        throw new SeedValidationError(
+          `Invalid scope '${row.scope}' for threshold key '${row.threshold_key}' in 'buildings.building_activation_thresholds'.`,
+          { details: { activation_rule_id: row.activation_rule_id, field: "scope" } },
+        );
+      }
+    }
+
+    if (row.threshold_key === "building_level_min") {
+      const scopedBuildingId = parseScopedReference(row.scope, "building");
+      if (scopedBuildingId === undefined) {
+        throw new SeedValidationError(
+          `Invalid scope '${row.scope}' for threshold key '${row.threshold_key}' in 'buildings.building_activation_thresholds'.`,
+          { details: { activation_rule_id: row.activation_rule_id, field: "scope" } },
+        );
+      }
+      assertRef(
+        buildingIds,
+        scopedBuildingId,
+        "buildings.building_activation_thresholds",
+        { activation_rule_id: row.activation_rule_id, field: "scope" },
+      );
+    }
   }
 
   for (const row of Object.values(bundle.units.unit_lines.entries_by_id)) {
@@ -893,6 +1031,28 @@ export const applyFirstSliceFilteringV1 = (
         }
         return true;
       }),
+      building_activation_thresholds: filterRowsTable(
+        bundle.buildings.building_activation_thresholds,
+        (row) => {
+          if (
+            !allowSliceStatus(
+              row.slice_status,
+              enablement.module_filters.buildings?.building_activation_thresholds
+                ?.allowed_slice_statuses,
+              visibleByDefault,
+            )
+          ) {
+            return false;
+          }
+          if (
+            enablement.module_filters.buildings?.building_activation_thresholds
+              ?.include_only_enabled_buildings
+          ) {
+            return enabledBuildingIds.has(row.building_id);
+          }
+          return true;
+        },
+      ),
     },
     units: {
       unit_lines: filterKeyedTable(bundle.units.unit_lines, (row) =>
@@ -1096,6 +1256,46 @@ function parseBuildingEffectSeedV1(raw: unknown, path: string): BuildingEffectSe
   };
 }
 
+function parseBuildingActivationThresholdSeedV1(
+  raw: unknown,
+  path: string,
+): BuildingActivationThresholdSeedV1 {
+  const row = asRecord(raw, path);
+  return {
+    activation_rule_id: readStableId(row, "activation_rule_id", path),
+    activation_package_id: readStableId(row, "activation_package_id", path),
+    building_id: readStableId(row, "building_id", path),
+    threshold_phase: readEnum(
+      row,
+      "threshold_phase",
+      path,
+      BUILDING_ACTIVATION_THRESHOLD_PHASES,
+    ),
+    threshold_key: readEnum(
+      row,
+      "threshold_key",
+      path,
+      BUILDING_ACTIVATION_THRESHOLD_KEYS,
+    ),
+    scope: readString(row, "scope", path),
+    operation: readEnum(
+      row,
+      "operation",
+      path,
+      BUILDING_ACTIVATION_THRESHOLD_OPERATIONS,
+    ),
+    value: readFiniteNumber(row, "value", path),
+    value_display_format: readEnum(
+      row,
+      "value_display_format",
+      path,
+      BUILDING_ACTIVATION_THRESHOLD_VALUE_DISPLAY_FORMATS,
+    ),
+    ui_locked_hint: readString(row, "ui_locked_hint", path),
+    slice_status: readEnum(row, "slice_status", path, SLICE_STATUSES),
+  };
+}
+
 function parseUnitLineSeedV1(raw: unknown, path: string): UnitLineSeedV1 {
   const row = asRecord(raw, path);
   return {
@@ -1241,6 +1441,21 @@ function allowSliceStatus(
     return allowed.includes(status);
   }
   return visibleByDefault(status);
+}
+
+function parseScopedReference(
+  scope: string,
+  prefix: string,
+): string | undefined {
+  const expectedPrefix = `${prefix}:`;
+  if (!scope.startsWith(expectedPrefix)) {
+    return undefined;
+  }
+  const scopedId = scope.slice(expectedPrefix.length);
+  if (!STABLE_ID_PATTERN.test(scopedId)) {
+    return undefined;
+  }
+  return scopedId;
 }
 
 function assertRef(

@@ -4,6 +4,7 @@ import { test } from "node:test";
 import {
   applyFirstSliceFilteringV1,
   loadStarterSeedBundleV1,
+  parseBuildingActivationThresholdsSeedV1,
   parseResourceDefinitionsSeedV1,
   parseUnitVariantModifiersSeedV1,
   SeedValidationError,
@@ -87,6 +88,50 @@ test("parseUnitVariantModifiersSeedV1 rejects duplicate row identity", () => {
   );
 });
 
+test("parseBuildingActivationThresholdsSeedV1 rejects duplicate activation_rule_id", () => {
+  const duplicateRowSeed = {
+    schema_version: "rk-v1-starter-seed",
+    source_doc: "docs/design/v1-starter-data-tables.md",
+    source_section: "Unit test duplicate-row fixture",
+    table_id: "buildings.building_activation_thresholds",
+    rows: [
+      {
+        activation_rule_id: "act_granary_unlock_food_90",
+        activation_package_id: "m2_storage_defense_activation",
+        building_id: "granary",
+        threshold_phase: "unlock",
+        threshold_key: "resource_stock_ratio",
+        scope: "resource:food",
+        operation: "gte",
+        value: 0.9,
+        value_display_format: "ratio",
+        ui_locked_hint: "hint_granary_unlock_food_cap_pressure",
+        slice_status: "data_stub_post_slice",
+      },
+      {
+        activation_rule_id: "act_granary_unlock_food_90",
+        activation_package_id: "m2_storage_defense_activation",
+        building_id: "granary",
+        threshold_phase: "unlock",
+        threshold_key: "building_level_min",
+        scope: "building:grain_plot",
+        operation: "gte",
+        value: 4,
+        value_display_format: "integer",
+        ui_locked_hint: "hint_granary_unlock_grain_plot_l4",
+        slice_status: "data_stub_post_slice",
+      },
+    ],
+  };
+
+  assertSeedValidationError(
+    () => {
+      parseBuildingActivationThresholdsSeedV1(duplicateRowSeed);
+    },
+    "Duplicate row identity 'act_granary_unlock_food_90' in 'buildings.building_activation_thresholds'.",
+  );
+});
+
 test("validateStarterSeedCrossReferencesV1 rejects missing unit base reference", async () => {
   const { seeds } = await loadStarterSeedBundleV1();
   const missingUnitReferenceBundle = {
@@ -112,6 +157,32 @@ test("validateStarterSeedCrossReferencesV1 rejects missing unit base reference",
     },
     "Missing cross-reference 'missing_base_unit' in 'units.unit_variants'.",
   );
+});
+
+test("loadStarterSeedBundleV1 preserves post-slice building activation threshold IDs", async () => {
+  const { seeds } = await loadStarterSeedBundleV1();
+  const ruleIds = seeds.buildings.building_activation_thresholds.rows.map(
+    (row) => row.activation_rule_id,
+  );
+
+  assert.deepStrictEqual(ruleIds, [
+    "act_granary_reveal_food_75",
+    "act_granary_unlock_food_90",
+    "act_granary_unlock_grain_plot_l4",
+    "act_warehouse_reveal_nonfood_75",
+    "act_warehouse_unlock_nonfood_90",
+    "act_warehouse_unlock_timber_camp_l4",
+    "act_warehouse_unlock_stone_quarry_l3",
+    "act_palisade_reveal_barracks_l3",
+    "act_palisade_unlock_barracks_l4",
+    "act_palisade_unlock_rally_post_l2",
+    "act_watchtower_reveal_palisade_l2",
+    "act_watchtower_unlock_palisade_l4",
+    "act_watchtower_unlock_rally_post_l4",
+    "act_guardhouse_reveal_palisade_l3",
+    "act_guardhouse_unlock_palisade_l5",
+    "act_guardhouse_unlock_barracks_l5",
+  ]);
 });
 
 test("applyFirstSliceFilteringV1 excludes stub entries and keeps cinder_throne_legates starter scope", async () => {
@@ -160,6 +231,7 @@ test("applyFirstSliceFilteringV1 excludes stub entries and keeps cinder_throne_l
     assert.ok(enabledBuildingIds.has(effect.building_id));
   }
   assert.ok(!filtered.buildings.building_effects.rows.some((effect) => effect.building_id === "palisade"));
+  assert.equal(filtered.buildings.building_activation_thresholds.rows.length, 0);
 
   const activation = filtered.civilizations.activation.entries_by_id;
   assert.ok(activation.cinder_throne_legates);

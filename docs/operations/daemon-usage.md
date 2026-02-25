@@ -49,6 +49,13 @@ The daemon can automatically re-queue recoverable blocked items using `coordinat
 
 When the `platform` agent exists but no platform/release items exist in active/completed/blocked backlog, daemon also seeds a one-time `platform_bootstrap` queued item so cross-platform delivery work is represented in the lane.
 
+## Scheduling Priority Notes
+
+Routing supports dependency-unlock prioritization via `coordination/policies/routing-rules.yaml` `dependency_unlock_priority`:
+- boosts queued tasks that unlock downstream queued work,
+- prefers immediate unlocks by default,
+- keeps `critical` priority protected from being overtaken.
+
 ## Monitoring Progress (PowerShell)
 
 Live high-level event stream (daemon start/agent start/validation/completion/failure):

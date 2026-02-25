@@ -404,4 +404,45 @@
       }
     ]
   }
+  ,
+  {
+    "timestamp_utc": "2026-02-25T20:05:00Z",
+    "agent_id": "ilya-fen",
+    "work_item_id": "RK-M1-0006-F03-F01",
+    "status": "done",
+    "summary": "Added v1 seed/config and runtime support for `buildings.building_activation_thresholds`, including table parsing/validation, first-slice filtering, and deterministic threshold evaluation (`resource_stock_ratio`, `resource_stock_ratio_any`, `building_level_min` with AND semantics per `building_id + threshold_phase`).",
+    "changed_files": [
+      "backend/src/app/config/seeds/v1/starter-seed-loaders.ts",
+      "backend/src/app/config/seeds/v1/starter-seed-loaders.test.ts",
+      "backend/src/modules/buildings/infra/seeds/v1/building-lines.json",
+      "backend/src/modules/buildings/infra/seeds/v1/building-activation-thresholds.json",
+      "backend/src/modules/buildings/application/building-activation-threshold-evaluator.ts",
+      "backend/src/modules/buildings/application/building-activation-threshold-evaluator.test.ts",
+      "backend/src/modules/buildings/application/index.ts",
+      "agents/ilya-fen/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Wire building activation threshold evaluation into settlement building visibility/read-model flow",
+        "owner_role": "backend",
+        "milestone": "M2",
+        "priority": "medium",
+        "description": "Integrate the new deterministic threshold evaluator into the buildings query/state projection path so reveal/unlock state for post-slice buildings can be computed from settlement stock/cap/level snapshots and surfaced through backend DTOs.",
+        "acceptance_criteria": [
+          "A buildings read/query path can return reveal/unlock state for `granary`, `warehouse`, `palisade`, `watchtower`, and `guardhouse` using `building_activation_thresholds` rows",
+          "Rows for the same `building_id` + `threshold_phase` are evaluated with AND semantics through the integrated path",
+          "First-slice output remains unchanged when activation threshold rows are filtered out by first-slice enablement"
+        ],
+        "dependencies": [
+          "RK-M1-0006-F03-F01"
+        ],
+        "inputs": [
+          "backend/src/modules/buildings/application/building-activation-threshold-evaluator.ts",
+          "backend/src/app/config/seeds/v1/starter-seed-loaders.ts",
+          "docs/design/v1-starter-data-tables.md"
+        ]
+      }
+    ]
+  }
 ]

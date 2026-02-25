@@ -51,6 +51,58 @@ class QueueManager:
         total_runs = int(agent_stats.get("total_runs", 0))
         return (load, total_runs)
 
+    def _dependency_unlock_metrics(
+        self,
+        *,
+        candidate_ids: set[str],
+        completed_ids: set[str],
+    ) -> dict[str, dict[str, int]]:
+        metrics: dict[str, dict[str, int]] = {item_id: {"total": 0, "immediate": 0} for item_id in candidate_ids}
+        queued_items = [item for item in self.active if item.get("status") == "queued"]
+        for target in queued_items:
+            target_id = str(target.get("id", ""))
+            deps_raw = target.get("dependencies", [])
+            if not isinstance(deps_raw, list) or not deps_raw:
+                continue
+            deps = [str(dep) for dep in deps_raw]
+            dep_set = set(deps)
+            relevant = dep_set.intersection(candidate_ids)
+            if not relevant:
+                continue
+            for dep in relevant:
+                if dep == target_id:
+                    continue
+                metrics[dep]["total"] += 1
+                other_deps = [other for other in deps if other != dep]
+                if all(other in completed_ids for other in other_deps):
+                    metrics[dep]["immediate"] += 1
+        return metrics
+
+    @staticmethod
+    def _boolish(value: Any, default: bool) -> bool:
+        if value is None:
+            return default
+        if isinstance(value, bool):
+            return value
+        text = str(value).strip().lower()
+        if text in {"1", "true", "yes", "on"}:
+            return True
+        if text in {"0", "false", "no", "off"}:
+            return False
+        return default
+
+    @staticmethod
+    def _intish(value: Any, default: int, min_value: int = 0, max_value: int | None = None) -> int:
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            parsed = default
+        if parsed < min_value:
+            parsed = min_value
+        if max_value is not None and parsed > max_value:
+            parsed = max_value
+        return parsed
+
     def select_next(self, routing_rules: dict[str, Any], stats: dict[str, Any]) -> dict[str, Any] | None:
         completed_ids = self.completed_ids()
         candidates = [
@@ -61,10 +113,37 @@ class QueueManager:
         if not candidates:
             return None
 
+        unlock_cfg = routing_rules.get("dependency_unlock_priority", {}) if isinstance(routing_rules, dict) else {}
+        if not isinstance(unlock_cfg, dict):
+            unlock_cfg = {}
+        unlock_enabled = self._boolish(unlock_cfg.get("enabled"), False)
+        critical_protected = self._boolish(unlock_cfg.get("critical_priority_protected"), True)
+        boost_levels = self._intish(unlock_cfg.get("priority_boost_levels", 1), default=1, min_value=0, max_value=3)
+        prefer_immediate = self._boolish(unlock_cfg.get("prefer_immediate_unblocks"), True)
+        candidate_ids = {str(item.get("id", "")) for item in candidates if str(item.get("id", ""))}
+        unlock_metrics = (
+            self._dependency_unlock_metrics(candidate_ids=candidate_ids, completed_ids=completed_ids) if unlock_enabled else {}
+        )
+
         def sort_key(item: dict[str, Any]) -> tuple[Any, ...]:
             load, total_runs = self._agent_score(item, routing_rules, stats)
+            item_id = str(item.get("id", ""))
+            base_rank = PRIORITY_RANK.get(item["priority"], 99)
+            unlock_total = int(unlock_metrics.get(item_id, {}).get("total", 0))
+            unlock_immediate = int(unlock_metrics.get(item_id, {}).get("immediate", 0))
+            unlock_signal = unlock_immediate if prefer_immediate else unlock_total
+
+            effective_rank = base_rank
+            if unlock_enabled and boost_levels > 0 and unlock_signal > 0:
+                floor = 1 if critical_protected else 0
+                if not (critical_protected and base_rank == 0):
+                    effective_rank = max(floor, base_rank - boost_levels)
+
             return (
-                PRIORITY_RANK.get(item["priority"], 99),
+                effective_rank,
+                -unlock_immediate,
+                -unlock_total,
+                base_rank,
                 item.get("created_at", ""),
                 load,
                 total_runs,
