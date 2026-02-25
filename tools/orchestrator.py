@@ -31,6 +31,10 @@ AGENT_HEARTBEAT_SECONDS = 15
 LOW_QUEUE_WATERMARK = 2
 
 
+def _bool_env(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def build_session_id(*, pid: int, started_at: str) -> str:
     compact = started_at.replace("-", "").replace(":", "").replace("+", "Z").replace(".", "")
     return f"rk-{compact}-p{pid}"
@@ -609,7 +613,7 @@ def commit_message(agent_name: str, item_id: str, title: str) -> str:
     return f"[Agent:{agent_name}][Item:{item_id}] {short}"
 
 
-def run_validation_for_item(root: Path, item: dict[str, Any], commit_rules: dict[str, Any]) -> tuple[bool, list[dict[str, Any]]]:
+def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]) -> list[str]:
     commands = []
     defaults = commit_rules.get("default_validation_commands", [])
     if isinstance(defaults, list):
@@ -617,6 +621,15 @@ def run_validation_for_item(root: Path, item: dict[str, Any], commit_rules: dict
     item_cmds = item.get("validation_commands", [])
     if isinstance(item_cmds, list):
         commands.extend([str(cmd) for cmd in item_cmds if str(cmd).strip()])
+    if item.get("owner_role") == "frontend" and _bool_env("REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA"):
+        commands.append(
+            "python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5"
+        )
+    return commands
+
+
+def run_validation_for_item(root: Path, item: dict[str, Any], commit_rules: dict[str, Any]) -> tuple[bool, list[dict[str, Any]]]:
+    commands = build_validation_commands(item, commit_rules)
     if not commands:
         return True, []
     return run_validation_commands(root, commands)

@@ -12,6 +12,7 @@ This repository is operated by a head daemon that schedules one AI agent at a ti
 - Use placeholder art only for now (wireframes, temporary icons, neutral silhouettes, labeled mock images). Final art production is deferred and may replace placeholders later.
 - Agents should propose follow-up work in their `outbox.json` entries (`proposed_work_items`) so the daemon can replenish the backlog continuously.
 - Avoid feature creep in the first playable slice. Use `docs/design/first-vertical-slice.md` as a hard scope boundary; defer out-of-scope ideas into follow-up tasks instead of implementing them.
+- Frontend QA should rely on automated visual smoke checks (`tools/frontend_visual_smoke.py`) with multi-device screenshots and baseline diffs when environment allows browser execution.
 
 ## Primary Runtime
 

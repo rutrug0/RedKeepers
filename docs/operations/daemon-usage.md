@@ -9,11 +9,13 @@
 - `python tools/orchestrator.py run --until-idle` : exit when queue becomes idle or stalled (one-shot queue drain mode)
 - `python tools/smoke_daemon_env.py` : read-only smoke validation for queue/policy/state files
 - `python tools/render_stats_html.py` : generate runtime dashboard HTML (global + per-session agent/model stats + backlog section)
+- `python tools/frontend_visual_smoke.py` : run multi-device frontend screenshot smoke checks (see `docs/operations/frontend-visual-qa.md`)
 
 ## Environment Variables
 
 - `REDKEEPERS_CODEX_COMMAND` : command used to invoke Codex CLI (default `codex exec`)
 - `REDKEEPERS_WORKER_MODE=mock` : simulate successful agent runs for testing the daemon flow
+- `REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA=1` : append strict visual smoke validation command for frontend-owned work items during daemon validation
 
 ## Smoke Validation (PowerShell)
 

@@ -12,3 +12,4 @@ Known constraints:
 Vertical slice QA guard:
 - Validate against `docs/design/first-vertical-slice.md` and flag feature creep
 - Prefer tests/checks that protect the agreed slice boundaries and placeholder-art policy
+- For frontend visual QA, use `tools/frontend_visual_smoke.py` (multi-device screenshots + baseline diff). If environment blocks browser launch, document blocker and preserve report artifacts.
