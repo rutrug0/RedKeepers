@@ -1,42 +1,5 @@
 [
   {
-    "id": "RK-M1-0006-F01-F01-F01",
-    "title": "Add backend tests for v1 starter seed loader validation and first-slice filtering",
-    "description": "Add focused tests for the new v1 seed loader utilities covering malformed shape errors, duplicate IDs/rows, missing cross-references, and first-slice filtering behavior using the committed seed JSON fixtures.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "low",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006-F01-F01"
-    ],
-    "inputs": [
-      "backend/src/app/config/seeds/v1/starter-seed-loaders.ts",
-      "backend/src/modules/*/infra/seeds/v1/*.json",
-      "backend/src/app/config/seeds/v1/*.json"
-    ],
-    "acceptance_criteria": [
-      "Tests cover at least one malformed object shape failure with clear error message assertion",
-      "Tests cover duplicate keyed IDs or duplicate row identity rejection",
-      "Tests cover missing cross-reference rejection (e.g. producer_building_id or base_unit_id)",
-      "Tests verify first-slice filtering excludes balance/data stubs and keeps cinder_throne_legates starter content by default"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T16:00:57.781880+00:00",
-    "updated_at": "2026-02-25T18:03:27.030128+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M1-0006-F01-F01",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-M1-0007-F02-F01",
     "title": "Add typed backend loaders and validation helpers for v1 narrative seed tables",
     "description": "Implement framework-agnostic loader/parser utilities for the new narrative JSON tables and enforce the shared narrative row shape (required fields, unique keys per table, token list consistency with template placeholders) at startup or in tests.",
@@ -59,17 +22,18 @@
       "No gameplay mechanics are added; work remains data loading/validation only"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T16:09:20.320370+00:00",
-    "updated_at": "2026-02-25T16:09:20.320370+00:00",
+    "updated_at": "2026-02-25T18:04:36.264102+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M1-0007-F02"
+    "generated_from_item_id": "RK-M1-0007-F02",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
