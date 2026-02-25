@@ -177,5 +177,74 @@
       "tests/test_codex_preflight.py",
       "agents/tomas-grell/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-25T19:09:50.3757052Z",
+    "item_id": "RK-M1-0005-F02-F01-ESC-F03",
+    "status": "completed",
+    "summary": "Updated orchestrator validation handling so frontend visual smoke runs reporting STATUS: BLOCKED are treated as blocked environment outcomes with actionable blocker reasons, without incrementing retries or triggering retry-threshold escalation; added regression tests to preserve failed-validation retry semantics for real visual regressions.",
+    "checks": [
+      "python tools/orchestrator.py status (pass)",
+      "python -m unittest tests.test_frontend_visual_blocked_outcome (pass)",
+      "python -m unittest discover -s tests (fails: pre-existing failures in tests/test_daemon_smoke_env.py and tests/test_m1_scaffold_smoke.py)"
+    ],
+    "changed_files": [
+      "tools/orchestrator.py",
+      "tests/test_frontend_visual_blocked_outcome.py",
+      "agents/tomas-grell/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
+        "owner_role": "qa",
+        "milestone": "M1",
+        "priority": "normal",
+        "description": "Investigate and resolve the existing failures in tests/test_daemon_smoke_env.py and tests/test_m1_scaffold_smoke.py so full regression runs are green and do not obscure feature-specific validation outcomes.",
+        "acceptance_criteria": [
+          "python -m unittest discover -s tests passes without failures in test_daemon_smoke_env.py",
+          "python -m unittest discover -s tests passes without failures in test_m1_scaffold_smoke.py",
+          "Root-cause notes for each fixed failure are captured in the corresponding test or agent run summary"
+        ],
+        "inputs": [
+          "tests/test_daemon_smoke_env.py",
+          "tests/test_m1_scaffold_smoke.py",
+          "tools/health_checks.py",
+          "client-web/index.html"
+        ],
+        "validation_commands": [
+          "python -m unittest discover -s tests"
+        ]
+      }
+    ]
+  },
+  {
+    "ts": "2026-02-25T19:12:51.1368290Z",
+    "item_id": "RK-M1-0005-F02-F01-ESC-F03",
+    "status": "completed",
+    "summary": "Verified the frontend visual STATUS: BLOCKED handling is present in orchestrator and covered by regression tests: blocked outcomes include actionable visual-smoke reason details and bypass retry/escalation increments, while true visual regressions continue through failed-validation retry semantics.",
+    "checks": [
+      "python tools/orchestrator.py status (pass)",
+      "python -m unittest tests.test_frontend_visual_blocked_outcome -v (pass)",
+      "python -m unittest discover -s tests (fails: pre-existing failures in tests/test_daemon_smoke_env.py and tests/test_m1_scaffold_smoke.py)"
+    ],
+    "changed_files": [
+      "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
+    "ts": "2026-02-25T19:18:40.0253417Z",
+    "item_id": "RK-M1-0005-F02-F01-ESC-F03",
+    "status": "completed",
+    "summary": "Hardened frontend visual blocker detection to use report status/error even when STATUS output is truncated, strip report-path noise from blocker summaries, and added regression coverage that environment blockers do not create retry-threshold escalation items.",
+    "checks": [
+      "python tools/orchestrator.py status (pass)",
+      "python -m unittest tests.test_frontend_visual_blocked_outcome -v (pass)",
+      "python -m unittest discover -s tests (fails: pre-existing failures in tests/test_daemon_smoke_env.py and tests/test_m1_scaffold_smoke.py)"
+    ],
+    "changed_files": [
+      "tools/orchestrator.py",
+      "tests/test_frontend_visual_blocked_outcome.py",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]

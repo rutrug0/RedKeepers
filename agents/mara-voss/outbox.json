@@ -592,5 +592,45 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "ts":  "2026-02-25T19:21:44.8438011Z",
+        "item_id":  "RK-M1-0005-F02-F01-ESC-F03-ESC",
+        "status":  "completed",
+        "summary":  "Root cause confirmed: the source item implementation already covers frontend visual `STATUS: BLOCKED` handling, but the item kept failing daemon validation because full-suite unittest discovery currently has unrelated baseline failures; retries then escalated on generic validation failure.",
+        "root_cause":  "Validation command scope mismatch. `RK-M1-0005-F02-F01-ESC-F03` runs `python -m unittest discover -s tests`, which fails on pre-existing tests unrelated to frontend visual blocker-state logic (`tests/test_daemon_smoke_env.py` and `tests/test_m1_scaffold_smoke.py`).",
+        "evidence":  {
+                         "source_retry_failures":  "coordination/runtime/run-history.jsonl:86-88 (`RK-M1-0005-F02-F01-ESC-F03` failed validation 3x on unittest discover)",
+                         "validation_failure_signal":  "coordination/runtime/daemon-events.jsonl:1239,1254,1282 (`validation_failed` events for source item)",
+                         "test_failure_1":  "tests/test_daemon_smoke_env.py:68 expects missing `daemon-state.json` required-file error, while current `tools/health_checks.py` required_paths omits that file",
+                         "test_failure_2":  "tests/test_m1_scaffold_smoke.py:67-69 expects legacy static markers (`resource-grid`, `map-stage`, `event-list`) absent from current client shell markup",
+                         "feature_path_verification":  "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_queue_integrity => pass"
+                     },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
+                                        "owner_role":  "qa",
+                                        "milestone":  "M1",
+                                        "priority":  "high",
+                                        "description":  "Resolve existing unrelated failures in `tests/test_daemon_smoke_env.py` and `tests/test_m1_scaffold_smoke.py` so full regression validation is green and does not re-escalate completed feature work.",
+                                        "dependencies":  [
+                                                             "RK-M1-0005-F02-F01-ESC-F03"
+                                                         ],
+                                        "inputs":  [
+                                                       "tests/test_daemon_smoke_env.py",
+                                                       "tests/test_m1_scaffold_smoke.py",
+                                                       "tools/health_checks.py",
+                                                       "client-web/index.html"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "`python -m unittest discover -s tests` passes without failures in `tests/test_daemon_smoke_env.py`",
+                                                                    "`python -m unittest discover -s tests` passes without failures in `tests/test_m1_scaffold_smoke.py`",
+                                                                    "Updated assertions reflect current first-slice contract (runtime vs state required-file semantics, current placeholder shell markup) without expanding product scope"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python -m unittest discover -s tests"
+                                                                ]
+                                    }
+                                ]
     }
 ]

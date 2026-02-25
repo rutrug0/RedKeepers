@@ -106,6 +106,8 @@ class QueueManager:
         item["result_summary"] = result_summary
         if commit_sha:
             item["commit_sha"] = commit_sha
+        self.completed = [existing for existing in self.completed if existing.get("id") != item_id]
+        self.blocked = [existing for existing in self.blocked if existing.get("id") != item_id]
         self.completed.append(item)
         self.active = [candidate for candidate in self.active if candidate["id"] != item_id]
 
@@ -116,11 +118,15 @@ class QueueManager:
         item["status"] = "blocked"
         item["updated_at"] = utc_now_iso()
         item["blocker_reason"] = blocker_reason
+        self.blocked = [existing for existing in self.blocked if existing.get("id") != item_id]
+        self.completed = [existing for existing in self.completed if existing.get("id") != item_id]
         self.blocked.append(item)
         self.active = [candidate for candidate in self.active if candidate["id"] != item_id]
 
     def requeue_blocked(self, item_id: str, *, reason: str) -> bool:
         if any(item.get("id") == item_id for item in self.active):
+            return False
+        if any(item.get("id") == item_id for item in self.completed):
             return False
         idx = next((i for i, item in enumerate(self.blocked) if item.get("id") == item_id), None)
         if idx is None:
@@ -146,6 +152,11 @@ class QueueManager:
         return item["retry_count"]
 
     def append_item(self, item: dict[str, Any]) -> None:
+        item_id = item.get("id")
+        if isinstance(item_id, str):
+            self.active = [existing for existing in self.active if existing.get("id") != item_id]
+            self.blocked = [existing for existing in self.blocked if existing.get("id") != item_id]
+            self.completed = [existing for existing in self.completed if existing.get("id") != item_id]
         self.active.append(item)
 
     def create_escalation_item(

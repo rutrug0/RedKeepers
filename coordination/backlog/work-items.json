@@ -580,9 +580,47 @@
     "generated_from_item_id": "RK-M0-0006"
   },
   {
-    "id": "RK-M1-0005-F02-F01-ESC",
-    "title": "Escalation: Add automated a11y and mobile viewport smoke checks for client shell",
-    "description": "Investigate repeated failure for item RK-M1-0005-F02-F01. Reason: retry threshold exceeded",
+    "id": "RK-M1-0005-F02-F01-ESC-F02",
+    "title": "Add frontend visual QA dependency preflight to daemon environment checks",
+    "description": "Extend daemon environment validation so frontend-visual QA prerequisites are verified before scheduling frontend items, including Playwright importability in the exact Python interpreter used by orchestrator validation.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0002"
+    ],
+    "inputs": [
+      "tools/health_checks.py",
+      "tools/orchestrator.py",
+      "coordination/policies/commit-guard-rules.yaml",
+      "docs/operations/frontend-visual-qa.md"
+    ],
+    "acceptance_criteria": [
+      "Environment/status preflight emits a clear actionable error when frontend visual QA is enabled and `playwright` is missing for the active Python interpreter",
+      "Preflight guidance includes explicit install/remediation commands for Playwright and Chromium runtime",
+      "When prerequisites are present, `python tools/orchestrator.py status` passes without false frontend-visual dependency errors"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:52:07.843340+00:00",
+    "updated_at": "2026-02-25T18:52:07.843340+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC"
+  },
+  {
+    "id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
+    "title": "Escalation: Treat frontend visual `STATUS: BLOCKED` validation results as block-state outcomes",
+    "description": "Investigate repeated failure for item RK-M1-0005-F02-F01-ESC-F03. Reason: retry threshold exceeded",
     "milestone": "M1",
     "type": "qa",
     "priority": "high",
@@ -600,14 +638,14 @@
     "validation_commands": [],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-25T18:49:40.934120+00:00",
-    "updated_at": "2026-02-25T18:52:05.806570+00:00",
+    "created_at": "2026-02-25T19:19:20.252923+00:00",
+    "updated_at": "2026-02-25T19:22:19.756017+00:00",
     "estimated_effort": "S",
     "token_budget": 6000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "source_item_id": "RK-M1-0005-F02-F01",
+    "source_item_id": "RK-M1-0005-F02-F01-ESC-F03",
     "assigned_agent": "mara-voss"
   }
 ]

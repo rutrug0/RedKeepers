@@ -409,6 +409,57 @@ def revisit_recoverable_blocked_items(queue: QueueManager, retry_policy: dict[st
     return reopened_ids
 
 
+def _dedupe_by_item_id(items: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[str]]:
+    selected: dict[str, tuple[datetime, int, dict[str, Any]]] = {}
+    invalid_items: list[dict[str, Any]] = []
+    duplicate_ids: set[str] = set()
+
+    for idx, item in enumerate(items):
+        item_id = item.get("id")
+        if not isinstance(item_id, str) or not item_id.strip():
+            invalid_items.append(item)
+            continue
+        canonical_id = item_id.strip()
+        ts = _parse_iso_datetime(item.get("updated_at")) or _parse_iso_datetime(item.get("created_at")) or datetime.min.replace(tzinfo=timezone.utc)
+        existing = selected.get(canonical_id)
+        if existing is None:
+            selected[canonical_id] = (ts, idx, item)
+            continue
+        duplicate_ids.add(canonical_id)
+        current_ts, current_idx, _ = existing
+        if ts > current_ts or (ts == current_ts and idx > current_idx):
+            selected[canonical_id] = (ts, idx, item)
+
+    deduped = [entry[2] for entry in sorted(selected.values(), key=lambda row: row[1])]
+    if invalid_items:
+        deduped.extend(invalid_items)
+    return deduped, sorted(duplicate_ids)
+
+
+def repair_backlog_archive_duplicates(root: Path) -> dict[str, Any]:
+    completed_path = root / "coordination" / "backlog" / "completed-items.json"
+    blocked_path = root / "coordination" / "backlog" / "blocked-items.json"
+    result = {
+        "completed_removed": 0,
+        "blocked_removed": 0,
+        "completed_duplicate_ids": [],
+        "blocked_duplicate_ids": [],
+    }
+
+    for path, field_prefix in [(completed_path, "completed"), (blocked_path, "blocked")]:
+        data = load_json(path, [])
+        if not isinstance(data, list):
+            continue
+        deduped, duplicate_ids = _dedupe_by_item_id(data)
+        removed = len(data) - len(deduped)
+        if removed <= 0:
+            continue
+        save_json_atomic(path, deduped)
+        result[f"{field_prefix}_removed"] = removed
+        result[f"{field_prefix}_duplicate_ids"] = duplicate_ids
+    return result
+
+
 def _coerce_string_list(value: Any, *, field: str, errors: list[str]) -> list[str]:
     if value is None:
         return []
@@ -815,6 +866,101 @@ def run_validation_for_item(root: Path, item: dict[str, Any], commit_rules: dict
     return run_validation_commands(root, commands)
 
 
+def _extract_frontend_visual_report_path(text: str) -> str | None:
+    marker = "report="
+    idx = text.rfind(marker)
+    if idx < 0:
+        return None
+    tail = text[idx + len(marker) :].strip()
+    if not tail:
+        return None
+    token_chars: list[str] = []
+    for ch in tail:
+        if ch in {"\r", "\n", "\t", " "}:
+            break
+        token_chars.append(ch)
+    candidate = "".join(token_chars).strip().strip("'\"")
+    return candidate or None
+
+
+def _strip_frontend_visual_report_token(text: str) -> str:
+    cleaned = text.strip()
+    if not cleaned:
+        return cleaned
+    lower = cleaned.lower()
+    if lower.startswith("report="):
+        return ""
+    marker = " report="
+    idx = lower.rfind(marker)
+    if idx >= 0:
+        cleaned = cleaned[:idx].strip(" :;,-")
+    return cleaned
+
+
+def _extract_frontend_visual_blocked_summary(text: str) -> str | None:
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    for idx, line in enumerate(lines):
+        if not line.upper().startswith("STATUS: BLOCKED"):
+            continue
+        tail = _strip_frontend_visual_report_token(line[len("STATUS: BLOCKED") :].strip(" :-"))
+        if tail:
+            return tail
+        if idx + 1 < len(lines):
+            next_line = _strip_frontend_visual_report_token(lines[idx + 1])
+            if next_line:
+                return next_line
+        return "Frontend visual smoke reported STATUS: BLOCKED"
+    return None
+
+
+def frontend_visual_environment_blocker_reason(validation_results: list[dict[str, Any]], *, root: Path) -> str | None:
+    for result in validation_results:
+        if not isinstance(result, dict):
+            continue
+        command = str(result.get("command", ""))
+        effective_command = str(result.get("effective_command", ""))
+        command_text = f"{command}\n{effective_command}".lower()
+        if "frontend_visual_smoke.py" not in command_text:
+            continue
+
+        stdout_tail = str(result.get("stdout_tail", ""))
+        stderr_tail = str(result.get("stderr_tail", ""))
+        combined_text = f"{stdout_tail}\n{stderr_tail}"
+
+        summary = _extract_frontend_visual_blocked_summary(combined_text)
+        report_status = ""
+        report_error = ""
+        report_path_raw = _extract_frontend_visual_report_path(combined_text)
+        if report_path_raw:
+            report_path = Path(report_path_raw)
+            if not report_path.is_absolute():
+                report_path = root / report_path
+            try:
+                report = load_json(report_path, {})
+            except Exception:
+                report = {}
+            if isinstance(report, dict):
+                report_status = str(report.get("status", "")).strip().lower()
+                if report_status and report_status != "blocked":
+                    # Keep existing failure/retry semantics for true visual regressions.
+                    continue
+                report_error = report.get("error")
+                if isinstance(report_error, str):
+                    report_error = report_error.strip()
+                else:
+                    report_error = ""
+
+        if summary is None:
+            if report_status != "blocked":
+                continue
+            summary = report_error or "Frontend visual smoke reported STATUS: BLOCKED"
+        elif report_error:
+            summary = report_error
+
+        return f"Frontend visual smoke blocked by environment: {summary}"
+    return None
+
+
 def is_systemic_worker_bootstrap_error(worker_summary: str, exit_code: int) -> bool:
     text = (worker_summary or "").lower()
     return exit_code == 127 or "command not found" in text or "codex cli command not found" in text
@@ -828,6 +974,17 @@ def process_one(
     model_stats_tracker: ModelStatsTracker | None = None,
     model_stats: dict[str, Any] | None = None,
 ) -> int:
+    repaired = repair_backlog_archive_duplicates(ROOT)
+    if repaired["completed_removed"] or repaired["blocked_removed"]:
+        emit_event(
+            "recovery",
+            "Repaired duplicate backlog archive ids",
+            completed_removed=repaired["completed_removed"],
+            blocked_removed=repaired["blocked_removed"],
+            completed_duplicate_ids=repaired["completed_duplicate_ids"],
+            blocked_duplicate_ids=repaired["blocked_duplicate_ids"],
+        )
+
     errors = validate_environment(ROOT)
     if errors:
         set_daemon_state(state="error", last_error="; ".join(errors[:5]), lock_held=False)
@@ -875,7 +1032,13 @@ def process_one(
     item = queue.select_next(policies["routing"], stats)
     if item is None:
         emit_event("idle", "No dependency-ready queued work item available")
-        daemon_state = set_daemon_state(state="idle", active_item=None, last_run_summary="No queued dependency-ready work item", lock_held=True)
+        daemon_state = set_daemon_state(
+            state="idle",
+            active_item=None,
+            last_error=None,
+            last_run_summary="No queued dependency-ready work item",
+            lock_held=True,
+        )
         stats_tracker.write_progress_summary(
             daemon_state="idle",
             active_item=None,
@@ -924,6 +1087,7 @@ def process_one(
         daemon_state = set_daemon_state(
             state="dry_run",
             active_item={**item, "assigned_agent": agent_id, "assigned_role": agent_cfg.get("role")},
+            last_error=None,
             last_run_summary=f"Dry run selected {item['id']} for {agent_id}",
             lock_held=True,
         )
@@ -980,6 +1144,7 @@ def process_one(
         set_daemon_state(
             state="blocked",
             active_item=None,
+            last_error=None,
             last_run_summary=f"{item['id']} blocked by {agent_id}: {blocker_reason}",
             lock_held=True,
         )
@@ -1005,6 +1170,7 @@ def process_one(
     daemon_state = set_daemon_state(
         state="running",
         active_item={**item, "assigned_agent": agent_id, "assigned_role": agent_cfg.get("role"), "requested_model": requested_model},
+        last_error=None,
         lock_held=True,
     )
     stats_tracker.begin_run()
@@ -1134,6 +1300,7 @@ def process_one(
         set_daemon_state(
             state="blocked",
             active_item=None,
+            last_error=None,
             last_run_summary=f"{item['id']} blocked by {agent_id}: {worker.summary}",
             lock_held=True,
         )
@@ -1157,6 +1324,7 @@ def process_one(
         set_daemon_state(
             state="validating",
             active_item={**item, "assigned_agent": agent_id, "assigned_role": agent_cfg.get("role")},
+            last_error=None,
             lock_held=True,
         )
 
@@ -1242,6 +1410,7 @@ def process_one(
             set_daemon_state(
                 state="idle",
                 active_item=None,
+                last_error=None,
                 last_run_summary=f"{item['id']} completed by {agent_id}",
                 lock_held=True,
             )
@@ -1261,46 +1430,85 @@ def process_one(
                 },
             )
         else:
-            emit_event("validation_failed", "Validation or commit failed", item_id=item["id"], agent_id=agent_id)
-            max_retries = int(policies.get("retry", {}).get("max_retries_per_item_per_agent", 2))
-            retry_count = queue.increment_retry(item["id"], "validation failed or commit failed")
-            if retry_count > max_retries:
-                source_item = queue.get_active_item(item["id"])
-                if source_item:
-                    queue.create_escalation_item(
-                        source_item,
-                        lead_agent_name=agents.get("mara-voss", {}).get("display_name", "Mara Voss"),
-                        reason="retry threshold exceeded",
-                    )
-                    queue.mark_blocked(item["id"], "retry threshold exceeded; escalated")
-            queue.save()
-            record_run_stats(
-                "failed",
-                requested_model_override=run_requested_model,
-                used_model_override=run_used_model,
-                fallback_used_override=run_fallback_used,
-            )
-            set_daemon_state(
-                state="error",
-                active_item=None,
-                last_error=f"Validation/commit failed for {item['id']}",
-                last_run_summary=f"{item['id']} failed validation and was requeued",
-                lock_held=True,
-            )
-            append_jsonl(
-                RUN_HISTORY_PATH,
-                {
-                    "ts": utc_now_iso(),
-                    "item_id": item["id"],
-                    "agent_id": agent_id,
-                    "result": "failed_validation",
-                    "summary": worker.summary,
-                    "validation_results": validation_results,
-                    "model_requested": run_requested_model,
-                    "model_used": run_used_model,
-                    "fallback_used": run_fallback_used,
-                },
-            )
+            blocker_reason = frontend_visual_environment_blocker_reason(validation_results, root=ROOT)
+            if blocker_reason:
+                emit_event(
+                    "blocked",
+                    "Frontend visual validation blocked by environment",
+                    item_id=item["id"],
+                    agent_id=agent_id,
+                    reason=blocker_reason,
+                )
+                queue.mark_blocked(item["id"], blocker_reason)
+                queue.save()
+                record_run_stats(
+                    "blocked",
+                    requested_model_override=run_requested_model,
+                    used_model_override=run_used_model,
+                    fallback_used_override=run_fallback_used,
+                )
+                set_daemon_state(
+                    state="blocked",
+                    active_item=None,
+                    last_error=None,
+                    last_run_summary=f"{item['id']} blocked during validation by {agent_id}: {blocker_reason}",
+                    lock_held=True,
+                )
+                append_jsonl(
+                    RUN_HISTORY_PATH,
+                    {
+                        "ts": utc_now_iso(),
+                        "item_id": item["id"],
+                        "agent_id": agent_id,
+                        "result": "blocked",
+                        "summary": blocker_reason,
+                        "validation_results": validation_results,
+                        "model_requested": run_requested_model,
+                        "model_used": run_used_model,
+                        "fallback_used": run_fallback_used,
+                    },
+                )
+            else:
+                emit_event("validation_failed", "Validation or commit failed", item_id=item["id"], agent_id=agent_id)
+                max_retries = int(policies.get("retry", {}).get("max_retries_per_item_per_agent", 2))
+                retry_count = queue.increment_retry(item["id"], "validation failed or commit failed")
+                if retry_count > max_retries:
+                    source_item = queue.get_active_item(item["id"])
+                    if source_item:
+                        queue.create_escalation_item(
+                            source_item,
+                            lead_agent_name=agents.get("mara-voss", {}).get("display_name", "Mara Voss"),
+                            reason="retry threshold exceeded",
+                        )
+                        queue.mark_blocked(item["id"], "retry threshold exceeded; escalated")
+                queue.save()
+                record_run_stats(
+                    "failed",
+                    requested_model_override=run_requested_model,
+                    used_model_override=run_used_model,
+                    fallback_used_override=run_fallback_used,
+                )
+                set_daemon_state(
+                    state="error",
+                    active_item=None,
+                    last_error=f"Validation/commit failed for {item['id']}",
+                    last_run_summary=f"{item['id']} failed validation and was requeued",
+                    lock_held=True,
+                )
+                append_jsonl(
+                    RUN_HISTORY_PATH,
+                    {
+                        "ts": utc_now_iso(),
+                        "item_id": item["id"],
+                        "agent_id": agent_id,
+                        "result": "failed_validation",
+                        "summary": worker.summary,
+                        "validation_results": validation_results,
+                        "model_requested": run_requested_model,
+                        "model_used": run_used_model,
+                        "fallback_used": run_fallback_used,
+                    },
+                )
     else:
         if is_systemic_worker_bootstrap_error(worker.summary, worker.exit_code):
             emit_event("infrastructure_error", "Worker bootstrap error; stopping daemon loop", item_id=item["id"], agent_id=agent_id, error=worker.summary)
@@ -1427,6 +1635,7 @@ def process_one(
 
 def cmd_status() -> int:
     migrate_legacy_runtime_files()
+    repair_backlog_archive_duplicates(ROOT)
     errors = validate_environment(ROOT)
     if errors:
         print("Environment validation failed:")
