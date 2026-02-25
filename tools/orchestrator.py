@@ -11,6 +11,7 @@ from typing import Any
 from codex_worker import run_agent
 from git_guard import changed_files, commit_changes, current_branch, is_git_repo, run_validation_commands
 from health_checks import validate_environment
+from model_stats import ModelStatsTracker
 from prompt_builder import build_prompt
 from queue_manager import QueueManager
 from schemas import append_jsonl, load_json, load_yaml_like, save_json_atomic, utc_now_iso
@@ -28,6 +29,11 @@ EVENTS_LOG_PATH = RUNTIME_DIR / "daemon-events.jsonl"
 RUN_HISTORY_PATH = RUNTIME_DIR / "run-history.jsonl"
 AGENT_HEARTBEAT_SECONDS = 15
 LOW_QUEUE_WATERMARK = 2
+
+
+def build_session_id(*, pid: int, started_at: str) -> str:
+    compact = started_at.replace("-", "").replace(":", "").replace("+", "Z").replace(".", "")
+    return f"rk-{compact}-p{pid}"
 
 
 def load_agent_catalog(root: Path) -> dict[str, dict[str, Any]]:
@@ -87,6 +93,7 @@ def default_daemon_state() -> dict[str, Any]:
         "state": "idle",
         "updated_at": utc_now_iso(),
         "active_item": None,
+        "session_id": None,
         "last_error": None,
         "last_run_summary": None,
         "lock_held": False,
@@ -624,6 +631,9 @@ def process_one(
     *,
     dry_run: bool,
     verbose: bool,
+    session_id: str | None = None,
+    model_stats_tracker: ModelStatsTracker | None = None,
+    model_stats: dict[str, Any] | None = None,
 ) -> int:
     errors = validate_environment(ROOT)
     if errors:
@@ -640,6 +650,9 @@ def process_one(
     queue.load()
     stats_tracker = StatsTracker(ROOT, agents)
     stats = stats_tracker.load()
+    model_stats_data = model_stats
+    if model_stats_tracker is not None and model_stats_data is None:
+        model_stats_data = model_stats_tracker.load()
     stats_tracker.refresh_queue_totals(
         stats,
         queued_count=sum(1 for item in queue.active if item.get("status") == "queued"),
@@ -763,6 +776,7 @@ def process_one(
         exc = worker_box["exception"]
         raise RuntimeError(f"Worker wrapper crashed for {agent_id}: {exc}") from exc
     worker = worker_box["result"]
+    elapsed_seconds = time.monotonic() - worker_started
     emit_event(
         "agent_end",
         "Agent execution finished",
@@ -771,7 +785,7 @@ def process_one(
         role=agent_cfg.get("role"),
         result=worker.status,
         exit_code=worker.exit_code,
-        elapsed_seconds=round(time.monotonic() - worker_started, 2),
+        elapsed_seconds=round(elapsed_seconds, 2),
         model_requested=worker.requested_model,
         model_used=worker.used_model,
         fallback_used=worker.fallback_used,
@@ -782,11 +796,34 @@ def process_one(
     if verbose and worker.stderr:
         print(worker.stderr[-2000:], file=sys.stderr)
 
+    def record_run_stats(outcome: str) -> None:
+        stats_tracker.record_result(
+            stats,
+            agent_id=agent_id,
+            outcome=outcome,
+            tokens_in=worker.tokens_in_est,
+            tokens_out=worker.tokens_out_est,
+        )
+        if model_stats_tracker is not None and model_stats_data is not None:
+            model_stats_tracker.record_run(
+                model_stats_data,
+                session_id=session_id,
+                agent_id=agent_id,
+                role=agent_cfg.get("role"),
+                outcome=outcome,
+                requested_model=worker.requested_model,
+                used_model=worker.used_model,
+                fallback_used=worker.fallback_used,
+                tokens_in=worker.tokens_in_est,
+                tokens_out=worker.tokens_out_est,
+                runtime_seconds=elapsed_seconds,
+            )
+
     if worker.status == "blocked":
         emit_event("blocked", "Work item blocked by agent", item_id=item["id"], agent_id=agent_id, reason=worker.summary)
         queue.mark_blocked(item["id"], worker.blocker_reason or worker.summary)
         queue.save()
-        stats_tracker.record_result(stats, agent_id=agent_id, outcome="blocked", tokens_in=worker.tokens_in_est, tokens_out=worker.tokens_out_est)
+        record_run_stats("blocked")
         set_daemon_state(
             state="blocked",
             active_item=None,
@@ -889,7 +926,7 @@ def process_one(
                     source_item_id=item["id"],
                     rejected_count=len(rejected_followups),
                 )
-            stats_tracker.record_result(stats, agent_id=agent_id, outcome="completed", tokens_in=worker.tokens_in_est, tokens_out=worker.tokens_out_est)
+            record_run_stats("completed")
             set_daemon_state(
                 state="idle",
                 active_item=None,
@@ -925,7 +962,7 @@ def process_one(
                     )
                     queue.mark_blocked(item["id"], "retry threshold exceeded; escalated")
             queue.save()
-            stats_tracker.record_result(stats, agent_id=agent_id, outcome="failed", tokens_in=worker.tokens_in_est, tokens_out=worker.tokens_out_est)
+            record_run_stats("failed")
             set_daemon_state(
                 state="error",
                 active_item=None,
@@ -954,7 +991,7 @@ def process_one(
             # or spawn escalation chains. Leave the item queued and stop the daemon loop.
             queue.update_item_status(item["id"], "queued", last_failure_reason=worker.summary)
             queue.save()
-            stats_tracker.record_result(stats, agent_id=agent_id, outcome="failed", tokens_in=worker.tokens_in_est, tokens_out=worker.tokens_out_est)
+            record_run_stats("failed")
             set_daemon_state(
                 state="error",
                 active_item=None,
@@ -984,6 +1021,8 @@ def process_one(
                 completed_count=len(queue.completed),
             )
             stats_tracker.save(stats)
+            if model_stats_tracker is not None and model_stats_data is not None:
+                model_stats_tracker.save(model_stats_data)
             daemon_state = load_json(DAEMON_STATE_PATH, default_daemon_state())
             stats_tracker.write_progress_summary(
                 daemon_state=daemon_state.get("state", "unknown"),
@@ -1011,7 +1050,7 @@ def process_one(
                 emit_event("blocked", "Item blocked after retry threshold", item_id=item["id"], agent_id=agent_id)
                 queue.mark_blocked(item["id"], f"Repeated failure: {worker.summary}")
         queue.save()
-        stats_tracker.record_result(stats, agent_id=agent_id, outcome="failed", tokens_in=worker.tokens_in_est, tokens_out=worker.tokens_out_est)
+        record_run_stats("failed")
         set_daemon_state(
             state="error",
             active_item=None,
@@ -1046,6 +1085,8 @@ def process_one(
         completed_count=len(queue.completed),
     )
     stats_tracker.save(stats)
+    if model_stats_tracker is not None and model_stats_data is not None:
+        model_stats_tracker.save(model_stats_data)
     daemon_state = load_json(DAEMON_STATE_PATH, default_daemon_state())
     stats_tracker.write_progress_summary(
         daemon_state=daemon_state.get("state", "unknown"),
@@ -1078,12 +1119,29 @@ def cmd_status() -> int:
 def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool, keep_alive: bool) -> int:
     migrate_legacy_runtime_files()
     lock = DaemonLock(os.getpid())
+    model_stats_tracker: ModelStatsTracker | None = None
+    model_stats: dict[str, Any] | None = None
+    session_id: str | None = None
+    session_started_at: str | None = None
     try:
         lock.acquire()
     except RuntimeError as exc:
         set_daemon_state(state="error", last_error=str(exc), lock_held=False)
         print(str(exc), file=sys.stderr)
         return 1
+
+    model_stats_tracker = ModelStatsTracker(ROOT)
+    model_stats = model_stats_tracker.load()
+    session_started_at = utc_now_iso()
+    session_id = build_session_id(pid=os.getpid(), started_at=session_started_at)
+    model_stats_tracker.start_session(
+        model_stats,
+        session_id=session_id,
+        started_at=session_started_at,
+        pid=os.getpid(),
+        mode="once" if once else "run",
+    )
+    model_stats_tracker.save(model_stats)
 
     emit_event(
         "daemon_start",
@@ -1092,8 +1150,9 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool, kee
         mode="once" if once else "run",
         dry_run=dry_run,
         keep_alive=keep_alive,
+        session_id=session_id,
     )
-    set_daemon_state(lock_held=True, state="idle", last_error=None)
+    set_daemon_state(lock_held=True, state="idle", last_error=None, session_id=session_id)
     try:
         # If a previous daemon run crashed or was interrupted, items may be left in
         # assigned/running/validating. With the lock acquired, no other daemon is active,
@@ -1110,9 +1169,21 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool, kee
             )
 
         if once:
-            return process_one(dry_run=dry_run, verbose=verbose)
+            return process_one(
+                dry_run=dry_run,
+                verbose=verbose,
+                session_id=session_id,
+                model_stats_tracker=model_stats_tracker,
+                model_stats=model_stats,
+            )
         while True:
-            rc = process_one(dry_run=dry_run, verbose=verbose)
+            rc = process_one(
+                dry_run=dry_run,
+                verbose=verbose,
+                session_id=session_id,
+                model_stats_tracker=model_stats_tracker,
+                model_stats=model_stats,
+            )
             if rc != 0 or dry_run:
                 if rc != 0:
                     emit_event("daemon_stop", "Daemon loop exiting with non-zero status", exit_code=rc)
@@ -1180,9 +1251,16 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool, kee
         emit_event("daemon_interrupt", "KeyboardInterrupt received; stopping daemon")
         return 130
     finally:
-        set_daemon_state(lock_held=False, active_item=None, state="idle")
+        if model_stats_tracker is not None and model_stats is not None and session_id is not None:
+            model_stats_tracker.end_session(
+                model_stats,
+                session_id=session_id,
+                ended_at=utc_now_iso(),
+            )
+            model_stats_tracker.save(model_stats)
+        set_daemon_state(lock_held=False, active_item=None, state="idle", session_id=None)
         lock.release()
-        emit_event("daemon_stop", "Daemon stopped and lock released", pid=os.getpid())
+        emit_event("daemon_stop", "Daemon stopped and lock released", pid=os.getpid(), session_id=session_id)
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -88,7 +88,7 @@ def validate_environment(root: Path) -> list[str]:
     )
 
     # Runtime files are generated on demand; validate them only if they already exist.
-    for state_name in ["daemon-state.json", "agent-stats.json", "progress-summary.json", "locks.json"]:
+    for state_name in ["daemon-state.json", "agent-stats.json", "model-stats.json", "progress-summary.json", "locks.json"]:
         _validate_json_object(
             errors=errors,
             path=runtime_dir / state_name,

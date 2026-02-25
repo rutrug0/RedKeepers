@@ -8,6 +8,7 @@
 - `python tools/orchestrator.py run` : persistent daemon mode (keeps polling for new/unblocked work)
 - `python tools/orchestrator.py run --until-idle` : exit when queue becomes idle or stalled (one-shot queue drain mode)
 - `python tools/smoke_daemon_env.py` : read-only smoke validation for queue/policy/state files
+- `python tools/render_stats_html.py` : generate runtime dashboard HTML (global + per-session agent/model stats)
 
 ## Environment Variables
 
@@ -42,7 +43,7 @@ Default CLI output is intentionally high-level. Detailed subprocess output is on
 
 Live high-level event stream (daemon start/agent start/validation/completion/failure):
 
-`Get-Content coordination\\state\\daemon-events.jsonl -Wait`
+`Get-Content coordination\\runtime\\daemon-events.jsonl -Wait`
 
 Current status snapshot on demand:
 
@@ -50,12 +51,17 @@ Current status snapshot on demand:
 
 Recent completed/failed runs:
 
-`Get-Content coordination\\state\\run-history.jsonl | Select-Object -Last 20`
+`Get-Content coordination\\runtime\\run-history.jsonl | Select-Object -Last 20`
 
 Queue and progress state:
 
 - `coordination\\backlog\\work-items.json`
 - `coordination\\backlog\\completed-items.json`
 - `coordination\\backlog\\blocked-items.json`
-- `coordination\\state\\progress-summary.json`
-- `coordination\\state\\agent-stats.json`
+- `coordination\\runtime\\progress-summary.json`
+- `coordination\\runtime\\agent-stats.json`
+- `coordination\\runtime\\model-stats.json`
+
+Generate dashboard:
+
+`python tools/render_stats_html.py --output coordination\\runtime\\stats-dashboard.html`
