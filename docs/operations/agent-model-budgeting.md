@@ -3,7 +3,7 @@
 Model assignments and token budgets are defined in `coordination/policies/model-policy.yaml`.
 
 Guidelines:
-- Use stronger/default account model for lead/backend/QA baseline work
+- Use stronger/default account model for lead/backend/QA/platform baseline work
 - Use `gpt-5.3-codex-spark` for lightweight tasks and lower-priority roles where speed/cost wins
 - Keep high reasoning on lead/backend/escalation paths, but avoid unsupported model IDs in account-constrained environments
 - Track estimated token usage in `coordination/runtime/agent-stats.json`

@@ -47,6 +47,8 @@ Default CLI output is intentionally high-level. Detailed subprocess output is on
 
 The daemon can automatically re-queue recoverable blocked items using `coordination/policies/retry-policy.yaml` `blocked_revisit` settings (cooldown, per-cycle cap, reason include/exclude patterns). This is intended for transient blockers like model-access/config incidents while keeping audit-only blocked artifacts untouched.
 
+When the `platform` agent exists but no platform/release items exist in active/completed/blocked backlog, daemon also seeds a one-time `platform_bootstrap` queued item so cross-platform delivery work is represented in the lane.
+
 ## Monitoring Progress (PowerShell)
 
 Live high-level event stream (daemon start/agent start/validation/completion/failure):

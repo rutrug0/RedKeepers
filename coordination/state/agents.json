@@ -71,5 +71,17 @@
       "Define acceptance and regression criteria",
       "Gate completion with reproducible checks"
     ]
+  },
+  "juno-cairn": {
+    "display_name": "Juno Cairn",
+    "role": "platform",
+    "title": "Platform & Release Engineer",
+    "model": "default",
+    "reasoning": "medium",
+    "responsibilities": [
+      "Own web/Steam/Android packaging and release scaffolding",
+      "Create reproducible build/run scripts for vertical-slice delivery",
+      "Maintain platform risk register and release readiness checklist"
+    ]
   }
 }

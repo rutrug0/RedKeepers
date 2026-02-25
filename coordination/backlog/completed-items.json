@@ -1219,5 +1219,45 @@
     "source_item_id": "RK-M1-0005-F02-F01-ESC-F03",
     "assigned_agent": "mara-voss",
     "commit_sha": "5379cdc8f39f72b7f099a836a668b4ed13bfce4b"
+  },
+  {
+    "id": "RK-M1-0006-F02-F01",
+    "title": "Re-validate rally/stone pacing after starter Pass A tuning is serialized",
+    "description": "After backend seed/config data is updated with the approved starter tuning pass, rerun the 30m/2h/6h pacing simulation to confirm barracks timing improvement holds and determine whether rally_post/stone timing still needs a narrow follow-up adjustment.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006-F02"
+    ],
+    "inputs": [
+      "docs/design/v1-early-progression-pacing-sim.md",
+      "docs/design/v1-starter-data-tables.md"
+    ],
+    "acceptance_criteria": [
+      "Updated pacing checkpoints are documented for 30m, 2h, and 6h using serialized seed values",
+      "Barracks unlock and first unit training cadence are explicitly verified against the tuned target",
+      "Rally_post timing is either approved or a small stone/rally-only tuning pass is proposed"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 3,
+    "created_at": "2026-02-25T15:39:41.742815+00:00",
+    "updated_at": "2026-02-25T19:28:29.868538+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/rowan-hale/outbox.json` JSON syntax check passed via `python -m json.tool`.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-M1-0006-F02",
+    "assigned_agent": "rowan-hale",
+    "last_failure_reason": "ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "Repeated failure: ERROR: {\"detail\":\"The 'gpt-5-mini' model is not supported when using Codex with a ChatGPT account.\"} (fallback model used: gpt-5-mini)",
+    "blocked_revisit_count": 1,
+    "commit_sha": "7ba9640855fe6d3ea6a2ecb29d592888a088c021"
   }
 ]

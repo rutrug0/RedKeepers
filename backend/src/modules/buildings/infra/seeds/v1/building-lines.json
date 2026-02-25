@@ -16,7 +16,7 @@
       "cost_wood_l1": 60,
       "cost_stone_l1": 20,
       "cost_iron_l1": 0,
-      "cost_mult_per_level": 1.55,
+      "cost_mult_per_level": 1.46,
       "slice_status": "playable_now"
     },
     "timber_camp": {
@@ -30,7 +30,7 @@
       "cost_wood_l1": 40,
       "cost_stone_l1": 20,
       "cost_iron_l1": 0,
-      "cost_mult_per_level": 1.55,
+      "cost_mult_per_level": 1.46,
       "slice_status": "playable_now"
     },
     "stone_quarry": {
@@ -44,7 +44,7 @@
       "cost_wood_l1": 30,
       "cost_stone_l1": 40,
       "cost_iron_l1": 0,
-      "cost_mult_per_level": 1.58,
+      "cost_mult_per_level": 1.5,
       "slice_status": "playable_now"
     },
     "iron_pit": {
@@ -58,7 +58,7 @@
       "cost_wood_l1": 40,
       "cost_stone_l1": 30,
       "cost_iron_l1": 20,
-      "cost_mult_per_level": 1.6,
+      "cost_mult_per_level": 1.52,
       "slice_status": "playable_now"
     },
     "barracks": {
@@ -68,8 +68,8 @@
       "max_level_v1": 10,
       "build_time_l1_s": 180,
       "build_time_mult_per_level": 1.55,
-      "cost_food_l1": 90,
-      "cost_wood_l1": 120,
+      "cost_food_l1": 75,
+      "cost_wood_l1": 105,
       "cost_stone_l1": 80,
       "cost_iron_l1": 40,
       "cost_mult_per_level": 1.6,
@@ -82,8 +82,8 @@
       "max_level_v1": 10,
       "build_time_l1_s": 150,
       "build_time_mult_per_level": 1.52,
-      "cost_food_l1": 80,
-      "cost_wood_l1": 80,
+      "cost_food_l1": 70,
+      "cost_wood_l1": 70,
       "cost_stone_l1": 60,
       "cost_iron_l1": 20,
       "cost_mult_per_level": 1.58,

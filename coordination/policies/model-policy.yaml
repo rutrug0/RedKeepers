@@ -33,6 +33,11 @@
       "model": "default",
       "reasoning": "medium",
       "daily_token_budget": 160000
+    },
+    "juno-cairn": {
+      "model": "default",
+      "reasoning": "medium",
+      "daily_token_budget": 180000
     }
   },
   "lightweight_task_override": {

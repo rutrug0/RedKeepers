@@ -212,6 +212,16 @@ def _next_auto_refill_item_id(queue: QueueManager) -> str:
         i += 1
 
 
+def _next_auto_platform_item_id(queue: QueueManager) -> str:
+    existing_ids = {item["id"] for item in queue.active} | {item["id"] for item in queue.completed} | {item["id"] for item in queue.blocked}
+    i = 1
+    while True:
+        candidate = f"RK-AUTO-PLATFORM-{i:04d}"
+        if candidate not in existing_ids:
+            return candidate
+        i += 1
+
+
 def ensure_queue_stall_recovery_item(queue: QueueManager) -> dict[str, Any] | None:
     stalled = _queued_items_with_unmet_dependencies(queue)
     if not stalled:
@@ -281,7 +291,7 @@ def ensure_backlog_refill_item(queue: QueueManager) -> dict[str, Any] | None:
         "title": "Generate next backlog tranche",
         "description": (
             "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation "
-            "tasks across backend, frontend, design, content, and QA with dependencies and acceptance criteria. "
+            "tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. "
             "Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas."
         ),
         "milestone": "M0",
@@ -314,6 +324,58 @@ def ensure_backlog_refill_item(queue: QueueManager) -> dict[str, Any] | None:
         "blocker_reason": None,
         "escalation_target": "Mara Voss",
         "auto_generated": "backlog_refill",
+    }
+    queue.append_item(item)
+    queue.save()
+    return item
+
+
+def ensure_platform_bootstrap_item(queue: QueueManager, agents: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
+    platform_agent_id = "juno-cairn"
+    if platform_agent_id not in agents:
+        return None
+
+    has_platform_work = any(item.get("owner_role") == "platform" for item in queue.active)
+    has_platform_history = any(item.get("owner_role") == "platform" for item in queue.completed) or any(
+        item.get("owner_role") == "platform" for item in queue.blocked
+    )
+    if has_platform_work or has_platform_history:
+        return None
+
+    item = {
+        "id": _next_auto_platform_item_id(queue),
+        "title": "Bootstrap platform release lane for vertical slice",
+        "description": (
+            "Create the first platform/release execution task for web, Steam wrapper, and Android wrapper pathways "
+            "so cross-platform delivery work is represented in the active backlog."
+        ),
+        "milestone": "M0",
+        "type": "infra",
+        "priority": "high",
+        "owner_role": "platform",
+        "preferred_agent": platform_agent_id,
+        "dependencies": [],
+        "inputs": [
+            "docs/architecture/client-cross-platform-strategy.md",
+            "docs/design/first-vertical-slice.md",
+            "docs/operations/daemon-usage.md",
+        ],
+        "acceptance_criteria": [
+            "Platform lane creates concrete follow-up implementation tasks for web, Steam, and Android packaging readiness",
+            "Follow-up tasks stay inside first vertical slice scope",
+            "Release flow relies on placeholder assets and does not block on final art",
+        ],
+        "validation_commands": ["python tools/orchestrator.py status"],
+        "status": "queued",
+        "retry_count": 0,
+        "created_at": utc_now_iso(),
+        "updated_at": utc_now_iso(),
+        "estimated_effort": "S",
+        "token_budget": 9000,
+        "result_summary": None,
+        "blocker_reason": None,
+        "escalation_target": "Mara Voss",
+        "auto_generated": "platform_bootstrap",
     }
     queue.append_item(item)
     queue.save()
@@ -998,6 +1060,16 @@ def process_one(
     policies = load_policies(ROOT)
     queue = QueueManager(ROOT)
     queue.load()
+    platform_bootstrap = ensure_platform_bootstrap_item(queue, agents)
+    if platform_bootstrap is not None:
+        emit_event(
+            "platform_bootstrap",
+            "Created automatic platform bootstrap task",
+            item_id=platform_bootstrap["id"],
+            title=platform_bootstrap["title"],
+            preferred_agent=platform_bootstrap.get("preferred_agent"),
+        )
+        queue.load()
     stats_tracker = StatsTracker(ROOT, agents)
     stats = stats_tracker.load()
     model_stats_data = model_stats

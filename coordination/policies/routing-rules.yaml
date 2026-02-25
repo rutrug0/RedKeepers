@@ -5,7 +5,8 @@
     "frontend": "sera-kest",
     "design": "rowan-hale",
     "content": "nika-thorn",
-    "qa": "tomas-grell"
+    "qa": "tomas-grell",
+    "platform": "juno-cairn"
   },
   "fallback_agent": "mara-voss"
 }
