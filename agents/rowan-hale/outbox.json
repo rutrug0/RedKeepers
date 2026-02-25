@@ -10,5 +10,79 @@
       "agents/rowan-hale/outbox.json"
     ],
     "blockers": []
+  },
+  {
+    "timestamp_utc": "2026-02-25T15:06:34.7403828Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-M1-0006",
+    "status": "done",
+    "summary": "Defined v1 starter economy/building/unit data tables with normalized stats/timings, civ modifier overlays, and slice-safe activation flags plus backend/frontend field annotations.",
+    "changed_files": [
+      "docs/design/v1-starter-data-tables.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Serialize v1 starter tables into backend seed config format",
+        "owner_role": "backend",
+        "milestone": "M1",
+        "priority": "high",
+        "description": "Convert the markdown starter tables into machine-readable seed/config data for `economy`, `buildings`, and `units` modules without changing values or adding mechanics.",
+        "dependencies": [
+          "RK-M1-0006"
+        ],
+        "inputs": [
+          "docs/design/v1-starter-data-tables.md",
+          "docs/architecture/backend-modular-monolith.md"
+        ],
+        "acceptance_criteria": [
+          "Machine-readable seed/config files exist for resource definitions, building lines/effects, unit lines, civ modifiers, and unit variants",
+          "Config keys match the stable IDs in docs/design/v1-starter-data-tables.md",
+          "First-slice enable list supports only cinder_throne_legates and hides balance/data stubs by default"
+        ],
+        "validation_commands": []
+      },
+      {
+        "title": "Run early progression pacing simulation on starter economy and training values",
+        "owner_role": "design",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Validate the first 2-6 hours of settlement progression using the new starter tables (resource income, build cadence, unit training cadence) and propose numeric adjustments if bottlenecks feel too hard/soft.",
+        "dependencies": [
+          "RK-M1-0006"
+        ],
+        "inputs": [
+          "docs/design/v1-starter-data-tables.md",
+          "docs/design/first-vertical-slice.md"
+        ],
+        "acceptance_criteria": [
+          "Documented pacing checkpoints for at least 30m, 2h, and 6h progression windows",
+          "At least one recommended tuning pass is proposed or current values are explicitly approved",
+          "Recommendations preserve first-slice complexity caps and stat-driven asymmetry approach"
+        ],
+        "validation_commands": []
+      },
+      {
+        "title": "Define post-slice storage and defense building activation package",
+        "owner_role": "design",
+        "milestone": "M2",
+        "priority": "medium",
+        "description": "Add the next building lines (storage/warehouse and defense support lines) and activation thresholds so the economy can move beyond flat base storage caps after the first playable slice.",
+        "dependencies": [
+          "RK-M1-0006"
+        ],
+        "inputs": [
+          "docs/design/v1-starter-data-tables.md",
+          "docs/design/first-vertical-slice.md"
+        ],
+        "acceptance_criteria": [
+          "Storage and defense line additions are expressed as data-table rows and effects, not bespoke mechanics",
+          "First-slice playable subset remains unchanged and clearly flagged",
+          "Updated values include backend/frontend field annotations matching existing table conventions"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]

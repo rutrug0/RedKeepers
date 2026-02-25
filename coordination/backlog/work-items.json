@@ -22,10 +22,10 @@
       "Table fields are annotated for backend module ownership (economy/buildings/units) and frontend display needs"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T14:56:20.031070+00:00",
+    "updated_at": "2026-02-25T15:07:24.841092+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
