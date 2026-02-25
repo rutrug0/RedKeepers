@@ -48,5 +48,47 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-25T15:09:17.5065283Z",
+    "agent_id": "ilya-fen",
+    "work_item_id": "RK-M1-0004-F01",
+    "status": "done",
+    "summary": "Added framework-agnostic typed shared primitives (IDs, result/error, clock, in-process event bus) and app composition/bootstrap contracts for module registration via interfaces, plus scaffold note updates.",
+    "changed_files": [
+      "backend/README.md",
+      "backend/src/shared/README.md",
+      "backend/src/shared/ids.ts",
+      "backend/src/shared/result.ts",
+      "backend/src/shared/time.ts",
+      "backend/src/shared/events.ts",
+      "backend/src/shared/index.ts",
+      "backend/src/app/README.md",
+      "backend/src/app/composition.ts",
+      "backend/src/app/index.ts",
+      "agents/ilya-fen/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Add reference in-memory service registry and event bus for bootstrap smoke tests",
+        "owner_role": "backend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Implement minimal in-memory adapters for the new `ServiceRegistry` and `InProcessEventBus` contracts plus a bootstrap smoke composition example to validate module registration flow before framework selection.",
+        "acceptance_criteria": [
+          "Reference implementations depend only on backend shared/app contracts and no framework runtime",
+          "A simple bootstrap smoke path can compose at least one placeholder module using the contracts",
+          "Any notes/docs added describe the adapters as temporary reference implementations"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ],
+        "inputs": [
+          "backend/src/app/composition.ts",
+          "backend/src/shared/events.ts"
+        ]
+      }
+    ]
   }
 ]

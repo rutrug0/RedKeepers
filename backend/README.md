@@ -18,4 +18,4 @@ Each module follows the repeatable internal layout from the architecture documen
 
 ## Deferred Framework Choice
 
-No web framework, ORM, or DI container is selected in this scaffold. Placeholder files exist only to make boundaries explicit so implementation can proceed without coupling the layout to a runtime stack yet.
+No web framework, ORM, or DI container is selected in this scaffold. The initial `src/shared/*` and `src/app/*` files define typed primitives and composition contracts only, so implementation can proceed without coupling the layout to a runtime stack yet.

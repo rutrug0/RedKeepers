@@ -262,5 +262,43 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
     "assigned_agent": "ilya-fen",
     "commit_sha": "2ad3c32545a0d39588b788863bc4a53e086517b3"
+  },
+  {
+    "id": "RK-M1-0006",
+    "title": "Define v1 starter economy, building, and unit data tables",
+    "description": "Translate the factions v1 concept into implementation-ready starter data tables for core resources, building families, unit lines, and civilization modifiers using the stat-driven asymmetry approach.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0003"
+    ],
+    "inputs": [
+      "docs/design/core-loops.md",
+      "docs/design/factions-and-civilizations.md",
+      "docs/architecture/backend-modular-monolith.md"
+    ],
+    "acceptance_criteria": [
+      "Document defines starter resource set, core building families, and baseline unit roster tables with costs/timings/stats (numeric or clearly normalized values)",
+      "Civilization differentiation is expressed as v1-safe stat/timing modifiers compatible with the existing complexity guardrails",
+      "Table fields are annotated for backend module ownership (economy/buildings/units) and frontend display needs"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T14:20:08.432712+00:00",
+    "updated_at": "2026-02-25T15:07:25.641901+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `coordination/backlog/work-items.json` was already modified in the workspace and was not changed by this task.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
+    "assigned_agent": "rowan-hale",
+    "recovered_from_stale_in_progress": true,
+    "commit_sha": "d7ef6f189d534b1b1a065c9f194ebd828e9652fa"
   }
 ]

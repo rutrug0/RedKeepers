@@ -2,4 +2,9 @@
 
 Process bootstrap and composition root placeholders.
 
-Intended contents (deferred): config loading, dependency wiring, transport startup, lifecycle hooks.
+Framework-agnostic composition contracts live here so modules can be wired via interfaces before a runtime stack is chosen:
+
+- `composition.ts`: module registration/bootstrap interfaces, service registry contract, lifecycle hooks
+- `index.ts`: app-layer contract exports
+
+Concrete config loading, transport startup, and infra adapter wiring remain deferred.
