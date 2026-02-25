@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "artifact_id": "redkeepers-web-vertical-slice",
+  "release_channel": "vertical-slice-web",
+  "title": "RedKeepers Vertical Slice Web Placeholder Build",
+  "description": "Placeholder-only release metadata for the first playable web vertical slice packaging lane.",
+  "art_status": "placeholder-only",
+  "placeholder_assets": [
+    {
+      "id": "web_store_icon_512",
+      "kind": "icon",
+      "path": "release-placeholders/web-store-icon-512.txt",
+      "status": "placeholder"
+    },
+    {
+      "id": "web_store_header_1920x1080",
+      "kind": "header-image",
+      "path": "release-placeholders/web-store-header-1920x1080.txt",
+      "status": "placeholder"
+    },
+    {
+      "id": "web_screenshot_slot_01",
+      "kind": "screenshot",
+      "path": "release-placeholders/web-screenshot-slot-01.txt",
+      "status": "placeholder"
+    }
+  ],
+  "notes": [
+    "Final art is intentionally deferred beyond first-vertical-slice scope.",
+    "This metadata must remain placeholder-only for M0 packaging automation."
+  ]
+}

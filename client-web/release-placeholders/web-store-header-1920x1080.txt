@@ -1,0 +1,4 @@
+Placeholder asset label: web store header
+Dimensions: 1920x1080
+Usage: release metadata scaffold only
+Replacement policy: replace with final art post-slice

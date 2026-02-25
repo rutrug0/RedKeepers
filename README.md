@@ -24,3 +24,12 @@ This repository is bootstrapped with the M0 orchestration foundation:
 - The daemon is intentionally high-level in CLI output.
 - Detailed run records are stored under `coordination/state/`.
 - Direct commits to `main` are gated by daemon validation rules.
+
+## Web Vertical Slice Packaging (M0)
+
+- Build/package deterministic web artifact:
+  - `python tools/web_vertical_slice_packaging.py package --clean`
+- Run local smoke against packaged artifact:
+  - `python tools/web_vertical_slice_packaging.py smoke`
+- Runbook:
+  - `docs/operations/web-vertical-slice-packaging.md`

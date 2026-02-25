@@ -1,0 +1,4 @@
+Placeholder asset label: web store icon
+Dimensions: 512x512
+Usage: release metadata scaffold only
+Replacement policy: replace with final art post-slice
