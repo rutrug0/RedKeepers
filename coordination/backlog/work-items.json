@@ -331,44 +331,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
   },
   {
-    "id": "RK-M0-0006-F01",
-    "title": "Integrate settlement resource projection service with backend tick runner composition",
-    "description": "Wire the new deterministic economy projection service into the app-level module tick orchestration path so resource projection output can be applied/saved and published through the in-process event bus during scheduled simulation ticks.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0006"
-    ],
-    "inputs": [
-      "backend/src/modules/economy/application/settlement-resource-projection-service.ts",
-      "backend/src/app/composition.ts",
-      "backend/src/app/reference/in-memory-event-bus.ts"
-    ],
-    "acceptance_criteria": [
-      "App composition can resolve an economy tick service instance and invoke it for one settlement tick cycle",
-      "Projected placeholder economy tick events are published via the existing in-memory event bus contract",
-      "Integration remains first-slice bounded to a single settlement and starter resources only"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:38:07.112014+00:00",
-    "updated_at": "2026-02-25T20:23:58.921069+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M0-0006",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-M1-0005-F02-F01-ESC-F02",
     "title": "Add frontend visual QA dependency preflight to daemon environment checks",
     "description": "Extend daemon environment validation so frontend-visual QA prerequisites are verified before scheduling frontend items, including Playwright importability in the exact Python interpreter used by orchestrator validation.",
@@ -467,17 +429,18 @@
       "Rally_post timing is either approved or a narrow rally/stone-only delta is documented with explicit numeric values"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T19:28:29.875797+00:00",
-    "updated_at": "2026-02-25T19:28:29.875797+00:00",
+    "updated_at": "2026-02-25T20:26:14.713552+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M1-0006-F02-F01"
+    "generated_from_item_id": "RK-M1-0006-F02-F01",
+    "assigned_agent": "rowan-hale"
   },
   {
     "id": "RK-M1-0006-F02-F01-F01-F01",
@@ -720,5 +683,41 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "nika-thorn",
     "generated_from_item_id": "RK-M0-0015"
+  },
+  {
+    "id": "RK-M0-0006-F01-F01",
+    "title": "Persist first-slice economy tick state in a repository-backed adapter",
+    "description": "Replace the in-memory first-slice settlement tick state holder in the economy tick module with a persistence adapter so ticked resource projections are durable and shared across module boundaries.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006-F01"
+    ],
+    "inputs": [
+      "backend/src/app/economy-tick-runner.ts",
+      "backend/src/modules/economy/application/settlement-resource-projection-service.ts"
+    ],
+    "acceptance_criteria": [
+      "A concrete economy tick state repository persists `tick_started_at`, `tick_ended_at`, and per-resource stock after each tick.",
+      "App-level tick state can be read back through an injectable token/service after a scheduled cycle.",
+      "Economy tick placeholder event emission remains unchanged by the persistence migration."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:24:01.776405+00:00",
+    "updated_at": "2026-02-25T20:24:01.776405+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M0-0006-F01"
   }
 ]

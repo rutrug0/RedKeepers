@@ -1593,5 +1593,44 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
     "assigned_agent": "nika-thorn",
     "commit_sha": "4ba2e7fd7e57637940214f4831a5fea728d376b7"
+  },
+  {
+    "id": "RK-M0-0006-F01",
+    "title": "Integrate settlement resource projection service with backend tick runner composition",
+    "description": "Wire the new deterministic economy projection service into the app-level module tick orchestration path so resource projection output can be applied/saved and published through the in-process event bus during scheduled simulation ticks.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006"
+    ],
+    "inputs": [
+      "backend/src/modules/economy/application/settlement-resource-projection-service.ts",
+      "backend/src/app/composition.ts",
+      "backend/src/app/reference/in-memory-event-bus.ts"
+    ],
+    "acceptance_criteria": [
+      "App composition can resolve an economy tick service instance and invoke it for one settlement tick cycle",
+      "Projected placeholder economy tick events are published via the existing in-memory event bus contract",
+      "Integration remains first-slice bounded to a single settlement and starter resources only"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:38:07.112014+00:00",
+    "updated_at": "2026-02-25T20:24:01.767313+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Validation status: not run (`python tools/orchestrator.py status` not executed per your current request).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M0-0006",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "06a815b33e77a6bbbdff4f21a6146894030e4944"
   }
 ]

@@ -212,6 +212,40 @@
     ]
   },
   {
+    "timestamp_utc": "2026-02-25T20:30:00.0000000Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-M1-0006-F02-F01-F02",
+    "status": "done",
+    "summary": "Re-ran 30m/2h/6h post-Pass A serialized pacing and completed the rally/stone micro-pass review; barracks and first training are within target pacing, but rally_post still misses the 6h window.",
+    "changed_files": [
+      "docs/design/v1-early-progression-pacing-sim.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Apply micro-pass rally cost delta and re-run RK-M1-0006-F02-F01-F02",
+        "owner_role": "backend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Apply narrow rally_post-only cost deltas and rerun the 30m/2h/6h reference simulation to validate rally_post reaches L1 by 6h.",
+        "dependencies": [
+          "RK-M1-0006-F02-F01-F02"
+        ],
+        "inputs": [
+          "docs/design/v1-early-progression-pacing-sim.md",
+          "backend/src/modules/economy/infra/seeds/v1/resource-definitions.json",
+          "backend/src/modules/buildings/infra/seeds/v1/building-lines.json"
+        ],
+        "acceptance_criteria": [
+          "rally_post cost values updated to `rally_post.cost_food_l1: 64 -> 55`, `rally_post.cost_wood_l1: 64 -> 33`, and `rally_post.cost_stone_l1: 52 -> 52`",
+          "30m/2h/6h checkpoint tables are refreshed after the micro candidate is applied",
+          "Rally_post reaches L1 by or before 6h in the re-run"
+        ]
+      }
+    ]
+  },
+  {
     "timestamp_utc": "2026-02-25T19:50:00.0000000Z",
     "agent_id": "rowan-hale",
     "work_item_id": "RK-M0-0009",
