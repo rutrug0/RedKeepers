@@ -1,0 +1,31 @@
+{
+  "schema_version": "rk-v1-world-map-seed",
+  "source_doc": "docs/design/map-scout-interaction-contract.md",
+  "source_section": "M0 scout-select event token fixtures",
+  "table_id": "world_map.scout_event_tokens",
+  "rows": [
+    {
+      "outcome_code": "outcome_scout_dispatched",
+      "content_key": "event.world.scout_dispatched",
+      "required_tokens": [
+        "settlement_name",
+        "target_tile_label"
+      ]
+    },
+    {
+      "outcome_code": "outcome_scout_report_empty",
+      "content_key": "event.world.scout_report_empty",
+      "required_tokens": [
+        "target_tile_label"
+      ]
+    },
+    {
+      "outcome_code": "outcome_scout_report_hostile",
+      "content_key": "event.world.scout_report_hostile",
+      "required_tokens": [
+        "target_tile_label",
+        "hostile_force_estimate"
+      ]
+    }
+  ]
+}

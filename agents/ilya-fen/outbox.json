@@ -622,4 +622,44 @@
     "blockers": [],
     "proposed_work_items": []
   }
+  ,
+  {
+    "timestamp_utc": "2026-02-25T20:31:15.400194+00:00",
+    "agent_id": "ilya-fen",
+    "work_item_id": "RK-M0-0009-F02",
+    "status": "done",
+    "summary": "Added placeholder world-map scout seed fixtures for deterministic M0 tile outcomes, including one tile each in unknown/quiet/hostile states and explicit scout event token fixtures for `target_tile_label` and `hostile_force_estimate`.",
+    "changed_files": [
+      "backend/src/app/config/seeds/v1/world-map-tile-seed-fixtures.json",
+      "backend/src/app/config/seeds/v1/world-map-scout-event-token-fixtures.json",
+      "agents/ilya-fen/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Wire world-map scout seed fixtures into dev bootstrap/dev fixture loader",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Add a lightweight fixture loader that hydrates the world-map tile state repository with rows from `world-map-tile-seed-fixtures.json` so local/dev runs can replay all three scout outcomes with deterministic fixture tile ids.",
+        "acceptance_criteria": [
+          "Backend can load the new world-map tile seed file and return world-map tile snapshots keyed by settlement_id+tile_id.",
+          "A single dev flow can execute all three scout outcomes using seeded tile ids.",
+          "Fixture hostile rows include `hostile_force_estimate` and quiet rows include `target_tile_label` so events render placeholder tokens deterministically."
+        ],
+        "dependencies": [
+          "RK-M0-0009-F01",
+          "RK-M0-0009-F02"
+        ],
+        "inputs": [
+          "backend/src/app/config/seeds/v1/world-map-tile-seed-fixtures.json",
+          "backend/src/app/config/seeds/v1/world-map-scout-event-token-fixtures.json",
+          "backend/src/modules/world_map"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
+  }
 ]

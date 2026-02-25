@@ -1,0 +1,30 @@
+{
+  "schema_version": "rk-v1-world-map-seed",
+  "source_doc": "docs/design/map-scout-interaction-contract.md",
+  "source_section": "M0 scout-select deterministic placeholder tiles",
+  "table_id": "world_map_tiles",
+  "rows": [
+    {
+      "settlement_id": "settlement_alpha",
+      "tile_id": "tile_unknown_demo",
+      "tile_state": "tile_state_unknown",
+      "tile_revision": 0,
+      "target_tile_label": "Fogged Ridge Crossing"
+    },
+    {
+      "settlement_id": "settlement_alpha",
+      "tile_id": "tile_quiet_watch",
+      "tile_state": "tile_state_quiet",
+      "tile_revision": 0,
+      "target_tile_label": "Black Reed March"
+    },
+    {
+      "settlement_id": "settlement_alpha",
+      "tile_id": "tile_hostile_glade",
+      "tile_state": "tile_state_hostile_hint",
+      "tile_revision": 0,
+      "target_tile_label": "Burnt Causeway",
+      "hostile_force_estimate": "light raider column"
+    }
+  ]
+}
