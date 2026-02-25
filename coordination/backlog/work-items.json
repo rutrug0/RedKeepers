@@ -1,77 +1,5 @@
 [
   {
-    "id": "RK-M1-0007-F02",
-    "title": "Define machine-readable narrative seed format for content placeholders",
-    "description": "Create a JSON seed/schema for narrative placeholder strings (civ intros, settlement name pools, event templates) so client/backend can consume stable keys and tokenized templates without parsing markdown.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0007"
-    ],
-    "inputs": [
-      "docs/content/naming-bible-v1.md",
-      "docs/content/placeholder-narrative-seed-pack-v1.md",
-      "backend/src/app/config/seeds/"
-    ],
-    "acceptance_criteria": [
-      "Machine-readable content seed files include stable keys, scope flags, and tokenized templates for civ intros, settlement names, and event feed messages",
-      "Schema or validation notes define required fields (`key`, scope/status, related IDs/categories, template/tokens)",
-      "No first-slice mechanics are added; work is limited to data serialization and validation shape"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:18:45.966375+00:00",
-    "updated_at": "2026-02-25T16:09:18.998896+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "nika-thorn",
-    "generated_from_item_id": "RK-M1-0007",
-    "assigned_agent": "ilya-fen"
-  },
-  {
-    "id": "RK-M1-0008-F01",
-    "title": "Run browser-based visual smoke pass for M1 client shell breakpoints",
-    "description": "Execute the documented manual checklist for the client shell at desktop/tablet/mobile widths and confirm placeholder-art-only compliance with screenshots or notes.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0008"
-    ],
-    "inputs": [
-      "agents/tomas-grell/manual-verification-rk-m1-0008.md",
-      "client-web/index.html",
-      "client-web/styles.css",
-      "docs/design/first-vertical-slice.md"
-    ],
-    "acceptance_criteria": [
-      "Manual verification checklist in agents/tomas-grell/manual-verification-rk-m1-0008.md is executed in a browser",
-      "Responsive behavior at >=1221px, 861-1220px, and <=860px is recorded with pass/fail notes",
-      "Placeholder-art policy compliance is explicitly confirmed or violations are logged"
-    ],
-    "validation_commands": [],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:21:48.485313+00:00",
-    "updated_at": "2026-02-25T15:21:48.485313+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "tomas-grell",
-    "generated_from_item_id": "RK-M1-0008"
-  },
-  {
     "id": "RK-M1-0005-F01-F01",
     "title": "Add empty and error mock scenarios for client shell panels",
     "description": "Extend the local mock panel state model so settlement, world map, and event feed each include empty and error scenarios, with the existing mock-state toggles able to switch to them for UI iteration and QA.",
@@ -92,17 +20,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T15:28:20.612766+00:00",
-    "updated_at": "2026-02-25T15:28:20.612766+00:00",
+    "updated_at": "2026-02-25T16:22:52.073047+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "sera-kest",
-    "generated_from_item_id": "RK-M1-0005-F01"
+    "generated_from_item_id": "RK-M1-0005-F01",
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-M1-0005-F02-F01",
@@ -277,5 +206,40 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-M1-0006-F01-F01"
+  },
+  {
+    "id": "RK-M1-0007-F02-F01",
+    "title": "Add typed backend loaders and validation helpers for v1 narrative seed tables",
+    "description": "Implement framework-agnostic loader/parser utilities for the new narrative JSON tables and enforce the shared narrative row shape (required fields, unique keys per table, token list consistency with template placeholders) at startup or in tests.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0007-F02"
+    ],
+    "inputs": [
+      "backend/src/app/config/seeds/v1/narrative/*.json",
+      "backend/src/app/config/seeds/v1/narrative/narrative-template-table.schema.json"
+    ],
+    "acceptance_criteria": [
+      "Backend exposes typed loaders/parsers for `civilization-intros.json`, `starter-settlement-name-pool.json`, and `event-feed-messages.json`",
+      "Validation rejects missing required narrative fields (`key`, `slice_status_scope`, `categories`, `related_ids`, `template`, `tokens`) and duplicate row keys within a table",
+      "Validation checks template token placeholders match the declared `tokens` array order/uniqueness",
+      "No gameplay mechanics are added; work remains data loading/validation only"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T16:09:20.320370+00:00",
+    "updated_at": "2026-02-25T16:09:20.320370+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M1-0007-F02"
   }
 ]

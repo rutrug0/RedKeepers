@@ -28,7 +28,7 @@
     panels: {
       settlement: {
         title: "Cinderwatch Hold",
-        stateOptions: ["loading", "populated"],
+        stateOptions: ["loading", "populated", "empty", "error"],
         scenarios: {
           loading: {
             titleSuffix: "(Syncing)",
@@ -60,11 +60,33 @@
               contentKey: "civ_intro.cinder_throne_legates",
             },
           },
+          empty: {
+            titleSuffix: "(Idle)",
+            emptySummary:
+              "No active work orders are in progress. Use placeholder controls to seed resource and queue records.",
+            resourceHint: "No resource deltas are currently staged in this mock scenario.",
+            queueHint: "No build upgrades queued.",
+            garrisonHint: "No stationed unit entries.",
+            civIntro: {
+              civId: "cinder_throne_legates",
+              displayName: "Cinder Throne Legates",
+              contentKey: "civ_intro.cinder_throne_legates",
+            },
+          },
+          error: {
+            titleSuffix: "(Sync Error)",
+            errorCode: "SETTLEMENT_SYNC_TIMEOUT",
+            emptySummary:
+              "Settlement placeholder payload could not be resolved from local mock transport.",
+            resourceHint: "Resource ledger unavailable while sync is in error.",
+            queueHint: "Build queue data unavailable while sync is in error.",
+            garrisonHint: "Garrison snapshot unavailable while sync is in error.",
+          },
         },
       },
       worldMap: {
         title: "Frontier Region Map",
-        stateOptions: ["loading", "populated"],
+        stateOptions: ["loading", "populated", "empty", "error"],
         scenarios: {
           loading: {
             coords: "-- / --",
@@ -113,11 +135,52 @@
               "Set Rally Marker (placeholder)",
             ],
           },
+          empty: {
+            coords: "-- / --",
+            region: "No discovered frontier tiles",
+            selectedTile: {
+              Type: "No Selection",
+              Control: "N/A",
+              Travel: "N/A",
+            },
+            legend: [
+              { kind: "settlement", label: "Your Settlements" },
+              { kind: "allied", label: "Friendly / Allied" },
+              { kind: "hostile", label: "Hostile / Points of Interest" },
+            ],
+            actions: [
+              "Send Scouts (placeholder)",
+              "Queue Survey (placeholder)",
+              "Drop Rally Marker (placeholder)",
+            ],
+            emptySummary:
+              "No marker or route placeholders are active in this map scenario.",
+            selectedTileHint: "Select a placeholder tile after mock markers are injected.",
+          },
+          error: {
+            coords: "-- / --",
+            region: "Map telemetry unavailable",
+            selectedTile: {
+              Type: "Unavailable",
+              Control: "Unknown",
+              Travel: "Unavailable",
+            },
+            legend: [
+              { kind: "settlement", label: "Your Settlements" },
+              { kind: "allied", label: "Friendly / Allied" },
+              { kind: "hostile", label: "Hostile / Points of Interest" },
+            ],
+            actions: ["Retry Sync (placeholder)", "Open Diagnostics (placeholder)"],
+            errorCode: "MAP_STREAM_OFFLINE",
+            emptySummary:
+              "World map placeholder stream failed to load. Map interactions stay disabled in this mock error state.",
+            selectedTileHint: "Tile inspection is suspended while the map stream is offline.",
+          },
         },
       },
       eventFeed: {
         title: "Dispatches & Alerts",
-        stateOptions: ["loading", "populated"],
+        stateOptions: ["loading", "populated", "empty", "error"],
         scenarios: {
           loading: {
             filters: ["All", "Settlement", "Military", "World"],
@@ -181,6 +244,22 @@
               "Alliance message drawer slot",
               "Tutorial prompt slot",
             ],
+          },
+          empty: {
+            filters: ["All", "Settlement", "Military", "World"],
+            selectedFilter: "All",
+            emptySummary:
+              "No placeholder dispatches are queued. Trigger settlement/map actions to generate feed rows.",
+            notificationSummary: "Notification queue is clear.",
+          },
+          error: {
+            filters: ["All", "Settlement", "Military", "World"],
+            selectedFilter: "All",
+            errorCode: "FEED_CACHE_READ_FAILED",
+            emptySummary:
+              "Event feed placeholder records failed to load from local mock cache.",
+            notificationSummary:
+              "Notification queue unavailable while feed cache is in an error state.",
           },
         },
       },
@@ -277,7 +356,7 @@
       return;
     }
 
-    refs.title.textContent = mode === "loading" ? `${panel.title} ${scenario.titleSuffix}` : panel.title;
+    refs.title.textContent = scenario.titleSuffix ? `${panel.title} ${scenario.titleSuffix}` : panel.title;
 
     if (mode === "loading") {
       const resourceCards = Array.from({ length: scenario.resourceSlots })
@@ -349,6 +428,79 @@
               <div class="skeleton-line"></div>
               <div class="skeleton-line" style="width: 88%;"></div>
             </div>
+          </section>
+        </div>
+      `;
+
+      return;
+    }
+
+    if (mode === "empty") {
+      const civIntroTitle = scenario.civIntro?.displayName || "Civilization";
+      const civIntroText = getNarrativeText(scenario.civIntro?.contentKey, scenario.civIntro?.tokens);
+
+      refs.content.innerHTML = `
+        <div class="stack">
+          <section class="subpanel compact">
+            <h3>Settlement Status</h3>
+            <div class="wire-empty">${escapeHtml(scenario.emptySummary || "No active settlement data in this placeholder state.")}</div>
+          </section>
+          <section class="subpanel">
+            <h3>Resource Ledger</h3>
+            <div class="wire-empty">${escapeHtml(scenario.resourceHint || "No resources recorded.")}</div>
+          </section>
+          <section class="subpanel">
+            <div class="subpanel__head">
+              <h3>Build Queue</h3>
+              <button type="button" class="ghost-btn">Manage</button>
+            </div>
+            <div class="wire-empty">${escapeHtml(scenario.queueHint || "No build queue items.")}</div>
+          </section>
+          <section class="subpanel">
+            <div class="subpanel__head">
+              <h3>Garrison Snapshot</h3>
+              <button type="button" class="ghost-btn">Review</button>
+            </div>
+            <div class="wire-empty">${escapeHtml(scenario.garrisonHint || "No unit entries available.")}</div>
+          </section>
+          <section class="subpanel compact">
+            <h3>Civilization Briefing</h3>
+            <p><strong>${escapeHtml(civIntroTitle)}</strong></p>
+            <p>${escapeHtml(civIntroText)}</p>
+          </section>
+        </div>
+      `;
+
+      return;
+    }
+
+    if (mode === "error") {
+      refs.content.innerHTML = `
+        <div class="stack">
+          <section class="subpanel compact">
+            <h3>Settlement Status</h3>
+            <div class="wire-empty">
+              <strong>Placeholder error: ${escapeHtml(scenario.errorCode || "UNKNOWN_SETTLEMENT_ERROR")}</strong><br />
+              ${escapeHtml(scenario.emptySummary || "Settlement data could not be loaded.")}
+            </div>
+          </section>
+          <section class="subpanel">
+            <h3>Resource Ledger</h3>
+            <div class="wire-empty">${escapeHtml(scenario.resourceHint || "Resource ledger unavailable.")}</div>
+          </section>
+          <section class="subpanel">
+            <div class="subpanel__head">
+              <h3>Build Queue</h3>
+              <button type="button" class="ghost-btn">Manage</button>
+            </div>
+            <div class="wire-empty">${escapeHtml(scenario.queueHint || "Build queue unavailable.")}</div>
+          </section>
+          <section class="subpanel">
+            <div class="subpanel__head">
+              <h3>Garrison Snapshot</h3>
+              <button type="button" class="ghost-btn">Review</button>
+            </div>
+            <div class="wire-empty">${escapeHtml(scenario.garrisonHint || "Garrison data unavailable.")}</div>
           </section>
         </div>
       `;
@@ -503,6 +655,93 @@
       return;
     }
 
+    if (mode === "empty") {
+      refs.content.innerHTML = `
+        <div class="map-layout">
+          <div class="map-stage" role="group" aria-label="Empty placeholder world map viewport">
+            <div class="map-overlay map-overlay--top-left">
+              <span class="chip chip--small">Coords: ${escapeHtml(scenario.coords)}</span>
+              <span class="chip chip--small">Region: ${escapeHtml(scenario.region)}</span>
+            </div>
+            <div class="map-grid" aria-hidden="true"></div>
+            <div class="map-loading-overlay" aria-hidden="true">
+              <div class="map-loading-card">
+                <p class="subpanel-note">${escapeHtml(scenario.emptySummary || "No map marker placeholders are available.")}</p>
+              </div>
+            </div>
+            <div class="map-overlay map-overlay--bottom-right">
+              <div class="map-controls" aria-label="Placeholder map controls">
+                <button type="button" class="control-btn" aria-label="Zoom in">+</button>
+                <button type="button" class="control-btn" aria-label="Zoom out">-</button>
+                <button type="button" class="control-btn" aria-label="Center on settlement">O</button>
+              </div>
+            </div>
+          </div>
+          <aside class="map-side" aria-label="Map side panels">
+            <section class="subpanel compact">
+              <h3>Selected Tile</h3>
+              <p class="subpanel-note">${escapeHtml(scenario.selectedTileHint || "No tile selected.")}</p>
+              <div class="wire-fields">${selectedFields}</div>
+            </section>
+            <section class="subpanel compact">
+              <h3>Legend (Placeholder)</h3>
+              <ul class="legend-list">${legendItems}</ul>
+            </section>
+            <section class="subpanel compact">
+              <h3>Map Actions</h3>
+              <div class="stack-sm">${actionItems}</div>
+            </section>
+          </aside>
+        </div>
+      `;
+
+      return;
+    }
+
+    if (mode === "error") {
+      refs.content.innerHTML = `
+        <div class="map-layout">
+          <div class="map-stage is-loading" role="group" aria-label="Error placeholder world map viewport">
+            <div class="map-overlay map-overlay--top-left">
+              <span class="chip chip--small">Coords: ${escapeHtml(scenario.coords)}</span>
+              <span class="chip chip--small">Region: ${escapeHtml(scenario.region)}</span>
+            </div>
+            <div class="map-grid" aria-hidden="true"></div>
+            <div class="map-loading-overlay" aria-hidden="true">
+              <div class="map-loading-card">
+                <p class="subpanel-note"><strong>Placeholder error: ${escapeHtml(scenario.errorCode || "UNKNOWN_MAP_ERROR")}</strong></p>
+                <p class="subpanel-note">${escapeHtml(scenario.emptySummary || "Map stream unavailable.")}</p>
+              </div>
+            </div>
+            <div class="map-overlay map-overlay--bottom-right">
+              <div class="map-controls" aria-label="Placeholder map controls">
+                <button type="button" class="control-btn" aria-label="Zoom in">+</button>
+                <button type="button" class="control-btn" aria-label="Zoom out">-</button>
+                <button type="button" class="control-btn" aria-label="Center on settlement">O</button>
+              </div>
+            </div>
+          </div>
+          <aside class="map-side" aria-label="Map side panels">
+            <section class="subpanel compact">
+              <h3>Selected Tile</h3>
+              <p class="subpanel-note">${escapeHtml(scenario.selectedTileHint || "Tile inspection unavailable.")}</p>
+              <div class="wire-fields">${selectedFields}</div>
+            </section>
+            <section class="subpanel compact">
+              <h3>Legend (Placeholder)</h3>
+              <ul class="legend-list">${legendItems}</ul>
+            </section>
+            <section class="subpanel compact">
+              <h3>Map Actions</h3>
+              <div class="stack-sm">${actionItems}</div>
+            </section>
+          </aside>
+        </div>
+      `;
+
+      return;
+    }
+
     const markers = (scenario.markers || [])
       .map(
         (marker) => `
@@ -606,6 +845,51 @@
           <section class="subpanel compact">
             <h3>Queued Notifications</h3>
             <div class="wire-tiles">${notificationSlots}</div>
+          </section>
+        </div>
+      `;
+
+      return;
+    }
+
+    if (mode === "empty") {
+      refs.content.innerHTML = `
+        <div class="stack">
+          <section class="subpanel compact">
+            <h3>Feed Controls</h3>
+            <div class="segment-row" role="group" aria-label="Mock event filters">${filters}</div>
+          </section>
+          <section class="subpanel">
+            <h3>Recent Events</h3>
+            <div class="wire-empty">${escapeHtml(scenario.emptySummary || "No event feed entries are available.")}</div>
+          </section>
+          <section class="subpanel compact">
+            <h3>Queued Notifications</h3>
+            <div class="wire-empty">${escapeHtml(scenario.notificationSummary || "No notifications queued.")}</div>
+          </section>
+        </div>
+      `;
+
+      return;
+    }
+
+    if (mode === "error") {
+      refs.content.innerHTML = `
+        <div class="stack">
+          <section class="subpanel compact">
+            <h3>Feed Controls</h3>
+            <div class="segment-row" role="group" aria-label="Mock event filters">${filters}</div>
+          </section>
+          <section class="subpanel">
+            <h3>Recent Events</h3>
+            <div class="wire-empty">
+              <strong>Placeholder error: ${escapeHtml(scenario.errorCode || "UNKNOWN_EVENT_FEED_ERROR")}</strong><br />
+              ${escapeHtml(scenario.emptySummary || "Event feed unavailable in this mock state.")}
+            </div>
+          </section>
+          <section class="subpanel compact">
+            <h3>Queued Notifications</h3>
+            <div class="wire-empty">${escapeHtml(scenario.notificationSummary || "Notification queue unavailable.")}</div>
           </section>
         </div>
       `;

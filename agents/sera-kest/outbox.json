@@ -127,5 +127,15 @@
       "client-web/app.js",
       "agents/sera-kest/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-25T16:21:51.1781357Z",
+    "item_id": "RK-M1-0005-F01-F01",
+    "status": "completed",
+    "summary": "Extended client-shell mock panel states with empty and error scenarios for settlement, world map, and event feed, and updated per-panel state toggles/renderers so loading/populated/empty/error can be previewed for UI iteration and QA using placeholder-only views.",
+    "files": [
+      "client-web/app.js",
+      "agents/sera-kest/outbox.json"
+    ]
   }
 ]

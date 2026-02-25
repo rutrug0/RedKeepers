@@ -24,29 +24,49 @@ Findings:
 - Responsive CSS breakpoints exist for desktop/tablet/mobile transitions at `1220px` and `860px`.
 - Reduced-motion handling exists (`@media (prefers-reduced-motion: reduce)`).
 
-## Manual Browser Verification Checklist (Pending visual run)
+## Manual Browser Verification Checklist (Blocked in sandbox)
 
 1. Desktop width (`>=1221px`)
+- Status: BLOCKED (visual browser process launch denied by sandbox policy and Chromium runtime access errors).
+- Planned checks (not executable in this environment):
 - Confirm three-column shell layout renders (`settlement`, `world map`, `event feed` all visible).
 - Confirm sticky region nav remains usable while scrolling.
 - Confirm placeholder markers and wireframe visuals are visible (no final art imagery/assets).
 
 2. Tablet width (`861px` to `1220px`)
+- Status: BLOCKED (same environment constraint).
+- Planned checks (not executable in this environment):
 - Confirm `event-feed-panel` moves below the first row (`grid-column: 1 / -1` behavior).
 - Confirm map side panels reflow into three columns under map stage.
 - Confirm controls remain readable/clickable (minimum touch target pattern still visually intact).
 
 3. Mobile width (`<=860px`)
+- Status: BLOCKED (same environment constraint).
+- Planned checks (not executable in this environment):
 - Confirm top bar stacks vertically.
 - Confirm region tabs collapse to one-column button stack.
 - Confirm main app panels render one column and remain scroll-accessible.
 - Confirm resource cards become single-column and map stage height reduces without overflow clipping critical controls.
 
 4. Keyboard/interaction smoke
+- Status: BLOCKED (same environment constraint).
+- Planned checks (not executable in this environment):
 - Tab to region tabs, use arrow keys/Home/End, then `Enter`/`Space` to activate panel focus/scroll.
 - Confirm active tab state updates while scrolling between panels (IntersectionObserver behavior).
 
-## Placeholder-Art Policy Compliance Checks (Pending visual confirmation)
+## Attempted Browser Execution Evidence
+
+Attempts made in this run:
+- `node agents/tomas-grell/artifacts/rk-m1-0008-f01/run-visual-smoke.js` -> failed with `Error: spawn EPERM` when trying to launch Chromium.
+- Python subprocess launch of Chromium/Edge headless (`--screenshot` path test) -> process exits before render with:
+  - `FATAL: ... platform_channel.cc ... Access is denied. (0x5)`
+  - `ERROR: crash server failed to launch, self-terminating`
+
+Impact:
+- Manual browser checks cannot be executed inside current sandboxed CLI session.
+- No screenshots can be produced from this environment.
+
+## Placeholder-Art Policy Compliance Checks (Partial: static only)
 
 Policy reference:
 - `docs/design/first-vertical-slice.md` -> In Scope: "Placeholder art only (replaceable later)"
@@ -57,7 +77,11 @@ Checks:
 - Map viewport uses CSS gradients/grids and labeled markers, not final map illustrations.
 - Event feed and notification tiles remain placeholder text content.
 
+Status:
+- Static/source verification: PASS
+- Visual in-browser confirmation: BLOCKED in current environment (requires non-sandbox browser run)
+
 ## Result
 
 - Static QA precheck: PASS
-- Manual browser verification: NOT RUN in CLI-only session (follow-up visual pass can execute checklist above)
+- Manual browser verification: BLOCKED (sandbox policy/runtime restrictions prevent Chromium/Edge visual run)

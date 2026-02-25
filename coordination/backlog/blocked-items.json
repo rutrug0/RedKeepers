@@ -270,5 +270,42 @@
     "assigned_agent": "tomas-grell",
     "last_failure_reason": "Codex CLI command not found: codex",
     "requeue_reason": "Requeued after Codex CLI Windows bootstrap fixes and backlog cleanup"
+  },
+  {
+    "id": "RK-M1-0008-F01",
+    "title": "Run browser-based visual smoke pass for M1 client shell breakpoints",
+    "description": "Execute the documented manual checklist for the client shell at desktop/tablet/mobile widths and confirm placeholder-art-only compliance with screenshots or notes.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0008"
+    ],
+    "inputs": [
+      "agents/tomas-grell/manual-verification-rk-m1-0008.md",
+      "client-web/index.html",
+      "client-web/styles.css",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "Manual verification checklist in agents/tomas-grell/manual-verification-rk-m1-0008.md is executed in a browser",
+      "Responsive behavior at >=1221px, 861-1220px, and <=860px is recorded with pass/fail notes",
+      "Placeholder-art policy compliance is explicitly confirmed or violations are logged"
+    ],
+    "validation_commands": [],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:21:48.485313+00:00",
+    "updated_at": "2026-02-25T16:19:36.084046+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "- `agents/tomas-grell/outbox.json`: appended blocked run summary and structured follow-up task for daemon ingestion.",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "tomas-grell",
+    "generated_from_item_id": "RK-M1-0008",
+    "assigned_agent": "tomas-grell"
   }
 ]

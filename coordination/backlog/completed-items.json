@@ -708,5 +708,42 @@
     "generated_from_item_id": "RK-M1-0007",
     "assigned_agent": "sera-kest",
     "commit_sha": "ba62220bb181fdf9bdfccd97e3cd1d0894dc4412"
+  },
+  {
+    "id": "RK-M1-0007-F02",
+    "title": "Define machine-readable narrative seed format for content placeholders",
+    "description": "Create a JSON seed/schema for narrative placeholder strings (civ intros, settlement name pools, event templates) so client/backend can consume stable keys and tokenized templates without parsing markdown.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0007"
+    ],
+    "inputs": [
+      "docs/content/naming-bible-v1.md",
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "backend/src/app/config/seeds/"
+    ],
+    "acceptance_criteria": [
+      "Machine-readable content seed files include stable keys, scope flags, and tokenized templates for civ intros, settlement names, and event feed messages",
+      "Schema or validation notes define required fields (`key`, scope/status, related IDs/categories, template/tokens)",
+      "No first-slice mechanics are added; work is limited to data serialization and validation shape"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:18:45.966375+00:00",
+    "updated_at": "2026-02-25T16:09:20.314307+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/ilya-fen/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-M1-0007",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "c967268ae35608d7455a644e2f11d072fbaa3515"
   }
 ]
