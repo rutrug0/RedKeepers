@@ -549,6 +549,7 @@ def resolve_execution_profile(
     agent_id: str,
     agent_cfg: dict[str, Any],
     model_policy: dict[str, Any],
+    item: dict[str, Any] | None = None,
 ) -> dict[str, str | None]:
     def _clean(value: Any) -> str | None:
         if value is None:
@@ -562,6 +563,29 @@ def resolve_execution_profile(
     model = _clean(policy_cfg.get("model")) or _clean(agent_cfg.get("model"))
     reasoning = _clean(policy_cfg.get("reasoning")) or _clean(agent_cfg.get("reasoning"))
     fallback_model = _clean(policy_cfg.get("fallback_model")) or _clean(model_policy.get("default_fallback_model"))
+    selection_reason = "agent_policy"
+
+    if item is not None:
+        retry_count_raw = item.get("retry_count", 0)
+        try:
+            retry_count = int(retry_count_raw)
+        except (TypeError, ValueError):
+            retry_count = 0
+        priority = str(item.get("priority", "")).strip().lower()
+        should_upgrade = priority == "critical" or retry_count > 0
+        escalation_cfg = (model_policy.get("escalation_upgrade", {}) or {}).get("critical_or_repeated_failure", {})
+        if should_upgrade and isinstance(escalation_cfg, dict):
+            upgraded_model = _clean(escalation_cfg.get("model"))
+            upgraded_reasoning = _clean(escalation_cfg.get("reasoning"))
+            upgraded_fallback = _clean(escalation_cfg.get("fallback_model"))
+            if upgraded_model:
+                model = upgraded_model
+                selection_reason = "escalation_upgrade"
+            if upgraded_reasoning:
+                reasoning = upgraded_reasoning
+            if upgraded_fallback:
+                fallback_model = upgraded_fallback
+
     if fallback_model == model:
         fallback_model = None
 
@@ -569,6 +593,7 @@ def resolve_execution_profile(
         "model": model,
         "reasoning": reasoning,
         "fallback_model": fallback_model,
+        "selection_reason": selection_reason,
     }
 
 
@@ -641,6 +666,7 @@ def process_one(
         agent_id=agent_id,
         agent_cfg=agent_cfg,
         model_policy=policies.get("model", {}),
+        item=item,
     )
     emit_event(
         "select",
@@ -648,18 +674,28 @@ def process_one(
         item_id=item["id"],
         title=item["title"],
         agent_id=agent_id,
+        role=agent_cfg.get("role"),
         priority=item.get("priority"),
         milestone=item.get("milestone"),
         model=execution_profile.get("model"),
         reasoning=execution_profile.get("reasoning"),
         fallback_model=execution_profile.get("fallback_model"),
+        model_selection=execution_profile.get("selection_reason"),
     )
 
     if dry_run:
-        emit_event("dry_run", "Dry-run selected item without execution", item_id=item["id"], agent_id=agent_id)
+        emit_event(
+            "dry_run",
+            "Dry-run selected item without execution",
+            item_id=item["id"],
+            agent_id=agent_id,
+            role=agent_cfg.get("role"),
+            model=execution_profile.get("model"),
+            model_selection=execution_profile.get("selection_reason"),
+        )
         daemon_state = set_daemon_state(
             state="dry_run",
-            active_item={**item, "assigned_agent": agent_id},
+            active_item={**item, "assigned_agent": agent_id, "assigned_role": agent_cfg.get("role")},
             last_run_summary=f"Dry run selected {item['id']} for {agent_id}",
             lock_held=True,
         )
@@ -669,7 +705,11 @@ def process_one(
     queue.mark_assigned(item["id"], agent_id)
     queue.mark_running(item["id"])
     queue.save()
-    daemon_state = set_daemon_state(state="running", active_item={**item, "assigned_agent": agent_id}, lock_held=True)
+    daemon_state = set_daemon_state(
+        state="running",
+        active_item={**item, "assigned_agent": agent_id, "assigned_role": agent_cfg.get("role")},
+        lock_held=True,
+    )
     stats_tracker.begin_run()
 
     prompt = build_prompt(ROOT, agent_id=agent_id, agent_cfg=agent_cfg, work_item=item)
@@ -682,6 +722,7 @@ def process_one(
         model=execution_profile.get("model"),
         reasoning=execution_profile.get("reasoning"),
         fallback_model=execution_profile.get("fallback_model"),
+        model_selection=execution_profile.get("selection_reason"),
     )
     worker_started = time.monotonic()
     worker_timeout = int(policies.get("retry", {}).get("worker_timeout_seconds", 900))
@@ -727,6 +768,7 @@ def process_one(
         "Agent execution finished",
         item_id=item["id"],
         agent_id=agent_id,
+        role=agent_cfg.get("role"),
         result=worker.status,
         exit_code=worker.exit_code,
         elapsed_seconds=round(time.monotonic() - worker_started, 2),
@@ -768,7 +810,11 @@ def process_one(
         emit_event("validating", "Starting validation for completed work item", item_id=item["id"], agent_id=agent_id)
         queue.mark_validating(item["id"])
         queue.save()
-        set_daemon_state(state="validating", active_item={**item, "assigned_agent": agent_id}, lock_held=True)
+        set_daemon_state(
+            state="validating",
+            active_item={**item, "assigned_agent": agent_id, "assigned_role": agent_cfg.get("role")},
+            lock_held=True,
+        )
 
         commit_rules = policies["commit"]
         validations_ok, validation_results = run_validation_for_item(ROOT, item, commit_rules)

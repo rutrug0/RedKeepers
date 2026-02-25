@@ -18,10 +18,12 @@ def render_status(data: dict[str, Any]) -> str:
         lines.append(f"Last error: {daemon.get('last_error')}")
 
     if active_item:
+        active_role = active_item.get("assigned_role")
+        role_suffix = f" ({active_role})" if active_role else ""
         lines.append(
             "Active: "
             f"{active_item.get('id')} | {active_item.get('title')} | "
-            f"{active_item.get('assigned_agent', 'unassigned')}"
+            f"{active_item.get('assigned_agent', 'unassigned')}{role_suffix}"
         )
     else:
         lines.append("Active: none")
@@ -36,8 +38,10 @@ def render_status(data: dict[str, Any]) -> str:
 
     lines.append("Agent Utilization:")
     for agent_id, stats in sorted(agent_stats.items()):
+        role = stats.get("role")
+        role_suffix = f" ({role})" if role else ""
         lines.append(
-            f"  - {agent_id}: runs={stats.get('total_runs', 0)} "
+            f"  - {agent_id}{role_suffix}: runs={stats.get('total_runs', 0)} "
             f"done={stats.get('completed_items', 0)} "
             f"fail={stats.get('failed_runs', 0)} "
             f"time={round(float(stats.get('total_runtime_seconds', 0.0)), 1)}s "
