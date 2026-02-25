@@ -1,1 +1,54 @@
-[]
+[
+  {
+    "timestamp_utc": "2026-02-25T15:17:40.5295958Z",
+    "agent_id": "nika-thorn",
+    "work_item_id": "RK-M1-0007",
+    "status": "done",
+    "summary": "Created an M1 placeholder naming bible and narrative seed pack with anti-derivative guardrails, civ intro copy, 12 starter settlement names, unit/building flavor labels, and 24 event feed templates keyed to v1 design IDs.",
+    "changed_files": [
+      "docs/content/naming-bible-v1.md",
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "agents/nika-thorn/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Wire placeholder narrative seed keys into client event feed mock state",
+        "owner_role": "frontend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Load a subset of `docs/content/placeholder-narrative-seed-pack-v1.md` templates into the client shell mock data so event feed rows and civ intro panels use stable content keys instead of hard-coded strings.",
+        "inputs": [
+          "client-web/app.js",
+          "docs/content/placeholder-narrative-seed-pack-v1.md"
+        ],
+        "acceptance_criteria": [
+          "Client mock state references stable `event.*` and `civ_intro.*` keys from the placeholder seed pack",
+          "At least one settlement action, unit training action, and scout/world-map action render feed text via templated string substitution",
+          "Implementation keeps placeholder text replaceable without changing UI component structure"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "title": "Define machine-readable narrative seed format for content placeholders",
+        "owner_role": "backend",
+        "milestone": "M1",
+        "priority": "medium",
+        "description": "Create a JSON seed/schema for narrative placeholder strings (civ intros, settlement name pools, event templates) so client/backend can consume stable keys and tokenized templates without parsing markdown.",
+        "inputs": [
+          "docs/content/naming-bible-v1.md",
+          "docs/content/placeholder-narrative-seed-pack-v1.md",
+          "backend/src/app/config/seeds/"
+        ],
+        "acceptance_criteria": [
+          "Machine-readable content seed files include stable keys, scope flags, and tokenized templates for civ intros, settlement names, and event feed messages",
+          "Schema or validation notes define required fields (`key`, scope/status, related IDs/categories, template/tokens)",
+          "No first-slice mechanics are added; work is limited to data serialization and validation shape"
+        ],
+        "validation_commands": []
+      }
+    ]
+  }
+]

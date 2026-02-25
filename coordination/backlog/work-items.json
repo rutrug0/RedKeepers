@@ -22,17 +22,18 @@
       "Entries are clearly marked replaceable placeholders and reference stable identifiers or categories from the design tables where applicable"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T14:20:08.432712+00:00",
-    "updated_at": "2026-02-25T14:20:08.432712+00:00",
+    "updated_at": "2026-02-25T15:18:45.060663+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0001"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0001",
+    "assigned_agent": "nika-thorn"
   },
   {
     "id": "RK-M1-0008",
@@ -142,41 +143,6 @@
     "generated_from_item_id": "RK-M1-0005"
   },
   {
-    "id": "RK-M1-0006-F01",
-    "title": "Serialize v1 starter tables into backend seed config format",
-    "description": "Convert the markdown starter tables into machine-readable seed/config data for `economy`, `buildings`, and `units` modules without changing values or adding mechanics.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006"
-    ],
-    "inputs": [
-      "docs/design/v1-starter-data-tables.md",
-      "docs/architecture/backend-modular-monolith.md"
-    ],
-    "acceptance_criteria": [
-      "Machine-readable seed/config files exist for resource definitions, building lines/effects, unit lines, civ modifiers, and unit variants",
-      "Config keys match the stable IDs in docs/design/v1-starter-data-tables.md",
-      "First-slice enable list supports only cinder_throne_legates and hides balance/data stubs by default"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T15:07:25.646762+00:00",
-    "updated_at": "2026-02-25T15:14:16.183409+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M1-0006",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-M1-0006-F02",
     "title": "Run early progression pacing simulation on starter economy and training values",
     "description": "Validate the first 2-6 hours of settlement progression using the new starter tables (resource income, build cadence, unit training cadence) and propose numeric adjustments if bottlenecks feel too hard/soft.",
@@ -279,5 +245,39 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-M1-0004-F01"
+  },
+  {
+    "id": "RK-M1-0006-F01-F01",
+    "title": "Add typed seed loaders and validation for v1 starter config JSON",
+    "description": "Implement framework-agnostic loader utilities and schema/shape validation for the new v1 JSON seed files so modules can consume starter config safely and enforce stable IDs plus first-slice filtering at startup.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006-F01"
+    ],
+    "inputs": [
+      "backend/src/modules/*/infra/seeds/v1/*.json",
+      "backend/src/app/config/seeds/v1/first-slice-enablement.json"
+    ],
+    "acceptance_criteria": [
+      "Backend includes typed loader functions for economy/buildings/units starter seed JSON files and civilization config files",
+      "Validation rejects malformed rows, duplicate IDs, and missing cross-references (e.g. producer_building_id, base_unit_id) with clear errors",
+      "A first-slice filtering helper applies the enablement config and excludes balance/data stubs by default"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T15:14:18.513439+00:00",
+    "updated_at": "2026-02-25T15:14:18.513439+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M1-0006-F01"
   }
 ]
