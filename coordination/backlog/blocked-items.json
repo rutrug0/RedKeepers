@@ -505,5 +505,77 @@
     "generated_by_agent": "juno-cairn",
     "generated_from_item_id": "RK-AUTO-PLATFORM-0001",
     "assigned_agent": "juno-cairn"
+  },
+  {
+    "id": "RK-AUTO-PLATFORM-0001-F01-F01",
+    "title": "Gate platform lane with packaged web artifact smoke validation",
+    "description": "Add daemon validation hooks for platform-owned web packaging items so deterministic package build and packaged-artifact smoke commands run automatically before completion.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-PLATFORM-0001-F01"
+    ],
+    "inputs": [
+      "tools/orchestrator.py",
+      "coordination/policies/commit-guard-rules.yaml",
+      "tools/web_vertical_slice_packaging.py"
+    ],
+    "acceptance_criteria": [
+      "Platform validation can run `python tools/web_vertical_slice_packaging.py package --clean` automatically for matching work items",
+      "Platform validation can run `python tools/web_vertical_slice_packaging.py smoke` against the produced artifact",
+      "Blocked/success outcomes are surfaced in daemon command-result summaries"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-25T19:52:52.919873+00:00",
+    "updated_at": "2026-02-25T20:39:03.628167+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "Note: pre-existing daemon/backlog changes in `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` were left untouched.",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "juno-cairn",
+    "generated_from_item_id": "RK-AUTO-PLATFORM-0001-F01",
+    "assigned_agent": "juno-cairn"
+  },
+  {
+    "id": "RK-M0-0010-F01",
+    "title": "Wire loop namespaced outcome keys into client key selection",
+    "description": "Add support for `event.tick.*`, `event.build.*`, `event.train.*`, and `event.scout.*` keys in client shell/event panel lookups with fallback to existing module keys.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0010"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Client renders at least one `tick` outcome via a `event.tick.*` key",
+      "Client renders at least one `build`, `train`, and `scout` outcome via the new loop namespace keys",
+      "Existing module keys remain supported until full migration is complete"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:20:25.957720+00:00",
+    "updated_at": "2026-02-25T20:40:27.177747+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "Frontend visual smoke blocked by environment: playwright import failed: No module named 'playwright'",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-M0-0010",
+    "assigned_agent": "sera-kest"
   }
 ]

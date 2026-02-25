@@ -42,5 +42,54 @@ class FrontendValidationCommandTests(unittest.TestCase):
         self.assertTrue(any("frontend_visual_smoke.py" in cmd for cmd in commands))
 
 
+class PlatformValidationCommandTests(unittest.TestCase):
+    def test_platform_web_packaging_validation_enabled_for_matching_item(self) -> None:
+        item = {
+            "owner_role": "platform",
+            "validation_commands": ["python tools/orchestrator.py status"],
+            "inputs": ["tools/web_vertical_slice_packaging.py"],
+        }
+        rules = {
+            "default_validation_commands": [],
+            "platform_web_packaging_validation": {
+                "enabled": True,
+                "owner_roles": ["platform"],
+                "match_inputs_any": ["tools/web_vertical_slice_packaging.py"],
+                "commands": [
+                    "python tools/web_vertical_slice_packaging.py package --clean",
+                    "python tools/web_vertical_slice_packaging.py smoke",
+                ],
+            },
+        }
+
+        commands = orchestrator.build_validation_commands(item, rules)
+
+        self.assertIn("python tools/orchestrator.py status", commands)
+        self.assertIn("python tools/web_vertical_slice_packaging.py package --clean", commands)
+        self.assertIn("python tools/web_vertical_slice_packaging.py smoke", commands)
+
+    def test_platform_web_packaging_validation_skips_non_matching_item(self) -> None:
+        item = {
+            "owner_role": "platform",
+            "validation_commands": [],
+            "inputs": ["tools/steam_tauri_wrapper.py"],
+        }
+        rules = {
+            "default_validation_commands": [],
+            "platform_web_packaging_validation": {
+                "enabled": True,
+                "owner_roles": ["platform"],
+                "match_inputs_any": ["tools/web_vertical_slice_packaging.py"],
+                "commands": [
+                    "python tools/web_vertical_slice_packaging.py package --clean",
+                    "python tools/web_vertical_slice_packaging.py smoke",
+                ],
+            },
+        }
+
+        commands = orchestrator.build_validation_commands(item, rules)
+        self.assertEqual(commands, [])
+
+
 if __name__ == "__main__":
     unittest.main()

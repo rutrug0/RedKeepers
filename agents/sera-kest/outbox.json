@@ -149,5 +149,16 @@
       "docs/operations/frontend-visual-qa.md",
       "agents/sera-kest/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-25T20:45:00.0000000Z",
+    "item_id": "RK-M0-0010-F01",
+    "status": "completed",
+    "summary": "Added namespaced event keys for client shell event rendering with fallback support for legacy module keys, and updated mock event-feed rows to include tick/build/train/scout outcome keys.",
+    "files": [
+      "client-web/app.js",
+      "client-android-capacitor/www/app.js",
+      "agents/sera-kest/outbox.json"
+    ]
   }
 ]

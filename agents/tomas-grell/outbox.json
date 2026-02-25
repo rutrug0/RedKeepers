@@ -246,5 +246,41 @@
       "tests/test_frontend_visual_blocked_outcome.py",
       "agents/tomas-grell/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-25T20:40:32.235725Z",
+    "item_id": "RK-M0-0014-F01",
+    "status": "completed",
+    "summary": "Added a single deterministic M0 smoke assertion test for RK-M0-0014 that validates 15m/30m/60m progression rows from settlement and scout snapshot inputs.",
+    "checks": [
+      "python -m unittest tests.test_m0_0014_progression_smoke (not run in this item pass)"
+    ],
+    "changed_files": [
+      "tests/test_m0_0014_progression_smoke.py",
+      "tests/fixtures/rk-m0-0014-progression-profile.json",
+      "agents/tomas-grell/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Source RK-M0-0014 smoke data from deterministic pipeline snapshot artifacts",
+        "owner_role": "qa",
+        "milestone": "M0",
+        "priority": "normal",
+        "description": "Connect `tests/test_m0_0014_progression_smoke.py` to the generated deterministic settlement and scout snapshot artifact used by automated first-slice progression runs, replacing manual fixture maintenance.",
+        "acceptance_criteria": [
+          "CI smoke command points test fixture path through environment variable to a generated snapshot artifact",
+          "Smoke test fails when matrix thresholds are violated in generated data and passes when thresholds hold",
+          "Runbook documents how to regenerate snapshot inputs when simulation seeds change"
+        ],
+        "inputs": [
+          "tests/test_m0_0014_progression_smoke.py",
+          "pipeline or generator that emits 15m/30m/60m settlement & scout snapshots",
+          "docs/design/first-slice-progression-target-matrix.md"
+        ],
+        "validation_commands": [
+          "python -m unittest tests.test_m0_0014_progression_smoke.py"
+        ]
+      }
+    ]
   }
 ]

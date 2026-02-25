@@ -407,111 +407,6 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
   },
   {
-    "id": "RK-M0-0009-F02",
-    "title": "Add placeholder map tile seeds and event-token fixtures for the scout-select flow",
-    "description": "Create minimal static tile seed rows for unknown/quiet/hostile_hint states and token fixtures for `target_tile_label` and `hostile_force_estimate` on scout outcomes.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0009"
-    ],
-    "inputs": [
-      "docs/design/map-scout-interaction-contract.md",
-      "backend/src/app/config/seeds"
-    ],
-    "acceptance_criteria": [
-      "Seed data can produce all three scout outcomes in a deterministic dev fixture setup",
-      "Fixture event tokens are placeholder-only and do not introduce new mechanics",
-      "No additional map interaction flow is introduced beyond scout/select"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T19:42:43.440378+00:00",
-    "updated_at": "2026-02-25T20:33:09.458404+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M0-0009",
-    "assigned_agent": "ilya-fen"
-  },
-  {
-    "id": "RK-AUTO-PLATFORM-0001-F01-F01",
-    "title": "Gate platform lane with packaged web artifact smoke validation",
-    "description": "Add daemon validation hooks for platform-owned web packaging items so deterministic package build and packaged-artifact smoke commands run automatically before completion.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "platform",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-PLATFORM-0001-F01"
-    ],
-    "inputs": [
-      "tools/orchestrator.py",
-      "coordination/policies/commit-guard-rules.yaml",
-      "tools/web_vertical_slice_packaging.py"
-    ],
-    "acceptance_criteria": [
-      "Platform validation can run `python tools/web_vertical_slice_packaging.py package --clean` automatically for matching work items",
-      "Platform validation can run `python tools/web_vertical_slice_packaging.py smoke` against the produced artifact",
-      "Blocked/success outcomes are surfaced in daemon command-result summaries"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T19:52:52.919873+00:00",
-    "updated_at": "2026-02-25T19:52:52.919873+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "juno-cairn",
-    "generated_from_item_id": "RK-AUTO-PLATFORM-0001-F01"
-  },
-  {
-    "id": "RK-M0-0010-F01",
-    "title": "Wire loop namespaced outcome keys into client key selection",
-    "description": "Add support for `event.tick.*`, `event.build.*`, `event.train.*`, and `event.scout.*` keys in client shell/event panel lookups with fallback to existing module keys.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0010"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Client renders at least one `tick` outcome via a `event.tick.*` key",
-      "Client renders at least one `build`, `train`, and `scout` outcome via the new loop namespace keys",
-      "Existing module keys remain supported until full migration is complete"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T20:20:25.957720+00:00",
-    "updated_at": "2026-02-25T20:20:25.957720+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "nika-thorn",
-    "generated_from_item_id": "RK-M0-0010"
-  },
-  {
     "id": "RK-M0-0014-F01",
     "title": "Add M0 smoke assertions for first-slice progression targets",
     "description": "Add a deterministic smoke check that evaluates 15m/30m/60m snapshot bounds from RK-M0-0014 and fails when matrix thresholds are not met.",
@@ -530,17 +425,18 @@
       "Test output clearly marks which matrix row failed and emits pass/fail in CI-readable form"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T20:21:05.106609+00:00",
-    "updated_at": "2026-02-25T20:21:05.106609+00:00",
+    "updated_at": "2026-02-25T20:41:59.520725+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-M0-0014"
+    "generated_from_item_id": "RK-M0-0014",
+    "assigned_agent": "tomas-grell"
   },
   {
     "id": "RK-M0-0015-F01",
@@ -684,5 +580,43 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-M1-0006-F02-F01-F01-F01"
+  },
+  {
+    "id": "RK-M0-0009-F02-F01",
+    "title": "Wire world-map scout seed fixtures into dev bootstrap/dev fixture loader",
+    "description": "Add a lightweight fixture loader that hydrates the world-map tile state repository with rows from `world-map-tile-seed-fixtures.json` so local/dev runs can replay all three scout outcomes with deterministic fixture tile ids.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0009-F01",
+      "RK-M0-0009-F02"
+    ],
+    "inputs": [
+      "backend/src/app/config/seeds/v1/world-map-tile-seed-fixtures.json",
+      "backend/src/app/config/seeds/v1/world-map-scout-event-token-fixtures.json",
+      "backend/src/modules/world_map"
+    ],
+    "acceptance_criteria": [
+      "Backend can load the new world-map tile seed file and return world-map tile snapshots keyed by settlement_id+tile_id.",
+      "A single dev flow can execute all three scout outcomes using seeded tile ids.",
+      "Fixture hostile rows include `hostile_force_estimate` and quiet rows include `target_tile_label` so events render placeholder tokens deterministically."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-25T20:33:10.756351+00:00",
+    "updated_at": "2026-02-25T20:33:10.756351+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M0-0009-F02"
   }
 ]

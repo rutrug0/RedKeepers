@@ -7,5 +7,18 @@
     "strict": true,
     "max_overflow_px": 0,
     "max_diff_percent": 0.5
+  },
+  "platform_web_packaging_validation": {
+    "enabled": true,
+    "owner_roles": [
+      "platform"
+    ],
+    "match_inputs_any": [
+      "tools/web_vertical_slice_packaging.py"
+    ],
+    "commands": [
+      "python tools/web_vertical_slice_packaging.py package --clean",
+      "python tools/web_vertical_slice_packaging.py smoke"
+    ]
   }
 }

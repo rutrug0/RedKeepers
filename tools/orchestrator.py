@@ -1088,8 +1088,58 @@ def commit_message(agent_name: str, item_id: str, title: str) -> str:
     return f"[Agent:{agent_name}][Item:{item_id}] {short}"
 
 
+def _extract_status_line(text: str) -> tuple[str, str]:
+    lines = [raw_line.strip() for raw_line in text.splitlines() if raw_line.strip()]
+    for idx, line in enumerate(lines):
+        if not line:
+            continue
+        upper = line.upper()
+        if not upper.startswith("STATUS:"):
+            continue
+        tail = line[len("STATUS:") :].strip()
+        if not tail:
+            continue
+        parts = tail.split(None, 1)
+        status = parts[0].strip().upper()
+        detail = parts[1].strip() if len(parts) > 1 else ""
+        if not detail and idx + 1 < len(lines):
+            next_line = lines[idx + 1]
+            if not next_line.upper().startswith("STATUS:"):
+                detail = next_line
+        return status, detail
+    return "", ""
+
+
+def _summarize_validation_results(validation_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    summaries: list[dict[str, Any]] = []
+    for result in validation_results:
+        if not isinstance(result, dict):
+            continue
+        command = str(result.get("command", "")).strip()
+        exit_code_raw = result.get("exit_code", 0)
+        try:
+            exit_code = int(exit_code_raw)
+        except (TypeError, ValueError):
+            exit_code = -1
+        stdout_tail = str(result.get("stdout_tail", ""))
+        stderr_tail = str(result.get("stderr_tail", ""))
+        combined_text = f"{stdout_tail}\n{stderr_tail}"
+        status, detail = _extract_status_line(combined_text)
+        if not status:
+            status = "COMPLETED" if exit_code == 0 else "FAILED"
+        summary: dict[str, Any] = {
+            "command": command,
+            "exit_code": exit_code,
+            "status": status,
+        }
+        if detail:
+            summary["detail"] = detail
+        summaries.append(summary)
+    return summaries
+
+
 def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]) -> list[str]:
-    commands = []
+    commands: list[str] = []
     defaults = commit_rules.get("default_validation_commands", [])
     if isinstance(defaults, list):
         commands.extend([str(cmd) for cmd in defaults if str(cmd).strip()])
@@ -1129,6 +1179,57 @@ def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]
         if strict:
             visual_cmd_parts.append("--strict")
         commands.append(" ".join(visual_cmd_parts))
+
+    platform_web_cfg = commit_rules.get("platform_web_packaging_validation", {})
+    if not isinstance(platform_web_cfg, dict):
+        platform_web_cfg = {}
+    platform_enabled = _boolish(platform_web_cfg.get("enabled"), False)
+    env_platform_web = os.environ.get("REDKEEPERS_ENABLE_PLATFORM_WEB_PACKAGING_VALIDATION")
+    if env_platform_web is not None:
+        platform_enabled = _boolish(env_platform_web, platform_enabled)
+
+    def _string_list(value: Any) -> list[str]:
+        if not isinstance(value, list):
+            return []
+        return [str(entry).strip() for entry in value if str(entry).strip()]
+
+    def _norm_path_text(value: str) -> str:
+        return value.strip().replace("\\", "/").lower()
+
+    if platform_enabled:
+        owner_roles_raw = _string_list(platform_web_cfg.get("owner_roles"))
+        owner_roles = {_norm_path_text(role) for role in (owner_roles_raw or ["platform"])}
+        item_owner_role = _norm_path_text(str(item.get("owner_role", "")))
+        role_match = item_owner_role in owner_roles
+
+        input_tokens_raw = _string_list(platform_web_cfg.get("match_inputs_any"))
+        input_tokens = [_norm_path_text(token) for token in (input_tokens_raw or ["tools/web_vertical_slice_packaging.py"])]
+        item_inputs_raw = item.get("inputs", [])
+        item_inputs = []
+        if isinstance(item_inputs_raw, list):
+            item_inputs = [_norm_path_text(str(entry)) for entry in item_inputs_raw if str(entry).strip()]
+        input_match = bool(input_tokens) and any(
+            token in candidate for token in input_tokens for candidate in item_inputs
+        )
+
+        if role_match and input_match:
+            platform_commands = _string_list(platform_web_cfg.get("commands"))
+            if not platform_commands:
+                platform_commands = [
+                    "python tools/web_vertical_slice_packaging.py package --clean",
+                    "python tools/web_vertical_slice_packaging.py smoke",
+                ]
+            commands.extend(platform_commands)
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for command in commands:
+        normalized = str(command).strip()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        deduped.append(normalized)
+    commands = deduped
     return commands
 
 
@@ -1231,6 +1332,26 @@ def frontend_visual_environment_blocker_reason(validation_results: list[dict[str
             summary = report_error
 
         return f"Frontend visual smoke blocked by environment: {summary}"
+    return None
+
+
+def platform_web_packaging_environment_blocker_reason(validation_results: list[dict[str, Any]]) -> str | None:
+    for result in validation_results:
+        if not isinstance(result, dict):
+            continue
+        command = str(result.get("command", ""))
+        effective_command = str(result.get("effective_command", ""))
+        command_text = f"{command}\n{effective_command}".replace("\\", "/").lower()
+        if "tools/web_vertical_slice_packaging.py" not in command_text:
+            continue
+        stdout_tail = str(result.get("stdout_tail", ""))
+        stderr_tail = str(result.get("stderr_tail", ""))
+        status, detail = _extract_status_line(f"{stdout_tail}\n{stderr_tail}")
+        if status != "BLOCKED":
+            continue
+        if not detail:
+            detail = "Web vertical-slice packaging reported STATUS: BLOCKED"
+        return f"Platform web packaging blocked by environment: {detail}"
     return None
 
 
@@ -1668,6 +1789,15 @@ def process_one(
                     }
                 )
 
+        if validation_results:
+            emit_event(
+                "validation_summary",
+                "Validation command-result summary",
+                item_id=item["id"],
+                agent_id=agent_id,
+                results=_summarize_validation_results(validation_results),
+            )
+
         if validations_ok:
             emit_event("completed", "Work item completed", item_id=item["id"], agent_id=agent_id, commit_sha=commit_sha)
             queue.mark_completed(item["id"], worker.summary, commit_sha=commit_sha)
@@ -1740,10 +1870,12 @@ def process_one(
             )
         else:
             blocker_reason = frontend_visual_environment_blocker_reason(validation_results, root=ROOT)
+            if blocker_reason is None:
+                blocker_reason = platform_web_packaging_environment_blocker_reason(validation_results)
             if blocker_reason:
                 emit_event(
                     "blocked",
-                    "Frontend visual validation blocked by environment",
+                    "Validation blocked by environment",
                     item_id=item["id"],
                     agent_id=agent_id,
                     reason=blocker_reason,

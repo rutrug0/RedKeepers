@@ -7,12 +7,20 @@
   const placeholderNarrativeSeedTemplates = Object.freeze({
     "civ_intro.cinder_throne_legates":
       "The Cinder Throne Legates hold the frontier by ash, ration, and decree. Their magistrates build roads before monuments, and their branded levies turn every settlement into a hard post that is costly to break.",
+    "event.tick.passive_income":
+      "{settlement_name} stores rise: +{food_gain} Food, +{wood_gain} Wood, +{stone_gain} Stone, +{iron_gain} Iron.",
     "event.buildings.upgrade_started":
+      "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
+    "event.build.upgrade_started":
       "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
     "event.units.training_started":
       "{settlement_name}: training begins for {quantity} {unit_label}.",
+    "event.train.started":
+      "{settlement_name}: training begins for {quantity} {unit_label}.",
     "event.units.upkeep_reduced_garrison":
       "{settlement_name}: garrison ration discipline reduces stationed troop upkeep.",
+    "event.scout.dispatched":
+      "{settlement_name}: scouts ride out toward {target_tile_label}.",
     "event.world.scout_report_hostile":
       "Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).",
     "event.settlement.name_assigned":
@@ -193,23 +201,45 @@
             selectedFilter: "All",
             events: [
               {
-                contentKey: "event.world.scout_report_hostile",
+                contentKey: "event.tick.passive_income",
                 tokens: {
-                  target_tile_label: "Black Reed March",
-                  hostile_force_estimate: "light raider column",
+                  settlement_name: "Cinderwatch Hold",
+                  food_gain: 16,
+                  wood_gain: 10,
+                  stone_gain: 6,
+                  iron_gain: 5,
                 },
-                meta: "2m ago | Map | Placeholder content",
+                meta: "2m ago | Economy | Tick",
                 priority: "high",
               },
               {
-                contentKey: "event.buildings.upgrade_started",
+                contentKey: "event.build.upgrade_started",
                 tokens: {
                   settlement_name: "Cinderwatch Hold",
                   building_label: "Granary Upgrade",
                   from_level: 5,
                   to_level: 6,
                 },
-                meta: "8m ago | Settlement | Build queue",
+                meta: "8m ago | Settlement | Build loop",
+                priority: "normal",
+              },
+              {
+                contentKey: "event.train.started",
+                tokens: {
+                  settlement_name: "Cinderwatch Hold",
+                  quantity: 12,
+                  unit_label: "Road Wardens",
+                },
+                meta: "16m ago | Military | Train loop",
+                priority: "normal",
+              },
+              {
+                contentKey: "event.scout.dispatched",
+                tokens: {
+                  settlement_name: "Cinderwatch Hold",
+                  target_tile_label: "Black Reed March",
+                },
+                meta: "21m ago | World | Scout loop",
                 priority: "normal",
               },
               {
@@ -217,25 +247,7 @@
                 tokens: {
                   settlement_name: "Cinderwatch Hold",
                 },
-                meta: "14m ago | Military | Status effect",
-                priority: "normal",
-              },
-              {
-                contentKey: "event.units.training_started",
-                tokens: {
-                  settlement_name: "Cinderwatch Hold",
-                  quantity: 12,
-                  unit_label: "Road Wardens",
-                },
-                meta: "23m ago | Military | Training order",
-                priority: "medium",
-              },
-              {
-                contentKey: "event.settlement.name_assigned",
-                tokens: {
-                  settlement_name: "Brandwatch",
-                },
-                meta: "29m ago | Settlement | Founding ledger",
+                meta: "29m ago | Military | Legacy module key support",
                 priority: "normal",
               },
             ],
@@ -299,8 +311,40 @@
     String(template).replace(/\{([a-z0-9_]+)\}/gi, (match, tokenName) =>
       Object.prototype.hasOwnProperty.call(tokens, tokenName) ? String(tokens[tokenName]) : match,
     );
+  const getNarrativeTemplateWithFallback = (contentKey) => {
+    if (!contentKey) {
+      return "";
+    }
+
+    const candidates = [];
+    const addCandidate = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+      }
+    };
+
+    addCandidate(contentKey);
+
+    if (contentKey.startsWith("event.buildings.")) {
+      addCandidate(contentKey.replace("event.buildings.", "event.build."));
+    } else if (contentKey.startsWith("event.units.")) {
+      addCandidate(contentKey.replace("event.units.", "event.train."));
+    } else if (contentKey.startsWith("event.world.scout_")) {
+      addCandidate(contentKey.replace("event.world.", "event.scout."));
+    }
+
+    if (contentKey.startsWith("event.build.")) {
+      addCandidate(contentKey.replace("event.build.", "event.buildings."));
+    } else if (contentKey.startsWith("event.train.")) {
+      addCandidate(contentKey.replace("event.train.", "event.units."));
+    } else if (contentKey.startsWith("event.scout.")) {
+      addCandidate(contentKey.replace("event.scout.", "event.world.scout_"));
+    }
+
+    return candidates.find((key) => placeholderNarrativeSeedTemplates[key]);
+  };
   const getNarrativeText = (contentKey, tokens) => {
-    const template = placeholderNarrativeSeedTemplates[contentKey];
+    const template = getNarrativeTemplateWithFallback(contentKey);
 
     if (!template) {
       return contentKey ? `[Missing placeholder template: ${contentKey}]` : "";
