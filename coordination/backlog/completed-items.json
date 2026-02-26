@@ -3042,5 +3042,37 @@
     "assigned_agent": "tomas-grell",
     "recovered_from_stale_in_progress": true,
     "commit_sha": "dac1a26af6e27ad3ef1d0ccf5192a228e6ac6c81"
+  },
+  {
+    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
+    "title": "Escalation: Add regression tests for codex model access preflight paths",
+    "description": "Investigate repeated failure for item RK-M1-0004-F01-F01-F01-ESC-F01-F01. Reason: retry threshold exceeded",
+    "milestone": "M1",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T09:21:18.947180+00:00",
+    "updated_at": "2026-02-26T11:37:54.002878+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": "- `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` were already dirty in the workspace and were left untouched.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "6e500ad7d76d0673a637f380257137ee698450e5"
   }
 ]

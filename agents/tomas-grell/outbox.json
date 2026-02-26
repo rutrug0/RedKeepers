@@ -528,5 +528,20 @@
       "tests/test_queue_integrity.py",
       "agents/tomas-grell/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-26T11:40:50.784033Z",
+    "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01",
+    "status": "completed",
+    "summary": "Validated codex preflight regressions with scoped commands and closed the blocked source item with an audit note documenting validation-scope mismatch.",
+    "checks": [
+      "python -m unittest tests.test_model_preflight_paths tests.test_codex_preflight (pass)",
+      "python tools/orchestrator.py status (pass)"
+    ],
+    "changed_files": [
+      "coordination/backlog/blocked-items.json",
+      "coordination/backlog/completed-items.json",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]
