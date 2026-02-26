@@ -2081,5 +2081,41 @@
     "generated_from_item_id": "RK-M0-0014-F01-F01-F01",
     "assigned_agent": "ilya-fen",
     "commit_sha": "a5d50570beb8b017c651f007a61726ad67c0f7ec"
+  },
+  {
+    "id": "RK-M0-0014-F01-F01-F01-F01-F01",
+    "title": "Wire RK-M0-0014 generator to true backend seed replay pipeline output",
+    "description": "Replace the current replay fallback contract with the actual backend replay payload contract/output artifact once backend seed replay pipeline is available.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0014-F01-F01-F01-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Generator reads from a backend-produced RK-M0-0014 progression replay artifact path without wrapper/user-specified seed path.",
+      "Replay artifacts include deterministic settlement and scout snapshots that match backend policy logic outputs.",
+      "Smoke profile still regenerates via the same command invocation and remains byte-for-byte deterministic for unchanged replay payloads."
+    ],
+    "validation_commands": [
+      "python tools/rk_m0_0014_progression_profile.py"
+    ],
+    "status": "completed",
+    "retry_count": 2,
+    "created_at": "2026-02-25T21:19:05.406947+00:00",
+    "updated_at": "2026-02-26T08:16:51.569866+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Outbox updated for `RK-M0-0014-F01-F01-F01-F01-F01` with structured summary and no new follow-up work items (`proposed_work_items: []`).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M0-0014-F01-F01-F01-F01",
+    "last_failure_reason": "validation failed or commit failed",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "615ecf7de642fb01ffd1e2699404ef2fbc1c9814"
   }
 ]
