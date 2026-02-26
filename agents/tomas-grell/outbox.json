@@ -131,8 +131,7 @@
         ]
       }
     ]
-  }
-,
+  },
   {
     "ts": "2026-02-25T18:12:30Z",
     "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01",
@@ -359,6 +358,20 @@
     "checks": [
       "python tools/orchestrator.py status (pass)",
       "dependency audit: queued dependencies against work/completed/blocked IDs (issues=0, dependency_ready=2)"
+    ],
+    "changed_files": [
+      "coordination/backlog/work-items.json",
+      "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
+    "ts": "2026-02-26T08:35:46.715968Z",
+    "item_id": "RK-AUTO-STALL-0002-F01",
+    "status": "completed",
+    "summary": "Normalized queued dependency references by replacing invalid non-item dependencies with valid backlog IDs and removing a stale queued duplicate that was already archived as blocked for first-slice scope gating.",
+    "checks": [
+      "python tools/orchestrator.py status (pass)",
+      "dependency audit: queued dependencies against work/completed/blocked IDs (issues=0, dependency_ready=3)"
     ],
     "changed_files": [
       "coordination/backlog/work-items.json",

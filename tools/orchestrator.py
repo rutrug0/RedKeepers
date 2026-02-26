@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 import threading
 import time
@@ -90,36 +91,114 @@ ROLE_STYLE = {
     "qa": "1;31",
     "platform": "1;37",
 }
-RESULT_STYLE = {
-    "completed": "1;32",
-    "blocked": "1;33",
-    "failed": "1;31",
-    "dry_run": "1;36",
-}
-
-
 def _style(text: str, ansi_code: str | None) -> str:
     if not COLOR_ENABLED or not ansi_code:
         return text
     return f"\x1b[{ansi_code}m{text}{ANSI_RESET}"
 
 
-def _format_event_field(key: str, value: Any) -> str:
-    if key == "role":
-        role = str(value).strip().lower()
-        return f"role={_style(role.upper(), ROLE_STYLE.get(role))}"
-    if key == "title":
-        return f"title={_style(repr(value), '1')}"
-    if key == "result":
-        result = str(value).strip().lower()
-        return f"result={_style(result.upper(), RESULT_STYLE.get(result))}"
-    if key == "agent_id":
-        return f"agent_id={_style(repr(value), '1;36')}"
-    if key == "item_id":
-        return f"item_id={_style(repr(value), '1;35')}"
-    if key in {"model", "model_requested", "model_used"}:
-        return f"{key}={_style(repr(value), '0;36')}"
-    return f"{key}={value!r}"
+def _display_timestamp(ts: str) -> str:
+    try:
+        parsed = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        else:
+            parsed = parsed.astimezone(timezone.utc)
+        return parsed.replace(microsecond=0).isoformat().replace("+00:00", "")
+    except ValueError:
+        # Best-effort fallback keeps output stable if timestamp parsing changes.
+        return ts.split("+", 1)[0].split(".", 1)[0]
+
+
+def _normalize_log_text(value: Any, *, max_chars: int = 300, max_sentences: int | None = None) -> str:
+    text = " ".join(str(value or "").strip().split())
+    if not text:
+        return ""
+    if max_sentences is not None:
+        sentences = [part.strip() for part in re.split(r"(?<=[.!?])\s+", text) if part.strip()]
+        text = " ".join(sentences[:max_sentences]) if sentences else text
+    if len(text) > max_chars:
+        text = text[: max_chars - 3].rstrip() + "..."
+    return text
+
+
+def _with_period(text: str) -> str:
+    if not text:
+        return ""
+    if text.endswith((".", "!", "?")):
+        return text
+    return f"{text}."
+
+
+def _format_role(role: Any) -> str:
+    role_text = str(role or "").strip().lower()
+    if not role_text:
+        return "UNASSIGNED"
+    return _style(role_text.upper(), ROLE_STYLE.get(role_text))
+
+
+def _render_event_lines(ts: str, kind: str, message: str, fields: dict[str, Any]) -> list[str]:
+    ts_display = _display_timestamp(ts)
+    kind_label = _style(kind, KIND_STYLE.get(kind))
+    prefix = f"[{ts_display}] [{kind_label}]"
+    agent_id = str(fields.get("agent_id") or "").strip()
+    role_label = _format_role(fields.get("role"))
+    title = _normalize_log_text(fields.get("title"), max_chars=180, max_sentences=1)
+    description = _normalize_log_text(fields.get("description"), max_chars=420, max_sentences=3)
+    message_text = _normalize_log_text(message, max_chars=220, max_sentences=2) or kind.replace("_", " ")
+
+    if kind == "select":
+        summary = title or message_text
+        head = f"{prefix} {role_label}, {agent_id or 'unassigned'}: {_with_period(summary)}"
+        return [head, description] if description else [head]
+
+    if kind == "agent_start":
+        summary = title or fields.get("item_id") or "work item"
+        summary_text = _normalize_log_text(summary, max_chars=180, max_sentences=1)
+        head = f"{prefix} {role_label}, {agent_id or 'unassigned'}: Starting {_with_period(summary_text)}"
+        return [head, description] if description else [head]
+
+    if kind == "agent_heartbeat":
+        elapsed = fields.get("elapsed_seconds")
+        if isinstance(elapsed, (int, float)):
+            elapsed_text = f"{elapsed:.1f}"
+        else:
+            elapsed_text = _normalize_log_text(elapsed, max_chars=32) or "unknown"
+        return [f"{prefix} Agent {agent_id or 'unknown'} still running, elapsed seconds: {elapsed_text}."]
+
+    if kind == "agent_end":
+        elapsed = fields.get("elapsed_seconds")
+        if isinstance(elapsed, (int, float)):
+            elapsed_text = f"{elapsed:.2f}"
+        else:
+            elapsed_text = _normalize_log_text(elapsed, max_chars=32) or "unknown"
+        result = _normalize_log_text(fields.get("result"), max_chars=24) or "unknown"
+        return [f"{prefix} Agent {agent_id or 'unknown'} finished ({result}), elapsed seconds: {elapsed_text}."]
+
+    if kind in {"blocked", "failed", "validation_failed", "error", "infrastructure_error"}:
+        reason = _normalize_log_text(fields.get("reason") or fields.get("error"), max_chars=260, max_sentences=2)
+        if agent_id:
+            line = f"{prefix} Agent {agent_id}: {_with_period(message_text)}"
+        else:
+            line = f"{prefix} {_with_period(message_text)}"
+        if reason:
+            line = f"{line} Reason: {_with_period(reason)}"
+        return [line]
+
+    if kind in {"wait", "sleep"} and fields.get("seconds") is not None:
+        return [f"{prefix} {_with_period(message_text)} (seconds={fields.get('seconds')})."]
+
+    if kind == "completed":
+        if agent_id:
+            return [f"{prefix} Agent {agent_id}: {_with_period(message_text)}"]
+        return [f"{prefix} {_with_period(message_text)}"]
+
+    if kind == "idle":
+        return [f"{prefix} {_with_period(message_text)}"]
+
+    if agent_id:
+        return [f"{prefix} Agent {agent_id}: {_with_period(message_text)}"]
+    return [f"{prefix} {_with_period(message_text)}"]
 
 
 def build_session_id(*, pid: int, started_at: str) -> str:
@@ -209,12 +288,7 @@ def migrate_legacy_runtime_files() -> None:
 
 def emit_event(kind: str, message: str, **fields: Any) -> None:
     ts = utc_now_iso()
-    kind_label = _style(kind, KIND_STYLE.get(kind))
-    line = f"[{ts}][{kind_label}] {message}"
-    if fields:
-        ordered = " ".join(_format_event_field(key, fields[key]) for key in sorted(fields))
-        line = f"{line} | {ordered}"
-    print(line, flush=True)
+    print("\n".join(_render_event_lines(ts, kind, message, fields)), flush=True)
     append_jsonl(
         EVENTS_LOG_PATH,
         {
@@ -1554,6 +1628,7 @@ def process_one(
         "Selected work item",
         item_id=item["id"],
         title=item["title"],
+        description=item.get("description"),
         agent_id=agent_id,
         role=agent_cfg.get("role"),
         priority=item.get("priority"),
@@ -1670,6 +1745,8 @@ def process_one(
         "agent_start",
         "Agent execution started",
         item_id=item["id"],
+        title=item["title"],
+        description=item.get("description"),
         agent_id=agent_id,
         role=agent_cfg.get("role"),
         model=selected_model,
