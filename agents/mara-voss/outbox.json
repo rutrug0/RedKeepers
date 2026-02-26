@@ -2313,5 +2313,166 @@
                 "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T20:53:01.6139009Z",
+        "item_id": "RK-AUTO-BACKLOG-0005",
+        "status": "completed",
+        "summary": "Generated a six-item implementation-first backlog tranche that unblocks the critical smoke dependency chain and covers backend/frontend/design/content/platform plus one release-blocking QA gate task within first-slice scope.",
+        "files": [
+            "coordination/backlog/work-items.json",
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": [
+            {
+                "id": "RK-AUTO-BACKLOG-0005-F01",
+                "title": "Requeue platform wrapper command-path hardening with deterministic script-smoke coverage",
+                "owner_role": "platform",
+                "milestone": "M0",
+                "priority": "high",
+                "dependencies": [
+                    "RK-AUTO-PLATFORM-0001"
+                ],
+                "inputs": [
+                    "scripts/",
+                    "client-steam-tauri/",
+                    "client-android-capacitor/",
+                    "docs/operations/steam-tauri-wrapper-packaging.md",
+                    "docs/operations/android-capacitor-wrapper-packaging.md"
+                ],
+                "description": "Recover from the non-actionable block on RK-AUTO-BACKLOG-0004-F05 by re-running platform wrapper command-path hardening and adding lightweight prepare-mode smoke checks for Steam and Android wrapper entry scripts.",
+                "acceptance_criteria": [
+                    "Canonical wrapper entry points remain `scripts/wrapper_steam_tauri.ps1` and `scripts/wrapper_android_capacitor.ps1` with deterministic prepare/dev/package modes.",
+                    "Automated checks invoke both wrapper scripts in prepare mode and fail on command-path or prerequisite drift.",
+                    "Wrapper metadata and assets stay placeholder-only and first-slice compatible."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "id": "RK-AUTO-BACKLOG-0005-F02",
+                "title": "Publish first-slice playable manifest lock for civ/profile/map fixtures",
+                "owner_role": "design",
+                "milestone": "M0",
+                "priority": "high",
+                "dependencies": [
+                    "RK-AUTO-BACKLOG-0004-F03"
+                ],
+                "inputs": [
+                    "docs/design/first-vertical-slice.md",
+                    "docs/design/v1-starter-data-tables.md",
+                    "docs/design/m0-hostile-settlement-combat-fixtures.md",
+                    "docs/design/first-slice-progression-target-matrix.md"
+                ],
+                "description": "Define a single implementation-facing manifest that locks first-slice playable scope (one civilization profile, one primary settlement, one foreign hostile fixture, limited resource/building/unit set) while explicitly tagging post-slice stubs.",
+                "acceptance_criteria": [
+                    "Manifest enumerates canonical in-slice IDs for civ, settlement, foreign hostile profile, resources, buildings, and units.",
+                    "Manifest marks non-playable data as `stub_post_slice` and documents why it is excluded from default first-session flows.",
+                    "Artifact is implementation-ready for backend/frontend/content consumption without requiring bespoke mechanics."
+                ]
+            },
+            {
+                "id": "RK-AUTO-BACKLOG-0005-F03",
+                "title": "Enforce first-slice playable manifest in backend seed/bootstrap paths",
+                "owner_role": "backend",
+                "milestone": "M0",
+                "priority": "high",
+                "dependencies": [
+                    "RK-AUTO-BACKLOG-0005-F02",
+                    "RK-AUTO-BACKLOG-0004-F01"
+                ],
+                "inputs": [
+                    "backend/",
+                    "shared/",
+                    "docs/design/first-vertical-slice.md",
+                    "docs/design/vertical-slice-done-v1.md"
+                ],
+                "description": "Use the first-slice playable manifest to gate backend default bootstrap payloads so runtime data always resolves one local player settlement plus one foreign hostile target fixture and excludes post-slice branches from first-session flow.",
+                "acceptance_criteria": [
+                    "Backend bootstrap/load paths consume the playable manifest and expose only in-slice entities by default.",
+                    "Map/bootstrap state guarantees one foreign settlement/profile suitable for deterministic hostile attack resolution.",
+                    "Scoped backend checks fail when bootstrap payloads drift outside first-slice manifest constraints."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "id": "RK-AUTO-BACKLOG-0005-F04",
+                "title": "Publish first-slice content key manifest and defer post-slice templates",
+                "owner_role": "content",
+                "milestone": "M0",
+                "priority": "normal",
+                "dependencies": [
+                    "RK-AUTO-BACKLOG-0005-F02",
+                    "RK-AUTO-BACKLOG-0004-F04"
+                ],
+                "inputs": [
+                    "docs/content/placeholder-narrative-seed-pack-v1.md",
+                    "docs/design/first-vertical-slice.md",
+                    "client-web/"
+                ],
+                "description": "Create a machine-readable first-slice content key manifest for tick/build/train/scout/hostile loops, and explicitly defer post-slice keys so default client/backend seed usage stays inside first vertical slice scope.",
+                "acceptance_criteria": [
+                    "First-slice manifest includes stable keys required for full playable loop, including hostile dispatch/resolve event outcomes.",
+                    "Out-of-scope keys (for example hero-specific templates) are marked deferred and excluded from default first-slice seed usage.",
+                    "Alias mapping for legacy key variants is documented so frontend rendering remains deterministic."
+                ]
+            },
+            {
+                "id": "RK-AUTO-BACKLOG-0005-F05",
+                "title": "Bind client shell defaults to playable/data manifests and stable local profile",
+                "owner_role": "frontend",
+                "milestone": "M0",
+                "priority": "high",
+                "dependencies": [
+                    "RK-AUTO-BACKLOG-0005-F03",
+                    "RK-AUTO-BACKLOG-0005-F04",
+                    "RK-AUTO-BACKLOG-0004-F02"
+                ],
+                "inputs": [
+                    "client-web/",
+                    "docs/design/first-vertical-slice.md",
+                    "docs/design/vertical-slice-done-v1.md"
+                ],
+                "description": "Update client shell defaults to consume first-slice manifests, persist a stable local player profile identifier, and keep first-session settlement/map/event flows limited to in-slice actions and content keys.",
+                "acceptance_criteria": [
+                    "Client establishes one stable local player identity/profile for dev runtime and reuses it across settlement/map interaction payloads.",
+                    "Event feed rendering resolves against first-slice manifest keys with deterministic fallback when a key is missing.",
+                    "Default first-session UI states avoid out-of-scope actions and keep placeholder-only presentation."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "id": "RK-AUTO-BACKLOG-0005-F06",
+                "title": "Run release-blocking slice gate evidence pass after manifest and wrapper hardening",
+                "owner_role": "qa",
+                "milestone": "M0",
+                "priority": "high",
+                "dependencies": [
+                    "RK-AUTO-BACKLOG-0004-F06",
+                    "RK-AUTO-BACKLOG-0005-F01",
+                    "RK-AUTO-BACKLOG-0005-F05"
+                ],
+                "inputs": [
+                    "tests/",
+                    "tools/",
+                    "docs/design/vertical-slice-done-v1.md",
+                    "docs/operations/"
+                ],
+                "description": "Execute a critical release-path QA pass that captures evidence for playable/quality/platform gates after wrapper command hardening and manifest-bound backend/frontend integration are complete.",
+                "acceptance_criteria": [
+                    "Critical golden-path smoke command runs and records deterministic stage evidence for tick/build/train/map/hostile resolve/event feed.",
+                    "Steam and Android wrapper prepare-mode commands are verified in the same gate pass (or produce explicit actionable blocked reason).",
+                    "Gate output summarizes PASS/FAIL for playable, quality, and platform gates with artifact links for daemon operators."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]

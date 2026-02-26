@@ -5831,5 +5831,43 @@
     "runtime_seconds": 548.56,
     "started_at": "2026-02-26T20:32:06.397483+00:00",
     "finished_at": "2026-02-26T20:41:14.955638+00:00"
+  },
+  {
+    "id": "RK-HUMAN-0001-F03-F02-F01-F01",
+    "title": "Consume backend hostile hero attachment payloads in web world-map adapter",
+    "description": "Update web hostile dispatch UI adapter to use backend-provided `hero_attachment` and `hero_runtime_payloads` from hostile attack responses instead of local hero mock composition so hero feedback aligns with backend-owned runtime payloads.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F03-F02-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Hostile dispatch accepted UI path reads hero assignment metadata from response `hero_attachment` when present.",
+      "Hero feedback/event rendering uses backend `hero_runtime_payloads` rows and keeps deterministic payload ordering expectations intact.",
+      "No regressions in no-hero hostile dispatch rendering paths (explicit null hero attachment remains supported)."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T20:41:17.367985+00:00",
+    "updated_at": "2026-02-26T20:47:18.176605+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/sera-kest/outbox.json](D:/RedKeepers/agents/sera-kest/outbox.json):587",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-HUMAN-0001-F03-F02-F01",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "3bbf09919b968e444a04a7cc216aca040b234b83",
+    "resolved_by_agent": "sera-kest",
+    "resolved_by_role": "frontend",
+    "runtime_seconds": 354.39,
+    "started_at": "2026-02-26T20:41:22.660583+00:00",
+    "finished_at": "2026-02-26T20:47:17.055704+00:00"
   }
 ]

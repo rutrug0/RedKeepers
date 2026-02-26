@@ -40,35 +40,42 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
   },
   {
-    "id": "RK-HUMAN-0001-F03-F02-F01-F01",
-    "title": "Consume backend hostile hero attachment payloads in web world-map adapter",
-    "description": "Update web hostile dispatch UI adapter to use backend-provided `hero_attachment` and `hero_runtime_payloads` from hostile attack responses instead of local hero mock composition so hero feedback aligns with backend-owned runtime payloads.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-HUMAN-0001-F03-F02-F01"
+    "id": "RK-AUTO-BACKLOG-0005",
+    "title": "Generate next backlog tranche",
+    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas. Prioritize fast cycle throughput: bias toward implementation tasks (backend/frontend/design/content/platform) and add dedicated QA/regression tasks only when risk is critical or release-blocking.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-items.json",
+      "docs/design/first-vertical-slice.md",
+      "coordination/runtime/run-history.jsonl"
     ],
-    "inputs": [],
     "acceptance_criteria": [
-      "Hostile dispatch accepted UI path reads hero assignment metadata from response `hero_attachment` when present.",
-      "Hero feedback/event rendering uses backend `hero_runtime_payloads` rows and keeps deterministic payload ordering expectations intact.",
-      "No regressions in no-hero hostile dispatch rendering paths (explicit null hero attachment remains supported)."
+      "At least 3 new queued tasks are created or requeued",
+      "Each task has owner_role, dependencies, and acceptance criteria",
+      "Tasks reflect current project priorities and unblock progress",
+      "Generated tranche is implementation-heavy; non-critical QA/lead coordination tasks are minimized",
+      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
     ],
-    "validation_commands": [],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-26T20:41:17.367985+00:00",
-    "updated_at": "2026-02-26T20:47:17.087180+00:00",
+    "created_at": "2026-02-26T20:47:18.334291+00:00",
+    "updated_at": "2026-02-26T20:55:10.650507+00:00",
     "estimated_effort": "S",
-    "token_budget": 8000,
+    "token_budget": 12000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-HUMAN-0001-F03-F02-F01",
-    "assigned_agent": "sera-kest"
+    "auto_generated": "backlog_refill",
+    "assigned_agent": "mara-voss"
   }
 ]
