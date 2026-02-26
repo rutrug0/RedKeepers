@@ -548,5 +548,36 @@
                                     "python -m unittest tests.test_rk_m0_0011_first_slice_loop_smoke",
                                     "python tools/orchestrator.py status"
                                 ]
+    },
+    {
+        "ts":  "2026-02-26T20:31:11.5437248Z",
+        "item_id":  "RK-HUMAN-0001-F03-F02",
+        "status":  "completed",
+        "summary":  "Integrated an unlock-gated optional hero attach surface into world-map hostile dispatch with a preserved no-hero path, readiness/cooldown pre-commit preview, shared hero event-key feed entries (`event.hero.assigned`, `event.hero.ability_activated`, `event.hero.cooldown_complete`), and combat outcome modifier-delta rendering tied to shared keys.",
+        "files":  [
+                      "client-web/app.js",
+                      "client-web/styles.css",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js"
+                                ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Wire hero attachment payload + runtime keys through hostile attack transport",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M2",
+                                        "priority":  "medium",
+                                        "description":  "Extend `POST /world-map/settlements/{targetSettlementId}/attack` contracts to accept optional hero attachment fields and return deterministic hero attachment metadata/event rows so frontend hero feedback can rely on backend-owned runtime payloads instead of local mock composition.",
+                                        "acceptance_criteria":  [
+                                                                    "World-map hostile attack endpoint accepts optional `player_id`, `hero_id`, `hero_target_scope`, and `hero_assignment_context_id` without breaking no-hero dispatch behavior",
+                                                                    "Accepted hostile dispatch responses include stable hero attachment metadata (or explicit null) and preserve deterministic lifecycle payload ordering",
+                                                                    "Hero-related failure codes (`feature_not_in_slice`, `hero_unavailable`, `hero_already_assigned`, `hero_target_scope_mismatch`) are surfaced consistently through hostile dispatch contract responses"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
     }
 ]

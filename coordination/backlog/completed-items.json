@@ -5708,5 +5708,46 @@
     "runtime_seconds": 162.55,
     "started_at": "2026-02-26T20:13:39.521892+00:00",
     "finished_at": "2026-02-26T20:16:22.078460+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F04-F02",
+    "title": "Adopt new hostile combat/retreat narrative keys in world-map hostile attack response payloads",
+    "description": "Extend hostile attack service/event payload selection so combat and retreat states can emit the newly seeded `event.combat.hostile_*` and `event.world.hostile_*` keys while keeping existing keys backward-compatible.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F04"
+    ],
+    "inputs": [
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+    ],
+    "acceptance_criteria": [
+      "Hostile attack resolved responses can emit at least one new `event.combat.hostile_*` key for combat outcomes",
+      "Retreat/defeat responses emit a deterministic `event.world.hostile_*` post-combat key when applicable",
+      "Existing keys (`event.world.march_started`, `event.world.march_returned`, `event.combat.placeholder_skirmish_*`) remain valid aliases during transition"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:58:29.119307+00:00",
+    "updated_at": "2026-02-26T20:22:07.415052+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `node --experimental-strip-types --test ...`: blocked by existing environment/runtime limits (`ERR_UNSUPPORTED_DIR_IMPORT`, `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX`).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F04",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "e1e05878e528d15081b6e7070b8765626dc11775",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 336.75,
+    "started_at": "2026-02-26T20:16:28.851936+00:00",
+    "finished_at": "2026-02-26T20:22:05.608012+00:00"
   }
 ]

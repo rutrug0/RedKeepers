@@ -91,6 +91,20 @@
       "Dispatch denied: route to {target_tile_label} breaks on impassable ground.",
     "event.world.hostile_dispatch_failed_march_already_exists":
       "Dispatch denied: march id {march_id} already carries a standing war order.",
+    "event.world.hostile_dispatch_failed_feature_not_in_slice":
+      "Dispatch denied: hero march attachment remains disabled until post-slice feature gates pass.",
+    "event.world.hostile_dispatch_failed_hero_unavailable":
+      "Dispatch denied: selected hero is unavailable (locked, cooling down, or missing player scope).",
+    "event.world.hostile_dispatch_failed_hero_already_assigned":
+      "Dispatch denied: selected hero is already assigned to an active context.",
+    "event.world.hostile_dispatch_failed_hero_target_scope_mismatch":
+      "Dispatch denied: selected hero is assigned to an incompatible target scope.",
+    "event.hero.assigned":
+      "{hero_id} assigned to {assignment_context_type} context {assignment_context_id}.",
+    "event.hero.ability_activated":
+      "{hero_id} activates {ability_id}; cooldown runs until {cooldown_ends_at}.",
+    "event.hero.cooldown_complete":
+      "{hero_id} is ready again: {ability_id} cooldown complete.",
     "event.settlement.name_assigned":
       "Surveyors record the new holding as {settlement_name}. The name enters the ledger.",
   });
@@ -531,13 +545,66 @@
     "march_arrived",
     "combat_resolved",
   ]);
+  const heroDispatchUnlockGateV1 = Object.freeze({
+    min_settlement_level: 4,
+    min_barracks_level: 2,
+    min_completed_attacks: 1,
+    min_completed_scouts: 1,
+    tutorial_dependency: "tutorial_core_v1_complete",
+  });
+  const heroDispatchProfileSeed = Object.freeze([
+    {
+      hero_id: "hero_legion_prefect",
+      display_name: "Legion Prefect",
+      ability_id: "ability_iron_mandate",
+      ability_name: "Iron Mandate",
+      cooldown_s: 21_600,
+      readiness_state: "ready",
+      cooldown_ends_at: null,
+      modifier_deltas: Object.freeze([
+        "army_attack_mult x1.12 (90s)",
+        "morale_loss_taken_mult x0.85 (90s)",
+      ]),
+      modifier_delta_summary: "Attack +12%, morale loss taken -15% for opening combat window.",
+    },
+    {
+      hero_id: "hero_fen_oracle",
+      display_name: "Fen Oracle",
+      ability_id: "ability_rotwrit_veil",
+      ability_name: "Rotwrit Veil",
+      cooldown_s: 28_800,
+      readiness_state: "on_cooldown",
+      cooldown_ends_at: new Date(Date.now() + 9 * 60_000).toISOString(),
+      modifier_deltas: Object.freeze([
+        "scout_visibility_radius +1 (next scout)",
+        "ambush_chance_mult x1.10 (first contact)",
+      ]),
+      modifier_delta_summary: "Scout reach +1 and first-contact ambush chance +10% on next qualifying action.",
+    },
+  ]);
   const worldMapActionRuntime = {
     pending_action: null,
     selected_marker_id: "marker_home_settlement",
     next_march_sequence: 1,
     hostile_dispatch_outcome: null,
     unavailable_scout_tile_by_id: {},
+    player_id: "player_alpha",
+    completed_attacks: 1,
+    completed_scouts: 1,
+    hero_unlock_progress: {
+      settlement_level: 4,
+      barracks_level: 2,
+      tutorial_dependency_complete: true,
+    },
+    hero_dispatch: {
+      selected_hero_id: null,
+      heroes: heroDispatchProfileSeed.map((entry) => ({
+        ...entry,
+        modifier_deltas: [...entry.modifier_deltas],
+      })),
+    },
   };
+  let worldMapHeroCooldownRefreshTimer = null;
 
   const cloneResourceValues = (values) => {
     const normalized = {};
@@ -613,6 +680,148 @@
     const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
     const seconds = String(totalSeconds % 60).padStart(2, "0");
     return `${minutes}:${seconds}`;
+  };
+  const resolveHeroDispatchUnlockState = () => {
+    const progress = worldMapActionRuntime.hero_unlock_progress || {};
+    return (
+      (Number(progress.settlement_level) || 0) >= heroDispatchUnlockGateV1.min_settlement_level
+      && (Number(progress.barracks_level) || 0) >= heroDispatchUnlockGateV1.min_barracks_level
+      && (Number(worldMapActionRuntime.completed_attacks) || 0) >= heroDispatchUnlockGateV1.min_completed_attacks
+      && (Number(worldMapActionRuntime.completed_scouts) || 0) >= heroDispatchUnlockGateV1.min_completed_scouts
+      && progress.tutorial_dependency_complete === true
+    );
+  };
+  const getWorldMapHeroDispatchRoster = () =>
+    Array.isArray(worldMapActionRuntime.hero_dispatch?.heroes)
+      ? worldMapActionRuntime.hero_dispatch.heroes
+      : [];
+  const resolveSelectedWorldMapDispatchHero = () => {
+    if (!resolveHeroDispatchUnlockState()) {
+      return null;
+    }
+    const selectedHeroId = String(worldMapActionRuntime.hero_dispatch?.selected_hero_id || "").trim();
+    if (selectedHeroId.length < 1) {
+      return null;
+    }
+    const selectedHero = getWorldMapHeroDispatchRoster().find((hero) => hero.hero_id === selectedHeroId) || null;
+    if (!selectedHero || selectedHero.readiness_state !== "ready") {
+      return null;
+    }
+    return selectedHero;
+  };
+  const setSelectedWorldMapDispatchHero = (heroId) => {
+    if (!resolveHeroDispatchUnlockState()) {
+      worldMapActionRuntime.hero_dispatch.selected_hero_id = null;
+      return;
+    }
+
+    const normalizedHeroId = String(heroId || "").trim();
+    if (normalizedHeroId.length < 1 || normalizedHeroId === "none") {
+      worldMapActionRuntime.hero_dispatch.selected_hero_id = null;
+      return;
+    }
+
+    const selectedHero = getWorldMapHeroDispatchRoster().find((hero) => hero.hero_id === normalizedHeroId);
+    if (!selectedHero || selectedHero.readiness_state !== "ready") {
+      return;
+    }
+    worldMapActionRuntime.hero_dispatch.selected_hero_id = normalizedHeroId;
+  };
+  const formatDurationFromMs = (durationMs) => {
+    const totalSeconds = Math.max(0, Math.floor((Number(durationMs) || 0) / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    if (hours > 0) {
+      return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+    }
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
+  const resolveHeroReadinessSummary = (hero) => {
+    if (!hero || hero.readiness_state !== "on_cooldown") {
+      return "Ready now";
+    }
+    const cooldownEndsAt = parseIsoInstant(hero.cooldown_ends_at);
+    if (cooldownEndsAt === null) {
+      return "Cooldown";
+    }
+    const remainingMs = cooldownEndsAt.getTime() - Date.now();
+    if (remainingMs <= 0) {
+      return "Ready now";
+    }
+    return `Cooldown ${formatDurationFromMs(remainingMs)} remaining`;
+  };
+  const clearWorldMapHeroCooldownRefreshTimer = () => {
+    if (worldMapHeroCooldownRefreshTimer !== null) {
+      clearTimeout(worldMapHeroCooldownRefreshTimer);
+      worldMapHeroCooldownRefreshTimer = null;
+    }
+  };
+  const syncWorldMapHeroDispatchReadiness = () => {
+    const roster = getWorldMapHeroDispatchRoster();
+    if (roster.length < 1) {
+      return false;
+    }
+
+    let hasUpdated = false;
+    for (const hero of roster) {
+      if (hero.readiness_state !== "on_cooldown") {
+        continue;
+      }
+      const cooldownEndsAt = parseIsoInstant(hero.cooldown_ends_at);
+      if (cooldownEndsAt === null || cooldownEndsAt.getTime() > Date.now()) {
+        continue;
+      }
+
+      hero.readiness_state = "ready";
+      hero.cooldown_ends_at = null;
+      appendEventFeedEntry({
+        contentKey: "event.hero.cooldown_complete",
+        tokens: {
+          hero_id: hero.hero_id,
+          ability_id: hero.ability_id,
+        },
+        meta: "Just now | World | HERO cooldown",
+        priority: "normal",
+      });
+      hasUpdated = true;
+    }
+
+    if (!resolveHeroDispatchUnlockState()) {
+      worldMapActionRuntime.hero_dispatch.selected_hero_id = null;
+    } else if (resolveSelectedWorldMapDispatchHero() === null) {
+      const selectedHeroId = String(worldMapActionRuntime.hero_dispatch.selected_hero_id || "").trim();
+      if (selectedHeroId.length > 0) {
+        worldMapActionRuntime.hero_dispatch.selected_hero_id = null;
+        hasUpdated = true;
+      }
+    }
+
+    return hasUpdated;
+  };
+  const scheduleWorldMapHeroCooldownRefresh = () => {
+    clearWorldMapHeroCooldownRefreshTimer();
+    const cooldownInstantValues = getWorldMapHeroDispatchRoster()
+      .filter((hero) => hero.readiness_state === "on_cooldown")
+      .map((hero) => parseIsoInstant(hero.cooldown_ends_at))
+      .filter(Boolean);
+    if (cooldownInstantValues.length < 1) {
+      return;
+    }
+
+    const nearestCooldown = cooldownInstantValues
+      .map((value) => value.getTime())
+      .sort((a, b) => a - b)[0];
+    const delayMs = Math.max(50, Math.min(nearestCooldown - Date.now() + 50, 2_147_483_647));
+    worldMapHeroCooldownRefreshTimer = window.setTimeout(() => {
+      worldMapHeroCooldownRefreshTimer = null;
+      const readinessUpdated = syncWorldMapHeroDispatchReadiness();
+      if (readinessUpdated) {
+        renderPanels();
+      } else {
+        renderMapPanel();
+      }
+    }, delayMs);
   };
 
   const toIsoOrValue = (value) => (value instanceof Date ? value.toISOString() : value);
@@ -869,6 +1078,10 @@
             departed_at: departedAtIso,
             seconds_per_tile: Number(input.seconds_per_tile) || undefined,
             army_name: input.army_name,
+            player_id: input.player_id,
+            hero_id: input.hero_id,
+            hero_target_scope: input.hero_target_scope,
+            hero_assignment_context_id: input.hero_assignment_context_id,
           },
         },
       );
@@ -996,6 +1209,10 @@
     max_active_marches_reached: "event.world.hostile_dispatch_failed_max_active_marches_reached",
     path_blocked_impassable: "event.world.hostile_dispatch_failed_path_blocked_impassable",
     march_already_exists: "event.world.hostile_dispatch_failed_march_already_exists",
+    feature_not_in_slice: "event.world.hostile_dispatch_failed_feature_not_in_slice",
+    hero_unavailable: "event.world.hostile_dispatch_failed_hero_unavailable",
+    hero_already_assigned: "event.world.hostile_dispatch_failed_hero_already_assigned",
+    hero_target_scope_mismatch: "event.world.hostile_dispatch_failed_hero_target_scope_mismatch",
   });
   const resolveHostileDispatchFailureContentKey = (errorCode) => {
     const normalizedErrorCode = String(errorCode || "").trim().toLowerCase();
@@ -1711,6 +1928,85 @@
       });
     }
   };
+  const resolveSelectedHeroDispatchAttachmentContext = (marchId) => {
+    const selectedHero = resolveSelectedWorldMapDispatchHero();
+    if (!resolveHeroDispatchUnlockState() || !selectedHero || selectedHero.readiness_state !== "ready") {
+      return null;
+    }
+
+    return {
+      hero_id: selectedHero.hero_id,
+      hero_name: selectedHero.display_name,
+      ability_id: selectedHero.ability_id,
+      ability_name: selectedHero.ability_name,
+      assignment_context_type: "army",
+      assignment_context_id: marchId,
+      modifier_deltas: [...(selectedHero.modifier_deltas || [])],
+      modifier_delta_summary: selectedHero.modifier_delta_summary || "",
+      cooldown_s: Number(selectedHero.cooldown_s) || 0,
+    };
+  };
+  const applyAcceptedHeroDispatchAttachment = (heroDispatchContext) => {
+    if (!heroDispatchContext) {
+      return null;
+    }
+
+    const roster = getWorldMapHeroDispatchRoster();
+    const hero = roster.find((candidate) => candidate.hero_id === heroDispatchContext.hero_id);
+    if (!hero || hero.readiness_state !== "ready") {
+      return null;
+    }
+
+    const cooldownEndsAt = new Date(
+      Date.now() + Math.max(1, Number(heroDispatchContext.cooldown_s) || 0) * 1000,
+    ).toISOString();
+    hero.readiness_state = "on_cooldown";
+    hero.cooldown_ends_at = cooldownEndsAt;
+    worldMapActionRuntime.hero_dispatch.selected_hero_id = null;
+
+    const sharedKeyRows = [
+      {
+        contentKey: "event.hero.assigned",
+        tokens: {
+          hero_id: heroDispatchContext.hero_id,
+          assignment_context_type: "army",
+          assignment_context_id: heroDispatchContext.assignment_context_id,
+        },
+      },
+      {
+        contentKey: "event.hero.ability_activated",
+        tokens: {
+          hero_id: heroDispatchContext.hero_id,
+          ability_id: heroDispatchContext.ability_id,
+          assignment_context_type: "army",
+          assignment_context_id: heroDispatchContext.assignment_context_id,
+          cooldown_ends_at: cooldownEndsAt,
+        },
+      },
+    ];
+    for (const row of sharedKeyRows) {
+      appendEventFeedEntry({
+        contentKey: row.contentKey,
+        tokens: row.tokens,
+        meta: "Just now | World | HERO runtime",
+        priority: "normal",
+      });
+    }
+    scheduleWorldMapHeroCooldownRefresh();
+
+    return {
+      hero_id: heroDispatchContext.hero_id,
+      hero_name: heroDispatchContext.hero_name,
+      ability_id: heroDispatchContext.ability_id,
+      ability_name: heroDispatchContext.ability_name,
+      assignment_context_type: "army",
+      assignment_context_id: heroDispatchContext.assignment_context_id,
+      cooldown_ends_at: cooldownEndsAt,
+      shared_event_keys: ["event.hero.assigned", "event.hero.ability_activated"],
+      modifier_deltas: [...heroDispatchContext.modifier_deltas],
+      modifier_delta_summary: heroDispatchContext.modifier_delta_summary,
+    };
+  };
 
   const applyHostileDispatchActionResult = (response, context) => {
     const targetTileLabel = context?.target_tile_label || "Hostile Settlement";
@@ -1748,6 +2044,8 @@
       return;
     }
 
+    worldMapActionRuntime.completed_attacks += 1;
+    const heroDispatchAttachment = applyAcceptedHeroDispatchAttachment(context?.hero_dispatch_context || null);
     appendHostileDispatchLifecycleEvents(response);
     const resolvedPayloads = response?.event_payloads || {};
     const primaryOutcomePayload =
@@ -1775,6 +2073,7 @@
       defender_strength: Number(response?.defender_strength) || 0,
       losses: response?.losses || null,
       snapshot: context?.snapshot || null,
+      hero_dispatch_attachment: heroDispatchAttachment,
       updated_at: new Date().toISOString(),
     };
     setLastActionOutcome("attack", response, outcomeContentKey, outcomeTokens);
@@ -1803,6 +2102,9 @@
       };
     } else {
       delete worldMapActionRuntime.unavailable_scout_tile_by_id[fallbackTileId];
+    }
+    if (!isFailure) {
+      worldMapActionRuntime.completed_scouts += 1;
     }
 
     appendEventFeedEntry({
@@ -1901,6 +2203,7 @@
     if ((actionType !== "scout" && actionType !== "attack") || worldMapActionRuntime.pending_action !== null) {
       return;
     }
+    syncWorldMapHeroDispatchReadiness();
     if (actionType === "scout") {
       const scoutAvailability = resolveWorldMapScoutContractAvailability();
       if (scoutAvailability.contractDisabled) {
@@ -1930,6 +2233,9 @@
       y: normalizeMapCoordinate(selectedMarker?.coords?.y, 1),
     };
     const marchId = `march_attack_${String(worldMapActionRuntime.next_march_sequence).padStart(4, "0")}`;
+    const heroDispatchContext = actionType === "attack"
+      ? resolveSelectedHeroDispatchAttachmentContext(marchId)
+      : null;
     if (actionType === "attack") {
       worldMapActionRuntime.next_march_sequence += 1;
     }
@@ -1965,6 +2271,10 @@
         departed_at: new Date(),
         seconds_per_tile: firstSliceWorldMapHostileDispatchFixture.seconds_per_tile,
         army_name: firstSliceWorldMapHostileDispatchFixture.army_name,
+        player_id: heroDispatchContext ? worldMapActionRuntime.player_id : undefined,
+        hero_id: heroDispatchContext?.hero_id,
+        hero_target_scope: heroDispatchContext?.assignment_context_type,
+        hero_assignment_context_id: heroDispatchContext?.assignment_context_id,
       });
 
       let latestMarchSnapshot = null;
@@ -1983,6 +2293,7 @@
         target_tile_label: targetTileLabel,
         target_settlement_id: targetSettlementId,
         snapshot: latestMarchSnapshot,
+        hero_dispatch_context: heroDispatchContext,
       });
     } catch (error) {
       if (actionType === "scout") {
@@ -2359,7 +2670,11 @@
     }
 
     if (mode === "populated") {
+      syncWorldMapHeroDispatchReadiness();
       syncWorldMapScenarioFromRuntime();
+      scheduleWorldMapHeroCooldownRefresh();
+    } else {
+      clearWorldMapHeroCooldownRefreshTimer();
     }
 
     refs.title.textContent = panel.title;
@@ -2405,6 +2720,72 @@
       .join("");
     const mapContractReasonSection = mapContractReasonRows.length > 0
       ? `<ul class="action-reason-list" aria-live="polite">${mapContractReasonRows}</ul>`
+      : "";
+    const heroDispatchUnlockState = resolveHeroDispatchUnlockState();
+    const selectedDispatchHero = resolveSelectedWorldMapDispatchHero();
+    const heroAttachRows = getWorldMapHeroDispatchRoster()
+      .map((hero) => {
+        const isSelected = selectedDispatchHero?.hero_id === hero.hero_id;
+        const isReady = hero.readiness_state === "ready";
+        const readinessLabel = isReady ? "Ready" : "Cooldown";
+        const readinessMeta = resolveHeroReadinessSummary(hero);
+        const cooldownValue = hero.cooldown_ends_at ? formatEventMetaTimestamp(hero.cooldown_ends_at) : "Available now";
+        return `
+          <li>
+            <button
+              type="button"
+              class="hero-attach-option${isSelected ? " is-selected" : ""}"
+              data-worldmap-hero-attach-id="${escapeHtml(hero.hero_id)}"
+              aria-pressed="${String(isSelected)}"
+              ${isReady ? "" : "disabled"}
+            >
+              <span class="hero-attach-option__name">${escapeHtml(hero.display_name)}</span>
+              <span class="hero-state-pill${isReady ? " is-ready" : " is-cooldown"}">${escapeHtml(readinessLabel)}</span>
+              <span class="hero-attach-option__meta">${escapeHtml(readinessMeta)}</span>
+              <span class="hero-attach-option__meta">Cooldown ends: ${escapeHtml(cooldownValue)}</span>
+            </button>
+          </li>
+        `;
+      })
+      .join("");
+    const selectedHeroModifierRows = selectedDispatchHero
+      ? (selectedDispatchHero.modifier_deltas || [])
+        .map((delta) => `<li>${escapeHtml(delta)}</li>`)
+        .join("")
+      : "";
+    const heroDispatchSection = mode === "populated" && heroDispatchUnlockState
+      ? `
+        <section class="subpanel compact hero-attach-panel">
+          <div class="subpanel__head">
+            <h3>Hero Attach (Optional)</h3>
+            <span class="chip chip--small">Post-Onboarding</span>
+          </div>
+          <p class="subpanel-note">Dispatch remains fully valid with no hero attached.</p>
+          <div class="stack-sm">
+            <button
+              type="button"
+              class="hero-attach-option${selectedDispatchHero === null ? " is-selected" : ""}"
+              data-worldmap-hero-attach-id="none"
+              aria-pressed="${String(selectedDispatchHero === null)}"
+            >
+              <span class="hero-attach-option__name">No Hero</span>
+              <span class="hero-state-pill is-optional">Core loop path</span>
+              <span class="hero-attach-option__meta">No ability cooldown tracked for this dispatch.</span>
+            </button>
+            <ul class="hero-attach-list">${heroAttachRows || "<li class=\"wire-empty\">No unlocked heroes in roster.</li>"}</ul>
+          </div>
+          ${selectedDispatchHero
+            ? `
+              <div class="hero-preview-block">
+                <p class="hero-preview-title">Pre-Commit Modifier Preview</p>
+                <p class="subpanel-note">${escapeHtml(selectedDispatchHero.modifier_delta_summary || "")}</p>
+                <ul class="hero-preview-list">${selectedHeroModifierRows}</ul>
+              </div>
+            `
+            : ""
+          }
+        </section>
+      `
       : "";
     const actionItems = (scenario.actions || [])
       .map((label) => {
@@ -2505,6 +2886,33 @@
       const snapshotProgressPercent = `${Math.round(clampPercent(snapshotProgressRatio * 100))}%`;
       const snapshotDistanceTiles = Number(snapshot?.authoritative_position?.distance_tiles) || 0;
       const snapshotTravelState = snapshot?.march_state || "march_state_unknown";
+      const heroDispatchAttachment = hostileDispatchOutcome.hero_dispatch_attachment || null;
+      const heroModifierRows = heroDispatchAttachment
+        ? (heroDispatchAttachment.modifier_deltas || [])
+          .map((delta) => `<li>${escapeHtml(delta)}</li>`)
+          .join("")
+        : "";
+      const heroSharedKeyRows = heroDispatchAttachment
+        ? (heroDispatchAttachment.shared_event_keys || [])
+          .map((key) => `<li><code>${escapeHtml(key)}</code></li>`)
+          .join("")
+        : "";
+      const heroImpactSection = heroDispatchAttachment
+        ? `
+          <div class="hero-impact-block" data-content-key="event.hero.ability_activated">
+            <p class="hero-impact-title">Hero Modifier Delta</p>
+            <p class="subpanel-note">${escapeHtml(heroDispatchAttachment.modifier_delta_summary || "Shared modifier deltas applied.")}</p>
+            <div class="wire-fields">
+              <div><span>Hero</span><strong>${escapeHtml(heroDispatchAttachment.hero_name || heroDispatchAttachment.hero_id)}</strong></div>
+              <div><span>Ability</span><strong>${escapeHtml(heroDispatchAttachment.ability_name || heroDispatchAttachment.ability_id)}</strong></div>
+              <div><span>Cooldown Ends</span><strong>${escapeHtml(formatEventMetaTimestamp(heroDispatchAttachment.cooldown_ends_at))}</strong></div>
+            </div>
+            <ul class="hero-preview-list">${heroModifierRows || "<li>No modifier rows available.</li>"}</ul>
+            <p class="hero-impact-title">Shared Event Keys</p>
+            <ul class="hero-shared-key-list">${heroSharedKeyRows || "<li><code>event.hero.ability_activated</code></li>"}</ul>
+          </div>
+        `
+        : "";
       return `
         <section class="subpanel compact">
           <h3>Hostile Dispatch Outcome</h3>
@@ -2515,6 +2923,7 @@
             <div><span>Strength</span><strong>${escapeHtml(`${formatNumber(hostileDispatchOutcome.attacker_strength || 0)} vs ${formatNumber(hostileDispatchOutcome.defender_strength || 0)}`)}</strong></div>
             <div><span>Losses</span><strong>${escapeHtml(`${formatNumber(Number(losses.attacker_units_lost) || 0)} attackers / ${formatNumber(Number(losses.defender_garrison_lost) || 0)} defenders`)}</strong></div>
           </div>
+          ${heroImpactSection}
           <div class="wire-fields">
             <div><span>March State</span><strong>${escapeHtml(snapshotTravelState)}</strong></div>
             <div><span>Travel Progress</span><strong>${escapeHtml(snapshotProgressPercent)}</strong></div>
@@ -2564,6 +2973,7 @@
               <div class="stack-sm">${actionItems}</div>
               ${mapContractReasonSection}
             </section>
+            ${heroDispatchSection}
             ${hostileDispatchOutcomeSection}
           </aside>
         </div>
@@ -2609,6 +3019,7 @@
               <div class="stack-sm">${actionItems}</div>
               ${mapContractReasonSection}
             </section>
+            ${heroDispatchSection}
             ${hostileDispatchOutcomeSection}
           </aside>
         </div>
@@ -2655,6 +3066,7 @@
               <div class="stack-sm">${actionItems}</div>
               ${mapContractReasonSection}
             </section>
+            ${heroDispatchSection}
             ${hostileDispatchOutcomeSection}
           </aside>
         </div>
@@ -2716,6 +3128,7 @@
             <div class="stack-sm">${actionItems}</div>
             ${mapContractReasonSection}
           </section>
+          ${heroDispatchSection}
           ${hostileDispatchOutcomeSection}
         </aside>
       </div>
@@ -2896,6 +3309,20 @@
       const actionType = settlementActionButton.getAttribute("data-settlement-adapter-action");
       if (actionType === "tick" || actionType === "build" || actionType === "train") {
         void runSettlementContractAction(actionType);
+      }
+      return;
+    }
+
+    const worldMapHeroAttachButton = event.target.closest("[data-worldmap-hero-attach-id]");
+    if (worldMapHeroAttachButton) {
+      const heroId = worldMapHeroAttachButton.getAttribute("data-worldmap-hero-attach-id");
+      setSelectedWorldMapDispatchHero(heroId);
+      renderPanels();
+      const focusTarget = typeof heroId === "string" && heroId.trim().length > 0
+        ? document.querySelector(`[data-worldmap-hero-attach-id="${heroId.trim()}"]`)
+        : null;
+      if (focusTarget instanceof HTMLButtonElement) {
+        focusTarget.focus({ preventScroll: true });
       }
       return;
     }
