@@ -39,45 +39,6 @@
     "escalation_target": "Mara Voss"
   },
   {
-    "id": "RK-M1-0005-F02-F01-ESC-F01",
-    "title": "Add queued-item model-policy drift audit after policy updates",
-    "description": "Add a lightweight daemon audit pass that scans queued items after model-policy changes and flags/remediates any item that would still resolve to unsupported model/fallback combinations.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0004-F01-F01-F01-ESC-F01"
-    ],
-    "inputs": [
-      "tools/orchestrator.py",
-      "tools/codex_worker.py",
-      "coordination/policies/model-policy.yaml",
-      "coordination/runtime/run-history.jsonl"
-    ],
-    "acceptance_criteria": [
-      "Audit identifies queued items whose resolved model and fallback are both inaccessible in current account context",
-      "Daemon emits a clear remediation hint and avoids repeated retry loops for those items",
-      "At least one regression test covers a stale queued item created before a policy change"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:23:43.800840+00:00",
-    "updated_at": "2026-02-26T14:56:15.540929+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC",
-    "assigned_agent": "tomas-grell"
-  },
-  {
     "id": "RK-M0-0013",
     "title": "Add action availability gating and cooldown feedback in client shell",
     "description": "Update settlement and map controls to react to backend contract state so build/train/scout actions show deterministic disabled states and placeholder reason feedback.",
@@ -172,17 +133,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T11:52:12.095556+00:00",
-    "updated_at": "2026-02-26T11:52:12.095556+00:00",
+    "updated_at": "2026-02-26T15:13:59.154822+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-STALL-0006-F01"
+    "generated_from_item_id": "RK-AUTO-STALL-0006-F01",
+    "assigned_agent": "mara-voss"
   },
   {
     "id": "RK-HUMAN-0001-F01",
@@ -352,44 +314,5 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-M0-0012"
-  },
-  {
-    "id": "RK-M0-0008-ESC-F01",
-    "title": "Requeue RK-M0-0008 with refreshed first-slice shell visual baseline",
-    "description": "Refresh default index-shell visual baselines after the tick/build/train adapter wiring changes, rerun strict visual smoke, and then complete RK-M0-0008 with unchanged first-slice scope.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-STALL-0010-F01"
-    ],
-    "inputs": [
-      "client-web/app.js",
-      "client-web/styles.css",
-      "coordination/runtime/frontend-visual/baseline/",
-      "tools/frontend_visual_smoke.py"
-    ],
-    "acceptance_criteria": [
-      "Baseline artifacts for desktop-1440, tablet-1024, mobile-390, and mobile-360 are refreshed from current first-slice shell output.",
-      "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict passes on index.html with no overflow violations.",
-      "RK-M0-0008 disposition is updated so RK-M0-0011 and RK-M0-0013 are no longer stalled on this blocker."
-    ],
-    "validation_commands": [
-      "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-26T14:39:43.712047+00:00",
-    "updated_at": "2026-02-26T14:39:43.712047+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-M0-0008-ESC"
   }
 ]

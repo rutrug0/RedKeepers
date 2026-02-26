@@ -414,5 +414,46 @@
     "archived_at": "2026-02-26T14:33:15.599178+00:00",
     "archive_reason": "dependency_stall_consolidated",
     "closed_by_item": "RK-AUTO-STALL-0010"
+  },
+  {
+    "id": "RK-M0-0007",
+    "title": "Finalize first-slice settlement loop handler internals",
+    "description": "Original first-slice handler-internals root item; disposition finalized after RK-M0-0012 delivery.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006",
+      "RK-M0-0009"
+    ],
+    "inputs": [
+      "backend/",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "First-slice settlement loop handler internals are implemented with deterministic response semantics",
+      "No net-new mechanics beyond first vertical slice scope"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-26T15:12:50+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "Archived as superseded: RK-M0-0012 delivered first-slice settlement loop contract endpoints and no separate M0 handler-internals delta remains.",
+    "escalation_target": "Mara Voss",
+    "last_failure_reason": "- None.",
+    "superseded_by": "RK-M0-0012",
+    "disposition": "archived_superseded",
+    "disposition_owner": "Mara Voss",
+    "archived_at": "2026-02-26T15:12:50+00:00",
+    "archive_reason": "superseded_by_delivered_replacement",
+    "closed_by_item": "RK-AUTO-STALL-0006-F01-F01"
   }
 ]

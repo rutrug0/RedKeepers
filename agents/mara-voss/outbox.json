@@ -1713,5 +1713,26 @@
             "coordination/backlog/blocked-items.json",
             "agents/mara-voss/outbox.json"
         ]
+    },
+    {
+        "ts": "2026-02-26T15:12:50+00:00",
+        "item_id": "RK-AUTO-STALL-0006-F01-F01",
+        "status": "completed",
+        "summary": "Finalized RK-M0-0007 disposition as archived superseded by RK-M0-0012 and confirmed no queued first-slice item depends directly on RK-M0-0007.",
+        "dependency_disposition": {
+            "dependency_id": "RK-M0-0007",
+            "decision": "archived_superseded",
+            "superseded_by": "RK-M0-0012"
+        },
+        "validation": {
+            "queued_items_with_rk_m0_0007_dependency": [],
+            "command": "python tools/orchestrator.py status",
+            "result": "pass"
+        },
+        "files": [
+            "coordination/backlog/blocked-archived-items.json",
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": []
     }
 ]

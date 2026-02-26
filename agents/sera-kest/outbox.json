@@ -298,5 +298,40 @@
                       "client-web/styles.css",
                       "agents/sera-kest/outbox.json"
                   ]
+    },
+    {
+        "ts":  "2026-02-26T15:09:47.8500304Z",
+        "item_id":  "RK-M0-0008-ESC-F01",
+        "status":  "blocked",
+        "summary":  "Refreshed index-shell baseline artifacts by promoting the latest desktop/tablet/mobile screenshots from coordination/runtime/frontend-visual/current into baseline, but strict smoke validation remains environment-blocked in this sandbox: default `python` cannot import Playwright and the runtime-policy Python hits Playwright launch failure `[WinError 5] Access is denied` when spawning Chromium.",
+        "files":  [
+                      "coordination/runtime/frontend-visual/baseline/desktop-1440.png",
+                      "coordination/runtime/frontend-visual/baseline/tablet-1024.png",
+                      "coordination/runtime/frontend-visual/baseline/mobile-390.png",
+                      "coordination/runtime/frontend-visual/baseline/mobile-360.png",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Run RK-M0-0008 visual strict pass in Playwright-capable worker runtime",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "high",
+                                        "description":  "Execute the index-shell visual smoke commands from a worker/runtime where Playwright Chromium can launch (no sandbox EPERM/WinError 5), then mark RK-M0-0008 dependencies resolved so RK-M0-0011 and RK-M0-0013 become dependency-ready.",
+                                        "acceptance_criteria":  [
+                                                                    "python tools/frontend_visual_smoke.py --update-baseline --max-overflow-px 0 --max-diff-percent 0.5 --strict passes for desktop-1440, tablet-1024, mobile-390, and mobile-360",
+                                                                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict passes immediately after baseline refresh",
+                                                                    "RK-M0-0008 (or RK-M0-0008-ESC-F01) disposition is moved out of blocker state and dependency stalls for RK-M0-0011 and RK-M0-0013 are cleared"
+                                                                ],
+                                        "dependencies":  [
+                                                             "Runtime where Playwright can spawn Chromium without EPERM/WinError 5"
+                                                         ],
+                                        "validation_commands":  [
+                                                                    "python tools/frontend_visual_smoke.py --update-baseline --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
     }
 ]

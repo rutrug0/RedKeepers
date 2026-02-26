@@ -4391,5 +4391,45 @@
     "assigned_agent": "mara-voss",
     "recovered_from_stale_in_progress": true,
     "commit_sha": "0856113e7b83efcabc279489cc1da6495298d25c"
+  },
+  {
+    "id": "RK-M1-0005-F02-F01-ESC-F01",
+    "title": "Add queued-item model-policy drift audit after policy updates",
+    "description": "Add a lightweight daemon audit pass that scans queued items after model-policy changes and flags/remediates any item that would still resolve to unsupported model/fallback combinations.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0004-F01-F01-F01-ESC-F01"
+    ],
+    "inputs": [
+      "tools/orchestrator.py",
+      "tools/codex_worker.py",
+      "coordination/policies/model-policy.yaml",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "Audit identifies queued items whose resolved model and fallback are both inaccessible in current account context",
+      "Daemon emits a clear remediation hint and avoids repeated retry loops for those items",
+      "At least one regression test covers a stale queued item created before a policy change"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:23:43.800840+00:00",
+    "updated_at": "2026-02-26T14:56:17.358150+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Note: `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` are also modified in the working tree (not edited by this task), and were left untouched.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "c8d436dfdc045fd665506b089278d0ac7a07d46a"
   }
 ]

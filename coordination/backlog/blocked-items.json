@@ -697,5 +697,45 @@
     "escalation_target": "Mara Voss",
     "assigned_agent": "sera-kest",
     "last_failure_reason": "validation failed or commit failed"
+  },
+  {
+    "id": "RK-M0-0008-ESC-F01",
+    "title": "Requeue RK-M0-0008 with refreshed first-slice shell visual baseline",
+    "description": "Refresh default index-shell visual baselines after the tick/build/train adapter wiring changes, rerun strict visual smoke, and then complete RK-M0-0008 with unchanged first-slice scope.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0010-F01"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "client-web/styles.css",
+      "coordination/runtime/frontend-visual/baseline/",
+      "tools/frontend_visual_smoke.py"
+    ],
+    "acceptance_criteria": [
+      "Baseline artifacts for desktop-1440, tablet-1024, mobile-390, and mobile-360 are refreshed from current first-slice shell output.",
+      "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict passes on index.html with no overflow violations.",
+      "RK-M0-0008 disposition is updated so RK-M0-0011 and RK-M0-0013 are no longer stalled on this blocker."
+    ],
+    "validation_commands": [
+      "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-26T14:39:43.712047+00:00",
+    "updated_at": "2026-02-26T15:10:35.610127+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "  Added `RK-M0-0008-ESC-F01` blocked run summary plus `proposed_work_items` to rerun strict smoke in a Playwright-capable runtime and then clear dependency stalls.",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M0-0008-ESC",
+    "assigned_agent": "sera-kest"
   }
 ]
