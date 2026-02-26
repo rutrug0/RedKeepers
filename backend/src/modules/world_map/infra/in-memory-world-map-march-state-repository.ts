@@ -1,5 +1,6 @@
 import type {
   WorldMapMarchStateRepository,
+  WorldMapMarchHeroAttachmentRuntimeState,
   WorldMapMarchRuntimeState,
 } from "../ports";
 
@@ -48,6 +49,7 @@ function normalizeRuntimeState(
     resolved_at: snapshot.resolved_at === undefined
       ? undefined
       : new Date(snapshot.resolved_at.getTime()),
+    hero_attachment: cloneHeroAttachment(snapshot.hero_attachment),
   };
 }
 
@@ -60,5 +62,21 @@ function cloneMarchRuntimeState(
     target: { ...state.target },
     departed_at: new Date(state.departed_at.getTime()),
     resolved_at: state.resolved_at === undefined ? undefined : new Date(state.resolved_at.getTime()),
+    hero_attachment: cloneHeroAttachment(state.hero_attachment),
+  };
+}
+
+function cloneHeroAttachment(
+  attachment: WorldMapMarchHeroAttachmentRuntimeState | undefined,
+): WorldMapMarchHeroAttachmentRuntimeState | undefined {
+  if (attachment === undefined) {
+    return undefined;
+  }
+  return {
+    ...attachment,
+    attached_at: new Date(attachment.attached_at.getTime()),
+    detached_at: attachment.detached_at === undefined
+      ? undefined
+      : new Date(attachment.detached_at.getTime()),
   };
 }

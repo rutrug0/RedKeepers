@@ -14,5 +14,14 @@
     "priority_boost_levels": 2,
     "prefer_immediate_unblocks": true
   },
+  "fast_cycle_role_priority": {
+    "enabled": true,
+    "deprioritize_roles": [
+      "lead",
+      "qa"
+    ],
+    "deprioritize_levels": 1,
+    "except_critical_priority": true
+  },
   "fallback_agent": "mara-voss"
 }

@@ -280,6 +280,94 @@ class QueueSchedulerPriorityTests(unittest.TestCase):
         assert selected is not None
         self.assertEqual(selected["id"], "ROOT-A")
 
+    def test_fast_cycle_role_bias_deprioritizes_noncritical_qa(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            queue = QueueManager(Path(tmpdir))
+            queue.completed = []
+            queue.blocked = []
+            queue.active = [
+                {
+                    "id": "QA-NORMAL",
+                    "owner_role": "qa",
+                    "priority": "normal",
+                    "status": "queued",
+                    "dependencies": [],
+                    "created_at": "2026-02-25T00:00:01+00:00",
+                },
+                {
+                    "id": "BE-NORMAL",
+                    "owner_role": "backend",
+                    "priority": "normal",
+                    "status": "queued",
+                    "dependencies": [],
+                    "created_at": "2026-02-25T00:00:02+00:00",
+                },
+            ]
+            routing = {
+                "owner_role_map": {"qa": "tomas-grell", "backend": "ilya-fen"},
+                "fast_cycle_role_priority": {
+                    "enabled": True,
+                    "deprioritize_roles": ["qa", "lead"],
+                    "deprioritize_levels": 1,
+                    "except_critical_priority": True,
+                },
+            }
+            stats = {
+                "agents": {
+                    "tomas-grell": {"current_load_score": 0.0, "total_runs": 0},
+                    "ilya-fen": {"current_load_score": 0.0, "total_runs": 0},
+                }
+            }
+
+            selected = queue.select_next(routing, stats)
+
+        assert selected is not None
+        self.assertEqual(selected["id"], "BE-NORMAL")
+
+    def test_fast_cycle_role_bias_does_not_penalize_critical(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            queue = QueueManager(Path(tmpdir))
+            queue.completed = []
+            queue.blocked = []
+            queue.active = [
+                {
+                    "id": "QA-CRIT",
+                    "owner_role": "qa",
+                    "priority": "critical",
+                    "status": "queued",
+                    "dependencies": [],
+                    "created_at": "2026-02-25T00:00:01+00:00",
+                },
+                {
+                    "id": "BE-HIGH",
+                    "owner_role": "backend",
+                    "priority": "high",
+                    "status": "queued",
+                    "dependencies": [],
+                    "created_at": "2026-02-25T00:00:02+00:00",
+                },
+            ]
+            routing = {
+                "owner_role_map": {"qa": "tomas-grell", "backend": "ilya-fen"},
+                "fast_cycle_role_priority": {
+                    "enabled": True,
+                    "deprioritize_roles": ["qa", "lead"],
+                    "deprioritize_levels": 1,
+                    "except_critical_priority": True,
+                },
+            }
+            stats = {
+                "agents": {
+                    "tomas-grell": {"current_load_score": 0.0, "total_runs": 0},
+                    "ilya-fen": {"current_load_score": 0.0, "total_runs": 0},
+                }
+            }
+
+            selected = queue.select_next(routing, stats)
+
+        assert selected is not None
+        self.assertEqual(selected["id"], "QA-CRIT")
+
 
 if __name__ == "__main__":
     unittest.main()

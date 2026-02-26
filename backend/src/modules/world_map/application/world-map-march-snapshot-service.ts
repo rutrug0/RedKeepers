@@ -6,9 +6,11 @@ import type {
 } from "../domain";
 import { WORLD_MAP_MARCH_SNAPSHOT_FLOW } from "../domain";
 import type {
+  WorldMapMarchHeroAttachmentRuntimeState,
   WorldMapMarchRuntimeState,
   WorldMapMarchStateRepository,
 } from "../ports";
+import type { HeroRuntimePersistenceRepository } from "../../heroes/ports";
 
 const DEFAULT_SECONDS_PER_TILE = 30;
 const DEFAULT_SNAPSHOT_INTERVAL_MS = 1000;
@@ -43,12 +45,14 @@ export class DeterministicWorldMapMarchSnapshotService
 {
   private readonly defaultSecondsPerTile: number;
   private readonly snapshotIntervalMs: number;
+  private readonly heroRuntimePersistenceRepository?: HeroRuntimePersistenceRepository;
 
   constructor(
     private readonly marchStateRepository: WorldMapMarchStateRepository,
     options?: {
       readonly default_seconds_per_tile?: number;
       readonly snapshot_interval_ms?: number;
+      readonly hero_runtime_persistence_repository?: HeroRuntimePersistenceRepository;
     },
   ) {
     this.defaultSecondsPerTile = normalizeMinimumPositiveInteger(
@@ -59,6 +63,8 @@ export class DeterministicWorldMapMarchSnapshotService
       options?.snapshot_interval_ms,
       DEFAULT_SNAPSHOT_INTERVAL_MS,
     );
+    this.heroRuntimePersistenceRepository =
+      options?.hero_runtime_persistence_repository;
   }
 
   emitMarchSnapshot(input: WorldMapMarchSnapshotInput): WorldMapMarchSnapshotResponseDto {
@@ -139,11 +145,17 @@ export class DeterministicWorldMapMarchSnapshotService
       return state;
     }
 
+    const detachedAttachment = this.detachHeroAttachmentOnResolvedReturn({
+      march_id: state.march_id,
+      hero_attachment: state.hero_attachment,
+      resolved_at: travel.arrives_at,
+    });
     const resolvedState = this.marchStateRepository.saveMarchRuntimeState({
       ...state,
       march_state: "march_state_resolved",
       march_revision: state.march_revision + 1,
       resolved_at: travel.arrives_at,
+      hero_attachment: detachedAttachment,
       resolution_outcome: resolveCombatOutcome(
         state.attacker_strength,
         state.defender_strength,
@@ -151,6 +163,44 @@ export class DeterministicWorldMapMarchSnapshotService
     });
 
     return normalizeRuntimeState(resolvedState, this.defaultSecondsPerTile);
+  }
+
+  private detachHeroAttachmentOnResolvedReturn(input: {
+    readonly march_id: string;
+    readonly hero_attachment: WorldMapMarchHeroAttachmentRuntimeState | undefined;
+    readonly resolved_at: Date;
+  }): WorldMapMarchHeroAttachmentRuntimeState | undefined {
+    if (input.hero_attachment === undefined) {
+      return undefined;
+    }
+    if (input.hero_attachment.detached_at !== undefined) {
+      return cloneHeroAttachment(input.hero_attachment);
+    }
+
+    if (this.heroRuntimePersistenceRepository !== undefined) {
+      const runtime = this.heroRuntimePersistenceRepository.readRuntimeState({
+        player_id: input.hero_attachment.player_id,
+        hero_id: input.hero_attachment.hero_id,
+      });
+      if (
+        runtime !== null
+        && runtime.assignment_context_type === input.hero_attachment.assignment_context_type
+        && runtime.assignment_context_id === input.hero_attachment.assignment_context_id
+      ) {
+        this.heroRuntimePersistenceRepository.applyAssignmentMutation({
+          player_id: input.hero_attachment.player_id,
+          hero_id: input.hero_attachment.hero_id,
+          expected_revision: runtime.revision,
+          now: input.resolved_at,
+          assignment: null,
+        });
+      }
+    }
+
+    return {
+      ...cloneHeroAttachment(input.hero_attachment),
+      detached_at: new Date(input.resolved_at.getTime()),
+    };
   }
 }
 
@@ -372,6 +422,7 @@ function normalizeRuntimeState(
     resolved_at:
       state.resolved_at === undefined ? undefined : new Date(state.resolved_at.getTime()),
     resolution_outcome: normalizeResolutionOutcome(state.resolution_outcome),
+    hero_attachment: normalizeHeroAttachment(state.hero_attachment),
   };
 }
 
@@ -418,6 +469,41 @@ function normalizeFiniteNumber(value: number): number {
 function normalizeNonEmpty(value: string, fallback: string): string {
   const normalized = value.trim();
   return normalized.length > 0 ? normalized : fallback;
+}
+
+function normalizeHeroAttachment(
+  attachment: WorldMapMarchHeroAttachmentRuntimeState | undefined,
+): WorldMapMarchHeroAttachmentRuntimeState | undefined {
+  if (attachment === undefined) {
+    return undefined;
+  }
+  return {
+    ...attachment,
+    player_id: normalizeNonEmpty(attachment.player_id, "player_unknown"),
+    hero_id: normalizeNonEmpty(attachment.hero_id, "hero_unknown"),
+    assignment_id: normalizeNonEmpty(attachment.assignment_id, "assignment_unknown"),
+    assignment_context_type: "army",
+    assignment_context_id: normalizeNonEmpty(
+      attachment.assignment_context_id,
+      "assignment_context_unknown",
+    ),
+    attached_at: new Date(attachment.attached_at.getTime()),
+    detached_at: attachment.detached_at === undefined
+      ? undefined
+      : new Date(attachment.detached_at.getTime()),
+  };
+}
+
+function cloneHeroAttachment(
+  attachment: WorldMapMarchHeroAttachmentRuntimeState,
+): WorldMapMarchHeroAttachmentRuntimeState {
+  return {
+    ...attachment,
+    attached_at: new Date(attachment.attached_at.getTime()),
+    detached_at: attachment.detached_at === undefined
+      ? undefined
+      : new Date(attachment.detached_at.getTime()),
+  };
 }
 
 function resolveCombatOutcome(

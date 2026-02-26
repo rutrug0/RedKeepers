@@ -1,79 +1,5 @@
 [
   {
-    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F03",
-    "title": "Add retry-loop guard for validation-scope mismatch on narrow QA items",
-    "description": "Add an orchestrator guard/test that flags when a narrow-scoped QA item is configured with full-suite discovery validation, and emits remediation to use targeted commands before retries accumulate.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC"
-    ],
-    "inputs": [
-      "tools/orchestrator.py",
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/blocked-items.json",
-      "tests/test_queue_integrity.py"
-    ],
-    "acceptance_criteria": [
-      "Queue status or validation preflight emits a deterministic warning/error when a narrow QA item uses `python -m unittest discover -s tests` without an explicit scope waiver.",
-      "At least one regression test covers the RK-M1-0004-style false escalation pattern.",
-      "Guard output includes actionable remediation text with scoped validation command expectations."
-    ],
-    "validation_commands": [
-      "python -m unittest tests.test_queue_integrity",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T18:04:15.217579+00:00",
-    "updated_at": "2026-02-26T18:41:22.760185+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
-    "assigned_agent": "tomas-grell"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0003-F01-F02-F01",
-    "title": "Run dedicated hero wireframe visual smoke after environment unblocks browser execution",
-    "description": "Execute strict multi-device visual smoke for hero-wireframes.html in a Playwright-capable runtime to confirm cooldown readability and pre-commit effect clarity remain stable as deferred M2 design artifacts evolve.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0003-F01-F02"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Strict visual smoke passes for hero-wireframes desktop/tablet/mobile captures at configured thresholds",
-      "No layout overflow or clipped cooldown/effect text appears at 1440, 1024, 390, and 360 widths",
-      "Baseline artifacts for hero-wireframes are regenerated only from live page captures in the validated runtime"
-    ],
-    "validation_commands": [
-      "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-26T18:10:57.931109+00:00",
-    "updated_at": "2026-02-26T18:10:57.931109+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "sera-kest",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F02"
-  },
-  {
     "id": "RK-HUMAN-0001-F03-F01",
     "title": "Implement M2 dispatch validation and hero attachment lifecycle for marches",
     "description": "Add post-slice dispatch validation for optional `hero_id`, enforce one-hero-per-march and single-active-assignment constraints, and persist deterministic attach/detach transitions across march start and return.",
@@ -98,17 +24,18 @@
       "No hero-specific combat/scout branches are introduced in resolvers"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T18:14:14.106079+00:00",
-    "updated_at": "2026-02-26T18:14:19.347423+00:00",
+    "updated_at": "2026-02-26T18:50:15.733760+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-HUMAN-0001-F03"
+    "generated_from_item_id": "RK-HUMAN-0001-F03",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-HUMAN-0001-F03-F02",

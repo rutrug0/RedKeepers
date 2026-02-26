@@ -1,6 +1,7 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
+import { InMemoryHeroRuntimePersistenceRepository } from "../../heroes/infra";
 import { InMemoryWorldMapMarchStateRepository } from "../infra";
 import { DeterministicWorldMapMarchSnapshotService } from "./world-map-march-snapshot-service";
 
@@ -154,5 +155,94 @@ test("march snapshot interpolation window is clamped to authoritative arrival ti
   assert.equal(
     snapshot.next_authoritative_snapshot_at?.toISOString(),
     "2026-02-26T17:01:00.000Z",
+  );
+});
+
+test("march resolution detaches attached hero assignment deterministically on return completion", () => {
+  const heroRuntimeRepository = new InMemoryHeroRuntimePersistenceRepository({
+    initial_snapshot: {
+      runtime_states: [
+        {
+          hero_runtime_id: "player_world::hero_march",
+          player_id: "player_world",
+          hero_id: "hero_march",
+          active_ability_id: "ability_march",
+          unlock_state: "unlocked",
+          readiness_state: "ready",
+          assignment_context_type: "army",
+          assignment_context_id: "march_hero_alpha",
+          revision: 3,
+          updated_at: new Date("2026-02-26T18:00:00.000Z"),
+        },
+      ],
+      assignment_bindings: [
+        {
+          assignment_id: "assign:player_world:hero_march:army:march_hero_alpha",
+          player_id: "player_world",
+          hero_id: "hero_march",
+          assignment_context_type: "army",
+          assignment_context_id: "march_hero_alpha",
+          is_active: true,
+          assigned_at: new Date("2026-02-26T17:59:00.000Z"),
+        },
+      ],
+      modifier_instances: [],
+    },
+  });
+  const marchRepository = new InMemoryWorldMapMarchStateRepository([
+    {
+      march_id: "march_hero_alpha",
+      settlement_id: "settlement_alpha",
+      march_revision: 6,
+      march_state: "march_state_in_transit",
+      origin: { x: 0, y: 0 },
+      target: { x: 1, y: 0 },
+      departed_at: new Date("2026-02-26T18:10:00.000Z"),
+      seconds_per_tile: 30,
+      attacker_strength: 120,
+      defender_strength: 80,
+      hero_attachment: {
+        player_id: "player_world",
+        hero_id: "hero_march",
+        assignment_id: "assign:player_world:hero_march:army:march_hero_alpha",
+        assignment_context_type: "army",
+        assignment_context_id: "march_hero_alpha",
+        attached_at: new Date("2026-02-26T18:10:00.000Z"),
+      },
+    },
+  ]);
+  const service = new DeterministicWorldMapMarchSnapshotService(marchRepository, {
+    hero_runtime_persistence_repository: heroRuntimeRepository,
+  });
+
+  const snapshot = service.emitMarchSnapshot({
+    march_id: "march_hero_alpha",
+    observed_at: new Date("2026-02-26T18:10:45.000Z"),
+  });
+
+  assert.equal(snapshot.march_state, "march_state_resolved");
+
+  const persistedMarch = marchRepository.readMarchRuntimeState({
+    march_id: "march_hero_alpha",
+  });
+  assert.notEqual(persistedMarch, null);
+  assert.equal(
+    persistedMarch?.hero_attachment?.detached_at?.toISOString(),
+    "2026-02-26T18:10:30.000Z",
+  );
+
+  const heroRuntime = heroRuntimeRepository.readRuntimeState({
+    player_id: "player_world",
+    hero_id: "hero_march",
+  });
+  assert.notEqual(heroRuntime, null);
+  assert.equal(heroRuntime?.assignment_context_type, "none");
+  assert.equal(heroRuntime?.assignment_context_id, undefined);
+  assert.equal(
+    heroRuntimeRepository.readActiveAssignmentBinding({
+      player_id: "player_world",
+      hero_id: "hero_march",
+    }),
+    null,
   );
 });

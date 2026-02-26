@@ -171,6 +171,17 @@ class QueueManager:
         critical_protected = self._boolish(unlock_cfg.get("critical_priority_protected"), True)
         boost_levels = self._intish(unlock_cfg.get("priority_boost_levels", 1), default=1, min_value=0, max_value=3)
         prefer_immediate = self._boolish(unlock_cfg.get("prefer_immediate_unblocks"), True)
+        role_bias_cfg = routing_rules.get("fast_cycle_role_priority", {}) if isinstance(routing_rules, dict) else {}
+        if not isinstance(role_bias_cfg, dict):
+            role_bias_cfg = {}
+        role_bias_enabled = self._boolish(role_bias_cfg.get("enabled"), False)
+        role_bias_levels = self._intish(role_bias_cfg.get("deprioritize_levels", 1), default=1, min_value=0, max_value=2)
+        role_bias_critical_protected = self._boolish(role_bias_cfg.get("except_critical_priority", True), True)
+        roles_raw = role_bias_cfg.get("deprioritize_roles", [])
+        if isinstance(roles_raw, list):
+            deprioritize_roles = {str(role).strip().lower() for role in roles_raw if str(role).strip()}
+        else:
+            deprioritize_roles = set()
         candidate_ids = {str(item.get("id", "")) for item in candidates if str(item.get("id", ""))}
         unlock_metrics = (
             self._dependency_unlock_metrics(candidate_ids=candidate_ids, completed_ids=completed_ids) if unlock_enabled else {}
@@ -201,6 +212,11 @@ class QueueManager:
                 floor = 1 if critical_protected else 0
                 if not (critical_protected and base_rank == 0):
                     effective_rank = max(floor, base_rank - boost_levels)
+
+            owner_role = str(item.get("owner_role", "")).strip().lower()
+            if role_bias_enabled and role_bias_levels > 0 and owner_role in deprioritize_roles:
+                if not (role_bias_critical_protected and base_rank == 0):
+                    effective_rank = min(99, effective_rank + role_bias_levels)
 
             return (
                 effective_rank,

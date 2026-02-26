@@ -5086,5 +5086,51 @@
     "runtime_seconds": 771.94,
     "started_at": "2026-02-26T18:21:14.407215+00:00",
     "finished_at": "2026-02-26T18:34:06.345118+00:00"
+  },
+  {
+    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F03",
+    "title": "Add retry-loop guard for validation-scope mismatch on narrow QA items",
+    "description": "Add an orchestrator guard/test that flags when a narrow-scoped QA item is configured with full-suite discovery validation, and emits remediation to use targeted commands before retries accumulate.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC"
+    ],
+    "inputs": [
+      "tools/orchestrator.py",
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "tests/test_queue_integrity.py"
+    ],
+    "acceptance_criteria": [
+      "Queue status or validation preflight emits a deterministic warning/error when a narrow QA item uses `python -m unittest discover -s tests` without an explicit scope waiver.",
+      "At least one regression test covers the RK-M1-0004-style false escalation pattern.",
+      "Guard output includes actionable remediation text with scoped validation command expectations."
+    ],
+    "validation_commands": [
+      "python -m unittest tests.test_queue_integrity",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T18:04:15.217579+00:00",
+    "updated_at": "2026-02-26T18:41:24.440249+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Unrelated queue-state churn is present in `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` from daemon activity; those were not edited for this work item.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "6f09db2e518b048da070f2f465a91c661c002ba6",
+    "resolved_by_agent": "tomas-grell",
+    "resolved_by_role": "qa",
+    "runtime_seconds": 427.83,
+    "started_at": "2026-02-26T18:34:14.911758+00:00",
+    "finished_at": "2026-02-26T18:41:22.745056+00:00"
   }
 ]

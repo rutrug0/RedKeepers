@@ -411,6 +411,42 @@
                                         "validation_commands":  [
                                                                     "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
                                                                     "python tools/orchestrator.py status"
+                                        ]
+                                    }
+                                ]
+    },
+    {
+        "ts":  "2026-02-26T18:42:40.8048414Z",
+        "item_id":  "RK-AUTO-BACKLOG-0003-F01-F02-F01",
+        "status":  "blocked",
+        "summary":  "Attempted dedicated strict hero-wireframes visual smoke in both the default `python` runtime and the runtime-policy Python interpreter. Default runtime is still missing Playwright (`No module named 'playwright'`), and the Playwright-capable interpreter remains blocked on browser launch (`[WinError 5] Access is denied`) before any live capture, so strict desktop/tablet/mobile validation and baseline regeneration could not run in this environment.",
+        "files":  [
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                    "C:\\Users\\Patrik\\AppData\\Local\\Programs\\Python\\Python310\\python.exe tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                    "python tools/orchestrator.py status"
+                                ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Execute hero wireframe strict visual smoke in browser-capable worker runtime",
+                                        "owner_role":  "platform",
+                                        "milestone":  "M2",
+                                        "priority":  "high",
+                                        "description":  "Run the dedicated hero-wireframes visual smoke in a worker/runtime where Playwright Chromium can spawn successfully (no WinError 5 subprocess/pipe denial), then regenerate hero baselines from live captures and re-run strict validation.",
+                                        "acceptance_criteria":  [
+                                                                    "Runtime can execute Playwright launch without `[WinError 5] Access is denied`",
+                                                                    "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --update-baseline --max-overflow-px 0 --max-diff-percent 0.5 --strict succeeds for desktop-1440, tablet-1024, mobile-390, and mobile-360",
+                                                                    "A second strict run without --update-baseline passes at configured thresholds for hero-wireframes"
+                                                                ],
+                                        "dependencies":  [
+                                                             "Worker/runtime policy that allows Playwright Chromium subprocess startup"
+                                                         ],
+                                        "validation_commands":  [
+                                                                    "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --update-baseline --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/orchestrator.py status"
                                                                 ]
                                     }
                                 ]

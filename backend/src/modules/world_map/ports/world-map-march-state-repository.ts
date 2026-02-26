@@ -4,6 +4,16 @@ import type {
   WorldMapMarchState,
 } from "../domain";
 
+export interface WorldMapMarchHeroAttachmentRuntimeState {
+  readonly player_id: string;
+  readonly hero_id: string;
+  readonly assignment_id: string;
+  readonly assignment_context_type: "army";
+  readonly assignment_context_id: string;
+  readonly attached_at: Date;
+  readonly detached_at?: Date;
+}
+
 export interface WorldMapMarchRuntimeState {
   readonly march_id: string;
   readonly settlement_id: string;
@@ -17,6 +27,7 @@ export interface WorldMapMarchRuntimeState {
   readonly defender_strength: number;
   readonly resolved_at?: Date;
   readonly resolution_outcome?: WorldMapMarchCombatOutcome;
+  readonly hero_attachment?: WorldMapMarchHeroAttachmentRuntimeState;
 }
 
 export interface WorldMapMarchStateRepository {
