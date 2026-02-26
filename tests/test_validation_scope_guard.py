@@ -53,6 +53,54 @@ class ValidationScopeGuardTests(unittest.TestCase):
         commands = orchestrator.build_validation_commands(item, rules)
         self.assertIn("python -m unittest discover -s tests", commands)
 
+    def test_fast_cycle_guard_skips_noncritical_test_commands(self) -> None:
+        item = {
+            "owner_role": "qa",
+            "priority": "normal",
+            "validation_commands": [
+                "python -m unittest tests.test_codex_preflight",
+                "python tools/orchestrator.py status",
+            ],
+        }
+        rules = {
+            "default_validation_commands": [],
+            "fast_cycle_validation": {"enabled": True},
+        }
+        commands = orchestrator.build_validation_commands(item, rules)
+        self.assertNotIn("python -m unittest tests.test_codex_preflight", commands)
+        self.assertIn("python tools/orchestrator.py status", commands)
+
+    def test_fast_cycle_guard_keeps_tests_for_critical_items(self) -> None:
+        item = {
+            "owner_role": "qa",
+            "priority": "critical",
+            "validation_commands": [
+                "python -m unittest tests.test_codex_preflight",
+            ],
+        }
+        rules = {
+            "default_validation_commands": [],
+            "fast_cycle_validation": {"enabled": True},
+        }
+        commands = orchestrator.build_validation_commands(item, rules)
+        self.assertIn("python -m unittest tests.test_codex_preflight", commands)
+
+    def test_fast_cycle_guard_can_be_overridden_by_env(self) -> None:
+        item = {
+            "owner_role": "qa",
+            "priority": "normal",
+            "validation_commands": [
+                "python -m unittest tests.test_codex_preflight",
+            ],
+        }
+        rules = {
+            "default_validation_commands": [],
+            "fast_cycle_validation": {"enabled": True},
+        }
+        with mock.patch.dict("os.environ", {"REDKEEPERS_STRICT_VALIDATION": "1"}, clear=False):
+            commands = orchestrator.build_validation_commands(item, rules)
+        self.assertIn("python -m unittest tests.test_codex_preflight", commands)
+
 
 if __name__ == "__main__":
     unittest.main()

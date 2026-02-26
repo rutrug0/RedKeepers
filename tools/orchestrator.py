@@ -2095,6 +2095,19 @@ def _is_full_suite_validation_command(command: str) -> bool:
     return False
 
 
+def _is_test_or_smoke_validation_command(command: str) -> bool:
+    text = " ".join(str(command or "").strip().split()).lower()
+    if not text:
+        return False
+    if "tools/orchestrator.py status" in text:
+        return False
+    markers = (
+        "-m unittest",
+        "pytest",
+    )
+    return any(marker in text for marker in markers)
+
+
 def _classify_validation_or_commit_failure(validation_results: list[dict[str, Any]]) -> dict[str, str]:
     commit_failure_commands = {"git commit", "branch check"}
     phase = "validation"
@@ -2248,6 +2261,15 @@ def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]
     allow_full_suite = _boolish(os.environ.get("REDKEEPERS_ALLOW_FULL_SUITE_VALIDATION"), False)
     if guard_enabled and not allow_full_suite:
         commands = [command for command in commands if not _is_full_suite_validation_command(command)]
+
+    fast_cycle_cfg = commit_rules.get("fast_cycle_validation", {})
+    if not isinstance(fast_cycle_cfg, dict):
+        fast_cycle_cfg = {}
+    fast_cycle_enabled = _boolish(fast_cycle_cfg.get("enabled"), False)
+    strict_validation = _boolish(os.environ.get("REDKEEPERS_STRICT_VALIDATION"), False)
+    item_priority = str(item.get("priority", "normal")).strip().lower()
+    if fast_cycle_enabled and not strict_validation and item_priority != "critical":
+        commands = [command for command in commands if not _is_test_or_smoke_validation_command(command)]
     return commands
 
 

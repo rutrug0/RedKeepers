@@ -31,11 +31,19 @@ def build_prompt(
     role = str(agent_cfg.get("role", "")).strip().lower()
     shared_ui_style = ""
     frontend_scope_rule = ""
+    lead_velocity_rule = ""
     if role == "frontend":
         shared_ui_style = _safe_read(project_root / "docs" / "design" / "ui-style-guide.md", max_chars=5000)
         frontend_scope_rule = (
             "- Keep UI implementation aligned with `docs/design/ui-style-guide.md`; "
             "consistency of shared tokens/components is mandatory.\n"
+        )
+    if role == "lead":
+        lead_velocity_rule = (
+            "- Prioritize fast delivery: generate implementation tasks first and keep QA/task overhead low.\n"
+            "- Create dedicated regression/smoke test tasks only for critical-risk paths "
+            "(release blockers, data-loss/corruption, security, hard crash loops).\n"
+            "- For non-critical work, prefer lightweight checks (build/status/scoped sanity) over broad test suites.\n"
         )
 
     input_sections: list[str] = []
@@ -95,6 +103,7 @@ Validation Commands:
 - Respect the first vertical slice scope (`docs/design/first-vertical-slice.md`). If you identify useful but out-of-scope work, defer it into `proposed_work_items` rather than implementing it now.
 - Keep outputs concise and implementation-focused.
 {frontend_scope_rule}- Make only the changes needed for this work item.
+{lead_velocity_rule}- Make only the changes needed for this work item.
 - If blocked, explain the blocker clearly and propose follow-up tasks.
 - If you identify follow-up work, append/update your `agents/{agent_id}/outbox.json` entry for this item with a `proposed_work_items` array (structured tasks for daemon ingestion).
 - `proposed_work_items` entries should include at minimum: `title`, `owner_role`, `description`, `acceptance_criteria` (array). Optional: `priority`, `dependencies`, `inputs`, `validation_commands`, `milestone`.

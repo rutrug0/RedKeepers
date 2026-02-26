@@ -2043,5 +2043,38 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T18:06:34.1439379Z",
+        "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F02",
+        "status": "completed",
+        "summary": "Retired the superseded source ID from active queue state and kept only its archived superseded record linked to replacement item RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01.",
+        "queue_updates": {
+            "removed_from_active_queue_ids": [
+                "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+            ],
+            "archived_reference": {
+                "archive_file": "coordination/backlog/blocked-archived-items.json",
+                "archived_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+                "superseded_by": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01"
+            }
+        },
+        "validation": {
+            "dependency_checks": {
+                "queued_dependency_matches": 0,
+                "blocked_dependency_matches": 0
+            },
+            "commands": [
+                "python tools/orchestrator.py status"
+            ],
+            "results": [
+                "pass"
+            ]
+        },
+        "files": [
+            "coordination/backlog/work-items.json",
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": []
     }
 ]
