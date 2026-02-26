@@ -1,5 +1,6 @@
 import type { WorldMapScoutSelectService } from "../application";
 import type { WorldMapScoutSelectResponseDto } from "../domain";
+import type { HeroAssignmentBoundContextType } from "../../heroes/ports";
 
 export const POST_WORLD_MAP_TILE_INTERACT_ROUTE =
   "/world-map/tiles/{tileId}/interact" as const;
@@ -14,11 +15,21 @@ export interface PostWorldMapTileInteractRequestBodyDto {
   readonly interaction_type: string;
   readonly flow_version: string;
   readonly settlement_name?: string;
+  readonly player_id?: string;
+  readonly assignment_context_type?: HeroAssignmentBoundContextType;
+  readonly assignment_context_id?: string;
+}
+
+export interface PostWorldMapTileInteractSessionContextDto {
+  readonly player_id?: string;
+  readonly assignment_context_type?: HeroAssignmentBoundContextType;
+  readonly assignment_context_id?: string;
 }
 
 export interface PostWorldMapTileInteractRequestDto {
   readonly path: PostWorldMapTileInteractPathParamsDto;
   readonly body: PostWorldMapTileInteractRequestBodyDto;
+  readonly session?: PostWorldMapTileInteractSessionContextDto;
 }
 
 export type PostWorldMapTileInteractResponseDto = WorldMapScoutSelectResponseDto;
@@ -85,10 +96,27 @@ export class WorldMapTileInteractEndpointHandler {
       );
     }
 
+    const playerId =
+      normalizeOptionalId(request.body.player_id)
+      ?? normalizeOptionalId(request.session?.player_id);
+    const assignmentContextType =
+      normalizeOptionalAssignmentContextType(
+        request.body.assignment_context_type,
+      )
+      ?? normalizeOptionalAssignmentContextType(
+        request.session?.assignment_context_type,
+      );
+    const assignmentContextId =
+      normalizeOptionalId(request.body.assignment_context_id)
+      ?? normalizeOptionalId(request.session?.assignment_context_id);
+
     return this.scoutSelectService.handleScoutSelect({
       settlement_id: settlementId,
       settlement_name: request.body.settlement_name,
       tile_id: bodyTileId,
+      player_id: playerId,
+      assignment_context_type: assignmentContextType,
+      assignment_context_id: assignmentContextId,
     });
   }
 }
@@ -103,4 +131,25 @@ function normalizeRequiredId(
     throw new WorldMapTileInteractValidationError(code, message);
   }
   return normalized;
+}
+
+function normalizeOptionalId(value: string | undefined): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+function normalizeOptionalAssignmentContextType(
+  value: HeroAssignmentBoundContextType | undefined,
+): HeroAssignmentBoundContextType | undefined {
+  if (
+    value === "army"
+    || value === "scout_detachment"
+    || value === "siege_column"
+  ) {
+    return value;
+  }
+  return undefined;
 }

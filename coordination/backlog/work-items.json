@@ -296,38 +296,6 @@
     "generated_from_item_id": "RK-AUTO-STALL-0006-F01"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F03",
-    "title": "Define and validate hero runtime event token fixtures",
-    "description": "Add machine-readable event token fixtures and validation for `event.hero.assigned`, `event.hero.ability_activated`, and `event.hero.cooldown_complete` so client event feed rendering can rely on stable keys and required token sets.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "low",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0003-F01-F03"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "A hero runtime event-token table defines required tokens for assignment, activation, and cooldown completion event keys.",
-      "Loader/validator rejects mismatched key-to-token mappings and duplicate identities.",
-      "Contract tests assert emitted hero runtime events conform to the declared key/token fixtures."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T12:11:58.073493+00:00",
-    "updated_at": "2026-02-26T13:15:05.307485+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0003-F01-F03-F02-F01",
     "title": "Thread scout action context through API endpoint for modifier-backed resolution",
     "description": "Propagate player and assignment context identity from world-map interaction endpoint inputs (or derived auth/session context) into scout action resolution so hero runtime modifiers can apply on the HTTP execution path without manual service-level inputs.",
@@ -346,16 +314,17 @@
       "Endpoint contract tests cover both baseline behavior and modifier-backed behavior."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T12:54:31.904256+00:00",
-    "updated_at": "2026-02-26T12:54:31.904256+00:00",
+    "updated_at": "2026-02-26T13:20:32.658878+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03-F02"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03-F02",
+    "assigned_agent": "ilya-fen"
   }
 ]

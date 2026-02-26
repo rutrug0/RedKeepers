@@ -1,6 +1,11 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
+import {
+  HeroRuntimeActionModifierSource,
+  SharedActionModifierAggregationService,
+} from "../../heroes/application";
+import { InMemoryHeroRuntimePersistenceRepository } from "../../heroes/infra";
 import { DeterministicWorldMapScoutSelectService } from "../application";
 import {
   WORLD_MAP_SCOUT_INTERACTION_OUTCOMES,
@@ -124,6 +129,84 @@ test("POST /world-map/tiles/{tileId}/interact returns report_hostile response fo
     target_tile_label: "Burnt Causeway",
     hostile_force_estimate: "light raider column",
   });
+});
+
+test("POST /world-map/tiles/{tileId}/interact applies next_scout_action modifier when session context is provided", () => {
+  const heroRuntimeRepository = new InMemoryHeroRuntimePersistenceRepository({
+    initial_snapshot: {
+      runtime_states: [],
+      assignment_bindings: [],
+      modifier_instances: [
+        {
+          modifier_instance_id: "mod_scout_detail",
+          player_id: "player_world",
+          hero_id: "hero_scout",
+          ability_id: "ability_scout",
+          modifier_id: "mod_scout_detail",
+          domain: "scout",
+          stat_key: "scout_report_detail_mult",
+          op: "mul",
+          value: "1.2",
+          trigger_window: "next_scout_action",
+          remaining_charges: 1,
+          assignment_context_type: "scout_detachment",
+          assignment_context_id: "scout_8",
+          activated_at: new Date("2026-02-26T12:00:00.000Z"),
+          status: "active",
+        },
+      ],
+    },
+  });
+  const modifierAggregation = new SharedActionModifierAggregationService([
+    new HeroRuntimeActionModifierSource(heroRuntimeRepository),
+  ], heroRuntimeRepository);
+
+  const repository = new InMemoryWorldMapTileStateRepository([
+    {
+      settlement_id: "settlement_alpha",
+      tile_id: "tile_0414_0198",
+      tile_state: "tile_state_hostile_hint",
+      tile_revision: 8,
+      target_tile_label: "Burnt Causeway",
+      hostile_force_estimate: "light raider column",
+    },
+  ]);
+  const service = new DeterministicWorldMapScoutSelectService(repository, {
+    action_modifier_aggregation: modifierAggregation,
+  });
+  const endpoint = new WorldMapTileInteractEndpointHandler(service);
+
+  const response = endpoint.handlePostTileInteract({
+    path: { tileId: "tile_0414_0198" },
+    body: {
+      settlement_id: "settlement_alpha",
+      tile_id: "tile_0414_0198",
+      interaction_type: "scout",
+      flow_version: "v1",
+    },
+    session: {
+      player_id: "player_world",
+      assignment_context_type: "scout_detachment",
+      assignment_context_id: "scout_8",
+    },
+  });
+
+  assert.equal(response.interaction_outcome, "outcome_scout_report_hostile");
+  if (response.interaction_outcome !== "outcome_scout_report_hostile") {
+    return;
+  }
+  assert.equal(
+    response.event.tokens.hostile_force_estimate,
+    "light raider column (verified)",
+  );
+
+  const consumedRows = heroRuntimeRepository.listModifierInstances({
+    player_id: "player_world",
+    status: "consumed",
+  });
+  assert.equal(consumedRows.length, 1);
+  assert.equal(consumedRows[0].modifier_instance_id, "mod_scout_detail");
+  assert.equal(consumedRows[0].remaining_charges, 0);
 });
 
 test("POST /world-map/tiles/{tileId}/interact emits only M0 outcome codes and tile states", () => {
