@@ -447,6 +447,42 @@
                                                                     "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --update-baseline --max-overflow-px 0 --max-diff-percent 0.5 --strict",
                                                                     "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
                                                                     "python tools/orchestrator.py status"
+                                        ]
+                                    }
+                                ]
+    },
+    {
+        "ts":  "2026-02-26T19:45:19.2048429Z",
+        "item_id":  "RK-AUTO-BACKLOG-0004-F02",
+        "status":  "completed",
+        "summary":  "Wired world-map hostile dispatch in the client shell by making map markers selectable (including a foreign settlement placeholder), adding hostile attack + march snapshot contract calls, and rendering dispatch/travel/combat lifecycle from backend payload keys (`dispatch_sent`, `march_arrived`, `combat_resolved`) in both event feed entries and a dedicated hostile outcome panel without local combat simulation fallback logic.",
+        "files":  [
+                      "client-web/app.js",
+                      "client-web/styles.css",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "python -m unittest tests.test_rk_m0_0011_first_slice_loop_smoke tests.test_frontend_visual_smoke",
+                                    "python tools/rk_m0_0011_first_slice_loop_smoke.py",
+                                    "python tools/orchestrator.py status"
+                                ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Add hostile dispatch action coverage to frontend visual smoke helper",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Extend first-slice shell action smoke paths so automation selects the hostile marker and verifies the hostile dispatch flow produces backend-keyed lifecycle feedback (including combat resolution) in the event feed.",
+                                        "acceptance_criteria":  [
+                                                                    "tools/frontend_visual_smoke.py includes a first-slice action feedback path that triggers `[data-worldmap-adapter-action=\"attack\"]` after selecting the hostile marker",
+                                                                    "Automated action feedback asserts at least one hostile dispatch completion key such as `event.combat.placeholder_skirmish_win` appears in the event feed after trigger",
+                                                                    "tests/test_frontend_visual_smoke.py includes helper coverage for the added hostile action path configuration"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python -m unittest tests.test_frontend_visual_smoke",
+                                                                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/orchestrator.py status"
                                                                 ]
                                     }
                                 ]

@@ -65,6 +65,18 @@
       "Scout dispatch to {target_tile_label} aborted: tile is unavailable for this route.",
     "event.scout.unavailable_tile":
       "Scout dispatch to {target_tile_label} aborted: tile is unavailable for this route.",
+    "event.world.march_started":
+      "{army_name} marches from {origin_settlement_name} toward {target_tile_label}.",
+    "event.world.march_returned":
+      "{army_name} returns to {settlement_name} with {haul_summary}.",
+    "event.combat.placeholder_skirmish_win":
+      "{army_name} wins a brief skirmish near {target_tile_label}. Losses are light; survivors regroup for orders.",
+    "event.combat.placeholder_skirmish_loss":
+      "{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.",
+    "event.world.hostile_dispatch_target_required":
+      "Select a foreign settlement tile before dispatching a hostile march.",
+    "event.world.hostile_dispatch_failed":
+      "Hostile march dispatch failed ({error_code}) near {target_tile_label}: {message}",
     "event.settlement.name_assigned":
       "Surveyors record the new holding as {settlement_name}. The name enters the ledger.",
   });
@@ -72,7 +84,7 @@
   const mockClientShellState = {
     panelModes: {
       settlement: "populated",
-      worldMap: "loading",
+      worldMap: "populated",
       eventFeed: "populated",
     },
     panels: {
@@ -160,20 +172,51 @@
           populated: {
             coords: "412 / 198",
             region: "Black Reed March",
-            selected_tile_id: "tile_0412_0198",
+            selected_tile_id: "tile_0000_0000",
+            selected_marker_id: "marker_home_settlement",
             markers: [
-              { className: "settlement", label: "Your Keep", selected: true },
-              { className: "allied", label: "Ally Camp", selected: false },
-              { className: "hostile", label: "Ruin Site", selected: false },
+              {
+                marker_id: "marker_home_settlement",
+                className: "settlement",
+                label: "Cinderwatch Hold",
+                selected: true,
+                tile_id: "tile_0000_0000",
+                tile_label: "Cinderwatch Hold",
+                target_kind: "home_settlement",
+                settlement_id: "settlement_alpha",
+                coords: { x: 0, y: 0 },
+              },
+              {
+                marker_id: "marker_allied_camp",
+                className: "allied",
+                label: "Roadwarden Camp",
+                selected: false,
+                tile_id: "tile_0001_0001",
+                tile_label: "Roadwarden Camp",
+                target_kind: "friendly_placeholder",
+                coords: { x: 1, y: 1 },
+              },
+              {
+                marker_id: "marker_hostile_ruin_holdfast",
+                className: "hostile",
+                label: "Ruin Holdfast",
+                selected: false,
+                tile_id: "tile_0002_0001",
+                tile_label: "Ruin Holdfast",
+                target_kind: "hostile_settlement",
+                settlement_id: "settlement_hostile",
+                defender_garrison_strength: 40,
+                coords: { x: 2, y: 1 },
+              },
             ],
             routes: [
               { className: "route-line--one" },
               { className: "route-line--two" },
             ],
             selectedTile: {
-              Type: "Neutral Forest",
-              Control: "Unclaimed",
-              Travel: "14m from Keep",
+              Type: "Home Settlement",
+              Control: "Player Controlled",
+              Travel: "Origin",
             },
             legend: [
               { kind: "settlement", label: "Your Settlements" },
@@ -182,6 +225,7 @@
             ],
             actions: [
               "Send Scouts (placeholder)",
+              "Dispatch Hostile March",
               "Plan Route (placeholder)",
               "Set Rally Marker (placeholder)",
             ],
@@ -453,8 +497,31 @@
     build: null,
     train: null,
   };
+  const firstSliceWorldMapHostileDispatchFixture = Object.freeze({
+    source_origin: {
+      x: 0,
+      y: 0,
+    },
+    seconds_per_tile: 30,
+    army_name: "Cinderwatch Vanguard",
+    dispatched_units: Object.freeze([
+      {
+        unit_id: "watch_levy",
+        unit_count: 10,
+        unit_attack: 5,
+      },
+    ]),
+  });
+  const worldMapHostileEventPayloadOrder = Object.freeze([
+    "dispatch_sent",
+    "march_arrived",
+    "combat_resolved",
+  ]);
   const worldMapActionRuntime = {
     pending_action: null,
+    selected_marker_id: "marker_home_settlement",
+    next_march_sequence: 1,
+    hostile_dispatch_outcome: null,
     unavailable_scout_tile_by_id: {},
   };
 
@@ -540,6 +607,8 @@
     building_upgrade: "/settlements/{settlementId}/buildings/{buildingId}/upgrade",
     unit_train: "/settlements/{settlementId}/units/{unitId}/train",
     world_map_tile_interact: "/world-map/tiles/{tileId}/interact",
+    world_map_settlement_attack: "/world-map/settlements/{targetSettlementId}/attack",
+    world_map_march_snapshot: "/world-map/marches/{marchId}/snapshot",
   });
 
   const resolveIsoInstant = (value, fallbackIso) => {
@@ -763,6 +832,57 @@
         transportResponse,
       );
     },
+    dispatchHostileSettlementAttackCommand: async (input) => {
+      const departedAtIso = resolveIsoInstant(input.departed_at, new Date().toISOString());
+      const transportResponse = await invokeFirstSliceTransportRoute(
+        firstSliceTransportRoutes.world_map_settlement_attack,
+        {
+          path: {
+            targetSettlementId: input.target_settlement_id,
+          },
+          body: {
+            flow_version: "v1",
+            march_id: input.march_id,
+            source_settlement_id: input.source_settlement_id,
+            source_settlement_name: input.source_settlement_name,
+            target_settlement_id: input.target_settlement_id,
+            target_settlement_name: input.target_settlement_name,
+            target_tile_label: input.target_tile_label,
+            origin: input.origin,
+            target: input.target,
+            defender_garrison_strength: Number(input.defender_garrison_strength) || 0,
+            dispatched_units: input.dispatched_units,
+            departed_at: departedAtIso,
+            seconds_per_tile: Number(input.seconds_per_tile) || undefined,
+            army_name: input.army_name,
+          },
+        },
+      );
+      return unwrapFirstSliceTransportSuccess(
+        firstSliceTransportRoutes.world_map_settlement_attack,
+        transportResponse,
+      );
+    },
+    getMarchSnapshotCommand: async (input) => {
+      const observedAtIso = resolveIsoInstant(input.observed_at, new Date().toISOString());
+      const transportResponse = await invokeFirstSliceTransportRoute(
+        firstSliceTransportRoutes.world_map_march_snapshot,
+        {
+          path: {
+            marchId: input.march_id,
+          },
+          body: {
+            march_id: input.march_id,
+            flow_version: "v1",
+            observed_at: observedAtIso,
+          },
+        },
+      );
+      return unwrapFirstSliceTransportSuccess(
+        firstSliceTransportRoutes.world_map_march_snapshot,
+        transportResponse,
+      );
+    },
   });
 
   const firstSliceClientContractAdapter = createFirstSliceClientContractAdapter();
@@ -885,12 +1005,118 @@
     };
   };
 
+  const getPopulatedMapScenario = () => mockClientShellState.panels.worldMap.scenarios.populated;
   const getPopulatedEventScenario = () => mockClientShellState.panels.eventFeed.scenarios.populated;
+  const normalizeMapCoordinate = (value, fallback) =>
+    Number.isFinite(value) ? Number(value) : Number(fallback) || 0;
+  const toMapMarkerDistance = (fromMarker, toMarker) => {
+    if (!fromMarker || !toMarker || !fromMarker.coords || !toMarker.coords) {
+      return 0;
+    }
+    const deltaX = Math.abs(
+      normalizeMapCoordinate(toMarker.coords.x, 0) - normalizeMapCoordinate(fromMarker.coords.x, 0),
+    );
+    const deltaY = Math.abs(
+      normalizeMapCoordinate(toMarker.coords.y, 0) - normalizeMapCoordinate(fromMarker.coords.y, 0),
+    );
+    return Math.max(0, Math.trunc(deltaX + deltaY));
+  };
+  const getWorldMapMarkerList = () => {
+    const mapScenario = getPopulatedMapScenario();
+    return Array.isArray(mapScenario.markers) ? mapScenario.markers : [];
+  };
+  const resolveWorldMapHomeMarker = () =>
+    getWorldMapMarkerList().find((marker) => marker.target_kind === "home_settlement")
+    || getWorldMapMarkerList()[0]
+    || null;
+  const resolveSelectedWorldMapMarker = () => {
+    const markerList = getWorldMapMarkerList();
+    if (markerList.length < 1) {
+      return null;
+    }
+
+    const selectedMarkerId = String(worldMapActionRuntime.selected_marker_id || "").trim();
+    if (selectedMarkerId.length > 0) {
+      const selectedByRuntime = markerList.find((marker) => marker.marker_id === selectedMarkerId);
+      if (selectedByRuntime) {
+        return selectedByRuntime;
+      }
+    }
+
+    const selectedByScenario = markerList.find((marker) => marker.selected === true);
+    if (selectedByScenario) {
+      return selectedByScenario;
+    }
+
+    return markerList[0];
+  };
+  const buildSelectedTileSnapshotFromMarker = (marker) => {
+    if (!marker) {
+      return {
+        Type: "No Selection",
+        Control: "N/A",
+        Travel: "N/A",
+      };
+    }
+
+    const homeMarker = resolveWorldMapHomeMarker();
+    const distanceTiles = toMapMarkerDistance(homeMarker, marker);
+    const etaSeconds = distanceTiles * firstSliceWorldMapHostileDispatchFixture.seconds_per_tile;
+    if (marker.target_kind === "home_settlement") {
+      return {
+        Type: "Home Settlement",
+        Control: "Player Controlled",
+        Travel: "Origin",
+      };
+    }
+    if (marker.target_kind === "hostile_settlement") {
+      return {
+        Type: "Foreign Settlement",
+        Control: "Hostile Placeholder",
+        Travel: `ETA ${formatEtaFromSeconds(etaSeconds)} (${distanceTiles} tiles)`,
+      };
+    }
+    return {
+      Type: "Friendly Placeholder",
+      Control: "Friendly Presence",
+      Travel: `ETA ${formatEtaFromSeconds(etaSeconds)} (${distanceTiles} tiles)`,
+    };
+  };
+  const syncWorldMapScenarioFromRuntime = () => {
+    const mapScenario = getPopulatedMapScenario();
+    const markerList = getWorldMapMarkerList();
+    if (markerList.length < 1) {
+      mapScenario.selected_tile_id = "";
+      mapScenario.selectedTile = buildSelectedTileSnapshotFromMarker(null);
+      return;
+    }
+
+    const selectedMarker = resolveSelectedWorldMapMarker() || markerList[0];
+    worldMapActionRuntime.selected_marker_id = selectedMarker.marker_id;
+    mapScenario.selected_marker_id = selectedMarker.marker_id;
+    mapScenario.selected_tile_id = selectedMarker.tile_id || "";
+    mapScenario.selectedTile = buildSelectedTileSnapshotFromMarker(selectedMarker);
+    mapScenario.markers = markerList.map((marker) => ({
+      ...marker,
+      selected: marker.marker_id === selectedMarker.marker_id,
+    }));
+  };
+  const setSelectedWorldMapMarker = (markerId) => {
+    if (!markerId || mockClientShellState.panelModes.worldMap !== "populated") {
+      return;
+    }
+    worldMapActionRuntime.selected_marker_id = String(markerId).trim();
+    syncWorldMapScenarioFromRuntime();
+  };
 
   const appendEventFeedEntry = (entry) => {
     const eventScenario = getPopulatedEventScenario();
     const existing = Array.isArray(eventScenario.events) ? eventScenario.events : [];
     eventScenario.events = [entry, ...existing].slice(0, 20);
+  };
+  const formatEventMetaTimestamp = (instantValue) => {
+    const parsed = parseIsoInstant(instantValue);
+    return parsed ? parsed.toISOString() : "Just now";
   };
 
   const mapPlaceholderEventTokens = (contentKey, payload) => {
@@ -1160,12 +1386,14 @@
       build: "event.build.failure_invalid_state",
       train: "event.train.failure_invalid_state",
       scout: "event.scout.unavailable_tile",
+      attack: "event.world.hostile_dispatch_failed",
     };
     const failureMetaByAction = {
       tick: "Just now | Economy | TICK adapter",
       build: "Just now | Settlement | BUILD adapter",
       train: "Just now | Military | TRAIN adapter",
       scout: "Just now | World | SCOUT adapter",
+      attack: "Just now | World | HOSTILE ATTACK adapter",
     };
 
     const failureContentKey = failureContentKeyByAction[actionType] || "event.tick.passive_gain_stalled";
@@ -1192,6 +1420,11 @@
         settlement_name: settlementActionRuntime.settlement_name,
         target_tile_label: fallbackTileLabel,
       },
+      attack: {
+        target_tile_label: fallbackTileLabel,
+        error_code: errorCode,
+        message: resolveActionErrorMessage(error),
+      },
     };
     const failureTokens = failureTokensByAction[actionType] || failureTokensByAction.tick;
 
@@ -1214,39 +1447,23 @@
   };
 
   const resolveSelectedWorldMapTileId = () => {
-    const currentMapScenario = getPanelScenario("worldMap").scenario;
-    const scenarioTileId =
-      typeof currentMapScenario?.selected_tile_id === "string"
-        ? currentMapScenario.selected_tile_id.trim()
-        : "";
-    if (scenarioTileId.length > 0) {
-      return scenarioTileId;
+    if (mockClientShellState.panelModes.worldMap === "populated") {
+      syncWorldMapScenarioFromRuntime();
     }
-
-    const populatedScenarioTileId =
-      typeof mockClientShellState.panels.worldMap.scenarios.populated.selected_tile_id === "string"
-        ? mockClientShellState.panels.worldMap.scenarios.populated.selected_tile_id.trim()
-        : "";
-    if (populatedScenarioTileId.length > 0) {
-      return populatedScenarioTileId;
+    const selectedMarker = resolveSelectedWorldMapMarker();
+    if (selectedMarker && typeof selectedMarker.tile_id === "string" && selectedMarker.tile_id.trim().length > 0) {
+      return selectedMarker.tile_id.trim();
     }
-
-    return "tile_0412_0198";
+    return "tile_0000_0000";
   };
 
   const resolveSelectedWorldMapTileLabel = (tileId) => {
-    const currentMapScenario = getPanelScenario("worldMap").scenario;
-    const selectedType =
-      typeof currentMapScenario?.selectedTile?.Type === "string"
-        ? currentMapScenario.selectedTile.Type.trim()
-        : "";
-    if (
-      selectedType.length > 0
-      && selectedType !== "No Selection"
-      && selectedType !== "Syncing"
-      && selectedType !== "Unavailable"
-    ) {
-      return selectedType;
+    const selectedMarker = resolveSelectedWorldMapMarker();
+    if (selectedMarker && typeof selectedMarker.tile_label === "string" && selectedMarker.tile_label.trim().length > 0) {
+      return selectedMarker.tile_label.trim();
+    }
+    if (selectedMarker && typeof selectedMarker.label === "string" && selectedMarker.label.trim().length > 0) {
+      return selectedMarker.label.trim();
     }
 
     return `Frontier Tile ${tileId}`;
@@ -1369,6 +1586,123 @@
       tokens,
     };
   };
+  const resolveWorldMapHostileDispatchAvailability = () => {
+    const selectedMarker = resolveSelectedWorldMapMarker();
+    const isHostileSettlementTarget =
+      selectedMarker
+      && selectedMarker.target_kind === "hostile_settlement"
+      && typeof selectedMarker.settlement_id === "string"
+      && selectedMarker.settlement_id.trim().length > 0;
+    if (isHostileSettlementTarget) {
+      return {
+        contractDisabled: false,
+        contentKey: "",
+        tokens: {},
+      };
+    }
+
+    return {
+      contractDisabled: true,
+      contentKey: "event.world.hostile_dispatch_target_required",
+      tokens: {
+        target_tile_label: selectedMarker?.tile_label || selectedMarker?.label || "foreign settlement tile",
+      },
+    };
+  };
+
+  const appendHostileDispatchLifecycleEvents = (response) => {
+    const eventPayloads = response?.event_payloads || {};
+    const resolvedEvents = worldMapHostileEventPayloadOrder
+      .map((payloadKey) => {
+        const payload = eventPayloads?.[payloadKey];
+        if (!payload || typeof payload.content_key !== "string") {
+          return null;
+        }
+        return {
+          payload_key: payload.payload_key || payloadKey,
+          content_key: payload.content_key,
+          tokens: payload.tokens || {},
+          occurred_at: payload.occurred_at,
+        };
+      })
+      .filter(Boolean);
+
+    if (resolvedEvents.length < 1) {
+      return;
+    }
+
+    for (const event of resolvedEvents) {
+      const contentKey = mapBackendEventKeyToClientKey(event.content_key);
+      const tokens = mapPlaceholderEventTokens(contentKey, event.tokens);
+      appendEventFeedEntry({
+        contentKey,
+        tokens,
+        meta: `${formatEventMetaTimestamp(event.occurred_at)} | World | HOSTILE ${String(event.payload_key || "event").toUpperCase()}`,
+        priority: event.payload_key === "combat_resolved" ? "high" : "normal",
+      });
+    }
+  };
+
+  const applyHostileDispatchActionResult = (response, context) => {
+    const targetTileLabel = context?.target_tile_label || "Hostile Settlement";
+    const targetSettlementId = context?.target_settlement_id || "settlement_hostile";
+    const isFailedContract = response?.status === "failed";
+    if (isFailedContract) {
+      const failureContentKey = "event.world.hostile_dispatch_failed";
+      const failureTokens = {
+        target_tile_label: targetTileLabel,
+        error_code: response?.error_code || "hostile_dispatch_failed",
+        message: response?.message || "Contract rejected by world-map attack endpoint.",
+      };
+      appendEventFeedEntry({
+        contentKey: failureContentKey,
+        tokens: failureTokens,
+        meta: "Just now | World | HOSTILE ATTACK adapter",
+        priority: "medium",
+      });
+      worldMapActionRuntime.hostile_dispatch_outcome = {
+        status: "failed",
+        flow: response?.flow || "world_map.hostile_attack_v1",
+        march_id: response?.march_id || context?.march_id || "march_unknown",
+        target_tile_label: targetTileLabel,
+        target_settlement_id: targetSettlementId,
+        error_code: response?.error_code || "hostile_dispatch_failed",
+        message: response?.message || "Hostile march dispatch failed.",
+        updated_at: new Date().toISOString(),
+      };
+      setLastActionOutcome("attack", response, failureContentKey, failureTokens);
+      return;
+    }
+
+    appendHostileDispatchLifecycleEvents(response);
+    const resolvedPayloads = response?.event_payloads || {};
+    const primaryOutcomePayload =
+      resolvedPayloads.combat_resolved
+      || resolvedPayloads.march_arrived
+      || resolvedPayloads.dispatch_sent;
+    const outcomeContentKey = primaryOutcomePayload?.content_key || "event.world.march_started";
+    const outcomeTokens = mapPlaceholderEventTokens(
+      outcomeContentKey,
+      primaryOutcomePayload?.tokens || {
+        target_tile_label: targetTileLabel,
+      },
+    );
+    worldMapActionRuntime.hostile_dispatch_outcome = {
+      status: "accepted",
+      flow: response?.flow || "world_map.hostile_attack_v1",
+      march_id: response?.march_id || context?.march_id || "march_unknown",
+      target_tile_label: targetTileLabel,
+      target_settlement_id: targetSettlementId,
+      payloads: resolvedPayloads,
+      combat_outcome: response?.combat_outcome || null,
+      attacker_strength: Number(response?.attacker_strength) || 0,
+      defender_strength: Number(response?.defender_strength) || 0,
+      losses: response?.losses || null,
+      snapshot: context?.snapshot || null,
+      updated_at: new Date().toISOString(),
+    };
+    setLastActionOutcome("attack", response, outcomeContentKey, outcomeTokens);
+  };
 
   const applyScoutActionResult = (response) => {
     const isFailure = response?.status === "failed";
@@ -1488,32 +1822,104 @@
   };
 
   const runWorldMapContractAction = async (actionType) => {
-    if (actionType !== "scout" || worldMapActionRuntime.pending_action !== null) {
+    if ((actionType !== "scout" && actionType !== "attack") || worldMapActionRuntime.pending_action !== null) {
       return;
     }
-    const scoutAvailability = resolveWorldMapScoutContractAvailability();
-    if (scoutAvailability.contractDisabled) {
-      return;
+    if (actionType === "scout") {
+      const scoutAvailability = resolveWorldMapScoutContractAvailability();
+      if (scoutAvailability.contractDisabled) {
+        return;
+      }
+    }
+    if (actionType === "attack") {
+      const hostileDispatchAvailability = resolveWorldMapHostileDispatchAvailability();
+      if (hostileDispatchAvailability.contractDisabled) {
+        return;
+      }
+    }
+
+    const tileId = resolveSelectedWorldMapTileId();
+    const targetTileLabel = resolveSelectedWorldMapTileLabel(tileId);
+    const selectedMarker = resolveSelectedWorldMapMarker();
+    const targetSettlementId =
+      typeof selectedMarker?.settlement_id === "string" && selectedMarker.settlement_id.trim().length > 0
+        ? selectedMarker.settlement_id.trim()
+        : "settlement_hostile";
+    const targetSettlementName =
+      typeof selectedMarker?.label === "string" && selectedMarker.label.trim().length > 0
+        ? selectedMarker.label.trim()
+        : targetTileLabel;
+    const targetCoords = {
+      x: normalizeMapCoordinate(selectedMarker?.coords?.x, 2),
+      y: normalizeMapCoordinate(selectedMarker?.coords?.y, 1),
+    };
+    const marchId = `march_attack_${String(worldMapActionRuntime.next_march_sequence).padStart(4, "0")}`;
+    if (actionType === "attack") {
+      worldMapActionRuntime.next_march_sequence += 1;
     }
 
     worldMapActionRuntime.pending_action = actionType;
     renderPanels();
 
-    const tileId = resolveSelectedWorldMapTileId();
-    const targetTileLabel = resolveSelectedWorldMapTileLabel(tileId);
-
     try {
-      const response = await firstSliceClientContractAdapter.scoutTileInteractCommand({
-        settlement_id: settlementActionRuntime.settlement_id,
-        settlement_name: settlementActionRuntime.settlement_name,
-        tile_id: tileId,
-      });
-      applyScoutActionResult(response);
-    } catch (error) {
-      handleActionInvocationError("scout", error, {
-        tile_id: tileId,
+      if (actionType === "scout") {
+        const response = await firstSliceClientContractAdapter.scoutTileInteractCommand({
+          settlement_id: settlementActionRuntime.settlement_id,
+          settlement_name: settlementActionRuntime.settlement_name,
+          tile_id: tileId,
+        });
+        applyScoutActionResult(response);
+        return;
+      }
+
+      const response = await firstSliceClientContractAdapter.dispatchHostileSettlementAttackCommand({
+        march_id: marchId,
+        source_settlement_id: settlementActionRuntime.settlement_id,
+        source_settlement_name: settlementActionRuntime.settlement_name,
+        target_settlement_id: targetSettlementId,
+        target_settlement_name: targetSettlementName,
         target_tile_label: targetTileLabel,
+        origin: {
+          x: normalizeMapCoordinate(firstSliceWorldMapHostileDispatchFixture.source_origin.x, 0),
+          y: normalizeMapCoordinate(firstSliceWorldMapHostileDispatchFixture.source_origin.y, 0),
+        },
+        target: targetCoords,
+        defender_garrison_strength: Number(selectedMarker?.defender_garrison_strength) || 40,
+        dispatched_units: firstSliceWorldMapHostileDispatchFixture.dispatched_units,
+        departed_at: new Date(),
+        seconds_per_tile: firstSliceWorldMapHostileDispatchFixture.seconds_per_tile,
+        army_name: firstSliceWorldMapHostileDispatchFixture.army_name,
       });
+
+      let latestMarchSnapshot = null;
+      if (response?.status === "accepted") {
+        try {
+          latestMarchSnapshot = await firstSliceClientContractAdapter.getMarchSnapshotCommand({
+            march_id: response.march_id,
+            observed_at: new Date(),
+          });
+        } catch {
+          latestMarchSnapshot = null;
+        }
+      }
+      applyHostileDispatchActionResult(response, {
+        march_id: marchId,
+        target_tile_label: targetTileLabel,
+        target_settlement_id: targetSettlementId,
+        snapshot: latestMarchSnapshot,
+      });
+    } catch (error) {
+      if (actionType === "scout") {
+        handleActionInvocationError("scout", error, {
+          tile_id: tileId,
+          target_tile_label: targetTileLabel,
+        });
+      } else if (actionType === "attack") {
+        handleActionInvocationError("attack", error, {
+          tile_id: tileId,
+          target_tile_label: targetTileLabel,
+        });
+      }
     } finally {
       worldMapActionRuntime.pending_action = null;
       renderPanels();
@@ -1787,7 +2193,7 @@
     const lastOutcome = settlementActionRuntime.last_outcome;
     const outcomeNarrative = lastOutcome
       ? getNarrativeText(lastOutcome.contentKey, lastOutcome.tokens)
-      : "No adapter calls yet. Trigger Tick, Build, Train, or Scout to see contract payload outcomes.";
+      : "No adapter calls yet. Trigger Tick, Build, Train, Scout, or Hostile March to see contract payload outcomes.";
     const outcomeClass = lastOutcome
       ? lastOutcome.status === "failed"
         ? "action-outcome is-failed"
@@ -1876,6 +2282,10 @@
       return;
     }
 
+    if (mode === "populated") {
+      syncWorldMapScenarioFromRuntime();
+    }
+
     refs.title.textContent = panel.title;
 
     const selectedFields = Object.entries(scenario.selectedTile || {})
@@ -1896,35 +2306,137 @@
 
     const isMapActionPending = worldMapActionRuntime.pending_action !== null;
     const scoutAvailability = resolveWorldMapScoutContractAvailability();
-    const mapContractReasonSection =
+    const hostileDispatchAvailability = resolveWorldMapHostileDispatchAvailability();
+    const mapContractReasonRows = [
       mode === "populated" && scoutAvailability.contractDisabled
         ? `
-          <ul class="action-reason-list" aria-live="polite">
-            <li class="action-reason-item" data-content-key="${escapeHtml(scoutAvailability.contentKey)}">
-              <strong>Send Scouts</strong>
-              <span>${escapeHtml(getNarrativeText(scoutAvailability.contentKey, scoutAvailability.tokens))}</span>
-            </li>
-          </ul>
+          <li class="action-reason-item" data-content-key="${escapeHtml(scoutAvailability.contentKey)}">
+            <strong>Send Scouts</strong>
+            <span>${escapeHtml(getNarrativeText(scoutAvailability.contentKey, scoutAvailability.tokens))}</span>
+          </li>
         `
-        : "";
+        : "",
+      mode === "populated" && hostileDispatchAvailability.contractDisabled
+        ? `
+          <li class="action-reason-item" data-content-key="${escapeHtml(hostileDispatchAvailability.contentKey)}">
+            <strong>Dispatch Hostile March</strong>
+            <span>${escapeHtml(getNarrativeText(hostileDispatchAvailability.contentKey, hostileDispatchAvailability.tokens))}</span>
+          </li>
+        `
+        : "",
+    ]
+      .filter((row) => row.length > 0)
+      .join("");
+    const mapContractReasonSection = mapContractReasonRows.length > 0
+      ? `<ul class="action-reason-list" aria-live="polite">${mapContractReasonRows}</ul>`
+      : "";
     const actionItems = (scenario.actions || [])
       .map((label) => {
         const normalizedLabel = String(label).trim().toLowerCase();
         const isScoutAction = normalizedLabel.startsWith("send scouts");
+        const isHostileDispatchAction = normalizedLabel.startsWith("dispatch hostile march");
         const isDisabled =
           mode !== "populated"
           || isMapActionPending
           || settlementActionRuntime.pending_action !== null
-          || (isScoutAction && scoutAvailability.contractDisabled);
+          || (isScoutAction && scoutAvailability.contractDisabled)
+          || (isHostileDispatchAction && hostileDispatchAvailability.contractDisabled);
         const displayLabel = isScoutAction && worldMapActionRuntime.pending_action === "scout"
           ? "Scouting..."
+          : isHostileDispatchAction && worldMapActionRuntime.pending_action === "attack"
+            ? "Dispatching..."
           : label;
 
         return `<button type="button" class="action-btn"${
-          isScoutAction ? ' data-worldmap-adapter-action="scout"' : ""
+          isScoutAction
+            ? ' data-worldmap-adapter-action="scout"'
+            : isHostileDispatchAction
+              ? ' data-worldmap-adapter-action="attack"'
+              : ""
         } ${isDisabled ? "disabled" : ""}>${escapeHtml(displayLabel)}</button>`;
       })
       .join("");
+    const hostileDispatchOutcome = worldMapActionRuntime.hostile_dispatch_outcome;
+    const hostileDispatchOutcomeSection = (() => {
+      if (mode === "loading") {
+        return `
+          <section class="subpanel compact">
+            <h3>Hostile Dispatch Outcome</h3>
+            <p class="loading-copy">Awaiting world-map contract readiness...</p>
+          </section>
+        `;
+      }
+
+      if (!hostileDispatchOutcome) {
+        return `
+          <section class="subpanel compact">
+            <h3>Hostile Dispatch Outcome</h3>
+            <p class="subpanel-note">Dispatch path uses backend payload keys only: dispatch_sent -> march_arrived -> combat_resolved.</p>
+            <div class="wire-empty">Select the hostile settlement marker and dispatch one march to view lifecycle + combat results.</div>
+          </section>
+        `;
+      }
+
+      if (hostileDispatchOutcome.status === "failed") {
+        const tokens = {
+          target_tile_label: hostileDispatchOutcome.target_tile_label,
+          error_code: hostileDispatchOutcome.error_code,
+          message: hostileDispatchOutcome.message,
+        };
+        const failedNarrative = getNarrativeText("event.world.hostile_dispatch_failed", tokens);
+        return `
+          <section class="subpanel compact">
+            <h3>Hostile Dispatch Outcome</h3>
+            <p class="action-outcome is-failed">${escapeHtml(failedNarrative)}</p>
+            <div class="wire-fields">
+              <div><span>Flow</span><strong>${escapeHtml(hostileDispatchOutcome.flow || "world_map.hostile_attack_v1")}</strong></div>
+              <div><span>Error</span><strong>${escapeHtml(hostileDispatchOutcome.error_code || "hostile_dispatch_failed")}</strong></div>
+              <div><span>March ID</span><strong>${escapeHtml(hostileDispatchOutcome.march_id || "march_unknown")}</strong></div>
+            </div>
+          </section>
+        `;
+      }
+
+      const payloadRows = worldMapHostileEventPayloadOrder
+        .map((payloadKey) => {
+          const payload = hostileDispatchOutcome.payloads?.[payloadKey];
+          if (!payload || typeof payload.content_key !== "string") {
+            return "";
+          }
+          const narrative = getNarrativeText(payload.content_key, payload.tokens || {});
+          return `
+            <li class="event-item${payloadKey === "combat_resolved" ? " priority-high" : ""}" data-payload-key="${escapeHtml(payload.payload_key || payloadKey)}">
+              <p class="event-item__title">${escapeHtml(narrative)}</p>
+              <p class="event-item__meta">${escapeHtml(`${payload.payload_key || payloadKey} | ${payload.content_key} | ${formatEventMetaTimestamp(payload.occurred_at)}`)}</p>
+            </li>
+          `;
+        })
+        .filter((row) => row.length > 0)
+        .join("");
+      const losses = hostileDispatchOutcome.losses || {};
+      const snapshot = hostileDispatchOutcome.snapshot;
+      const snapshotProgressRatio = Number(snapshot?.authoritative_position?.progress_ratio) || 0;
+      const snapshotProgressPercent = `${Math.round(clampPercent(snapshotProgressRatio * 100))}%`;
+      const snapshotDistanceTiles = Number(snapshot?.authoritative_position?.distance_tiles) || 0;
+      const snapshotTravelState = snapshot?.march_state || "march_state_unknown";
+      return `
+        <section class="subpanel compact">
+          <h3>Hostile Dispatch Outcome</h3>
+          <p class="subpanel-note">Backend payload lifecycle (deterministic): dispatch_sent -> march_arrived -> combat_resolved</p>
+          <ol class="event-list">${payloadRows || '<li class="event-item"><p class="event-item__title">No payload rows returned.</p></li>'}</ol>
+          <div class="wire-fields">
+            <div><span>Combat Outcome</span><strong>${escapeHtml(hostileDispatchOutcome.combat_outcome || "unknown")}</strong></div>
+            <div><span>Strength</span><strong>${escapeHtml(`${formatNumber(hostileDispatchOutcome.attacker_strength || 0)} vs ${formatNumber(hostileDispatchOutcome.defender_strength || 0)}`)}</strong></div>
+            <div><span>Losses</span><strong>${escapeHtml(`${formatNumber(Number(losses.attacker_units_lost) || 0)} attackers / ${formatNumber(Number(losses.defender_garrison_lost) || 0)} defenders`)}</strong></div>
+          </div>
+          <div class="wire-fields">
+            <div><span>March State</span><strong>${escapeHtml(snapshotTravelState)}</strong></div>
+            <div><span>Travel Progress</span><strong>${escapeHtml(snapshotProgressPercent)}</strong></div>
+            <div><span>Distance</span><strong>${escapeHtml(`${formatNumber(snapshotDistanceTiles)} tiles`)}</strong></div>
+          </div>
+        </section>
+      `;
+    })();
 
     if (mode === "loading") {
       refs.content.innerHTML = `
@@ -1966,6 +2478,7 @@
               <div class="stack-sm">${actionItems}</div>
               ${mapContractReasonSection}
             </section>
+            ${hostileDispatchOutcomeSection}
           </aside>
         </div>
       `;
@@ -2010,6 +2523,7 @@
               <div class="stack-sm">${actionItems}</div>
               ${mapContractReasonSection}
             </section>
+            ${hostileDispatchOutcomeSection}
           </aside>
         </div>
       `;
@@ -2055,6 +2569,7 @@
               <div class="stack-sm">${actionItems}</div>
               ${mapContractReasonSection}
             </section>
+            ${hostileDispatchOutcomeSection}
           </aside>
         </div>
       `;
@@ -2065,7 +2580,14 @@
     const markers = (scenario.markers || [])
       .map(
         (marker) => `
-          <div class="map-marker ${escapeHtml(marker.className)}${marker.selected ? " is-selected" : ""}">${escapeHtml(marker.label)}</div>
+          <button
+            type="button"
+            class="map-marker ${escapeHtml(marker.className)}${marker.selected ? " is-selected" : ""}"
+            data-worldmap-marker-id="${escapeHtml(marker.marker_id || "")}"
+            data-worldmap-tile-id="${escapeHtml(marker.tile_id || "")}"
+            aria-pressed="${String(marker.selected === true)}"
+            aria-label="${escapeHtml(`Select ${marker.label}`)}"
+          >${escapeHtml(marker.label)}</button>
         `,
       )
       .join("");
@@ -2108,6 +2630,7 @@
             <div class="stack-sm">${actionItems}</div>
             ${mapContractReasonSection}
           </section>
+          ${hostileDispatchOutcomeSection}
         </aside>
       </div>
     `;
@@ -2294,8 +2817,24 @@
     const worldMapActionButton = event.target.closest("[data-worldmap-adapter-action]");
     if (worldMapActionButton) {
       const actionType = worldMapActionButton.getAttribute("data-worldmap-adapter-action");
-      if (actionType === "scout") {
+      if (actionType === "scout" || actionType === "attack") {
         void runWorldMapContractAction(actionType);
+      }
+      return;
+    }
+
+    const worldMapMarkerButton = event.target.closest("[data-worldmap-marker-id]");
+    if (worldMapMarkerButton) {
+      const markerId = worldMapMarkerButton.getAttribute("data-worldmap-marker-id");
+      if (typeof markerId === "string" && markerId.trim().length > 0) {
+        setSelectedWorldMapMarker(markerId);
+        renderPanels();
+        const replacementMarkerButton = document.querySelector(
+          `[data-worldmap-marker-id="${markerId.trim()}"]`,
+        );
+        if (replacementMarkerButton instanceof HTMLButtonElement) {
+          replacementMarkerButton.focus({ preventScroll: true });
+        }
       }
       return;
     }

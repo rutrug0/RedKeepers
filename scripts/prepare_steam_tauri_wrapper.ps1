@@ -2,16 +2,13 @@ param(
   [switch]$CleanWeb
 )
 
-$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-Push-Location $repoRoot
-try {
-  $cmd = @("tools/steam_tauri_wrapper.py", "prepare")
-  if ($CleanWeb) {
-    $cmd += "--clean-web"
-  }
-  python @cmd
-  exit $LASTEXITCODE
+$wrapperScript = Join-Path $PSScriptRoot "wrapper_steam_tauri.ps1"
+$wrapperParams = @{
+  Mode = "prepare"
 }
-finally {
-  Pop-Location
+if ($CleanWeb) {
+  $wrapperParams["CleanWeb"] = $true
 }
+
+& $wrapperScript @wrapperParams
+exit $LASTEXITCODE

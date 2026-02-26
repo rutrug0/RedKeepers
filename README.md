@@ -36,26 +36,22 @@ This repository is bootstrapped with the M0 orchestration foundation:
 
 ## Steam Tauri Wrapper Packaging (M0)
 
-- Prepare wrapper web assets from packaged web artifact:
-  - `python tools/steam_tauri_wrapper.py prepare --clean-web`
-- Run local wrapper session:
-  - `python tools/steam_tauri_wrapper.py dev`
-- Build Windows wrapper package:
-  - `python tools/steam_tauri_wrapper.py build`
+- Standardized script entry point (recommended):
+  - `scripts/wrapper_steam_tauri.ps1 -Mode build -CleanWeb`
+- Standardized dev entry point:
+  - `scripts/wrapper_steam_tauri.ps1 -Mode dev -CleanWeb`
+- Legacy scripts and direct Python commands remain supported.
 - Runbook:
   - `docs/operations/steam-tauri-wrapper-packaging.md`
 
 ## Android Capacitor Wrapper Packaging (M0)
 
-- Prepare wrapper web assets from packaged web artifact:
-  - `python tools/android_capacitor_wrapper.py prepare --clean-web`
-- Sync wrapper assets into Android project:
-  - `python tools/android_capacitor_wrapper.py sync`
-- Open Android project in configured IDE:
-  - `python tools/android_capacitor_wrapper.py dev`
-- Build Android debug wrapper package:
-  - `python tools/android_capacitor_wrapper.py build-debug`
-- Build Android release wrapper package:
-  - `python tools/android_capacitor_wrapper.py build-release`
+- Standardized script entry point (recommended debug package):
+  - `scripts/wrapper_android_capacitor.ps1 -Mode build-debug -CleanWeb`
+- Standardized script entry point (recommended release package):
+  - `scripts/wrapper_android_capacitor.ps1 -Mode build-release -CleanWeb`
+- Standardized dev entry point:
+  - `scripts/wrapper_android_capacitor.ps1 -Mode dev -CleanWeb`
+- Legacy scripts and direct Python commands remain supported.
 - Runbook:
   - `docs/operations/android-capacitor-wrapper-packaging.md`

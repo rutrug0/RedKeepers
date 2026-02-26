@@ -17,40 +17,31 @@ This runbook defines the Steam-targeted Tauri wrapper scaffold around the packag
 
 ## Commands
 
-Prepare wrapper web assets from deterministic web package:
+Canonical reproducible script entry point (web artifact -> Steam wrapper build):
 
 ```powershell
-python tools/steam_tauri_wrapper.py prepare --clean-web
+scripts/wrapper_steam_tauri.ps1 -Mode build -CleanWeb
 ```
 
-Equivalent wrapper:
+Canonical reproducible script entry point (web artifact -> Steam wrapper dev run):
+
+```powershell
+scripts/wrapper_steam_tauri.ps1 -Mode dev -CleanWeb
+```
+
+Underlying Python commands (same behavior):
+
+```powershell
+python tools/steam_tauri_wrapper.py build --clean-web
+python tools/steam_tauri_wrapper.py dev --clean-web
+```
+
+Legacy script aliases (still supported):
 
 ```powershell
 scripts/prepare_steam_tauri_wrapper.ps1 -CleanWeb
-```
-
-Run local Tauri wrapper session:
-
-```powershell
-python tools/steam_tauri_wrapper.py dev
-```
-
-Equivalent wrapper:
-
-```powershell
-scripts/run_steam_tauri_wrapper_dev.ps1
-```
-
-Build Windows package (NSIS target via Tauri defaults):
-
-```powershell
-python tools/steam_tauri_wrapper.py build
-```
-
-Equivalent wrapper:
-
-```powershell
-scripts/package_steam_tauri_wrapper.ps1
+scripts/run_steam_tauri_wrapper_dev.ps1 -CleanWeb
+scripts/package_steam_tauri_wrapper.ps1 -CleanWeb
 ```
 
 ## Outputs

@@ -60,53 +60,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T19:16:22.546990+00:00",
-    "updated_at": "2026-02-26T19:16:22.546990+00:00",
+    "updated_at": "2026-02-26T19:46:04.092157+00:00",
     "estimated_effort": "S",
     "token_budget": 9000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0004-F03",
-    "title": "Finalize deterministic combat/loss fixture table for first-slice attack loop",
-    "description": "Produce implementation-ready fixture constants for first-slice hostile settlement combat (outcome comparison and loss ratios) plus one foreign settlement profile definition so backend/frontend behavior remains deterministic and testable.",
-    "milestone": "M0",
-    "type": "design",
-    "priority": "high",
-    "owner_role": "design",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0006"
-    ],
-    "inputs": [
-      "docs/design/world-map-v1-phasing.md",
-      "docs/design/v1-starter-data-tables.md",
-      "docs/design/first-vertical-slice.md"
-    ],
-    "acceptance_criteria": [
-      "Fixture doc defines deterministic attacker_vs_defender outcome rule and explicit loss ratios for win/loss/tie in first-slice scope.",
-      "At least one foreign settlement profile is documented with stats needed for deterministic attack resolution.",
-      "Spec stays within first-slice constraints and explicitly defers rich combat mechanics to post-slice follow-up."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T19:16:22.546990+00:00",
-    "updated_at": "2026-02-26T19:30:13.567498+00:00",
-    "estimated_effort": "S",
-    "token_budget": 7000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
-    "assigned_agent": "rowan-hale"
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-AUTO-BACKLOG-0004-F04",
@@ -137,45 +102,6 @@
     "updated_at": "2026-02-26T19:16:22.546990+00:00",
     "estimated_effort": "S",
     "token_budget": 6000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0004-F05",
-    "title": "Standardize Steam/Android wrapper run-build scripts for slice candidate artifact",
-    "description": "Harden platform/release lane by adding deterministic script entry points that package the current web slice artifact into existing Tauri (Steam lane scaffold) and Capacitor (Android lane scaffold) wrappers with placeholder metadata and reproducible local commands.",
-    "milestone": "M0",
-    "type": "infra",
-    "priority": "high",
-    "owner_role": "platform",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-PLATFORM-0001"
-    ],
-    "inputs": [
-      "client-steam-tauri/",
-      "client-android-capacitor/",
-      "scripts/",
-      "docs/design/vertical-slice-done-v1.md",
-      "docs/design/first-vertical-slice.md"
-    ],
-    "acceptance_criteria": [
-      "Platform scripts provide one reproducible command path for web->Steam wrapper and web->Android wrapper packaging in local/dev environment.",
-      "Wrapper metadata/assets remain explicitly placeholder-only with no final-art dependency.",
-      "Run/build docs are updated with prerequisites and expected output artifact locations for both wrapper lanes."
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-26T19:16:22.546990+00:00",
-    "updated_at": "2026-02-26T19:16:22.546990+00:00",
-    "estimated_effort": "S",
-    "token_budget": 9000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
@@ -283,5 +209,40 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F01"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F03-F01",
+    "title": "Add explicit tie-fixture automation coverage for hostile settlement attack resolution",
+    "description": "Add fixture-driven tests that assert tie classification (`attacker_strength == defender_strength`) maps to `combat_outcome=defender_win` and uses the documented tie loss ratios without variance.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F03"
+    ],
+    "inputs": [
+      "docs/design/m0-hostile-settlement-combat-fixtures.md",
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
+    ],
+    "acceptance_criteria": [
+      "Automated tests include at least one tie fixture scenario with explicit expected losses",
+      "Loss ratio assertions match fixture constants (`attacker: 1.00`, `defender: 0.20`) for tie",
+      "No new combat mechanics or random variance are introduced"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:30:15.095099+00:00",
+    "updated_at": "2026-02-26T19:30:15.095099+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F03"
   }
 ]

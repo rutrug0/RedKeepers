@@ -4,22 +4,19 @@ param(
   [switch]$CleanWeb
 )
 
-$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-Push-Location $repoRoot
-try {
-  $cmd = @("tools/android_capacitor_wrapper.py", "dev")
-  if ($SkipSync) {
-    $cmd += "--skip-sync"
-  }
-  if ($SkipPrepare) {
-    $cmd += "--skip-prepare"
-  }
-  if ($CleanWeb) {
-    $cmd += "--clean-web"
-  }
-  python @cmd
-  exit $LASTEXITCODE
+$wrapperScript = Join-Path $PSScriptRoot "wrapper_android_capacitor.ps1"
+$wrapperParams = @{
+  Mode = "dev"
 }
-finally {
-  Pop-Location
+if ($SkipSync) {
+  $wrapperParams["SkipSync"] = $true
 }
+if ($SkipPrepare) {
+  $wrapperParams["SkipPrepare"] = $true
+}
+if ($CleanWeb) {
+  $wrapperParams["CleanWeb"] = $true
+}
+
+& $wrapperScript @wrapperParams
+exit $LASTEXITCODE

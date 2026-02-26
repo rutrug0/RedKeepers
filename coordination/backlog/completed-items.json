@@ -5380,5 +5380,47 @@
     "runtime_seconds": 651.17,
     "started_at": "2026-02-26T19:16:27.798603+00:00",
     "finished_at": "2026-02-26T19:27:18.978762+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F03",
+    "title": "Finalize deterministic combat/loss fixture table for first-slice attack loop",
+    "description": "Produce implementation-ready fixture constants for first-slice hostile settlement combat (outcome comparison and loss ratios) plus one foreign settlement profile definition so backend/frontend behavior remains deterministic and testable.",
+    "milestone": "M0",
+    "type": "design",
+    "priority": "high",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0006"
+    ],
+    "inputs": [
+      "docs/design/world-map-v1-phasing.md",
+      "docs/design/v1-starter-data-tables.md",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "Fixture doc defines deterministic attacker_vs_defender outcome rule and explicit loss ratios for win/loss/tie in first-slice scope.",
+      "At least one foreign settlement profile is documented with stats needed for deterministic attack resolution.",
+      "Spec stays within first-slice constraints and explicitly defers rich combat mechanics to post-slice follow-up."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:16:22.546990+00:00",
+    "updated_at": "2026-02-26T19:30:14.895166+00:00",
+    "estimated_effort": "S",
+    "token_budget": 7000,
+    "result_summary": "- No additional validation commands were required for this design-only work item.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
+    "assigned_agent": "rowan-hale",
+    "commit_sha": "e63396bd757670a553b26f953ec1cf2b1add18d6",
+    "resolved_by_agent": "rowan-hale",
+    "resolved_by_role": "design",
+    "runtime_seconds": 166.5,
+    "started_at": "2026-02-26T19:27:27.021245+00:00",
+    "finished_at": "2026-02-26T19:30:13.517113+00:00"
   }
 ]

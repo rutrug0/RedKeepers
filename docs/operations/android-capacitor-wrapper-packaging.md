@@ -26,59 +26,40 @@ cd ..
 
 ## Commands
 
-Prepare wrapper web assets from deterministic web package:
+Canonical reproducible script entry point (web artifact -> Android debug package):
 
 ```powershell
-python tools/android_capacitor_wrapper.py prepare --clean-web
+scripts/wrapper_android_capacitor.ps1 -Mode build-debug -CleanWeb
 ```
 
-Equivalent wrapper:
+Canonical reproducible script entry point (web artifact -> Android release package):
+
+```powershell
+scripts/wrapper_android_capacitor.ps1 -Mode build-release -CleanWeb
+```
+
+Canonical reproducible script entry point (web artifact -> Android dev run):
+
+```powershell
+scripts/wrapper_android_capacitor.ps1 -Mode dev -CleanWeb
+```
+
+Underlying Python commands (same behavior):
+
+```powershell
+python tools/android_capacitor_wrapper.py build-debug --clean-web
+python tools/android_capacitor_wrapper.py build-release --clean-web
+python tools/android_capacitor_wrapper.py dev --clean-web
+```
+
+Legacy script aliases (still supported):
 
 ```powershell
 scripts/prepare_android_capacitor_wrapper.ps1 -CleanWeb
-```
-
-Sync prepared assets into Capacitor Android project:
-
-```powershell
-python tools/android_capacitor_wrapper.py sync
-```
-
-Equivalent wrapper:
-
-```powershell
-scripts/sync_android_capacitor_wrapper.ps1
-```
-
-Open Android project in configured IDE:
-
-```powershell
-python tools/android_capacitor_wrapper.py dev
-```
-
-Equivalent wrapper:
-
-```powershell
-scripts/run_android_capacitor_wrapper_dev.ps1
-```
-
-Build Android debug package:
-
-```powershell
-python tools/android_capacitor_wrapper.py build-debug
-```
-
-Build Android release package:
-
-```powershell
-python tools/android_capacitor_wrapper.py build-release
-```
-
-Equivalent wrapper for either variant:
-
-```powershell
-scripts/package_android_capacitor_wrapper.ps1 -Variant debug
-scripts/package_android_capacitor_wrapper.ps1 -Variant release
+scripts/sync_android_capacitor_wrapper.ps1 -CleanWeb
+scripts/run_android_capacitor_wrapper_dev.ps1 -CleanWeb
+scripts/package_android_capacitor_wrapper.ps1 -Variant debug -CleanWeb
+scripts/package_android_capacitor_wrapper.ps1 -Variant release -CleanWeb
 ```
 
 ## Outputs

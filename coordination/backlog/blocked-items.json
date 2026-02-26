@@ -696,5 +696,45 @@
     "generated_by_agent": "sera-kest",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F02",
     "assigned_agent": "sera-kest"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F05",
+    "title": "Standardize Steam/Android wrapper run-build scripts for slice candidate artifact",
+    "description": "Harden platform/release lane by adding deterministic script entry points that package the current web slice artifact into existing Tauri (Steam lane scaffold) and Capacitor (Android lane scaffold) wrappers with placeholder metadata and reproducible local commands.",
+    "milestone": "M0",
+    "type": "infra",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-PLATFORM-0001"
+    ],
+    "inputs": [
+      "client-steam-tauri/",
+      "client-android-capacitor/",
+      "scripts/",
+      "docs/design/vertical-slice-done-v1.md",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "Platform scripts provide one reproducible command path for web->Steam wrapper and web->Android wrapper packaging in local/dev environment.",
+      "Wrapper metadata/assets remain explicitly placeholder-only with no final-art dependency.",
+      "Run/build docs are updated with prerequisites and expected output artifact locations for both wrapper lanes."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:16:22.546990+00:00",
+    "updated_at": "2026-02-26T19:37:14.512424+00:00",
+    "estimated_effort": "S",
+    "token_budget": 9000,
+    "result_summary": null,
+    "blocker_reason": "Note: daemon-managed backlog files were already changing during runtime (`coordination/backlog/work-items.json`, `coordination/backlog/completed-items.json`); I did not edit them for this task.",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
+    "assigned_agent": "juno-cairn"
   }
 ]

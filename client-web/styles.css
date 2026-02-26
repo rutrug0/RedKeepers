@@ -470,8 +470,14 @@ a {
   padding: 4px 10px;
   border-radius: 10px;
   border: 1px solid;
+  color: var(--text);
+  font: inherit;
   font-size: 0.8rem;
   font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  appearance: none;
   backdrop-filter: blur(4px);
 }
 
@@ -498,6 +504,12 @@ a {
 
 .map-marker.is-selected {
   box-shadow: 0 0 0 2px rgba(243, 237, 230, 0.14), 0 0 0 4px rgba(217, 122, 59, 0.22);
+}
+
+.map-marker:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(217, 122, 59, 0.32);
 }
 
 .route-line {
