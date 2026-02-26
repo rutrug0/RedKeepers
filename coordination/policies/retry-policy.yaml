@@ -14,7 +14,8 @@
       "worker timed out",
       "timeout",
       "bootstrap",
-      "codex cli command not found"
+      "codex cli command not found",
+      "retry threshold exceeded"
     ],
     "exclude_reason_patterns": [
       "superseded escalation-chain artifact",

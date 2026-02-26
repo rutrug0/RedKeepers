@@ -141,6 +141,33 @@ class QueueStallRecoveryTests(unittest.TestCase):
 
         self.assertIsNone(created)
 
+    def test_creates_for_unmet_nonblocked_dependency_stall(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            queue = _prepare_queue(Path(tmpdir))
+            queue.active = [
+                {
+                    "id": "RK-A",
+                    "status": "queued",
+                    "dependencies": ["RK-B"],
+                },
+                {
+                    "id": "RK-B",
+                    "status": "queued",
+                    "dependencies": ["RK-A"],
+                },
+            ]
+            queue.blocked = []
+            queue.completed = []
+
+            with mock.patch.object(orchestrator, "STALL_RECOVERY_COOLDOWN_SECONDS", 0):
+                created = orchestrator.ensure_queue_stall_recovery_item(queue)
+
+        self.assertIsNotNone(created)
+        assert created is not None
+        rows = created.get("stall_snapshot", [])
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(all("unmet_dependencies" in row for row in rows))
+
 
 if __name__ == "__main__":
     unittest.main()

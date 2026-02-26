@@ -116,9 +116,7 @@
     "priority": "normal",
     "owner_role": "backend",
     "preferred_agent": null,
-    "dependencies": [
-      "RK-HUMAN-0001-F01"
-    ],
+    "dependencies": [],
     "inputs": [
       "backend/src/modules/world_map/",
       "docs/design/world-map-v1-phasing.md"
@@ -132,7 +130,7 @@
     "status": "queued",
     "retry_count": 0,
     "created_at": "2026-02-26T13:42:24.193702+00:00",
-    "updated_at": "2026-02-26T13:42:24.193702+00:00",
+    "updated_at": "2026-02-26T15:41:02.394862+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -150,9 +148,7 @@
     "priority": "normal",
     "owner_role": "backend",
     "preferred_agent": null,
-    "dependencies": [
-      "RK-HUMAN-0001-F02"
-    ],
+    "dependencies": [],
     "inputs": [
       "backend/src/modules/world_map/",
       "client-web/app.js",
@@ -164,17 +160,18 @@
       "Client can render interpolated movement without altering authoritative outcomes."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T13:42:24.193702+00:00",
-    "updated_at": "2026-02-26T13:42:24.193702+00:00",
+    "updated_at": "2026-02-26T16:09:48.345601+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-HUMAN-0001"
+    "generated_from_item_id": "RK-HUMAN-0001",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-HUMAN-0001-F03",
@@ -246,53 +243,164 @@
     "generated_from_item_id": "RK-HUMAN-0001"
   },
   {
-    "id": "RK-AUTO-STALL-0011",
-    "title": "Resolve queue dependency stall",
-    "description": "The daemon detected queued work items that are not dependency-ready because one or more dependencies are currently blocked. Review blocked items, requeue/close obsolete items, and restore runnable work.",
-    "milestone": "M0",
-    "type": "qa",
-    "priority": "high",
-    "owner_role": "lead",
-    "preferred_agent": "mara-voss",
-    "dependencies": [],
-    "inputs": [
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/blocked-items.json",
-      "coordination/runtime/run-history.jsonl"
+    "id": "RK-M1-0005-F02-F01",
+    "title": "Add automated a11y and mobile viewport smoke checks for client shell",
+    "description": "Add a lightweight browser-based smoke test (keyboard tab sequence + focus-visible assertions + 360px/390px viewport snapshots) for the client shell wireframe so future UI changes do not regress accessibility or mobile usability.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005-F02"
     ],
+    "inputs": [],
     "acceptance_criteria": [
-      "At least one dependency-stalled queued item is made runnable or explicitly closed",
-      "Blocked/obsolete queue artifacts are documented or consolidated",
-      "Backlog no longer stalls immediately on next daemon run"
+      "Automated check runs the client shell at 360px and 390px widths and verifies no horizontal overflow on the main shell container",
+      "Keyboard navigation test covers region tab activation and confirms visible focus styling on representative controls",
+      "Reduced-motion mode test confirms region navigation does not request smooth scrolling"
     ],
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T15:30:49.268048+00:00",
-    "updated_at": "2026-02-26T15:36:53.107302+00:00",
+    "status": "queued",
+    "retry_count": 4,
+    "created_at": "2026-02-25T15:31:58.488198+00:00",
+    "updated_at": "2026-02-26T15:41:02.295430+00:00",
     "estimated_effort": "S",
-    "token_budget": 10000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "queue_stall_recovery",
-    "stall_snapshot": [
-      {
-        "item_id": "RK-M0-0011",
-        "blocked_dependencies": [
-          "RK-M0-0008"
-        ]
-      },
-      {
-        "item_id": "RK-M0-0013",
-        "blocked_dependencies": [
-          "RK-M0-0008"
-        ]
-      }
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-M1-0005-F02",
+    "assigned_agent": "sera-kest",
+    "recovered_from_stale_in_progress": true,
+    "last_failure_reason": "validation failed or commit failed",
+    "last_unblocked_reason": "automatic blocked revisit (2/2)",
+    "last_blocker_reason": "retry threshold exceeded; escalated",
+    "blocked_revisit_count": 2
+  },
+  {
+    "id": "RK-M1-0005-F02-F01-ESC-F03",
+    "title": "Treat frontend visual `STATUS: BLOCKED` validation results as block-state outcomes",
+    "description": "Adjust validation result handling so environment blockers reported by `tools/frontend_visual_smoke.py` (`STATUS: BLOCKED`) mark work items blocked with actionable reason instead of repeatedly retrying/escalating as generic validation failures.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005-F02-F01-ESC"
     ],
-    "stall_fingerprint": "RK-M0-0011:RK-M0-0008|RK-M0-0013:RK-M0-0008",
-    "assigned_agent": "mara-voss"
+    "inputs": [
+      "tools/orchestrator.py",
+      "tools/frontend_visual_smoke.py",
+      "coordination/runtime/run-history.jsonl",
+      "tests/"
+    ],
+    "acceptance_criteria": [
+      "Frontend validation runs that return `STATUS: BLOCKED` are recorded as blocked with blocker reason containing the visual smoke error summary",
+      "Retry count is not incremented for environmental blockers and no new retry-threshold escalation is created from that condition",
+      "Regression coverage demonstrates this behavior while preserving existing failure semantics for real visual regressions"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status",
+      "python -m unittest discover -s tests"
+    ],
+    "status": "queued",
+    "retry_count": 3,
+    "created_at": "2026-02-25T18:52:07.843340+00:00",
+    "updated_at": "2026-02-26T15:41:02.295430+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC",
+    "assigned_agent": "tomas-grell",
+    "last_failure_reason": "validation failed or commit failed",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "retry threshold exceeded; escalated",
+    "blocked_revisit_count": 1
+  },
+  {
+    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+    "title": "Add regression tests for codex model access preflight paths",
+    "description": "Create focused tests that cover startup status preflight failures, fallback selection preflight behavior, and blocked run_history/model_stats fields for unsupported model profiles.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "tools/codex_worker.py",
+      "tools/health_checks.py",
+      "tools/orchestrator.py",
+      "tests"
+    ],
+    "acceptance_criteria": [
+      "status validation fails fast with exact unsupported-model reason when policy model is inaccessible and no usable fallback exists",
+      "execution selects configured fallback when primary model preflight fails and proceeds to run",
+      "blocked run_history and model-stats entries include model_requested/model_used/fallback fields"
+    ],
+    "validation_commands": [
+      "python -m unittest discover -s tests"
+    ],
+    "status": "queued",
+    "retry_count": 3,
+    "created_at": "2026-02-25T18:01:08.893118+00:00",
+    "updated_at": "2026-02-26T15:59:17.419756+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "tomas-grell",
+    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01",
+    "assigned_agent": "tomas-grell",
+    "last_failure_reason": "validation failed or commit failed",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "retry threshold exceeded; escalated",
+    "blocked_revisit_count": 1
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F02",
+    "title": "Design hero UI wireframes for assignment, ability use, and cooldown feedback",
+    "description": "Create placeholder-first wireframes for hero roster card, army dispatch ability slot, and event/combat feedback surfaces defined in the concept doc.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "docs/design/ui-style-guide.md"
+    ],
+    "acceptance_criteria": [
+      "Wireframes cover settlement hero card, dispatch modal controls, and feedback/event states",
+      "Cooldown readability and effect clarity are visible before action commit",
+      "All visuals remain placeholder/wireframe quality and avoid final art dependencies"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 1,
+    "created_at": "2026-02-26T11:43:39.057865+00:00",
+    "updated_at": "2026-02-26T15:59:17.419756+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01",
+    "assigned_agent": "sera-kest",
+    "last_failure_reason": "validation failed or commit failed",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "retry threshold exceeded; escalated",
+    "blocked_revisit_count": 1
   }
 ]

@@ -23,12 +23,20 @@ import {
   type PostSettlementUnitTrainResponseDto,
 } from "../../modules/units";
 import {
+  DeterministicWorldMapMarchSnapshotService,
+  InMemoryWorldMapMarchStateRepository,
   DeterministicWorldMapScoutSelectService,
+  POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE,
   InMemoryWorldMapTileStateRepository,
+  WorldMapMarchSnapshotEndpointHandler,
+  type PostWorldMapMarchSnapshotRequestDto,
+  type PostWorldMapMarchSnapshotResponseDto,
   POST_WORLD_MAP_TILE_INTERACT_ROUTE,
   WorldMapTileInteractEndpointHandler,
   type PostWorldMapTileInteractRequestDto,
   type PostWorldMapTileInteractContractResponseDto,
+  type WorldMapMarchSnapshotService,
+  type WorldMapMarchStateRepository,
   type WorldMapScoutSelectService,
   type WorldMapTileStateRepository,
 } from "../../modules/world_map";
@@ -37,12 +45,14 @@ export type FirstSliceSettlementLoopRoute =
   | typeof POST_SETTLEMENT_TICK_ROUTE
   | typeof POST_SETTLEMENT_BUILDING_UPGRADE_ROUTE
   | typeof POST_SETTLEMENT_UNIT_TRAIN_ROUTE
+  | typeof POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE
   | typeof POST_WORLD_MAP_TILE_INTERACT_ROUTE;
 
 export interface FirstSliceSettlementLoopRequestByRoute {
   readonly [POST_SETTLEMENT_TICK_ROUTE]: PostSettlementTickRequestDto;
   readonly [POST_SETTLEMENT_BUILDING_UPGRADE_ROUTE]: PostSettlementBuildingUpgradeRequestDto;
   readonly [POST_SETTLEMENT_UNIT_TRAIN_ROUTE]: PostSettlementUnitTrainRequestDto;
+  readonly [POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE]: PostWorldMapMarchSnapshotRequestDto;
   readonly [POST_WORLD_MAP_TILE_INTERACT_ROUTE]: PostWorldMapTileInteractRequestDto;
 }
 
@@ -50,6 +60,7 @@ export interface FirstSliceSettlementLoopResponseByRoute {
   readonly [POST_SETTLEMENT_TICK_ROUTE]: PostSettlementTickResponseDto;
   readonly [POST_SETTLEMENT_BUILDING_UPGRADE_ROUTE]: PostSettlementBuildingUpgradeResponseDto;
   readonly [POST_SETTLEMENT_UNIT_TRAIN_ROUTE]: PostSettlementUnitTrainResponseDto;
+  readonly [POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE]: PostWorldMapMarchSnapshotResponseDto;
   readonly [POST_WORLD_MAP_TILE_INTERACT_ROUTE]: PostWorldMapTileInteractContractResponseDto;
 }
 
@@ -86,6 +97,9 @@ interface FirstSliceSettlementLoopRouteResolverByRoute {
   readonly [POST_SETTLEMENT_UNIT_TRAIN_ROUTE]: (
     request: PostSettlementUnitTrainRequestDto,
   ) => PostSettlementUnitTrainResponseDto;
+  readonly [POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE]: (
+    request: PostWorldMapMarchSnapshotRequestDto,
+  ) => PostWorldMapMarchSnapshotResponseDto;
   readonly [POST_WORLD_MAP_TILE_INTERACT_ROUTE]: (
     request: PostWorldMapTileInteractRequestDto,
   ) => PostWorldMapTileInteractContractResponseDto;
@@ -95,6 +109,7 @@ export interface FirstSliceSettlementLoopTransportHandlers {
   readonly tick: SettlementTickEndpointHandler;
   readonly building_upgrade: SettlementBuildingUpgradeEndpointHandler;
   readonly unit_train: SettlementUnitTrainEndpointHandler;
+  readonly world_map_march_snapshot: WorldMapMarchSnapshotEndpointHandler;
   readonly world_map_tile_interact: WorldMapTileInteractEndpointHandler;
 }
 
@@ -102,6 +117,8 @@ export interface DeterministicFirstSliceSettlementLoopLocalRpcTransportOptions {
   readonly projection_service?: SettlementResourceProjectionService;
   readonly building_upgrade_command_handler?: FirstSliceBuildingUpgradeCommandHandler;
   readonly unit_train_command_handler?: FirstSliceUnitTrainCommandHandler;
+  readonly world_map_march_snapshot_service?: WorldMapMarchSnapshotService;
+  readonly world_map_march_state_repository?: WorldMapMarchStateRepository;
   readonly world_map_scout_select_service?: WorldMapScoutSelectService;
   readonly world_map_tile_state_repository?: WorldMapTileStateRepository;
   readonly resolve_tile_available?: (input: {
@@ -155,6 +172,8 @@ export const createFirstSliceSettlementLoopLocalRpcTransport = (
     [POST_SETTLEMENT_BUILDING_UPGRADE_ROUTE]: (request) =>
       handlers.building_upgrade.handlePostUpgrade(request),
     [POST_SETTLEMENT_UNIT_TRAIN_ROUTE]: (request) => handlers.unit_train.handlePostTrain(request),
+    [POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE]: (request) =>
+      handlers.world_map_march_snapshot.handlePostSnapshot(request),
     [POST_WORLD_MAP_TILE_INTERACT_ROUTE]: (request) =>
       handlers.world_map_tile_interact.handlePostTileInteractContract(request),
   });
@@ -162,6 +181,11 @@ export const createFirstSliceSettlementLoopLocalRpcTransport = (
 export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
   options?: DeterministicFirstSliceSettlementLoopLocalRpcTransportOptions,
 ): FirstSliceSettlementLoopLocalRpcTransport => {
+  const worldMapMarchStateRepository =
+    options?.world_map_march_state_repository ?? new InMemoryWorldMapMarchStateRepository();
+  const worldMapMarchSnapshotService =
+    options?.world_map_march_snapshot_service
+    ?? new DeterministicWorldMapMarchSnapshotService(worldMapMarchStateRepository);
   const worldMapTileStateRepository =
     options?.world_map_tile_state_repository ?? new InMemoryWorldMapTileStateRepository();
   const worldMapScoutSelectService =
@@ -178,6 +202,9 @@ export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
     ),
     unit_train: new SettlementUnitTrainEndpointHandler(
       options?.unit_train_command_handler ?? new DeterministicFirstSliceUnitTrainCommandHandler(),
+    ),
+    world_map_march_snapshot: new WorldMapMarchSnapshotEndpointHandler(
+      worldMapMarchSnapshotService,
     ),
     world_map_tile_interact: new WorldMapTileInteractEndpointHandler(
       worldMapScoutSelectService,

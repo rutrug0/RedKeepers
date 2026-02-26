@@ -11,6 +11,8 @@ import {
   POST_SETTLEMENT_UNIT_TRAIN_ROUTE,
 } from "../../modules/units";
 import {
+  InMemoryWorldMapMarchStateRepository,
+  POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE,
   POST_WORLD_MAP_TILE_INTERACT_ROUTE,
 } from "../../modules/world_map";
 import {
@@ -26,6 +28,7 @@ test("local first-slice transport exposes all settlement loop routes and serves 
       POST_SETTLEMENT_TICK_ROUTE,
       POST_SETTLEMENT_BUILDING_UPGRADE_ROUTE,
       POST_SETTLEMENT_UNIT_TRAIN_ROUTE,
+      POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE,
       POST_WORLD_MAP_TILE_INTERACT_ROUTE,
     ].sort(),
   );
@@ -116,6 +119,44 @@ test("local first-slice transport keeps cooldown error_code for unit train failu
     return;
   }
   assert.equal(response.body.error_code, "cooldown");
+});
+
+test("local first-slice transport serves deterministic world-map march snapshots", () => {
+  const transport = createDeterministicFirstSliceSettlementLoopLocalRpcTransport({
+    world_map_march_state_repository: new InMemoryWorldMapMarchStateRepository([
+      {
+        march_id: "march_alpha",
+        settlement_id: "settlement_alpha",
+        march_revision: 1,
+        march_state: "march_state_in_transit",
+        origin: { x: 0, y: 0 },
+        target: { x: 2, y: 0 },
+        departed_at: new Date("2026-02-26T19:00:00.000Z"),
+        seconds_per_tile: 30,
+        attacker_strength: 120,
+        defender_strength: 100,
+      },
+    ]),
+  });
+
+  const response = transport.invoke(POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE, {
+    path: {
+      marchId: "march_alpha",
+    },
+    body: {
+      march_id: "march_alpha",
+      flow_version: "v1",
+      observed_at: "2026-02-26T19:00:15.500Z",
+    },
+  });
+
+  assert.equal(response.status_code, 200);
+  if (response.status_code !== 200) {
+    return;
+  }
+  assert.equal(response.body.flow, "world_map.march_snapshot_v1");
+  assert.equal(response.body.march_state, "march_state_in_transit");
+  assert.equal(response.body.interpolation_window !== undefined, true);
 });
 
 test("local first-slice transport keeps unavailable_tile error_code for world-map scout failures", () => {

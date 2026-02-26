@@ -486,6 +486,17 @@ def normalize_queued_item_dependencies(
                 continue
             seen.add(dep_id)
 
+            if item_id and dep_id == item_id:
+                warnings.append(
+                    {
+                        "item_id": item_id,
+                        "dependency": dep_id,
+                        "reason": "self_dependency_id",
+                        "action": "Remove self-dependency; an item cannot depend on itself.",
+                    }
+                )
+                continue
+
             if dep_id in archived:
                 warnings.append(
                     {
@@ -947,32 +958,61 @@ def _canonical_stall_snapshot(rows: list[dict[str, Any]]) -> list[dict[str, Any]
     normalized: list[dict[str, Any]] = []
     for row in rows:
         item_id = str(row.get("item_id", "")).strip()
-        deps_raw = row.get("blocked_dependencies", [])
-        if not item_id or not isinstance(deps_raw, list):
+        unmet_raw = row.get("unmet_dependencies", [])
+        blocked_raw = row.get("blocked_dependencies", [])
+        if not isinstance(unmet_raw, list):
+            unmet_raw = []
+        if not isinstance(blocked_raw, list):
+            blocked_raw = []
+        if not item_id:
             continue
-        deps = sorted({str(dep).strip() for dep in deps_raw if str(dep).strip()})
-        if not deps:
+        unmet = sorted({str(dep).strip() for dep in unmet_raw if str(dep).strip()})
+        if not unmet and blocked_raw:
+            unmet = sorted({str(dep).strip() for dep in blocked_raw if str(dep).strip()})
+        if not unmet:
             continue
-        normalized.append({"item_id": item_id, "blocked_dependencies": deps})
-    normalized.sort(key=lambda entry: (entry["item_id"], ",".join(entry["blocked_dependencies"])))
+        blocked = []
+        blocked = sorted({str(dep).strip() for dep in blocked_raw if str(dep).strip()})
+        normalized.append(
+            {
+                "item_id": item_id,
+                "unmet_dependencies": unmet,
+                "blocked_dependencies": blocked,
+            }
+        )
+    normalized.sort(
+        key=lambda entry: (
+            entry["item_id"],
+            ",".join(entry.get("unmet_dependencies", [])),
+            ",".join(entry.get("blocked_dependencies", [])),
+        )
+    )
     return normalized
 
 
-def _stall_snapshot_signature(snapshot: list[dict[str, Any]]) -> tuple[tuple[str, tuple[str, ...]], ...]:
-    signature: list[tuple[str, tuple[str, ...]]] = []
+def _stall_snapshot_signature(snapshot: list[dict[str, Any]]) -> tuple[tuple[str, tuple[str, ...], tuple[str, ...]], ...]:
+    signature: list[tuple[str, tuple[str, ...], tuple[str, ...]]] = []
     for entry in snapshot:
         item_id = str(entry.get("item_id", "")).strip()
-        deps_raw = entry.get("blocked_dependencies", [])
-        if not item_id or not isinstance(deps_raw, list):
+        unmet_raw = entry.get("unmet_dependencies", [])
+        blocked_raw = entry.get("blocked_dependencies", [])
+        if not isinstance(unmet_raw, list):
+            unmet_raw = []
+        if not isinstance(blocked_raw, list):
+            blocked_raw = []
+        if not item_id:
             continue
-        deps = tuple(str(dep).strip() for dep in deps_raw if str(dep).strip())
-        if not deps:
+        unmet = tuple(str(dep).strip() for dep in unmet_raw if str(dep).strip())
+        if not unmet and blocked_raw:
+            unmet = tuple(str(dep).strip() for dep in blocked_raw if str(dep).strip())
+        if not unmet:
             continue
-        signature.append((item_id, deps))
+        blocked = tuple(str(dep).strip() for dep in blocked_raw if str(dep).strip())
+        signature.append((item_id, unmet, blocked))
     return tuple(signature)
 
 
-def _stall_item_signature(item: dict[str, Any]) -> tuple[tuple[str, tuple[str, ...]], ...]:
+def _stall_item_signature(item: dict[str, Any]) -> tuple[tuple[str, tuple[str, ...], tuple[str, ...]], ...]:
     snapshot_raw = item.get("stall_snapshot", [])
     if not isinstance(snapshot_raw, list):
         return ()
@@ -983,7 +1023,7 @@ def _stall_item_signature(item: dict[str, Any]) -> tuple[tuple[str, tuple[str, .
 def _latest_stall_recovery_timestamp(
     queue: QueueManager,
     *,
-    signature: tuple[tuple[str, tuple[str, ...]], ...],
+    signature: tuple[tuple[str, tuple[str, ...], tuple[str, ...]], ...],
 ) -> datetime | None:
     latest: datetime | None = None
     for existing in [*queue.active, *queue.completed, *queue.blocked]:
@@ -1057,8 +1097,9 @@ def ensure_queue_stall_recovery_item(queue: QueueManager) -> dict[str, Any] | No
         "id": _next_auto_stall_item_id(queue),
         "title": "Resolve queue dependency stall",
         "description": (
-            "The daemon detected queued work items that are not dependency-ready because one or more dependencies "
-            "are currently blocked. Review blocked items, requeue/close obsolete items, and restore runnable work."
+            "The daemon detected queued work items that are not dependency-ready due to unmet dependencies "
+            "(blocked, cyclic, or otherwise unresolved). Review blocked items and dependency graph health, "
+            "requeue/close obsolete items, and restore runnable work."
         ),
         "milestone": "M0",
         "type": "qa",
@@ -1088,7 +1129,10 @@ def ensure_queue_stall_recovery_item(queue: QueueManager) -> dict[str, Any] | No
         "escalation_target": "Mara Voss",
         "auto_generated": "queue_stall_recovery",
         "stall_snapshot": snapshot,
-        "stall_fingerprint": "|".join(f"{item_id}:{','.join(deps)}" for item_id, deps in signature),
+        "stall_fingerprint": "|".join(
+            f"{item_id}:unmet={','.join(unmet)}:blocked={','.join(blocked)}"
+            for item_id, unmet, blocked in signature
+        ),
     }
     queue.append_item(item)
     queue.save()

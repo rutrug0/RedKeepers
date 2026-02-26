@@ -205,6 +205,32 @@ class QueueIntegrityTests(unittest.TestCase):
             {"non_id_dependency_value", "archived_dependency_id", "unknown_dependency_id", "non_string_dependency"},
         )
 
+    def test_normalize_queued_dependencies_removes_self_dependency(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            backlog = root / "coordination" / "backlog"
+            backlog.mkdir(parents=True, exist_ok=True)
+            (backlog / "work-items.json").write_text("[]\n", encoding="utf-8")
+            (backlog / "completed-items.json").write_text("[]\n", encoding="utf-8")
+            (backlog / "blocked-items.json").write_text("[]\n", encoding="utf-8")
+
+            queue = QueueManager(root)
+            queue.active = [
+                {
+                    "id": "RK-M0-SELF",
+                    "status": "queued",
+                    "dependencies": ["RK-M0-SELF"],
+                    "updated_at": "2026-02-26T08:00:00+00:00",
+                }
+            ]
+            queue.completed = []
+            queue.blocked = []
+
+            warnings = orchestrator.normalize_queued_item_dependencies(queue, archived_ids=set())
+
+        self.assertEqual(queue.active[0]["dependencies"], [])
+        self.assertTrue(any(row["reason"] == "self_dependency_id" for row in warnings))
+
     def test_cmd_status_reports_dependency_ready_count_after_normalization(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

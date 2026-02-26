@@ -4540,5 +4540,56 @@
     "generated_from_item_id": "RK-M0-0012-F01",
     "assigned_agent": "sera-kest",
     "commit_sha": "6250f0d5a329c3093d778e01a9c862f971165030"
+  },
+  {
+    "id": "RK-AUTO-STALL-0011",
+    "title": "Resolve queue dependency stall",
+    "description": "The daemon detected queued work items that are not dependency-ready because one or more dependencies are currently blocked. Review blocked items, requeue/close obsolete items, and restore runnable work.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "At least one dependency-stalled queued item is made runnable or explicitly closed",
+      "Blocked/obsolete queue artifacts are documented or consolidated",
+      "Backlog no longer stalls immediately on next daemon run"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T15:30:49.268048+00:00",
+    "updated_at": "2026-02-26T15:36:54.511761+00:00",
+    "estimated_effort": "S",
+    "token_budget": 10000,
+    "result_summary": "- [coordination/backlog/completed-items.json](D:/RedKeepers/coordination/backlog/completed-items.json) was already dirty/daemon-updated in the worktree and was not modified by this task logic.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "auto_generated": "queue_stall_recovery",
+    "stall_snapshot": [
+      {
+        "item_id": "RK-M0-0011",
+        "blocked_dependencies": [
+          "RK-M0-0008"
+        ]
+      },
+      {
+        "item_id": "RK-M0-0013",
+        "blocked_dependencies": [
+          "RK-M0-0008"
+        ]
+      }
+    ],
+    "stall_fingerprint": "RK-M0-0011:RK-M0-0008|RK-M0-0013:RK-M0-0008",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "02704d8904d8c8831316987b9d56d87f29a185d2"
   }
 ]
