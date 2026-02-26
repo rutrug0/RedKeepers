@@ -3547,5 +3547,38 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
     "assigned_agent": "ilya-fen",
     "commit_sha": "5fd2cf236ef628e05e0ef9d9028eb496019eee75"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F02-F01",
+    "title": "Thread scout action context through API endpoint for modifier-backed resolution",
+    "description": "Propagate player and assignment context identity from world-map interaction endpoint inputs (or derived auth/session context) into scout action resolution so hero runtime modifiers can apply on the HTTP execution path without manual service-level inputs.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F03-F02"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Scout endpoint execution path passes `player_id`, `assignment_context_type`, and `assignment_context_id` into `DeterministicWorldMapScoutSelectService` action-resolution input.",
+      "When a matching active hero runtime scout modifier exists for `next_scout_action`, scout output reflects resolved numeric stats and shared lifecycle consumption updates modifier status/charges.",
+      "Endpoint contract tests cover both baseline behavior and modifier-backed behavior."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:54:31.904256+00:00",
+    "updated_at": "2026-02-26T13:20:34.219908+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [outbox.json](D:/RedKeepers/agents/ilya-fen/outbox.json:1388)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03-F02",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "d5145c5e601a5a59819fcf7171009cd26df48db4"
   }
 ]

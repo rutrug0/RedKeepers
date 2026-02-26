@@ -1158,5 +1158,68 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T13:23:16.798808+00:00",
+        "item_id": "RK-AUTO-STALL-0007",
+        "status": "completed",
+        "summary": "Resolved dependency stall by remapping first-slice queued dependencies away from blocked `RK-M0-0007`, removing one obsolete queued artifact already archived as closed, and restoring dependency-ready queued work.",
+        "queue_recovery": {
+            "remapped_dependency_items": {
+                "RK-M0-0008": {
+                    "from": "RK-M0-0007",
+                    "to": "RK-M0-0012"
+                },
+                "RK-M0-0011": {
+                    "from": "RK-M0-0007",
+                    "to": "RK-M0-0012"
+                },
+                "RK-M0-0012": {
+                    "removed": [
+                        "RK-M0-0007"
+                    ]
+                }
+            },
+            "explicitly_closed_item_ids": [
+                "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
+            ],
+            "dependency_ready_queued_after_recovery": [
+                "RK-M0-0012"
+            ]
+        },
+        "validation": {
+            "command": "python tools/orchestrator.py status",
+            "result": "pass",
+            "queue_snapshot": {
+                "queued": 7,
+                "dependency_ready": 1,
+                "running": 1,
+                "blocked": 21,
+                "completed": 82
+            }
+        },
+        "proposed_work_items": [
+            {
+                "title": "Resolve blocked parent dependency for queued model-policy drift audit item",
+                "owner_role": "lead",
+                "milestone": "M0",
+                "priority": "normal",
+                "description": "Decide disposition for blocked `RK-M1-0004-F01-F01-F01-ESC-F01-F01` (requeue with narrowed validation scope or defer/retire) so queued child `RK-M1-0005-F02-F01-ESC-F01` is either made runnable or explicitly closed.",
+                "inputs": [
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-items.json",
+                    "coordination/backlog/completed-items.json",
+                    "coordination/runtime/run-history.jsonl"
+                ],
+                "acceptance_criteria": [
+                    "A documented disposition exists for blocked parent `RK-M1-0004-F01-F01-F01-ESC-F01-F01`.",
+                    "Queued child `RK-M1-0005-F02-F01-ESC-F01` is updated to a valid dependency state (dependency-ready or explicitly closed/deferred).",
+                    "python tools/orchestrator.py status does not report this queued child as stalled on a blocked parent."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]
