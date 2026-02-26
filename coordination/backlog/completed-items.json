@@ -3415,5 +3415,38 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
     "assigned_agent": "ilya-fen",
     "commit_sha": "dc60c4694a73d230022b014c62aa36b71217541c"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F02",
+    "title": "Wire hero modifier instances into shared action modifier aggregation",
+    "description": "Extend the shared numeric modifier aggregation path used by action resolution so combat/scout calculators consume hero ability effects from runtime modifier instances by domain/trigger window/context.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F03"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Action resolution reads hero modifier runtime instances through the same numeric aggregation interface as other modifier sources.",
+      "Combat and scout resolvers consume resolved numeric stats without hero-id branches.",
+      "Charge and expiry consumption for hero modifier instances executes in the shared post-resolution modifier lifecycle path."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:11:58.072993+00:00",
+    "updated_at": "2026-02-26T12:54:31.691999+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Charge and expiry transitions are now applied through one shared post-resolution lifecycle path via `applyModifierLifecycle`.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "a63c7e0d0ab3cbbf9e0f2cedbe1fb272417e9bf4"
   }
 ]

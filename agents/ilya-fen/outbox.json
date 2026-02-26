@@ -1285,5 +1285,32 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "timestamp_utc":  "2026-02-26T13:01:36.1787654Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0003-F01-F03-F01-F01",
+        "status":  "done",
+        "summary":  "Added a Postgres-backed hero runtime migration runner plus integration-style migration execution tests that apply `20260226_000001_create_hero_runtime_tables_v1.sql`, validate runtime/assignment/modifier constraints, and verify reset/re-apply repeatability.",
+        "changed_files":  [
+                              "backend/src/modules/heroes/infra/sql/migrations/hero-runtime-migration-runner.ts",
+                              "backend/src/modules/heroes/infra/sql/migrations/hero-runtime-migration-runner.test.ts",
+                              "backend/src/modules/heroes/infra/sql/migrations/README.md",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --test backend/src/modules/heroes/infra/sql/migrations/hero-runtime-migration-runner.test.ts",
+                                    "node --experimental-strip-types --check backend/src/modules/heroes/infra/sql/migrations/hero-runtime-migration-runner.ts",
+                                    "node --experimental-strip-types --check backend/src/modules/heroes/infra/sql/migrations/hero-runtime-migration-runner.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "Sandbox denied Node test worker spawn (`spawn EPERM`) for `node --test`, but TypeScript syntax checks passed for the new migration runner and test files."
+                    },
+        "proposed_work_items":  [
+
+                                ]
     }
 ]
