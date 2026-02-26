@@ -35,45 +35,6 @@
     "generated_from_item_id": "RK-HUMAN-0001-F03"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0004-F01",
-    "title": "Implement deterministic hostile attack + resolve backend transport flow",
-    "description": "Implement the first-slice hostile map interaction path in backend transport: accept an attack command against a foreign settlement, run deterministic placeholder combat resolution, and emit stable event payload keys for client consumption.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0008"
-    ],
-    "inputs": [
-      "backend/",
-      "docs/design/world-map-v1-phasing.md",
-      "docs/design/first-vertical-slice.md",
-      "docs/design/v1-starter-data-tables.md"
-    ],
-    "acceptance_criteria": [
-      "Backend transport exposes one first-slice attack command route using source settlement, foreign target, and dispatched unit payload.",
-      "Resolver applies deterministic v1 outcome/loss constants (no randomness, no hero branches) and persists/returns outcome state for event feed usage.",
-      "Outcome payloads emit stable keys for dispatch_sent, march_arrived, and combat_resolved flows compatible with existing client event rendering."
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T19:16:22.546990+00:00",
-    "updated_at": "2026-02-26T19:27:18.982441+00:00",
-    "estimated_effort": "S",
-    "token_budget": 10000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0004-F02",
     "title": "Wire client world-map hostile dispatch and combat outcome panels",
     "description": "Implement the client-shell hostile dispatch path on world map: select a foreign settlement tile, send one deterministic attack, and render lifecycle + combat outcome feedback in the event feed using backend payload keys.",
@@ -134,17 +95,18 @@
       "Spec stays within first-slice constraints and explicitly defers rich combat mechanics to post-slice follow-up."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T19:16:22.546990+00:00",
-    "updated_at": "2026-02-26T19:16:22.546990+00:00",
+    "updated_at": "2026-02-26T19:30:13.567498+00:00",
     "estimated_effort": "S",
     "token_budget": 7000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
+    "assigned_agent": "rowan-hale"
   },
   {
     "id": "RK-AUTO-BACKLOG-0004-F04",
@@ -259,5 +221,67 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F01-F01",
+    "title": "Enforce hostile attack march cap and deterministic impassable-path validation",
+    "description": "Extend the hostile settlement attack command flow to enforce `max_active_marches` and reject blocked paths per deterministic world-map v1 phasing rules (`path_blocked_impassable`, `max_active_marches_reached`).",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Attack dispatch rejects when active march count exceeds configured cap with `error_code=max_active_marches_reached`.",
+      "Attack dispatch rejects when deterministic route crosses impassable tiles with `error_code=path_blocked_impassable`.",
+      "Deterministic acceptance/failure outcomes are covered by backend tests and exposed through transport contract responses."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:27:21.718445+00:00",
+    "updated_at": "2026-02-26T19:27:21.718445+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F01"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F01-F02",
+    "title": "Add event template mappings for hostile attack flow keys in web placeholder feed",
+    "description": "Add placeholder narrative templates and adapter mappings for `event.world.march_started`, `event.world.march_returned`, and `event.combat.placeholder_skirmish_*` so hostile attack events render text labels instead of missing-template fallbacks in the web shell.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Client event feed renders human-readable placeholder text for all hostile attack event content keys emitted by backend transport.",
+      "Template token substitution covers attack flow tokens (`army_name`, `origin_settlement_name`, `target_tile_label`, `settlement_name`, `haul_summary`).",
+      "No regressions in existing scout/build/train event rendering behavior."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:27:21.718445+00:00",
+    "updated_at": "2026-02-26T19:27:21.718445+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F01"
   }
 ]

@@ -43,7 +43,7 @@ This plan converts the requested world-map direction into first-slice-safe scope
   - attacker score = sum(`unit_count * unit_attack`) across dispatched units.
   - defender score = fixture garrison score at target settlement.
   - if attacker score > defender score -> attacker_win; else defender_win (ties defender_win).
-- `combat_losses`: deterministic ratio table by outcome (fixture-defined constants, no random variance).
+- `combat_losses`: deterministic ratio table by outcome (fixture-defined constants, no random variance). See `docs/design/m0-hostile-settlement-combat-fixtures.md` for implementation constants, tie classification, and fixture profile.
 - `gathering_v1`: endpoint or action returns `error_code=feature_not_in_slice` for any gather command.
 
 ## Guardrail Conflict Flags and Phased Compromise

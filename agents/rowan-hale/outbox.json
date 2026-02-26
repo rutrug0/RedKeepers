@@ -501,5 +501,41 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-26T19:28:53.9276973Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-AUTO-BACKLOG-0004-F03",
+    "status": "done",
+    "summary": "Finalized first-slice deterministic hostile-settlement combat fixture constants (win/loss/tie comparison classes with stable loss ratios), added one required foreign settlement profile, and linked world-map phasing to the fixture source doc.",
+    "changed_files": [
+      "docs/design/m0-hostile-settlement-combat-fixtures.md",
+      "docs/design/world-map-v1-phasing.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Add explicit tie-fixture automation coverage for hostile settlement attack resolution",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Add fixture-driven tests that assert tie classification (`attacker_strength == defender_strength`) maps to `combat_outcome=defender_win` and uses the documented tie loss ratios without variance.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0004-F03"
+        ],
+        "inputs": [
+          "docs/design/m0-hostile-settlement-combat-fixtures.md",
+          "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+          "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
+        ],
+        "acceptance_criteria": [
+          "Automated tests include at least one tie fixture scenario with explicit expected losses",
+          "Loss ratio assertions match fixture constants (`attacker: 1.00`, `defender: 0.20`) for tie",
+          "No new combat mechanics or random variance are introduced"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]
