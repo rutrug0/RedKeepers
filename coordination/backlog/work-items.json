@@ -101,47 +101,6 @@
     "generated_from_item_id": "RK-HUMAN-0001"
   },
   {
-    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
-    "title": "Add regression tests for codex model access preflight paths",
-    "description": "Create focused tests that cover startup status preflight failures, fallback selection preflight behavior, and blocked run_history/model_stats fields for unsupported model profiles.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "tools/codex_worker.py",
-      "tools/health_checks.py",
-      "tools/orchestrator.py",
-      "tests"
-    ],
-    "acceptance_criteria": [
-      "status validation fails fast with exact unsupported-model reason when policy model is inaccessible and no usable fallback exists",
-      "execution selects configured fallback when primary model preflight fails and proceeds to run",
-      "blocked run_history and model-stats entries include model_requested/model_used/fallback fields"
-    ],
-    "validation_commands": [
-      "python -m unittest discover -s tests"
-    ],
-    "status": "queued",
-    "retry_count": 3,
-    "created_at": "2026-02-25T18:01:08.893118+00:00",
-    "updated_at": "2026-02-26T15:59:17.419756+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "tomas-grell",
-    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01",
-    "assigned_agent": "tomas-grell",
-    "last_failure_reason": "validation failed or commit failed",
-    "last_unblocked_reason": "automatic blocked revisit (1/2)",
-    "last_blocker_reason": "retry threshold exceeded; escalated",
-    "blocked_revisit_count": 1
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0003-F01-F02",
     "title": "Design hero UI wireframes for assignment, ability use, and cooldown feedback",
     "description": "Create placeholder-first wireframes for hero roster card, army dispatch ability slot, and event/combat feedback surfaces defined in the concept doc.",
@@ -179,44 +138,35 @@
     "blocked_revisit_count": 1
   },
   {
-    "id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F02",
-    "title": "Unblock RK-M1-0005-F02-F01-ESC-F03 by scoping validation commands and requeueing",
-    "description": "Update source-item backlog metadata so `RK-M1-0005-F02-F01-ESC-F03` validates only frontend visual blocked-outcome checks, then clear blocked retry/escalation state and requeue it for a deterministic rerun.",
+    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
+    "title": "Escalation: Add regression tests for codex model access preflight paths",
+    "description": "Investigate repeated failure for item RK-M1-0004-F01-F01-F01-ESC-F01-F01. Reason: retry threshold exceeded",
     "milestone": "M1",
-    "type": "feature",
+    "type": "qa",
     "priority": "high",
     "owner_role": "lead",
     "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0005-F02-F01-ESC"
-    ],
+    "dependencies": [],
     "inputs": [
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/blocked-items.json",
-      "tools/orchestrator.py",
-      "tests/test_frontend_visual_blocked_outcome.py",
-      "tests/test_frontend_visual_status_blocked_detection.py"
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
     ],
     "acceptance_criteria": [
-      "`RK-M1-0005-F02-F01-ESC-F03` validation excludes `python -m unittest discover -s tests` and uses only targeted frontend-visual blocker tests plus status check.",
-      "Source item is requeued with cleared blocker metadata so retry-threshold escalation from unrelated suite failures does not recur.",
-      "A rerun records environment `STATUS: BLOCKED` outcomes as blocked with actionable blocker reason and no escalation."
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
     ],
-    "validation_commands": [
-      "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_frontend_visual_status_blocked_detection",
-      "python tools/orchestrator.py status"
-    ],
+    "validation_commands": [],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-26T17:38:43.522022+00:00",
-    "updated_at": "2026-02-26T17:42:05.231479+00:00",
+    "created_at": "2026-02-26T17:49:00.278017+00:00",
+    "updated_at": "2026-02-26T18:04:13.315837+00:00",
     "estimated_effort": "S",
-    "token_budget": 8000,
+    "token_budget": 6000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
-    "assigned_agent": "mara-voss"
+    "source_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+    "assigned_agent": "mara-voss",
+    "recovered_from_stale_in_progress": true
   }
 ]

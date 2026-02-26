@@ -1978,5 +1978,70 @@
             "agents/mara-voss/outbox.json"
         ],
         "proposed_work_items": []
+    },
+    {
+        "ts": "2026-02-26T18:01:46.136624+00:00",
+        "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
+        "status": "completed",
+        "summary": "Identified repeated retry/escalation root cause for RK-M1-0004-F01-F01-F01-ESC-F01-F01: validation used full-suite unittest discovery, so unrelated baseline test failures repeatedly failed the task despite preflight regression checks passing.",
+        "root_cause": "Validation-scope mismatch. The source item required codex model-preflight regression coverage, but its configured validation command `python -m unittest discover -s tests` pulled in unrelated known-failing tests (`tests/test_m1_scaffold_smoke.py` legacy marker assertions), triggering false retry-threshold escalation.",
+        "evidence": {
+            "daemon_validation_failures": [
+                "2026-02-26T09:15:12Z validation failed for RK-M1-0004-F01-F01-F01-ESC-F01-F01 (`python -m unittest discover -s tests` exit_code=1)",
+                "2026-02-26T09:18:17Z validation failed for RK-M1-0004-F01-F01-F01-ESC-F01-F01 (`python -m unittest discover -s tests` exit_code=1)",
+                "2026-02-26T09:21:18Z validation failed for RK-M1-0004-F01-F01-F01-ESC-F01-F01 (`python -m unittest discover -s tests` exit_code=1)",
+                "2026-02-26T17:49:00Z validation failed again after blocked revisit (`python -m unittest discover -s tests` exit_code=1)"
+            ],
+            "successful_scoped_requeue_reference": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01 completed on 2026-02-26T11:41:41Z with scoped validations (`tests.test_model_preflight_paths`, `tests.test_codex_preflight`, `python tools/orchestrator.py status`).",
+            "current_source_state": "`coordination/backlog/blocked-items.json` still lists RK-M1-0004-F01-F01-F01-ESC-F01-F01 as blocked with retry_count=4 and blocker_reason `retry threshold exceeded; escalated`."
+        },
+        "files": [
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": [
+            {
+                "title": "Retire superseded codex preflight source item and preserve replacement audit trail",
+                "owner_role": "lead",
+                "milestone": "M1",
+                "priority": "high",
+                "description": "Archive blocked source item `RK-M1-0004-F01-F01-F01-ESC-F01-F01` as superseded by completed replacement `RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01` so it cannot be requeued by blocked revisit again.",
+                "inputs": [
+                    "coordination/backlog/blocked-items.json",
+                    "coordination/backlog/blocked-archived-items.json",
+                    "coordination/backlog/completed-items.json",
+                    "coordination/runtime/daemon-events.jsonl"
+                ],
+                "acceptance_criteria": [
+                    "`RK-M1-0004-F01-F01-F01-ESC-F01-F01` is removed from active blocked backlog and recorded as superseded/archived with linkage to `RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01`.",
+                    "No queued or blocked items depend on the retired source ID.",
+                    "Queue status no longer requeues this superseded source ID during blocked revisit cycles."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "title": "Add retry-loop guard for validation-scope mismatch on narrow QA items",
+                "owner_role": "qa",
+                "milestone": "M1",
+                "priority": "normal",
+                "description": "Add an orchestrator guard/test that flags when a narrow-scoped QA item is configured with full-suite discovery validation, and emits remediation to use targeted commands before retries accumulate.",
+                "inputs": [
+                    "tools/orchestrator.py",
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-items.json",
+                    "tests/test_queue_integrity.py"
+                ],
+                "acceptance_criteria": [
+                    "Queue status or validation preflight emits a deterministic warning/error when a narrow QA item uses `python -m unittest discover -s tests` without an explicit scope waiver.",
+                    "At least one regression test covers the RK-M1-0004-style false escalation pattern.",
+                    "Guard output includes actionable remediation text with scoped validation command expectations."
+                ],
+                "validation_commands": [
+                    "python -m unittest tests.test_queue_integrity",
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]

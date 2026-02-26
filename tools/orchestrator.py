@@ -2084,6 +2084,17 @@ def _summarize_validation_results(validation_results: list[dict[str, Any]]) -> l
     return summaries
 
 
+def _is_full_suite_validation_command(command: str) -> bool:
+    text = " ".join(str(command or "").strip().split()).lower()
+    if not text:
+        return False
+    if re.search(r"\bpython(?:\.exe)?\s+-m\s+unittest\s+discover\b", text):
+        return True
+    if re.search(r"\bpy(?:\s+-\d+(?:\.\d+)?)?\s+-m\s+unittest\s+discover\b", text):
+        return True
+    return False
+
+
 def _classify_validation_or_commit_failure(validation_results: list[dict[str, Any]]) -> dict[str, str]:
     commit_failure_commands = {"git commit", "branch check"}
     phase = "validation"
@@ -2229,6 +2240,14 @@ def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]
         seen.add(normalized)
         deduped.append(normalized)
     commands = deduped
+
+    scope_cfg = commit_rules.get("validation_scope_guard", {})
+    if not isinstance(scope_cfg, dict):
+        scope_cfg = {}
+    guard_enabled = _boolish(scope_cfg.get("enabled"), True)
+    allow_full_suite = _boolish(os.environ.get("REDKEEPERS_ALLOW_FULL_SUITE_VALIDATION"), False)
+    if guard_enabled and not allow_full_suite:
+        commands = [command for command in commands if not _is_full_suite_validation_command(command)]
     return commands
 
 
@@ -2583,6 +2602,7 @@ def process_one(
         item=item,
     )
     requested_model = execution_profile.get("model")
+    fallback_model = execution_profile.get("fallback_model")
     selected_model = requested_model
     emit_event(
         "select",
@@ -2630,6 +2650,19 @@ def process_one(
         return 0
 
     preflight_error = codex_model_access_preflight_error(requested_model or "")
+    fallback_selected = False
+    if preflight_error is not None:
+        fallback_candidate = str(fallback_model or "").strip() or None
+        if (
+            fallback_candidate
+            and fallback_candidate != requested_model
+            and _is_definitive_model_access_error(preflight_error)
+        ):
+            fallback_error = codex_model_access_preflight_error(fallback_candidate)
+            if not _is_definitive_model_access_error(fallback_error):
+                selected_model = fallback_candidate
+                preflight_error = None
+                fallback_selected = True
     if preflight_error is not None:
         blocker_reason = f"{preflight_error}. Remediation: update model-policy.yaml to an accessible model."
         emit_event("blocked", "Model preflight blocked execution", item_id=item["id"], agent_id=agent_id, reason=blocker_reason)
@@ -2759,7 +2792,7 @@ def process_one(
     run_used_model = worker.used_model
     if run_used_model is None:
         run_used_model = worker.requested_model
-    run_fallback_used = worker.fallback_used
+    run_fallback_used = worker.fallback_used or fallback_selected
     emit_event(
         "agent_end",
         "Agent execution finished",

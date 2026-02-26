@@ -20,7 +20,9 @@ from codex_worker import WorkerResult  # noqa: E402
 class ModelPreflightValidationTests(unittest.TestCase):
     def test_validate_environment_fails_fast_with_exact_unsupported_model_reason(self) -> None:
         requested_model = "gpt-unsupported-primary"
+        fallback_model = "gpt-unsupported-fallback"
         requested_error = "model is unsupported for this account"
+        fallback_error = "fallback model is unsupported for this account"
 
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -31,6 +33,7 @@ class ModelPreflightValidationTests(unittest.TestCase):
                         "agent_models": {
                             "tomas-grell": {
                                 "model": requested_model,
+                                "fallback_model": fallback_model,
                                 "reasoning": "medium",
                             }
                         }
@@ -40,11 +43,18 @@ class ModelPreflightValidationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
+            def _fake_preflight(model: str) -> str | None:
+                if model == requested_model:
+                    return requested_error
+                if model == fallback_model:
+                    return fallback_error
+                return None
+
             with (
                 mock.patch.object(
                     health_checks,
                     "codex_model_access_preflight_error",
-                    return_value=requested_error,
+                    side_effect=_fake_preflight,
                 ) as preflight_mock,
                 mock.patch.object(
                     health_checks,
@@ -59,8 +69,58 @@ class ModelPreflightValidationTests(unittest.TestCase):
             "Remediation: update model-policy.yaml to an accessible model."
         )
         self.assertEqual(errors, [expected])
-        self.assertEqual(preflight_mock.call_count, 1)
+        self.assertEqual(preflight_mock.call_count, 2)
         self.assertEqual(preflight_mock.call_args_list[0].args[0], requested_model)
+        self.assertEqual(preflight_mock.call_args_list[1].args[0], fallback_model)
+
+    def test_validate_environment_skips_error_when_fallback_is_accessible(self) -> None:
+        requested_model = "gpt-unsupported-primary"
+        fallback_model = "gpt-5.3-codex-spark"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._write_required_files(root)
+            (root / "coordination" / "policies" / "model-policy.yaml").write_text(
+                json.dumps(
+                    {
+                        "agent_models": {
+                            "tomas-grell": {
+                                "model": requested_model,
+                                "fallback_model": fallback_model,
+                                "reasoning": "medium",
+                            }
+                        }
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            def _fake_preflight(model: str) -> str | None:
+                if model == requested_model:
+                    return "model is unsupported for this account"
+                if model == fallback_model:
+                    return None
+                return None
+
+            with (
+                mock.patch.object(
+                    health_checks,
+                    "codex_model_access_preflight_error",
+                    side_effect=_fake_preflight,
+                ) as preflight_mock,
+                mock.patch.object(
+                    health_checks,
+                    "codex_command_preflight_error",
+                    return_value=None,
+                ),
+            ):
+                errors = health_checks.validate_environment(root)
+
+        self.assertEqual(errors, [])
+        self.assertEqual(preflight_mock.call_count, 2)
+        self.assertEqual(preflight_mock.call_args_list[0].args[0], requested_model)
+        self.assertEqual(preflight_mock.call_args_list[1].args[0], fallback_model)
 
     @staticmethod
     def _write_required_files(root: Path) -> None:
@@ -95,6 +155,7 @@ class ModelPreflightValidationTests(unittest.TestCase):
 class ModelPreflightExecutionTests(unittest.TestCase):
     def test_process_one_blocks_when_model_preflight_fails(self) -> None:
         requested_model = "gpt-primary-bad"
+        fallback_model = "gpt-fallback-bad"
 
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -105,7 +166,7 @@ class ModelPreflightExecutionTests(unittest.TestCase):
             daemon_state_path = root / "coordination" / "runtime" / "daemon-state.json"
             daemon_state_path.parent.mkdir(parents=True, exist_ok=True)
             daemon_state_path.write_text("{}\n", encoding="utf-8")
-            policies = self._base_policies(requested_model=requested_model)
+            policies = self._base_policies(requested_model=requested_model, fallback_model=fallback_model)
             agents = {
                 "tomas-grell": {
                     "display_name": "Tomas Grell",
@@ -117,6 +178,15 @@ class ModelPreflightExecutionTests(unittest.TestCase):
             model_stats = {}
             model_stats_tracker = mock.Mock()
             run_agent_mock = mock.Mock()
+            preflight_calls: list[str] = []
+
+            def _fake_preflight(model: str) -> str | None:
+                preflight_calls.append(model)
+                if model == requested_model:
+                    return "Model is unsupported for this policy path"
+                if model == fallback_model:
+                    return "Fallback model is unsupported for this policy path"
+                return None
 
             with (
                 mock.patch.object(orchestrator, "ROOT", root),
@@ -153,12 +223,17 @@ class ModelPreflightExecutionTests(unittest.TestCase):
                     "ensure_backlog_refill_item",
                     return_value=None,
                 ),
+                mock.patch.object(
+                    orchestrator,
+                    "run_queued_model_policy_drift_audit",
+                    return_value={"flagged": [], "remediated_ids": [], "changed": False, "policy_fingerprint": "fp"},
+                ),
                 mock.patch.object(orchestrator, "load_agent_catalog", return_value=agents),
                 mock.patch.object(orchestrator, "load_policies", return_value=policies),
                 mock.patch.object(
                     orchestrator,
                     "codex_model_access_preflight_error",
-                    return_value="Model is unsupported for this policy path",
+                    side_effect=_fake_preflight,
                 ),
                 mock.patch.object(orchestrator, "run_agent", run_agent_mock),
             ):
@@ -176,6 +251,7 @@ class ModelPreflightExecutionTests(unittest.TestCase):
         self.assertFalse(run_history[-1]["fallback_used"])
         self.assertIn("Model is unsupported for this policy path", str(run_history[-1]["summary"]))
         run_agent_mock.assert_not_called()
+        self.assertEqual(preflight_calls, [requested_model, fallback_model])
 
         model_stats_tracker.record_run.assert_called_once()
         call_kwargs = model_stats_tracker.record_run.call_args.kwargs
@@ -183,6 +259,132 @@ class ModelPreflightExecutionTests(unittest.TestCase):
         self.assertEqual(call_kwargs["requested_model"], requested_model)
         self.assertEqual(call_kwargs["used_model"], requested_model)
         self.assertFalse(call_kwargs["fallback_used"])
+
+    def test_process_one_uses_fallback_model_when_primary_preflight_fails(self) -> None:
+        requested_model = "gpt-primary-bad"
+        fallback_model = "gpt-5.3-codex-spark"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            item = self._base_item(item_id="RK-PREF-FALLBACK", retry_count=0)
+            self._write_queue_files(root, [item], [], [])
+
+            run_history: list[dict[str, object]] = []
+            daemon_state_path = root / "coordination" / "runtime" / "daemon-state.json"
+            daemon_state_path.parent.mkdir(parents=True, exist_ok=True)
+            daemon_state_path.write_text("{}\n", encoding="utf-8")
+            run_agent_result = WorkerResult(
+                status="completed",
+                summary="agent completed on fallback",
+                stdout="ok",
+                stderr="",
+                exit_code=0,
+                requested_model=fallback_model,
+                used_model=fallback_model,
+                tokens_in_est=140,
+                tokens_out_est=55,
+            )
+            policies = self._base_policies(requested_model=requested_model, fallback_model=fallback_model)
+            agents = {
+                "tomas-grell": {
+                    "display_name": "Tomas Grell",
+                    "role": "qa",
+                    "model": "gpt-5.3-codex-spark",
+                    "reasoning": "medium",
+                }
+            }
+            model_stats = {}
+            model_stats_tracker = mock.Mock()
+            preflight_calls: list[str] = []
+
+            def _fake_preflight(model: str) -> str | None:
+                preflight_calls.append(model)
+                if model == requested_model:
+                    return "Model is unsupported for this policy path"
+                if model == fallback_model:
+                    return None
+                return None
+
+            with (
+                mock.patch.object(orchestrator, "ROOT", root),
+                mock.patch.object(orchestrator, "DAEMON_STATE_PATH", daemon_state_path),
+                mock.patch.object(orchestrator, "validate_environment", return_value=[]),
+                mock.patch.object(
+                    orchestrator,
+                    "repair_backlog_archive_duplicates",
+                    return_value={
+                        "completed_removed": 0,
+                        "blocked_removed": 0,
+                        "completed_duplicate_ids": [],
+                        "blocked_duplicate_ids": [],
+                    },
+                ),
+                mock.patch.object(orchestrator, "emit_event", return_value=None),
+                mock.patch.object(
+                    orchestrator,
+                    "set_daemon_state",
+                    side_effect=lambda **patch: patch,
+                ),
+                mock.patch.object(
+                    orchestrator,
+                    "append_jsonl",
+                    side_effect=lambda _path, record: run_history.append(record),
+                ),
+                mock.patch.object(
+                    orchestrator,
+                    "revisit_recoverable_blocked_items",
+                    return_value=[],
+                ),
+                mock.patch.object(
+                    orchestrator,
+                    "ensure_backlog_refill_item",
+                    return_value=None,
+                ),
+                mock.patch.object(
+                    orchestrator,
+                    "run_queued_model_policy_drift_audit",
+                    return_value={"flagged": [], "remediated_ids": [], "changed": False, "policy_fingerprint": "fp"},
+                ),
+                mock.patch.object(orchestrator, "load_agent_catalog", return_value=agents),
+                mock.patch.object(orchestrator, "load_policies", return_value=policies),
+                mock.patch.object(
+                    orchestrator,
+                    "codex_model_access_preflight_error",
+                    side_effect=_fake_preflight,
+                ),
+                mock.patch.object(orchestrator, "build_prompt", return_value="prompt"),
+                mock.patch.object(
+                    orchestrator,
+                    "run_agent",
+                    return_value=run_agent_result,
+                ) as run_agent_mock,
+                mock.patch.object(
+                    orchestrator,
+                    "run_validation_for_item",
+                    return_value=(True, []),
+                ),
+            ):
+                rc = orchestrator.process_one(
+                    dry_run=False,
+                    verbose=False,
+                    model_stats_tracker=model_stats_tracker,
+                    model_stats=model_stats,
+                )
+
+        self.assertEqual(rc, 0)
+        self.assertEqual(preflight_calls, [requested_model, fallback_model])
+        self.assertEqual(run_agent_mock.call_args.kwargs["model"], fallback_model)
+        self.assertEqual(run_history[-1]["result"], "completed")
+        self.assertEqual(run_history[-1]["model_requested"], requested_model)
+        self.assertEqual(run_history[-1]["model_used"], fallback_model)
+        self.assertTrue(run_history[-1]["fallback_used"])
+
+        model_stats_tracker.record_run.assert_called_once()
+        call_kwargs = model_stats_tracker.record_run.call_args.kwargs
+        self.assertEqual(call_kwargs["outcome"], "completed")
+        self.assertEqual(call_kwargs["requested_model"], requested_model)
+        self.assertEqual(call_kwargs["used_model"], fallback_model)
+        self.assertTrue(call_kwargs["fallback_used"])
 
     def test_process_one_runs_requested_model_when_preflight_passes(self) -> None:
         requested_model = "default"
@@ -252,6 +454,11 @@ class ModelPreflightExecutionTests(unittest.TestCase):
                     "ensure_backlog_refill_item",
                     return_value=None,
                 ),
+                mock.patch.object(
+                    orchestrator,
+                    "run_queued_model_policy_drift_audit",
+                    return_value={"flagged": [], "remediated_ids": [], "changed": False, "policy_fingerprint": "fp"},
+                ),
                 mock.patch.object(orchestrator, "load_agent_catalog", return_value=agents),
                 mock.patch.object(orchestrator, "load_policies", return_value=policies),
                 mock.patch.object(orchestrator, "codex_model_access_preflight_error", return_value=None),
@@ -279,13 +486,16 @@ class ModelPreflightExecutionTests(unittest.TestCase):
         self.assertEqual(run_agent_mock.call_count, 1)
 
     @staticmethod
-    def _base_policies(*, requested_model: str) -> dict[str, object]:
+    def _base_policies(*, requested_model: str, fallback_model: str | None = None) -> dict[str, object]:
+        agent_model_entry: dict[str, object] = {
+            "model": requested_model,
+            "reasoning": "medium",
+        }
+        if fallback_model:
+            agent_model_entry["fallback_model"] = fallback_model
         model_policy: dict[str, object] = {
             "agent_models": {
-                "tomas-grell": {
-                    "model": requested_model,
-                    "reasoning": "medium",
-                }
+                "tomas-grell": agent_model_entry
             }
         }
         return {

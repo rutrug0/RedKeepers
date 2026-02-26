@@ -76,29 +76,45 @@ def _validate_model_profile_access(*, errors: list[str], model_policy: Any) -> N
     escalation_upgrade = model_policy.get("escalation_upgrade", {}) or {}
     critical_cfg = escalation_upgrade.get("critical_or_repeated_failure") or {}
     lightweight_cfg = model_policy.get("lightweight_task_override", {}) or {}
+    global_fallback = model_policy.get("fallback_model")
+    if not isinstance(global_fallback, str):
+        global_fallback = None
 
-    checks: list[str] = []
+    checks: list[tuple[str, str | None]] = []
+
+    def _clean(value: Any) -> str | None:
+        if not isinstance(value, str):
+            return None
+        text = value.strip()
+        return text or None
 
     for cfg in agent_models.values():
         if not isinstance(cfg, dict):
             continue
-        model = cfg.get("model")
-        if isinstance(model, str) and model.strip():
-            checks.append(model.strip())
+        model = _clean(cfg.get("model"))
+        if not model:
+            continue
+        fallback = _clean(cfg.get("fallback_model")) or _clean(global_fallback)
+        checks.append((model, fallback))
 
     if isinstance(critical_cfg, dict):
-        crit_model = critical_cfg.get("model")
-        if isinstance(crit_model, str) and crit_model.strip():
-            checks.append(crit_model.strip())
+        crit_model = _clean(critical_cfg.get("model"))
+        if crit_model:
+            crit_fallback = _clean(critical_cfg.get("fallback_model")) or _clean(global_fallback)
+            checks.append((crit_model, crit_fallback))
 
     if isinstance(lightweight_cfg, dict):
-        light_model = lightweight_cfg.get("model")
-        if isinstance(light_model, str) and light_model.strip():
-            checks.append(light_model.strip())
+        light_model = _clean(lightweight_cfg.get("model"))
+        if light_model:
+            light_fallback = _clean(lightweight_cfg.get("fallback_model")) or _clean(global_fallback)
+            checks.append((light_model, light_fallback))
 
-    seen: set[str] = set()
-    for requested_model in checks:
-        key = requested_model.lower()
+    seen: set[tuple[str, str | None]] = set()
+    for requested_model, fallback_model in checks:
+        key = (
+            requested_model.lower(),
+            fallback_model.lower() if fallback_model else None,
+        )
         if key in seen:
             continue
         seen.add(key)
@@ -109,6 +125,11 @@ def _validate_model_profile_access(*, errors: list[str], model_policy: Any) -> N
         if not _is_definitive_model_access_error(requested_error):
             # Timeouts/transient transport failures should not hard-fail daemon startup.
             continue
+        if fallback_model:
+            fallback_error = codex_model_access_preflight_error(fallback_model)
+            if not _is_definitive_model_access_error(fallback_error):
+                # A usable fallback path exists for this profile.
+                continue
 
         errors.append(
             (

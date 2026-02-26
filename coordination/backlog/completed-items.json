@@ -4828,5 +4828,47 @@
     "source_item_id": "RK-M1-0005-F02-F01-ESC-F03",
     "assigned_agent": "mara-voss",
     "commit_sha": "88c80b3bbc7367ce7886a874e367ac274a93c01b"
+  },
+  {
+    "id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F02",
+    "title": "Unblock RK-M1-0005-F02-F01-ESC-F03 by scoping validation commands and requeueing",
+    "description": "Update source-item backlog metadata so `RK-M1-0005-F02-F01-ESC-F03` validates only frontend visual blocked-outcome checks, then clear blocked retry/escalation state and requeue it for a deterministic rerun.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005-F02-F01-ESC"
+    ],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "tools/orchestrator.py",
+      "tests/test_frontend_visual_blocked_outcome.py",
+      "tests/test_frontend_visual_status_blocked_detection.py"
+    ],
+    "acceptance_criteria": [
+      "`RK-M1-0005-F02-F01-ESC-F03` validation excludes `python -m unittest discover -s tests` and uses only targeted frontend-visual blocker tests plus status check.",
+      "Source item is requeued with cleared blocker metadata so retry-threshold escalation from unrelated suite failures does not recur.",
+      "A rerun records environment `STATUS: BLOCKED` outcomes as blocked with actionable blocker reason and no escalation."
+    ],
+    "validation_commands": [
+      "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_frontend_visual_status_blocked_detection",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T17:38:43.522022+00:00",
+    "updated_at": "2026-02-26T17:42:07.360948+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [D:/RedKeepers/agents/mara-voss/outbox.json](D:/RedKeepers/agents/mara-voss/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "f33131f0379ea7d5aceb47bd370f41e31a5efe09"
   }
 ]

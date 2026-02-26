@@ -1,5 +1,21 @@
 [
   {
+    "ts": "2026-02-26T17:48:05.335696Z",
+    "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+    "status": "completed",
+    "summary": "Added regression coverage for codex model-access preflight fallback behavior at startup and execution time, plus blocked/completed run telemetry field assertions for requested/used/fallback model tracking.",
+    "checks": [
+      "python -m unittest tests.test_model_preflight_paths tests.test_codex_preflight -v (pass)",
+      "python -m unittest discover -s tests (fails: pre-existing tests/test_m1_scaffold_smoke.py expects removed client-shell markers resource-grid/map-stage/event-list)"
+    ],
+    "changed_files": [
+      "tools/health_checks.py",
+      "tools/orchestrator.py",
+      "tests/test_model_preflight_paths.py",
+      "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
     "ts": "2026-02-26T17:35:24.966839Z",
     "item_id": "RK-M1-0005-F02-F01-ESC-F03",
     "status": "completed",
