@@ -1241,20 +1241,30 @@ def recover_stale_in_progress_items(
     queue: QueueManager,
     *,
     archived_ids: set[str] | None = None,
-) -> tuple[list[str], list[str]]:
+) -> tuple[list[str], list[dict[str, str]]]:
     recovered: list[str] = []
-    skipped_archived: list[str] = []
+    archived_dispositions: list[dict[str, str]] = []
     active_after_recovery: list[dict[str, Any]] = []
     changed = False
     archived = archived_ids if archived_ids is not None else load_blocked_archived_ids()
+    stale_statuses = {"assigned", "running", "validating"}
 
     for item in queue.active:
         item_id = str(item.get("id", "")).strip()
-        if item.get("status") in {"assigned", "running", "validating"}:
-            if item_id and item_id in archived:
-                skipped_archived.append(item_id)
-                changed = True
-                continue
+        status = str(item.get("status", "")).strip().lower()
+        if item_id and item_id in archived:
+            disposition = "skip_requeue_archived_stale_item" if status in stale_statuses else "remove_archived_active_item"
+            archived_dispositions.append(
+                {
+                    "item_id": item_id,
+                    "prior_status": status or "unknown",
+                    "disposition": disposition,
+                    "reason": "id_present_in_blocked_archived_backlog",
+                }
+            )
+            changed = True
+            continue
+        if status in stale_statuses:
             item["status"] = "queued"
             item["updated_at"] = utc_now_iso()
             item["recovered_from_stale_in_progress"] = True
@@ -1264,7 +1274,7 @@ def recover_stale_in_progress_items(
     if changed:
         queue.active = active_after_recovery
         queue.save()
-    return recovered, skipped_archived
+    return recovered, archived_dispositions
 
 
 def build_status_payload(
@@ -2652,7 +2662,7 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool, kee
         recovery_queue = QueueManager(ROOT)
         recovery_queue.load()
         archived_ids = load_blocked_archived_ids()
-        recovered_items, skipped_archived_items = recover_stale_in_progress_items(recovery_queue, archived_ids=archived_ids)
+        recovered_items, archived_dispositions = recover_stale_in_progress_items(recovery_queue, archived_ids=archived_ids)
         recovery_warnings = normalize_queued_item_dependencies(recovery_queue, archived_ids=archived_ids)
         if recovered_items:
             emit_event(
@@ -2661,12 +2671,13 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool, kee
                 count=len(recovered_items),
                 item_ids=recovered_items,
             )
-        if skipped_archived_items:
+        if archived_dispositions:
             emit_event(
                 "recovery",
-                "Skipped archived stale in-progress items during recovery",
-                count=len(skipped_archived_items),
-                item_ids=skipped_archived_items,
+                "Applied archived-item dispositions during stale recovery",
+                count=len(archived_dispositions),
+                item_ids=[row["item_id"] for row in archived_dispositions],
+                dispositions=archived_dispositions,
                 archive_path=str(BLOCKED_ARCHIVED_PATH.relative_to(ROOT).as_posix()),
             )
         if recovery_warnings:

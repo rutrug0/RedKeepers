@@ -107,15 +107,70 @@ class QueueIntegrityTests(unittest.TestCase):
             queue.completed = []
             queue.blocked = []
 
-            recovered, skipped = orchestrator.recover_stale_in_progress_items(
+            recovered, archived_dispositions = orchestrator.recover_stale_in_progress_items(
                 queue,
                 archived_ids={"RK-M0-ARCHIVED"},
             )
 
         self.assertEqual(recovered, ["RK-M0-LIVE"])
-        self.assertEqual(skipped, ["RK-M0-ARCHIVED"])
+        self.assertEqual(
+            archived_dispositions,
+            [
+                {
+                    "item_id": "RK-M0-ARCHIVED",
+                    "prior_status": "running",
+                    "disposition": "skip_requeue_archived_stale_item",
+                    "reason": "id_present_in_blocked_archived_backlog",
+                }
+            ],
+        )
         self.assertEqual([item["id"] for item in queue.active], ["RK-M0-LIVE"])
         self.assertEqual(queue.active[0]["status"], "queued")
+
+    def test_recover_stale_in_progress_prunes_archived_active_duplicates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            backlog = root / "coordination" / "backlog"
+            backlog.mkdir(parents=True, exist_ok=True)
+            (backlog / "work-items.json").write_text("[]\n", encoding="utf-8")
+            (backlog / "completed-items.json").write_text("[]\n", encoding="utf-8")
+            (backlog / "blocked-items.json").write_text("[]\n", encoding="utf-8")
+
+            queue = QueueManager(root)
+            queue.active = [
+                {
+                    "id": "RK-AUTO-BACKLOG-0003-F01",
+                    "status": "queued",
+                    "dependencies": [],
+                    "updated_at": "2026-02-26T08:00:00+00:00",
+                },
+                {
+                    "id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
+                    "status": "running",
+                    "dependencies": [],
+                    "updated_at": "2026-02-26T08:00:00+00:00",
+                },
+                {
+                    "id": "RK-M0-LIVE",
+                    "status": "assigned",
+                    "dependencies": [],
+                    "updated_at": "2026-02-26T08:00:00+00:00",
+                },
+            ]
+            queue.completed = []
+            queue.blocked = []
+
+            recovered, archived_dispositions = orchestrator.recover_stale_in_progress_items(
+                queue,
+                archived_ids={"RK-AUTO-BACKLOG-0003-F01", "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"},
+            )
+
+        self.assertEqual(recovered, ["RK-M0-LIVE"])
+        self.assertEqual([item["id"] for item in queue.active], ["RK-M0-LIVE"])
+        self.assertEqual(queue.active[0]["status"], "queued")
+        by_id = {row["item_id"]: row for row in archived_dispositions}
+        self.assertEqual(by_id["RK-AUTO-BACKLOG-0003-F01"]["disposition"], "remove_archived_active_item")
+        self.assertEqual(by_id["RK-M1-0005-F02-F01-ESC-F03-ESC-F01"]["disposition"], "skip_requeue_archived_stale_item")
 
     def test_normalize_queued_dependencies_removes_invalid_values(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -190,7 +245,17 @@ class QueueIntegrityTests(unittest.TestCase):
             (backlog / "blocked-items.json").write_text("[]\n", encoding="utf-8")
             (backlog / "blocked-archived-items.json").write_text("[]\n", encoding="utf-8")
             (runtime / "daemon-state.json").write_text("{}\n", encoding="utf-8")
-            (static_state / "agents.json").write_text("{}\n", encoding="utf-8")
+            (static_state / "agents.json").write_text(
+                json.dumps(
+                    {
+                        "tomas-grell": {
+                            "display_name": "Tomas Grell",
+                            "role": "qa",
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
 
             out = io.StringIO()
             with (

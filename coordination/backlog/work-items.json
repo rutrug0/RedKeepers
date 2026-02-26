@@ -249,45 +249,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
   },
   {
-    "id": "RK-M1-0005-F02-F01-ESC-F02",
-    "title": "Add frontend visual QA dependency preflight to daemon environment checks",
-    "description": "Extend daemon environment validation so frontend-visual QA prerequisites are verified before scheduling frontend items, including Playwright importability in the exact Python interpreter used by orchestrator validation.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "tools/health_checks.py",
-      "tools/orchestrator.py",
-      "coordination/policies/commit-guard-rules.yaml",
-      "docs/operations/frontend-visual-qa.md"
-    ],
-    "acceptance_criteria": [
-      "Environment/status preflight emits a clear actionable error when frontend visual QA is enabled and `playwright` is missing for the active Python interpreter",
-      "Preflight guidance includes explicit install/remediation commands for Playwright and Chromium runtime",
-      "When prerequisites are present, `python tools/orchestrator.py status` passes without false frontend-visual dependency errors"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 1,
-    "created_at": "2026-02-25T18:52:07.843340+00:00",
-    "updated_at": "2026-02-26T11:30:46.461394+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC",
-    "assigned_agent": "tomas-grell",
-    "last_failure_reason": "validation failed or commit failed",
-    "recovered_from_stale_in_progress": true
-  },
-  {
     "id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
     "title": "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
     "description": "Resolve existing unrelated failures in `tests/test_daemon_smoke_env.py` and `tests/test_m1_scaffold_smoke.py` so full regression validation is green and does not re-escalate completed feature work.",
@@ -350,10 +311,10 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T09:09:45.062502+00:00",
-    "updated_at": "2026-02-26T09:13:57.777113+00:00",
+    "updated_at": "2026-02-26T11:35:43.000691+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,

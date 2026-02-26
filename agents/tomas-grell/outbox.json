@@ -513,5 +513,20 @@
       "tests/test_codex_preflight.py",
       "agents/tomas-grell/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-26T11:35:06.8853028Z",
+    "item_id": "RK-AUTO-STALL-0005-F01",
+    "status": "completed",
+    "summary": "Hardened stale in-progress recovery so any ID found in blocked-archived backlog is removed from active queue (including stale and already-queued duplicates) with explicit recovery dispositions logged instead of requeueing archived items.",
+    "checks": [
+      "python -m unittest tests.test_queue_integrity -v (pass)",
+      "python tools/orchestrator.py status (pass; dependency_ready=2)"
+    ],
+    "changed_files": [
+      "tools/orchestrator.py",
+      "tests/test_queue_integrity.py",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]
