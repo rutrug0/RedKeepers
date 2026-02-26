@@ -2453,5 +2453,45 @@
     "generated_from_item_id": "RK-AUTO-STALL-0002",
     "assigned_agent": "tomas-grell",
     "commit_sha": "dce469ef69fdd212944f12294184bbf9461c9f84"
+  },
+  {
+    "id": "RK-AUTO-STALL-0002-F02",
+    "title": "Resolve missing dependency lineage for RK-M1-0005-F02-F01-ESC-F02",
+    "description": "Determine whether dependency `RK-M0-0002` should be restored, remapped, or removed for RK-M1-0005-F02-F01-ESC-F02 and update backlog links to eliminate phantom dependency stalls.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0002"
+    ],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "A concrete disposition is recorded for `RK-M0-0002` (restored/remapped/retired) with rationale",
+      "RK-M1-0005-F02-F01-ESC-F02 dependencies point only to valid, trackable backlog IDs",
+      "No queued item remains stalled solely due to missing `RK-M0-0002` reference"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T08:33:04.913743+00:00",
+    "updated_at": "2026-02-26T08:38:22.084180+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "If you want, I can run `python tools/orchestrator.py status` next to confirm the queue is no longer blocked on `RK-M0-0002`.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0002",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "82d9a2d9e893b6d788821e3053fe003ba46b2d96"
   }
 ]

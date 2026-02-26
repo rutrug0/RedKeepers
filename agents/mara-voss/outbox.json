@@ -763,5 +763,56 @@
                                      "rationale":  "Archived as non-actionable blocked work with no completed replacement scope; no active queued item has a required dependency relationship to it."
                                  },
         "result":  "Updated RK-M1-0005-F02-F01-ESC-F02.dependencies to [] and confirmed no queued items are stalled solely on `RK-M0-0002`."
+    },
+    {
+        "ts":  "2026-02-26T08:40:05.661087+00:00",
+        "item_id":  "RK-AUTO-STALL-0003",
+        "status":  "completed",
+        "summary":  "Resolved queue dependency stall by making one stalled queued item dependency-ready, requeueing blocked dependency root RK-M0-0007, closing deferred out-of-scope RK-AUTO-BACKLOG-0003-F01, and consolidating superseded escalation artifacts already archived.",
+        "queue_recovery":  {
+                               "made_runnable_item_ids":  [
+                                                              "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+                                                          ],
+                               "requeued_item_ids":  [
+                                                         "RK-M0-0007"
+                                                     ],
+                               "explicitly_closed_item_ids":  [
+                                                                   "RK-AUTO-BACKLOG-0003-F01"
+                                                               ],
+                               "consolidated_blocked_removed_ids":  [
+                                                                       "RK-M1-0001-ESC",
+                                                                       "RK-M1-0001-ESC-ESC",
+                                                                       "RK-M1-0001-ESC-ESC-ESC",
+                                                                       "RK-M1-0001-ESC-ESC-ESC-ESC"
+                                                                   ],
+                               "dependency_ready_queued_after_recovery":  [
+                                                                             "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+                                                                             "RK-M0-0007"
+                                                                         ]
+                           },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Resolve remaining blocked-parent dependency stall in QA escalation chain",
+                                        "owner_role":  "lead",
+                                        "milestone":  "M0",
+                                        "priority":  "normal",
+                                        "description":  "Decide disposition for `RK-M1-0005-F02-F01-ESC-F03` (requeue with narrowed validation scope or retire) and align child `RK-M1-0005-F02-F01-ESC-F03-ESC-F01` so no queued item remains stalled behind a retry-threshold blocked parent.",
+                                        "inputs":  [
+                                                       "coordination/backlog/work-items.json",
+                                                       "coordination/backlog/blocked-items.json",
+                                                       "coordination/runtime/run-history.jsonl",
+                                                       "tests/test_daemon_smoke_env.py",
+                                                       "tests/test_m1_scaffold_smoke.py"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "A documented disposition exists for `RK-M1-0005-F02-F01-ESC-F03` with rationale tied to current validation behavior",
+                                                                    "`RK-M1-0005-F02-F01-ESC-F03-ESC-F01` is either dependency-ready with valid parent linkage or explicitly closed/deferred",
+                                                                    "`python tools/orchestrator.py status` no longer shows queued items stalled on blocked dependency `RK-M1-0005-F02-F01-ESC-F03`"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
     }
 ]
