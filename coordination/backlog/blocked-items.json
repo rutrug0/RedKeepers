@@ -724,5 +724,44 @@
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01",
     "assigned_agent": "rowan-hale"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F02-ESC-F02",
+    "title": "Stabilize shared client-shell visual smoke baseline and interaction checks",
+    "description": "Investigate and fix current index.html smoke failures (100% visual diff and world-map keyboard/reduced-motion checks) as a separate shell-regression item so M0/M1 validation remains trustworthy.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "client-web/index.html",
+      "client-web/styles.css",
+      "client-web/app.js",
+      "coordination/runtime/frontend-visual/report.json",
+      "tools/frontend_visual_smoke.py"
+    ],
+    "acceptance_criteria": [
+      "Frontend visual smoke passes on default index.html target for desktop-1440, tablet-1024, mobile-390, and mobile-360 within configured thresholds",
+      "Keyboard ArrowRight+Enter activates world-map tab and reduced-motion checks record non-smooth scroll behavior",
+      "Updated baseline artifacts are committed only after deterministic pass is demonstrated in strict mode"
+    ],
+    "validation_commands": [
+      "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:01:49.000467+00:00",
+    "updated_at": "2026-02-26T12:31:20.658543+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "I could not regenerate/verify strict visual baselines in this sandbox due the Playwright runtime blockers above.",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F02-ESC",
+    "assigned_agent": "sera-kest"
   }
 ]

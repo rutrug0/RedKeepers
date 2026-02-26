@@ -1184,5 +1184,59 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "timestamp_utc":  "2026-02-26T12:41:35.7088744Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0003-F01-F03-F01",
+        "status":  "done",
+        "summary":  "Implemented M2 hero runtime persistence contracts with in-memory/file-backed repository adapters and SQL migrations for runtime states, assignment bindings, and runtime modifier instances, including optimistic concurrency writes for assignment and ability activation.",
+        "changed_files":  [
+                              "backend/src/modules/heroes/README.md",
+                              "backend/src/modules/heroes/index.ts",
+                              "backend/src/modules/heroes/api/README.md",
+                              "backend/src/modules/heroes/application/README.md",
+                              "backend/src/modules/heroes/domain/README.md",
+                              "backend/src/modules/heroes/ports/README.md",
+                              "backend/src/modules/heroes/ports/index.ts",
+                              "backend/src/modules/heroes/ports/hero-runtime-persistence-repository.ts",
+                              "backend/src/modules/heroes/infra/README.md",
+                              "backend/src/modules/heroes/infra/index.ts",
+                              "backend/src/modules/heroes/infra/in-memory-hero-runtime-persistence-repository.ts",
+                              "backend/src/modules/heroes/infra/in-memory-hero-runtime-persistence-repository.test.ts",
+                              "backend/src/modules/heroes/infra/file-backed-hero-runtime-persistence-repository.ts",
+                              "backend/src/modules/heroes/infra/sql/migrations/README.md",
+                              "backend/src/modules/heroes/infra/sql/migrations/20260226_000001_create_hero_runtime_tables_v1.sql",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Add hero runtime migration execution tests against the selected DB runtime",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M2",
+                                        "priority":  "medium",
+                                        "description":  "Add migration-runner validation that applies the hero runtime migration and proves uniqueness/consistency constraints for runtime rows, assignment bindings, and modifier instances in a real database environment.",
+                                        "acceptance_criteria":  [
+                                                                    "Automated test setup can apply `20260226_000001_create_hero_runtime_tables_v1.sql` end-to-end.",
+                                                                    "Tests verify active assignment uniqueness constraints and readiness/cooldown consistency checks fail invalid writes.",
+                                                                    "Tests verify rollback/reset path leaves the schema clean for repeatable CI runs."
+                                                                ]
+                                    },
+                                    {
+                                        "title":  "Wire assignment context ownership validation to context-owning repositories",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M2",
+                                        "priority":  "medium",
+                                        "description":  "Integrate hero assignment writes with owning module read ports (army/scout/siege) so assignment context ownership by `player_id` is validated transactionally before binding activation.",
+                                        "acceptance_criteria":  [
+                                                                    "Assignment mutation rejects contexts not owned by the requesting player.",
+                                                                    "Validation runs inside the same write boundary as assignment/runtime updates.",
+                                                                    "Contract tests cover allowed and rejected ownership cases for all supported context types."
+                                                                ]
+                                    }
+                                ]
     }
 ]

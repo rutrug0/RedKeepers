@@ -3348,5 +3348,39 @@
     "source_item_id": "RK-AUTO-BACKLOG-0003-F01-F02",
     "assigned_agent": "mara-voss",
     "commit_sha": "85221b5f733c2fe64d6ca0b3de83d04d275c9dcb"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03",
+    "title": "Plan backend hero runtime schema and combat hook integration",
+    "description": "Prepare schema and resolver plan for hero assignment state, active ability cooldowns, and combat/scout modifier application using existing action-resolution flow.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "backend/src/modules"
+    ],
+    "acceptance_criteria": [
+      "Schema plan includes hero readiness/cooldown state and assignment linkage to army context",
+      "Ability effects apply through shared numeric modifier pipeline rather than bespoke combat paths",
+      "Event keys for assignment/activation/cooldown completion are defined for client consumption"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T11:43:39.057865+00:00",
+    "updated_at": "2026-02-26T12:11:57.887716+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Parsed `agents/ilya-fen/outbox.json` successfully (`ConvertFrom-Json`).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "9b1d3cd7038064fa435f4b6d4260c18c8268fda7"
   }
 ]

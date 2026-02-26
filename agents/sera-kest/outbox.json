@@ -254,5 +254,38 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "ts":  "2026-02-26T12:30:12.6386390Z",
+        "item_id":  "RK-AUTO-BACKLOG-0003-F01-F02-ESC-F02",
+        "status":  "blocked",
+        "summary":  "Stabilized region-tab activation logic in client-web/app.js so IntersectionObserver no longer overrides the initial tab selection before any user scroll, which should make ArrowRight+Enter world-map smoke checks deterministic. Validation remains blocked in this sandbox because default python cannot import Playwright and the runtime-policy interpreter fails Playwright browser launch with WinError 5 (async subprocess pipe access denied).",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Run shell visual smoke and baseline refresh in Playwright-capable runtime",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M1",
+                                        "priority":  "high",
+                                        "description":  "Execute strict index.html visual smoke in a runtime that can launch Playwright Chromium, then update baseline screenshots and verify a second strict pass to close RK-AUTO-BACKLOG-0003-F01-F02-ESC-F02.",
+                                        "acceptance_criteria":  [
+                                                                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict passes for desktop-1440, tablet-1024, mobile-390, and mobile-360",
+                                                                    "ArrowRight+Enter activates world-map tab and reduced-motion scroll capture records non-smooth behavior",
+                                                                    "Baselines are refreshed with --update-baseline only after a deterministic strict pass strategy is confirmed, then strict validation passes again without baseline update"
+                                                                ],
+                                        "dependencies":  [
+                                                             "Environment where Playwright driver launch succeeds (no WinError 5 async subprocess pipe failure)"
+                                                         ],
+                                        "validation_commands":  [
+                                                                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/frontend_visual_smoke.py --update-baseline --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
     }
 ]

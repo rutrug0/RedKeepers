@@ -258,39 +258,6 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0003-F01-F03",
-    "title": "Plan backend hero runtime schema and combat hook integration",
-    "description": "Prepare schema and resolver plan for hero assignment state, active ability cooldowns, and combat/scout modifier application using existing action-resolution flow.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "docs/design/m2-hero-units-prototype-concept.md",
-      "backend/src/modules"
-    ],
-    "acceptance_criteria": [
-      "Schema plan includes hero readiness/cooldown state and assignment linkage to army context",
-      "Ability effects apply through shared numeric modifier pipeline rather than bespoke combat paths",
-      "Event keys for assignment/activation/cooldown completion are defined for client consumption"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T11:43:39.057865+00:00",
-    "updated_at": "2026-02-26T12:11:56.100203+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-STALL-0006-F01-F01",
     "title": "Finalize RK-M0-0007 disposition after RK-M0-0012 delivery",
     "description": "After RK-M0-0012 completes, decide whether RK-M0-0007 should be archived as superseded or reopened as a narrowed handler-internals delta, and document the final disposition in backlog records.",
@@ -329,41 +296,97 @@
     "generated_from_item_id": "RK-AUTO-STALL-0006-F01"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0003-F01-F02-ESC-F02",
-    "title": "Stabilize shared client-shell visual smoke baseline and interaction checks",
-    "description": "Investigate and fix current index.html smoke failures (100% visual diff and world-map keyboard/reduced-motion checks) as a separate shell-regression item so M0/M1 validation remains trustworthy.",
-    "milestone": "M1",
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F01",
+    "title": "Implement hero runtime persistence contracts and repositories",
+    "description": "Create schema migrations and repository interfaces/implementations for hero runtime states, assignment bindings, and hero modifier runtime instances exactly as defined in the M2 backend hero runtime schema plan.",
+    "milestone": "M2",
     "type": "feature",
     "priority": "normal",
-    "owner_role": "frontend",
+    "owner_role": "backend",
     "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "client-web/index.html",
-      "client-web/styles.css",
-      "client-web/app.js",
-      "coordination/runtime/frontend-visual/report.json",
-      "tools/frontend_visual_smoke.py"
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F03"
     ],
+    "inputs": [],
     "acceptance_criteria": [
-      "Frontend visual smoke passes on default index.html target for desktop-1440, tablet-1024, mobile-390, and mobile-360 within configured thresholds",
-      "Keyboard ArrowRight+Enter activates world-map tab and reduced-motion checks record non-smooth scroll behavior",
-      "Updated baseline artifacts are committed only after deterministic pass is demonstrated in strict mode"
+      "Runtime persistence includes `heroes.hero_runtime_states_v1`, `heroes.hero_assignment_bindings_v1`, and `heroes.hero_modifier_instances_v1` tables with documented uniqueness/consistency constraints.",
+      "Repository contracts support atomic assignment updates and ability activation writes with optimistic concurrency.",
+      "No hero-specific combat/scout formulas are introduced in persistence layer."
     ],
-    "validation_commands": [
-      "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
+    "validation_commands": [],
+    "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-26T12:01:49.000467+00:00",
-    "updated_at": "2026-02-26T12:01:49.000467+00:00",
+    "created_at": "2026-02-26T12:11:58.072993+00:00",
+    "updated_at": "2026-02-26T12:42:46.696550+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F02-ESC"
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
+    "assigned_agent": "ilya-fen"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F02",
+    "title": "Wire hero modifier instances into shared action modifier aggregation",
+    "description": "Extend the shared numeric modifier aggregation path used by action resolution so combat/scout calculators consume hero ability effects from runtime modifier instances by domain/trigger window/context.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F03"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Action resolution reads hero modifier runtime instances through the same numeric aggregation interface as other modifier sources.",
+      "Combat and scout resolvers consume resolved numeric stats without hero-id branches.",
+      "Charge and expiry consumption for hero modifier instances executes in the shared post-resolution modifier lifecycle path."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:11:58.072993+00:00",
+    "updated_at": "2026-02-26T12:11:58.072993+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F03",
+    "title": "Define and validate hero runtime event token fixtures",
+    "description": "Add machine-readable event token fixtures and validation for `event.hero.assigned`, `event.hero.ability_activated`, and `event.hero.cooldown_complete` so client event feed rendering can rely on stable keys and required token sets.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F03"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "A hero runtime event-token table defines required tokens for assignment, activation, and cooldown completion event keys.",
+      "Loader/validator rejects mismatched key-to-token mappings and duplicate identities.",
+      "Contract tests assert emitted hero runtime events conform to the declared key/token fixtures."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:11:58.073493+00:00",
+    "updated_at": "2026-02-26T12:11:58.073493+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03"
   }
 ]

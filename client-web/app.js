@@ -1111,6 +1111,15 @@
     return;
   }
 
+  const syncTabSelection = (activeTab) => {
+    tabs.forEach((item) => {
+      const isActive = item === activeTab;
+      item.classList.toggle("is-active", isActive);
+      item.setAttribute("aria-selected", String(isActive));
+      item.tabIndex = isActive ? 0 : -1;
+    });
+  };
+
   const moveFocusToPanel = (tab) => {
     const targetId = tab.getAttribute("data-target");
     const panel = targetId ? document.getElementById(targetId) : null;
@@ -1119,12 +1128,7 @@
       return;
     }
 
-    tabs.forEach((item) => {
-      const isActive = item === tab;
-      item.classList.toggle("is-active", isActive);
-      item.setAttribute("aria-selected", String(isActive));
-      item.tabIndex = isActive ? 0 : -1;
-    });
+    syncTabSelection(tab);
 
     try {
       panel.focus({ preventScroll: true });
@@ -1183,6 +1187,14 @@
   if ("IntersectionObserver" in window && panels.length > 0) {
     const observer = new IntersectionObserver(
       (entries) => {
+        const pageOffsetY =
+          typeof window.scrollY === "number"
+            ? window.scrollY
+            : Number(window.pageYOffset || 0);
+        if (pageOffsetY < 8) {
+          return;
+        }
+
         const visible = entries
           .filter((entry) => entry.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
@@ -1199,12 +1211,7 @@
           return;
         }
 
-        tabs.forEach((item) => {
-          const isActive = item === matchingTab;
-          item.classList.toggle("is-active", isActive);
-          item.setAttribute("aria-selected", String(isActive));
-          item.tabIndex = isActive ? 0 : -1;
-        });
+        syncTabSelection(matchingTab);
       },
       {
         rootMargin: "-20% 0px -55% 0px",
