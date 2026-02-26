@@ -4067,5 +4067,43 @@
     ],
     "assigned_agent": "mara-voss",
     "commit_sha": "971fbb1f17c89bac22d1fa50f7e921042c69c4fe"
+  },
+  {
+    "id": "RK-AUTO-STALL-0009-F01",
+    "title": "Normalize self-referential dependencies in queued world-map follow-ups",
+    "description": "Fix generated queued items with self-dependencies (`RK-HUMAN-0001-F01`, `RK-HUMAN-0001-F02`) so each item points to a valid predecessor or has no dependency, preventing permanent waiting states.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0009"
+    ],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json"
+    ],
+    "acceptance_criteria": [
+      "No queued item depends on its own ID.",
+      "Adjusted dependencies reference completed or valid queued predecessor IDs.",
+      "python tools/orchestrator.py status reports these items with accurate dependency readiness."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T13:53:47.851076+00:00",
+    "updated_at": "2026-02-26T13:56:33.144026+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/mara-voss/outbox.json](D:/RedKeepers/agents/mara-voss/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0009",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "1bb441d89177804ad6a4a666d7bd3247dc2875d3"
   }
 ]

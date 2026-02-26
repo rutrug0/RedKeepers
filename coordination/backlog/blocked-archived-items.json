@@ -333,5 +333,44 @@
     "archived_at": "2026-02-26T08:21:21.324124+00:00",
     "archive_reason": "out_of_scope_first_slice",
     "closed_by_item": "RK-AUTO-STALL-0001"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F01",
+    "title": "Finalize M2 hero definitions and shared ability modifier table",
+    "description": "Convert the deferred hero concept into data-table ready definitions (hero IDs, unlock gate, active ability effects, cooldown targets) without introducing bespoke mechanics.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "docs/design/v1-starter-data-tables.md",
+      "docs/design/vertical-slice-done-v1.md"
+    ],
+    "acceptance_criteria": [
+      "Hero definitions are expressed as IDs and numeric modifiers compatible with existing stat-driven model",
+      "Exactly one active ability per civilization hero is defined for prototype scope",
+      "Unlock gate is post-onboarding and does not alter first-slice tutorial flow"
+    ],
+    "validation_commands": [],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-26T11:43:39.057865+00:00",
+    "updated_at": "2026-02-26T13:58:50.067685+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "Deferred by Mara Voss: M2 hero-definition work remains out of first-vertical-slice scope until M2 scheduling is explicitly reopened.",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01",
+    "assigned_agent": "rowan-hale",
+    "last_blocker_reason": "- None.",
+    "disposition": "archived_deferred_out_of_first_slice_scope",
+    "disposition_owner": "Mara Voss",
+    "archived_at": "2026-02-26T13:58:50.067685+00:00",
+    "archive_reason": "deferred_out_of_scope"
   }
 ]

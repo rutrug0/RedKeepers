@@ -1543,5 +1543,35 @@
             "coordination/backlog/work-items.json",
             "agents/mara-voss/outbox.json"
         ]
+    },
+    {
+        "ts": "2026-02-26T13:59:26.0449807Z",
+        "item_id": "RK-AUTO-STALL-0009-F02",
+        "status": "completed",
+        "summary": "Requeued dependency-ready `RK-M1-0001` and archived `RK-AUTO-BACKLOG-0003-F01-F01` with explicit disposition metadata to remove non-actionable blocker churn for the targeted IDs.",
+        "queue_recovery": {
+            "requeued_item_ids": [
+                "RK-M1-0001"
+            ],
+            "archived_item_ids": [
+                "RK-AUTO-BACKLOG-0003-F01-F01"
+            ],
+            "archived_disposition": {
+                "RK-AUTO-BACKLOG-0003-F01-F01": "deferred_out_of_first_slice_scope"
+            }
+        },
+        "validation": {
+            "command": "python tools/orchestrator.py status",
+            "result": "pass",
+            "non_actionable_warning_ids_remaining": [
+                "RK-M0-0007"
+            ]
+        },
+        "files": [
+            "coordination/backlog/work-items.json",
+            "coordination/backlog/blocked-items.json",
+            "coordination/backlog/blocked-archived-items.json",
+            "agents/mara-voss/outbox.json"
+        ]
     }
 ]
