@@ -437,8 +437,25 @@
     last_outcome: null,
     next_correlation_id: 1,
   };
+  const settlementContractActionGateRuntime = {
+    build: {
+      building_id: "grain_plot",
+      required_cost_by_id: null,
+      cooldown_ends_at: null,
+    },
+    train: {
+      unit_id: "watch_levy",
+      required_cost_by_id: null,
+      queue_available_at: null,
+    },
+  };
+  const settlementContractGateRefreshTimerByAction = {
+    build: null,
+    train: null,
+  };
   const worldMapActionRuntime = {
     pending_action: null,
+    unavailable_scout_tile_by_id: {},
   };
 
   const cloneResourceValues = (values) => {
@@ -447,6 +464,67 @@
       normalized[resourceId] = Number(values?.[resourceId]) || 0;
     }
     return normalized;
+  };
+  const parseIsoInstant = (value) => {
+    if (value instanceof Date && Number.isFinite(value.getTime())) {
+      return value;
+    }
+    if (typeof value !== "string") {
+      return null;
+    }
+    const normalized = value.trim();
+    if (normalized.length < 1) {
+      return null;
+    }
+    const parsed = new Date(normalized);
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+    return parsed;
+  };
+  const normalizeResourceCostById = (values) => {
+    if (!values || typeof values !== "object") {
+      return null;
+    }
+    const normalized = cloneResourceValues(values);
+    const hasAtLeastOneCost = firstSliceResourceIds.some((resourceId) => normalized[resourceId] > 0);
+    return hasAtLeastOneCost ? normalized : null;
+  };
+  const hasInsufficientResourceStock = (requiredById, availableById) =>
+    firstSliceResourceIds.some(
+      (resourceId) => (Number(availableById?.[resourceId]) || 0) < (Number(requiredById?.[resourceId]) || 0),
+    );
+  const buildMissingResourceValues = (requiredById, availableById) => {
+    const missing = {};
+    for (const resourceId of firstSliceResourceIds) {
+      const requiredValue = Number(requiredById?.[resourceId]) || 0;
+      const availableValue = Number(availableById?.[resourceId]) || 0;
+      missing[resourceId] = Math.max(0, requiredValue - availableValue);
+    }
+    return missing;
+  };
+  const clearSettlementContractGateRefreshTimer = (actionType) => {
+    const existingTimer = settlementContractGateRefreshTimerByAction[actionType];
+    if (existingTimer !== null) {
+      clearTimeout(existingTimer);
+      settlementContractGateRefreshTimerByAction[actionType] = null;
+    }
+  };
+  const scheduleSettlementContractGateRefresh = (actionType, instantValue) => {
+    clearSettlementContractGateRefreshTimer(actionType);
+    const expiresAt = parseIsoInstant(instantValue);
+    if (expiresAt === null) {
+      return;
+    }
+    const remainingMs = expiresAt.getTime() - Date.now();
+    if (remainingMs <= 0) {
+      return;
+    }
+    const delayMs = Math.min(remainingMs + 50, 2_147_483_647);
+    settlementContractGateRefreshTimerByAction[actionType] = window.setTimeout(() => {
+      settlementContractGateRefreshTimerByAction[actionType] = null;
+      renderPanels();
+    }, delayMs);
   };
 
   const formatEtaFromSeconds = (durationSeconds) => {
@@ -941,6 +1019,31 @@
         settlement_name: settlementActionRuntime.settlement_name,
         cooldown_ends_at: toIsoOrValue(response.cooldown_ends_at),
       };
+      const nextBuildingId =
+        typeof response.building_id === "string" && response.building_id.trim().length > 0
+          ? response.building_id
+          : settlementContractActionGateRuntime.build.building_id;
+      settlementContractActionGateRuntime.build.building_id = nextBuildingId;
+      if (failureCode === "insufficient_resources") {
+        const requiredCostById = normalizeResourceCostById(response.required_cost_by_id);
+        if (requiredCostById !== null) {
+          settlementContractActionGateRuntime.build.required_cost_by_id = requiredCostById;
+        }
+        settlementContractActionGateRuntime.build.cooldown_ends_at = null;
+        clearSettlementContractGateRefreshTimer("build");
+
+        if (response.available_stock_by_id) {
+          settlementActionRuntime.resource_stock_by_id = cloneResourceValues(response.available_stock_by_id);
+        }
+      } else if (failureCode === "cooldown") {
+        const cooldownEndsAt = parseIsoInstant(response.cooldown_ends_at);
+        settlementContractActionGateRuntime.build.cooldown_ends_at =
+          cooldownEndsAt !== null ? cooldownEndsAt.toISOString() : null;
+        scheduleSettlementContractGateRefresh(
+          "build",
+          settlementContractActionGateRuntime.build.cooldown_ends_at,
+        );
+      }
       appendEventFeedEntry({
         contentKey: failureKey,
         tokens: failureTokens,
@@ -953,6 +1056,12 @@
 
     settlementActionRuntime.resource_stock_by_id = cloneResourceValues(response.resource_stock_after_by_id);
     settlementActionRuntime.building_level_by_id[response.building_id] = response.to_level;
+    settlementContractActionGateRuntime.build.building_id = response.building_id;
+    settlementContractActionGateRuntime.build.required_cost_by_id =
+      normalizeResourceCostById(response.resource_cost_by_id)
+      || settlementContractActionGateRuntime.build.required_cost_by_id;
+    settlementContractActionGateRuntime.build.cooldown_ends_at = null;
+    clearSettlementContractGateRefreshTimer("build");
     settlementActionRuntime.build_queue_entries = [
       {
         icon: "B*",
@@ -981,6 +1090,31 @@
         settlement_name: settlementActionRuntime.settlement_name,
         queue_available_at: toIsoOrValue(response.queue_available_at),
       };
+      const nextUnitId =
+        typeof response.unit_id === "string" && response.unit_id.trim().length > 0
+          ? response.unit_id
+          : settlementContractActionGateRuntime.train.unit_id;
+      settlementContractActionGateRuntime.train.unit_id = nextUnitId;
+      if (failureCode === "insufficient_resources") {
+        const requiredCostById = normalizeResourceCostById(response.required_cost_by_id);
+        if (requiredCostById !== null) {
+          settlementContractActionGateRuntime.train.required_cost_by_id = requiredCostById;
+        }
+        settlementContractActionGateRuntime.train.queue_available_at = null;
+        clearSettlementContractGateRefreshTimer("train");
+
+        if (response.available_stock_by_id) {
+          settlementActionRuntime.resource_stock_by_id = cloneResourceValues(response.available_stock_by_id);
+        }
+      } else if (failureCode === "cooldown") {
+        const queueAvailableAt = parseIsoInstant(response.queue_available_at);
+        settlementContractActionGateRuntime.train.queue_available_at =
+          queueAvailableAt !== null ? queueAvailableAt.toISOString() : null;
+        scheduleSettlementContractGateRefresh(
+          "train",
+          settlementContractActionGateRuntime.train.queue_available_at,
+        );
+      }
       appendEventFeedEntry({
         contentKey: failureKey,
         tokens: failureTokens,
@@ -992,6 +1126,12 @@
     }
 
     settlementActionRuntime.resource_stock_by_id = cloneResourceValues(response.resource_stock_after_by_id);
+    settlementContractActionGateRuntime.train.unit_id = response.unit_id;
+    settlementContractActionGateRuntime.train.required_cost_by_id =
+      normalizeResourceCostById(response.resource_cost_by_id)
+      || settlementContractActionGateRuntime.train.required_cost_by_id;
+    settlementContractActionGateRuntime.train.queue_available_at = null;
+    clearSettlementContractGateRefreshTimer("train");
     settlementActionRuntime.garrison_count_by_unit_id[response.unit_id] =
       (Number(settlementActionRuntime.garrison_count_by_unit_id[response.unit_id]) || 0) +
       (Number(response.quantity) || 0);
@@ -1111,6 +1251,124 @@
 
     return `Frontier Tile ${tileId}`;
   };
+  const resolveSettlementContractActionAvailability = (actionType) => {
+    if (actionType === "build") {
+      const buildGate = settlementContractActionGateRuntime.build;
+      const cooldownEndsAt = parseIsoInstant(buildGate.cooldown_ends_at);
+      if (cooldownEndsAt !== null) {
+        const cooldownRemainingMs = cooldownEndsAt.getTime() - Date.now();
+        if (cooldownRemainingMs > 0) {
+          return {
+            contractDisabled: true,
+            contentKey: "event.build.failure_cooldown",
+            tokens: {
+              building_id: buildGate.building_id,
+              settlement_name: settlementActionRuntime.settlement_name,
+              cooldown_ends_at: cooldownEndsAt.toISOString(),
+              cooldown_remaining_ms: cooldownRemainingMs,
+            },
+          };
+        }
+        buildGate.cooldown_ends_at = null;
+        clearSettlementContractGateRefreshTimer("build");
+      }
+
+      const requiredCostById = normalizeResourceCostById(buildGate.required_cost_by_id);
+      const availableStockById = cloneResourceValues(settlementActionRuntime.resource_stock_by_id);
+      if (
+        requiredCostById !== null
+        && hasInsufficientResourceStock(requiredCostById, availableStockById)
+      ) {
+        return {
+          contractDisabled: true,
+          contentKey: "event.build.failure_insufficient_resources",
+          tokens: {
+            building_id: buildGate.building_id,
+            settlement_name: settlementActionRuntime.settlement_name,
+            required_cost_by_id: requiredCostById,
+            available_stock_by_id: availableStockById,
+            missing_resources_by_id: buildMissingResourceValues(requiredCostById, availableStockById),
+          },
+        };
+      }
+    }
+
+    if (actionType === "train") {
+      const trainGate = settlementContractActionGateRuntime.train;
+      const queueAvailableAt = parseIsoInstant(trainGate.queue_available_at);
+      if (queueAvailableAt !== null) {
+        const cooldownRemainingMs = queueAvailableAt.getTime() - Date.now();
+        if (cooldownRemainingMs > 0) {
+          return {
+            contractDisabled: true,
+            contentKey: "event.train.failure_cooldown",
+            tokens: {
+              unit_id: trainGate.unit_id,
+              settlement_name: settlementActionRuntime.settlement_name,
+              queue_available_at: queueAvailableAt.toISOString(),
+              cooldown_remaining_ms: cooldownRemainingMs,
+            },
+          };
+        }
+        trainGate.queue_available_at = null;
+        clearSettlementContractGateRefreshTimer("train");
+      }
+
+      const requiredCostById = normalizeResourceCostById(trainGate.required_cost_by_id);
+      const availableStockById = cloneResourceValues(settlementActionRuntime.resource_stock_by_id);
+      if (
+        requiredCostById !== null
+        && hasInsufficientResourceStock(requiredCostById, availableStockById)
+      ) {
+        return {
+          contractDisabled: true,
+          contentKey: "event.train.failure_insufficient_resources",
+          tokens: {
+            unit_id: trainGate.unit_id,
+            settlement_name: settlementActionRuntime.settlement_name,
+            required_cost_by_id: requiredCostById,
+            available_stock_by_id: availableStockById,
+            missing_resources_by_id: buildMissingResourceValues(requiredCostById, availableStockById),
+          },
+        };
+      }
+    }
+
+    return {
+      contractDisabled: false,
+      contentKey: "",
+      tokens: {},
+    };
+  };
+  const resolveWorldMapScoutContractAvailability = () => {
+    const tileId = resolveSelectedWorldMapTileId();
+    const unavailableTileEntry = worldMapActionRuntime.unavailable_scout_tile_by_id[tileId];
+    if (!unavailableTileEntry) {
+      return {
+        contractDisabled: false,
+        contentKey: "",
+        tokens: {},
+      };
+    }
+
+    const contentKey =
+      typeof unavailableTileEntry.contentKey === "string" && unavailableTileEntry.contentKey.trim().length > 0
+        ? unavailableTileEntry.contentKey
+        : "event.scout.unavailable_tile";
+    const fallbackTokens = {
+      settlement_name: settlementActionRuntime.settlement_name,
+      target_tile_label: resolveSelectedWorldMapTileLabel(tileId),
+    };
+    const tokens = mapPlaceholderEventTokens(contentKey, {
+      ...fallbackTokens,
+      ...(unavailableTileEntry.tokens || {}),
+    });
+    return {
+      contractDisabled: true,
+      contentKey,
+      tokens,
+    };
+  };
 
   const applyScoutActionResult = (response) => {
     const isFailure = response?.status === "failed";
@@ -1119,12 +1377,23 @@
       : "event.world.scout_dispatched";
     const backendContentKey = response?.event?.content_key || fallbackBackendContentKey;
     const contentKey = mapBackendEventKeyToClientKey(backendContentKey);
-    const fallbackTileId = typeof response?.tile_id === "string" ? response.tile_id : resolveSelectedWorldMapTileId();
+    const fallbackTileId =
+      typeof response?.tile_id === "string" && response.tile_id.trim().length > 0
+        ? response.tile_id
+        : resolveSelectedWorldMapTileId();
     const eventTokens = response?.event?.tokens || {
       settlement_name: settlementActionRuntime.settlement_name,
       target_tile_label: resolveSelectedWorldMapTileLabel(fallbackTileId),
     };
     const tokens = mapPlaceholderEventTokens(contentKey, eventTokens);
+    if (isFailure && response?.error_code === "unavailable_tile") {
+      worldMapActionRuntime.unavailable_scout_tile_by_id[fallbackTileId] = {
+        contentKey,
+        tokens,
+      };
+    } else {
+      delete worldMapActionRuntime.unavailable_scout_tile_by_id[fallbackTileId];
+    }
 
     appendEventFeedEntry({
       contentKey,
@@ -1138,6 +1407,12 @@
   const runSettlementContractAction = async (actionType) => {
     if (settlementActionRuntime.pending_action !== null) {
       return;
+    }
+    if (actionType === "build" || actionType === "train") {
+      const availability = resolveSettlementContractActionAvailability(actionType);
+      if (availability.contractDisabled) {
+        return;
+      }
     }
 
     settlementActionRuntime.pending_action = actionType;
@@ -1214,6 +1489,10 @@
 
   const runWorldMapContractAction = async (actionType) => {
     if (actionType !== "scout" || worldMapActionRuntime.pending_action !== null) {
+      return;
+    }
+    const scoutAvailability = resolveWorldMapScoutContractAvailability();
+    if (scoutAvailability.contractDisabled) {
       return;
     }
 
@@ -1477,6 +1756,34 @@
     const isSuccessMode = settlementActionRuntime.action_outcome_mode === "success";
     const isFailureMode = settlementActionRuntime.action_outcome_mode === "failure";
     const pendingAction = settlementActionRuntime.pending_action;
+    const buildAvailability = resolveSettlementContractActionAvailability("build");
+    const trainAvailability = resolveSettlementContractActionAvailability("train");
+    const tickDisabled = pendingAction !== null;
+    const buildDisabled = pendingAction !== null || buildAvailability.contractDisabled;
+    const trainDisabled = pendingAction !== null || trainAvailability.contractDisabled;
+    const settlementContractReasonRows = [
+      buildAvailability.contractDisabled
+        ? `
+          <li class="action-reason-item" data-content-key="${escapeHtml(buildAvailability.contentKey)}">
+            <strong>Build Upgrade</strong>
+            <span>${escapeHtml(getNarrativeText(buildAvailability.contentKey, buildAvailability.tokens))}</span>
+          </li>
+        `
+        : "",
+      trainAvailability.contractDisabled
+        ? `
+          <li class="action-reason-item" data-content-key="${escapeHtml(trainAvailability.contentKey)}">
+            <strong>Train Unit</strong>
+            <span>${escapeHtml(getNarrativeText(trainAvailability.contentKey, trainAvailability.tokens))}</span>
+          </li>
+        `
+        : "",
+    ]
+      .filter((row) => row.length > 0)
+      .join("");
+    const settlementContractReasonSection = settlementContractReasonRows.length > 0
+      ? `<ul class="action-reason-list" aria-live="polite">${settlementContractReasonRows}</ul>`
+      : "";
     const lastOutcome = settlementActionRuntime.last_outcome;
     const outcomeNarrative = lastOutcome
       ? getNarrativeText(lastOutcome.contentKey, lastOutcome.tokens)
@@ -1514,21 +1821,22 @@
               type="button"
               class="action-btn"
               data-settlement-adapter-action="tick"
-              ${pendingAction ? "disabled" : ""}
+              ${tickDisabled ? "disabled" : ""}
             >${pendingAction === "tick" ? "Ticking..." : "Tick Settlement"}</button>
             <button
               type="button"
               class="action-btn"
               data-settlement-adapter-action="build"
-              ${pendingAction ? "disabled" : ""}
+              ${buildDisabled ? "disabled" : ""}
             >${pendingAction === "build" ? "Queuing..." : "Build Upgrade"}</button>
             <button
               type="button"
               class="action-btn"
               data-settlement-adapter-action="train"
-              ${pendingAction ? "disabled" : ""}
+              ${trainDisabled ? "disabled" : ""}
             >${pendingAction === "train" ? "Training..." : "Train Unit"}</button>
           </div>
+          ${settlementContractReasonSection}
           <p class="${outcomeClass}" aria-live="polite">${escapeHtml(outcomeNarrative)}</p>
           <p class="subpanel-note">${escapeHtml(lastOutcome?.detail || "Awaiting adapter response.")}</p>
         </section>
@@ -1587,6 +1895,18 @@
       .join("");
 
     const isMapActionPending = worldMapActionRuntime.pending_action !== null;
+    const scoutAvailability = resolveWorldMapScoutContractAvailability();
+    const mapContractReasonSection =
+      mode === "populated" && scoutAvailability.contractDisabled
+        ? `
+          <ul class="action-reason-list" aria-live="polite">
+            <li class="action-reason-item" data-content-key="${escapeHtml(scoutAvailability.contentKey)}">
+              <strong>Send Scouts</strong>
+              <span>${escapeHtml(getNarrativeText(scoutAvailability.contentKey, scoutAvailability.tokens))}</span>
+            </li>
+          </ul>
+        `
+        : "";
     const actionItems = (scenario.actions || [])
       .map((label) => {
         const normalizedLabel = String(label).trim().toLowerCase();
@@ -1594,7 +1914,8 @@
         const isDisabled =
           mode !== "populated"
           || isMapActionPending
-          || settlementActionRuntime.pending_action !== null;
+          || settlementActionRuntime.pending_action !== null
+          || (isScoutAction && scoutAvailability.contractDisabled);
         const displayLabel = isScoutAction && worldMapActionRuntime.pending_action === "scout"
           ? "Scouting..."
           : label;
@@ -1643,6 +1964,7 @@
               <h3>Map Actions</h3>
               <p class="loading-copy">Actions remain placeholder-only during mock loading.</p>
               <div class="stack-sm">${actionItems}</div>
+              ${mapContractReasonSection}
             </section>
           </aside>
         </div>
@@ -1686,6 +2008,7 @@
             <section class="subpanel compact">
               <h3>Map Actions</h3>
               <div class="stack-sm">${actionItems}</div>
+              ${mapContractReasonSection}
             </section>
           </aside>
         </div>
@@ -1730,6 +2053,7 @@
             <section class="subpanel compact">
               <h3>Map Actions</h3>
               <div class="stack-sm">${actionItems}</div>
+              ${mapContractReasonSection}
             </section>
           </aside>
         </div>
@@ -1782,6 +2106,7 @@
           <section class="subpanel compact">
             <h3>Map Actions</h3>
             <div class="stack-sm">${actionItems}</div>
+            ${mapContractReasonSection}
           </section>
         </aside>
       </div>

@@ -4668,5 +4668,46 @@
     "last_blocker_reason": "retry threshold exceeded; escalated",
     "blocked_revisit_count": 1,
     "commit_sha": "ba63f208b2c8e38d13ebf899bd8bfa55ca087b85"
+  },
+  {
+    "id": "RK-M0-0011",
+    "title": "Add first-slice loop smoke checks across backend contracts and client actions",
+    "description": "Create lightweight automated checks that assert the first-slice settlement tick/build/train/scout contracts are wired end-to-end with deterministic placeholders.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006",
+      "RK-M0-0008",
+      "RK-M0-0010",
+      "RK-M0-0009"
+    ],
+    "inputs": [
+      "tests/",
+      "backend/",
+      "client-web/",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "At least one automated check validates each of tick, upgrade, train, and scout flow touchpoints",
+      "Negative-path assertion covers insufficient resources and one unavailable-state condition",
+      "Check output is deterministic and includes a simple pass/fail summary for the first-slice slice readiness"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-26T16:16:27.423487+00:00",
+    "estimated_effort": "M",
+    "token_budget": 12000,
+    "result_summary": "- [agents/tomas-grell/outbox.json](D:/RedKeepers/agents/tomas-grell/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "c6d713d38698b16c024d75a8301f11300202283a"
   }
 ]

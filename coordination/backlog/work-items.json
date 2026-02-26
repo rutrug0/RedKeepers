@@ -1,45 +1,5 @@
 [
   {
-    "id": "RK-M0-0011",
-    "title": "Add first-slice loop smoke checks across backend contracts and client actions",
-    "description": "Create lightweight automated checks that assert the first-slice settlement tick/build/train/scout contracts are wired end-to-end with deterministic placeholders.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0006",
-      "RK-M0-0008",
-      "RK-M0-0010",
-      "RK-M0-0009"
-    ],
-    "inputs": [
-      "tests/",
-      "backend/",
-      "client-web/",
-      "docs/design/first-vertical-slice.md"
-    ],
-    "acceptance_criteria": [
-      "At least one automated check validates each of tick, upgrade, train, and scout flow touchpoints",
-      "Negative-path assertion covers insufficient resources and one unavailable-state condition",
-      "Check output is deterministic and includes a simple pass/fail summary for the first-slice slice readiness"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:15:22.000000+00:00",
-    "updated_at": "2026-02-26T16:16:26.044048+00:00",
-    "estimated_effort": "M",
-    "token_budget": 12000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "assigned_agent": "tomas-grell"
-  },
-  {
     "id": "RK-M0-0013",
     "title": "Add action availability gating and cooldown feedback in client shell",
     "description": "Update settlement and map controls to react to backend contract state so build/train/scout actions show deterministic disabled states and placeholder reason feedback.",
@@ -62,17 +22,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T18:32:27.509162+00:00",
-    "updated_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-26T16:24:23.827366+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-M0-0016",
