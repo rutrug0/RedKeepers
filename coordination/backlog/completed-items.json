@@ -2794,5 +2794,44 @@
     "assigned_agent": "mara-voss",
     "recovered_from_stale_in_progress": true,
     "commit_sha": "72dc6d59db23d8fc1400e7765d74b3cb2681eb71"
+  },
+  {
+    "id": "RK-AUTO-STALL-0004-F01",
+    "title": "Harden stale-run recovery against archived-item resurrection",
+    "description": "Add a backlog-state guard in orchestrator recovery paths so IDs present in `blocked-archived-items.json` cannot be reintroduced into `work-items.json` during stale in-progress recovery, and normalize dependencies to valid backlog IDs only.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0004"
+    ],
+    "inputs": [
+      "tools/orchestrator.py",
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-archived-items.json"
+    ],
+    "acceptance_criteria": [
+      "Recovery flow skips archived IDs and logs the disposition instead of requeueing them",
+      "Queued item dependencies are validated against known backlog IDs with actionable warnings for non-ID strings",
+      "python tools/orchestrator.py status reports at least one dependency-ready queued item in the provided recovery fixture"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T08:57:27.463862+00:00",
+    "updated_at": "2026-02-26T09:04:52.523227+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [coordination/backlog/work-items.json](D:/RedKeepers/coordination/backlog/work-items.json) (normalized queued dependency entries during status validation)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0004",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "b7df94dc9b01de84b034bb9bd2ce329c788e342f"
   }
 ]

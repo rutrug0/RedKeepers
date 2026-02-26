@@ -1,4 +1,4 @@
-﻿[
+[
     {
         "ts": "2026-02-25T13:37:46.7968877Z",
         "item_id": "RK-M1-0001-ESC-ESC-ESC-ESC",
@@ -894,6 +894,52 @@
                     "Recovery flow skips archived IDs and logs the disposition instead of requeueing them",
                     "Queued item dependencies are validated against known backlog IDs with actionable warnings for non-ID strings",
                     "python tools/orchestrator.py status reports at least one dependency-ready queued item in the provided recovery fixture"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
+    },
+    {
+        "ts": "2026-02-26T09:07:37.061554+00:00",
+        "item_id": "RK-AUTO-STALL-0005",
+        "status": "completed",
+        "summary": "Resolved queue dependency stall by requeueing dependency-root RK-M0-0007, explicitly closing reintroduced archived queued artifacts, and consolidating superseded blocked escalation artifacts.",
+        "queue_recovery": {
+            "requeued_item_ids": [
+                "RK-M0-0007"
+            ],
+            "explicitly_closed_item_ids": [
+                "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
+                "RK-AUTO-BACKLOG-0003-F01"
+            ],
+            "consolidated_blocked_removed_ids": [
+                "RK-M1-0001-ESC",
+                "RK-M1-0001-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC-ESC"
+            ],
+            "runnable_queued_after_recovery": [
+                "RK-M0-0007"
+            ]
+        },
+        "proposed_work_items": [
+            {
+                "title": "Prevent archived-item resurrection during stale in-progress recovery",
+                "owner_role": "qa",
+                "milestone": "M0",
+                "priority": "high",
+                "description": "Add orchestrator guards so items present in blocked-archived backlog cannot be reinserted into active work queue during stale-run recovery, and emit explicit disposition logs.",
+                "inputs": [
+                    "tools/orchestrator.py",
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-archived-items.json"
+                ],
+                "acceptance_criteria": [
+                    "Recovery flow skips archived IDs and logs their disposition instead of requeueing them",
+                    "Reproduced stale-run fixture no longer reintroduces RK-AUTO-BACKLOG-0003-F01 or RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
+                    "python tools/orchestrator.py status still reports at least one dependency-ready queued item after recovery"
                 ],
                 "validation_commands": [
                     "python tools/orchestrator.py status"
