@@ -1,0 +1,33 @@
+{
+  "schema_version": "rk-v1-hero-runtime-seed",
+  "source_doc": "docs/design/m2-hero-runtime-schema-and-resolver-hook-plan.md",
+  "source_section": "Client Event Keys (stable)",
+  "table_id": "heroes.hero_runtime_event_tokens",
+  "rows": [
+    {
+      "event_key": "event.hero.assigned",
+      "required_tokens": [
+        "hero_id",
+        "assignment_context_type",
+        "assignment_context_id"
+      ]
+    },
+    {
+      "event_key": "event.hero.ability_activated",
+      "required_tokens": [
+        "hero_id",
+        "ability_id",
+        "assignment_context_type",
+        "assignment_context_id",
+        "cooldown_ends_at"
+      ]
+    },
+    {
+      "event_key": "event.hero.cooldown_complete",
+      "required_tokens": [
+        "hero_id",
+        "ability_id"
+      ]
+    }
+  ]
+}

@@ -3481,5 +3481,38 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03-F01",
     "assigned_agent": "ilya-fen",
     "commit_sha": "817b5cc63753a0c5ef4e31c175cd17d76f669333"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F01-F02",
+    "title": "Wire assignment context ownership validation to context-owning repositories",
+    "description": "Integrate hero assignment writes with owning module read ports (army/scout/siege) so assignment context ownership by `player_id` is validated transactionally before binding activation.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F03-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Assignment mutation rejects contexts not owned by the requesting player.",
+      "Validation runs inside the same write boundary as assignment/runtime updates.",
+      "Contract tests cover allowed and rejected ownership cases for all supported context types."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:42:50.305580+00:00",
+    "updated_at": "2026-02-26T13:08:44.277128+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [outbox.json](D:\\RedKeepers\\agents\\ilya-fen\\outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "5d13c7600c4ebdcccb2ea6548e9b4e99c33bcd82"
   }
 ]

@@ -314,48 +314,17 @@
       "Contract tests assert emitted hero runtime events conform to the declared key/token fixtures."
     ],
     "validation_commands": [],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-26T12:11:58.073493+00:00",
-    "updated_at": "2026-02-26T12:11:58.073493+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F01-F02",
-    "title": "Wire assignment context ownership validation to context-owning repositories",
-    "description": "Integrate hero assignment writes with owning module read ports (army/scout/siege) so assignment context ownership by `player_id` is validated transactionally before binding activation.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0003-F01-F03-F01"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Assignment mutation rejects contexts not owned by the requesting player.",
-      "Validation runs inside the same write boundary as assignment/runtime updates.",
-      "Contract tests cover allowed and rejected ownership cases for all supported context types."
-    ],
-    "validation_commands": [],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-26T12:42:50.305580+00:00",
-    "updated_at": "2026-02-26T13:08:42.442195+00:00",
+    "created_at": "2026-02-26T12:11:58.073493+00:00",
+    "updated_at": "2026-02-26T13:15:05.307485+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03-F01",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
     "assigned_agent": "ilya-fen"
   },
   {
