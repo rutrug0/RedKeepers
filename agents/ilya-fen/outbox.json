@@ -1457,5 +1457,55 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "timestamp_utc":  "2026-02-26T15:18:48.4344468Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-M0-0012-F01",
+        "status":  "done",
+        "summary":  "Wired first-slice settlement loop endpoint handlers into a concrete local-RPC backend transport, exposed route registration/invocation for tick/build/train/scout contracts, and added transport-level smoke/contract tests that preserve insufficient_resources, cooldown, and unavailable_tile error-code payload keys.",
+        "changed_files":  [
+                              "backend/src/app/README.md",
+                              "backend/src/app/index.ts",
+                              "backend/src/app/transport/README.md",
+                              "backend/src/app/transport/index.ts",
+                              "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
+                              "backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                              "backend/src/app/transport/smoke.ts",
+                              "backend/src/app/transport/smoke.test.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --experimental-strip-types --check backend/src/app/transport/local-first-slice-settlement-loop-transport.ts backend/src/app/transport/smoke.ts backend/src/app/transport/index.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts backend/src/app/transport/smoke.test.ts backend/src/app/index.ts",
+                                    "node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts backend/src/app/transport/smoke.test.ts",
+                                    "python tools/orchestrator.py status"
+                                ],
+        "results":  {
+                        "validation_note":  "TypeScript strip-types checks passed for all touched backend transport files. Node test execution still fails in this environment due repository-wide ESM TypeScript directory/extensionless imports (`ERR_UNSUPPORTED_DIR_IMPORT`, `ERR_MODULE_NOT_FOUND`). Orchestrator status command passed."
+                    },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Replace client web local loop stubs with backend transport invocation bridge",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Connect `client-web` settlement action adapter calls to the new backend first-slice transport route invocations (direct bridge/dev shim) so tick/build/train/scout actions no longer rely on duplicated local simulation logic.",
+                                        "acceptance_criteria":  [
+                                                                    "Client settlement tick/build/train action calls invoke the backend transport routes and consume returned contract payloads directly.",
+                                                                    "Client world-map scout interaction path invokes backend transport route and handles unavailable_tile failure via existing event key flow.",
+                                                                    "Client-side action adapter no longer duplicates first-slice economic/build/train/scout simulation rules that now exist in backend handlers."
+                                                                ],
+                                        "dependencies":  [
+                                                             "RK-M0-0012-F01"
+                                                         ],
+                                        "inputs":  [
+                                                       "client-web/app.js",
+                                                       "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts"
+                                                   ]
+                                    }
+                                ]
     }
 ]

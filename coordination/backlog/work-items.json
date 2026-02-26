@@ -108,45 +108,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
   },
   {
-    "id": "RK-AUTO-STALL-0006-F01-F01",
-    "title": "Finalize RK-M0-0007 disposition after RK-M0-0012 delivery",
-    "description": "After RK-M0-0012 completes, decide whether RK-M0-0007 should be archived as superseded or reopened as a narrowed handler-internals delta, and document the final disposition in backlog records.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "lead",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0012"
-    ],
-    "inputs": [
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/blocked-items.json",
-      "coordination/backlog/blocked-archived-items.json",
-      "coordination/runtime/run-history.jsonl"
-    ],
-    "acceptance_criteria": [
-      "RK-M0-0007 has a final documented disposition (archived superseded or requeued narrowed scope).",
-      "No queued first-slice item depends directly on a blocked RK-M0-0007 root.",
-      "python tools/orchestrator.py status remains non-stalled after disposition update."
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T11:52:12.095556+00:00",
-    "updated_at": "2026-02-26T15:13:59.154822+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-STALL-0006-F01",
-    "assigned_agent": "mara-voss"
-  },
-  {
     "id": "RK-HUMAN-0001-F01",
     "title": "Add seasonal world lifecycle scheduler and rollover state model",
     "description": "Implement semi-persistent world lifecycle controls (open/lock/archive/reset) using `season_length_days` metadata while preserving deterministic archive snapshots.",
@@ -303,16 +264,17 @@
       "A smoke path demonstrates client-facing invocation against at least one wired runtime route."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T14:30:10.563290+00:00",
-    "updated_at": "2026-02-26T14:30:10.563290+00:00",
+    "updated_at": "2026-02-26T15:19:41.983460+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M0-0012"
+    "generated_from_item_id": "RK-M0-0012",
+    "assigned_agent": "ilya-fen"
   }
 ]

@@ -6,6 +6,7 @@ Framework-agnostic composition contracts live here so modules can be wired via i
 
 - `composition.ts`: module registration/bootstrap interfaces, service registry contract, lifecycle hooks
 - `reference/`: temporary in-memory reference adapters and a bootstrap smoke helper for contract validation
+- `transport/`: concrete local-RPC route wiring for first-slice settlement loop endpoint handlers
 - `index.ts`: app-layer contract exports
 
 Concrete config loading, transport startup, and infra adapter wiring remain deferred.
