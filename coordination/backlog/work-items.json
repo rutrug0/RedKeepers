@@ -140,40 +140,6 @@
     "generated_from_item_id": "RK-HUMAN-0001"
   },
   {
-    "id": "RK-HUMAN-0001-F02",
-    "title": "Evolve timer marches to near-realtime authoritative movement updates",
-    "description": "Introduce server-authoritative short-interval march updates and interpolation-ready payloads while preserving deterministic resolution semantics.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "backend/src/modules/world_map/",
-      "client-web/app.js",
-      "docs/design/world-map-v1-phasing.md"
-    ],
-    "acceptance_criteria": [
-      "March state snapshots are emitted at near-realtime intervals with stable IDs and timestamps.",
-      "Arrival and combat resolution remain server-authoritative and deterministic.",
-      "Client can render interpolated movement without altering authoritative outcomes."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T13:42:24.193702+00:00",
-    "updated_at": "2026-02-26T16:09:48.345601+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-HUMAN-0001",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-HUMAN-0001-F03",
     "title": "Add hero attachment path for marches using shared modifier model",
     "description": "Define and stage hero-to-march assignment rules and cooldown/modifier hooks as a post-slice extension of the shared stat-driven system.",
@@ -397,6 +363,47 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01",
+    "assigned_agent": "sera-kest",
+    "last_failure_reason": "validation failed or commit failed",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "retry threshold exceeded; escalated",
+    "blocked_revisit_count": 1
+  },
+  {
+    "id": "RK-M0-0008",
+    "title": "Wire client shell actions to first-slice backend contracts",
+    "description": "Add a thin client adapter layer so settlement tick, build, and train actions invoke backend-first-slice contract endpoints/stubs and update mock state/event feed.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005",
+      "RK-M0-0006"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "client-web/styles.css",
+      "client-web/index.html"
+    ],
+    "acceptance_criteria": [
+      "Tick/build/train buttons call a dedicated adapter method and reflect changed values in the settlement panel state",
+      "Client displays placeholder outcomes for success and failure paths from handler payloads",
+      "Event feed appends mapped event keys for backend action responses in placeholder format"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "validating",
+    "retry_count": 1,
+    "created_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-26T16:11:36.295981+00:00",
+    "estimated_effort": "M",
+    "token_budget": 12000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
     "assigned_agent": "sera-kest",
     "last_failure_reason": "validation failed or commit failed",
     "last_unblocked_reason": "automatic blocked revisit (1/2)",

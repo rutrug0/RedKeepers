@@ -343,5 +343,18 @@
                       "client-web/app.js",
                       "agents/sera-kest/outbox.json"
                   ]
+    },
+    {
+        "ts":  "2026-02-26T16:10:56.3976011Z",
+        "item_id":  "RK-M0-0008",
+        "status":  "completed",
+        "summary":  "Verified the first-slice settlement action adapter wiring remains in place: Tick/Build/Train invoke dedicated adapter methods, success/failure payloads update settlement runtime and placeholder outcome text, and mapped backend event keys continue appending into the event feed.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "python tools/orchestrator.py status"
+                                ]
     }
 ]
