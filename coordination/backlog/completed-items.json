@@ -4626,5 +4626,47 @@
     "generated_from_item_id": "RK-HUMAN-0001",
     "assigned_agent": "ilya-fen",
     "commit_sha": "cc6ae87463898f6d512938609c8cec2a1a955301"
+  },
+  {
+    "id": "RK-M0-0008",
+    "title": "Wire client shell actions to first-slice backend contracts",
+    "description": "Add a thin client adapter layer so settlement tick, build, and train actions invoke backend-first-slice contract endpoints/stubs and update mock state/event feed.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005",
+      "RK-M0-0006"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "client-web/styles.css",
+      "client-web/index.html"
+    ],
+    "acceptance_criteria": [
+      "Tick/build/train buttons call a dedicated adapter method and reflect changed values in the settlement panel state",
+      "Client displays placeholder outcomes for success and failure paths from handler payloads",
+      "Event feed appends mapped event keys for backend action responses in placeholder format"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 1,
+    "created_at": "2026-02-25T18:15:22.000000+00:00",
+    "updated_at": "2026-02-26T16:11:37.865824+00:00",
+    "estimated_effort": "M",
+    "token_budget": 12000,
+    "result_summary": "- [agents/sera-kest/outbox.json](D:\\RedKeepers\\agents\\sera-kest\\outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "assigned_agent": "sera-kest",
+    "last_failure_reason": "validation failed or commit failed",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "retry threshold exceeded; escalated",
+    "blocked_revisit_count": 1,
+    "commit_sha": "ba63f208b2c8e38d13ebf899bd8bfa55ca087b85"
   }
 ]

@@ -576,5 +576,21 @@
       "tests/test_model_policy_drift_audit.py",
       "agents/tomas-grell/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-26T16:15:48.9005612Z",
+    "item_id": "RK-M0-0011",
+    "status": "completed",
+    "summary": "Added deterministic first-slice loop smoke checks that validate backend/client wiring for tick, build-upgrade, train, and scout touchpoints, plus insufficient-resources and unavailable-tile negative-path coverage with a stable pass/fail readiness summary.",
+    "checks": [
+      "python -m unittest tests.test_rk_m0_0011_first_slice_loop_smoke -v (pass)",
+      "python tools/rk_m0_0011_first_slice_loop_smoke.py (pass; RK-M0-0011_SMOKE summary status=PASS pass=7 fail=0)",
+      "python tools/orchestrator.py status (pass)"
+    ],
+    "changed_files": [
+      "tools/rk_m0_0011_first_slice_loop_smoke.py",
+      "tests/test_rk_m0_0011_first_slice_loop_smoke.py",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]
