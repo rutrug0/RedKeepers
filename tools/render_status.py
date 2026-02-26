@@ -31,6 +31,7 @@ def render_status(data: dict[str, Any]) -> str:
     lines.append(
         "Queue: "
         f"queued={queue.get('queued', 0)} "
+        f"dependency_ready={queue.get('dependency_ready', 0)} "
         f"running={queue.get('running', 0)} "
         f"blocked={queue.get('blocked', 0)} "
         f"completed={queue.get('completed', 0)}"

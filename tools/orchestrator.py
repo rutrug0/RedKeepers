@@ -50,6 +50,7 @@ def _int_env(name: str, default: int, *, min_value: int = 0) -> int:
 
 
 AGENT_HEARTBEAT_SECONDS = _int_env("REDKEEPERS_AGENT_HEARTBEAT_SECONDS", 60, min_value=5)
+BACKLOG_ID_PATTERN = re.compile(r"^RK-[A-Z0-9]+(?:-[A-Z0-9]+)*$")
 
 
 def _supports_color_output() -> bool:
@@ -333,12 +334,148 @@ def milestone_progress(queue: QueueManager) -> dict[str, dict[str, int]]:
 def queue_counts(queue: QueueManager) -> dict[str, int]:
     running = sum(1 for item in queue.active if item.get("status") in {"assigned", "running", "validating"})
     queued = sum(1 for item in queue.active if item.get("status") == "queued")
+    completed_ids = {item.get("id") for item in queue.completed}
+    dependency_ready = 0
+    for item in queue.active:
+        if item.get("status") != "queued":
+            continue
+        deps_raw = item.get("dependencies", [])
+        if not isinstance(deps_raw, list):
+            continue
+        deps = [str(dep) for dep in deps_raw]
+        if all(dep in completed_ids for dep in deps):
+            dependency_ready += 1
     return {
         "queued": queued,
+        "dependency_ready": dependency_ready,
         "running": running,
         "blocked": len(queue.blocked),
         "completed": len(queue.completed),
     }
+
+
+def load_blocked_archived_ids() -> set[str]:
+    rows = load_json(BLOCKED_ARCHIVED_PATH, [])
+    if not isinstance(rows, list):
+        return set()
+    archived_ids: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        item_id = str(row.get("id", "")).strip()
+        if item_id:
+            archived_ids.add(item_id)
+    return archived_ids
+
+
+def _dependency_warning_message(row: dict[str, str]) -> str:
+    item_id = row.get("item_id", "<unknown>")
+    dep = row.get("dependency", "<unknown>")
+    reason = row.get("reason", "invalid")
+    action = row.get("action", "Replace it with a valid backlog work-item id.")
+    return f"- {item_id}: removed dependency `{dep}` ({reason}). Action: {action}"
+
+
+def format_dependency_warning_lines(warnings: list[dict[str, str]], *, max_lines: int = 8) -> list[str]:
+    if not warnings:
+        return []
+    rendered = [_dependency_warning_message(row) for row in warnings[:max_lines]]
+    remainder = len(warnings) - len(rendered)
+    if remainder > 0:
+        rendered.append(f"- ... and {remainder} more dependency normalization warnings.")
+    return rendered
+
+
+def normalize_queued_item_dependencies(
+    queue: QueueManager,
+    *,
+    archived_ids: set[str] | None = None,
+) -> list[dict[str, str]]:
+    known_ids = {
+        str(item.get("id", "")).strip()
+        for item in [*queue.active, *queue.completed, *queue.blocked]
+        if isinstance(item, dict) and str(item.get("id", "")).strip()
+    }
+    archived = archived_ids if archived_ids is not None else load_blocked_archived_ids()
+    warnings: list[dict[str, str]] = []
+    changed = False
+
+    for item in queue.active:
+        if item.get("status") != "queued":
+            continue
+        item_id = str(item.get("id", "")).strip()
+        deps_raw = item.get("dependencies", [])
+        if not isinstance(deps_raw, list):
+            continue
+
+        normalized: list[str] = []
+        seen: set[str] = set()
+        for dep in deps_raw:
+            if not isinstance(dep, str):
+                warnings.append(
+                    {
+                        "item_id": item_id,
+                        "dependency": repr(dep),
+                        "reason": "non_string_dependency",
+                        "action": "Dependencies must be backlog ids like RK-M0-0001.",
+                    }
+                )
+                continue
+            dep_id = dep.strip()
+            if not dep_id:
+                warnings.append(
+                    {
+                        "item_id": item_id,
+                        "dependency": dep,
+                        "reason": "empty_dependency",
+                        "action": "Remove empty dependencies or replace with a valid backlog id.",
+                    }
+                )
+                continue
+            if dep_id in seen:
+                continue
+            seen.add(dep_id)
+
+            if dep_id in archived:
+                warnings.append(
+                    {
+                        "item_id": item_id,
+                        "dependency": dep_id,
+                        "reason": "archived_dependency_id",
+                        "action": "Use an active prerequisite id. Archived blocked items cannot be reintroduced.",
+                    }
+                )
+                continue
+            if dep_id not in known_ids:
+                if BACKLOG_ID_PATTERN.match(dep_id):
+                    warnings.append(
+                        {
+                            "item_id": item_id,
+                            "dependency": dep_id,
+                            "reason": "unknown_dependency_id",
+                            "action": "Fix the id typo or create that backlog item before referencing it.",
+                        }
+                    )
+                else:
+                    warnings.append(
+                        {
+                            "item_id": item_id,
+                            "dependency": dep_id,
+                            "reason": "non_id_dependency_value",
+                            "action": "Replace free-form text with a backlog id (for example RK-M0-0001).",
+                        }
+                    )
+                continue
+            normalized.append(dep_id)
+
+        if normalized != deps_raw:
+            item["dependencies"] = normalized
+            item["updated_at"] = utc_now_iso()
+            changed = True
+
+    if changed:
+        queue.save()
+    return warnings
 
 
 def _queued_items_with_unmet_dependencies(queue: QueueManager) -> list[dict[str, Any]]:
@@ -1089,17 +1226,34 @@ def ingest_agent_follow_up_tasks(
     return created_ids, rejected
 
 
-def recover_stale_in_progress_items(queue: QueueManager) -> list[str]:
+def recover_stale_in_progress_items(
+    queue: QueueManager,
+    *,
+    archived_ids: set[str] | None = None,
+) -> tuple[list[str], list[str]]:
     recovered: list[str] = []
+    skipped_archived: list[str] = []
+    active_after_recovery: list[dict[str, Any]] = []
+    changed = False
+    archived = archived_ids if archived_ids is not None else load_blocked_archived_ids()
+
     for item in queue.active:
+        item_id = str(item.get("id", "")).strip()
         if item.get("status") in {"assigned", "running", "validating"}:
+            if item_id and item_id in archived:
+                skipped_archived.append(item_id)
+                changed = True
+                continue
             item["status"] = "queued"
             item["updated_at"] = utc_now_iso()
             item["recovered_from_stale_in_progress"] = True
-            recovered.append(item["id"])
-    if recovered:
+            recovered.append(item_id)
+            changed = True
+        active_after_recovery.append(item)
+    if changed:
+        queue.active = active_after_recovery
         queue.save()
-    return recovered
+    return recovered, skipped_archived
 
 
 def build_status_payload(
@@ -1601,6 +1755,15 @@ def process_one(
                 completed_count=len(queue.completed),
             )
             stats_tracker.save(stats)
+
+    dependency_warnings = normalize_queued_item_dependencies(queue, archived_ids=load_blocked_archived_ids())
+    if dependency_warnings:
+        emit_event(
+            "recovery",
+            "Normalized queued dependencies to known backlog ids",
+            warning_count=len(dependency_warnings),
+            warnings=format_dependency_warning_lines(dependency_warnings, max_lines=5),
+        )
 
     item = queue.select_next(policies["routing"], stats)
     if item is None:
@@ -2323,9 +2486,14 @@ def cmd_status() -> int:
     agents = load_agent_catalog(ROOT)
     queue = QueueManager(ROOT)
     queue.load()
+    dependency_warnings = normalize_queued_item_dependencies(queue, archived_ids=load_blocked_archived_ids())
     stats = StatsTracker(ROOT, agents).load()
     daemon_state = load_json(DAEMON_STATE_PATH, default_daemon_state())
     print(render_status(build_status_payload(daemon_state=daemon_state, queue=queue, stats=stats)))
+    if dependency_warnings:
+        print("Dependency normalization warnings:")
+        for line in format_dependency_warning_lines(dependency_warnings):
+            print(line)
     return 0
 
 
@@ -2369,16 +2537,33 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool, kee
     try:
         # If a previous daemon run crashed or was interrupted, items may be left in
         # assigned/running/validating. With the lock acquired, no other daemon is active,
-        # so these can be safely requeued.
+        # so these can be safely recovered, except ids already archived from blocked state.
         recovery_queue = QueueManager(ROOT)
         recovery_queue.load()
-        recovered_items = recover_stale_in_progress_items(recovery_queue)
+        archived_ids = load_blocked_archived_ids()
+        recovered_items, skipped_archived_items = recover_stale_in_progress_items(recovery_queue, archived_ids=archived_ids)
+        recovery_warnings = normalize_queued_item_dependencies(recovery_queue, archived_ids=archived_ids)
         if recovered_items:
             emit_event(
                 "recovery",
                 "Recovered stale in-progress items to queued state",
                 count=len(recovered_items),
                 item_ids=recovered_items,
+            )
+        if skipped_archived_items:
+            emit_event(
+                "recovery",
+                "Skipped archived stale in-progress items during recovery",
+                count=len(skipped_archived_items),
+                item_ids=skipped_archived_items,
+                archive_path=str(BLOCKED_ARCHIVED_PATH.relative_to(ROOT).as_posix()),
+            )
+        if recovery_warnings:
+            emit_event(
+                "recovery",
+                "Normalized queued dependencies to known backlog ids",
+                warning_count=len(recovery_warnings),
+                warnings=format_dependency_warning_lines(recovery_warnings, max_lines=5),
             )
 
         if once:

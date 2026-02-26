@@ -377,5 +377,22 @@
       "coordination/backlog/work-items.json",
       "agents/tomas-grell/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-26T09:04:30Z",
+    "item_id": "RK-AUTO-STALL-0004-F01",
+    "status": "completed",
+    "summary": "Added orchestrator recovery guards that skip archived stale-run IDs, normalize queued dependencies to known backlog IDs, emit actionable dependency warnings, and report dependency-ready queued counts in daemon status output.",
+    "checks": [
+      "python -m unittest tests.test_queue_integrity -v (pass)",
+      "python tools/orchestrator.py status (pass; dependency_ready=3)"
+    ],
+    "changed_files": [
+      "tools/orchestrator.py",
+      "tools/render_status.py",
+      "tests/test_queue_integrity.py",
+      "coordination/backlog/work-items.json",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]
