@@ -4,3 +4,4 @@ export * from "./world-map-march-dispatch-service";
 export * from "./world-map-hostile-attack-service";
 export * from "./world-map-lifecycle-scheduler-service";
 export * from "./world-map-neutral-gathering-service";
+export * from "./world-map-terrain-passability-resolver";

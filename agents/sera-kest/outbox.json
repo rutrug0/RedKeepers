@@ -500,5 +500,38 @@
                                     "node --check client-web/app.js",
                                     "python -m unittest tests.test_rk_m0_0011_first_slice_loop_smoke"
                                 ]
+    },
+    {
+        "ts":  "2026-02-26T20:08:08.8293158Z",
+        "item_id":  "RK-AUTO-BACKLOG-0004-F02-F01",
+        "status":  "completed",
+        "summary":  "Extended first-slice frontend visual smoke action coverage with a hostile dispatch attack path that pre-selects the hostile marker and verifies combat-resolution feedback lands in the event feed via backend lifecycle payload keys.",
+        "files":  [
+                      "tools/frontend_visual_smoke.py",
+                      "tests/test_frontend_visual_smoke.py",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "python -m unittest tests.test_frontend_visual_smoke",
+                                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                    "python tools/orchestrator.py status"
+                                ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Enable Playwright runtime for strict frontend smoke checks",
+                                        "owner_role":  "platform",
+                                        "milestone":  "M0",
+                                        "priority":  "high",
+                                        "description":  "Provision the daemon worker environment with Python Playwright (and required browser binaries) so strict frontend visual smoke commands can execute instead of returning import/runtime blockers.",
+                                        "acceptance_criteria":  [
+                                                                    "`python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict` runs without `playwright import failed`",
+                                                                    "Strict smoke executes action feedback checks and records pass/fail outcomes in `coordination/runtime/frontend-visual/report.json`"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
     }
 ]

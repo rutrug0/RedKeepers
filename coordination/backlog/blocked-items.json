@@ -736,5 +736,41 @@
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
     "assigned_agent": "juno-cairn"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F02-F01",
+    "title": "Add hostile dispatch action coverage to frontend visual smoke helper",
+    "description": "Extend first-slice shell action smoke paths so automation selects the hostile marker and verifies the hostile dispatch flow produces backend-keyed lifecycle feedback (including combat resolution) in the event feed.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F02"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "tools/frontend_visual_smoke.py includes a first-slice action feedback path that triggers `[data-worldmap-adapter-action=\"attack\"]` after selecting the hostile marker",
+      "Automated action feedback asserts at least one hostile dispatch completion key such as `event.combat.placeholder_skirmish_win` appears in the event feed after trigger",
+      "tests/test_frontend_visual_smoke.py includes helper coverage for the added hostile action path configuration"
+    ],
+    "validation_commands": [
+      "python -m unittest tests.test_frontend_visual_smoke",
+      "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:46:06.573852+00:00",
+    "updated_at": "2026-02-26T20:09:13.076639+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "- `python tools/orchestrator.py status` passed (daemon running; current active item is this task).",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F02",
+    "assigned_agent": "sera-kest"
   }
 ]

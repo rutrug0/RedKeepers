@@ -79,6 +79,12 @@ FIRST_SLICE_ACTION_FEEDBACK_PATHS: tuple[dict[str, str], ...] = (
         "trigger_selector": '[data-worldmap-adapter-action="scout"]',
         "expected_content_key": "event.scout.unavailable_tile",
     },
+    {
+        "path_id": "hostile_attack_completion_feedback",
+        "pre_click_selector": '[data-worldmap-marker-id="marker_hostile_ruin_holdfast"]',
+        "trigger_selector": '[data-worldmap-adapter-action="attack"]',
+        "expected_content_key": "event.combat.placeholder_skirmish_win",
+    },
 )
 
 
@@ -484,6 +490,7 @@ def _install_first_slice_transport_bridge(page: Any) -> None:
                 build_cost_by_id: { food: 0, wood: 120, stone: 80, iron: 20 },
                 train_cost_by_id: { food: 90, wood: 30, stone: 15, iron: 0 },
                 scout_calls: 0,
+                hostile_dispatch_calls: 0,
                 canonical_stock_by_id: { food: 1860, wood: 1240, stone: 980, iron: 715 },
             };
 
@@ -660,6 +667,89 @@ def _install_first_slice_transport_bridge(page: Any) -> None:
                                     },
                                 },
                                 queue_available_at: nowIso(),
+                            },
+                        };
+                    }
+
+                    if (path === "/world-map/settlements/{targetSettlementId}/attack") {
+                        bridgeState.hostile_dispatch_calls += 1;
+                        const eventOccurredAt = nowIso();
+                        const targetTileLabel = typeof body.target_tile_label === "string" && body.target_tile_label.trim().length > 0
+                            ? body.target_tile_label.trim()
+                            : "Ruin Holdfast";
+                        const sourceSettlementName = typeof body.source_settlement_name === "string" && body.source_settlement_name.trim().length > 0
+                            ? body.source_settlement_name.trim()
+                            : "Cinderwatch Hold";
+                        const armyName = typeof body.army_name === "string" && body.army_name.trim().length > 0
+                            ? body.army_name.trim()
+                            : "Cinderwatch Vanguard";
+                        const marchId = typeof body.march_id === "string" && body.march_id.trim().length > 0
+                            ? body.march_id.trim()
+                            : `march_attack_${String(bridgeState.hostile_dispatch_calls).padStart(4, "0")}`;
+                        return {
+                            status_code: 200,
+                            body: {
+                                status: "accepted",
+                                flow: "world_map.hostile_attack_v1",
+                                march_id: marchId,
+                                combat_outcome: "attacker_win",
+                                attacker_strength: 50,
+                                defender_strength: 40,
+                                losses: {
+                                    attacker_units_lost: 2,
+                                    defender_garrison_lost: 11,
+                                },
+                                event_payloads: {
+                                    dispatch_sent: {
+                                        payload_key: "dispatch_sent",
+                                        content_key: "event.world.hostile_dispatch_accepted",
+                                        tokens: {
+                                            army_name: armyName,
+                                            origin_settlement_name: sourceSettlementName,
+                                            target_tile_label: targetTileLabel,
+                                        },
+                                        occurred_at: eventOccurredAt,
+                                    },
+                                    march_arrived: {
+                                        payload_key: "march_arrived",
+                                        content_key: "event.world.hostile_post_battle_returned",
+                                        tokens: {
+                                            army_name: armyName,
+                                            settlement_name: sourceSettlementName,
+                                            haul_summary: "captured provisions and iron",
+                                        },
+                                        occurred_at: eventOccurredAt,
+                                    },
+                                    combat_resolved: {
+                                        payload_key: "combat_resolved",
+                                        content_key: "event.combat.placeholder_skirmish_attacker_win",
+                                        tokens: {
+                                            army_name: armyName,
+                                            target_tile_label: targetTileLabel,
+                                            settlement_name: sourceSettlementName,
+                                        },
+                                        occurred_at: eventOccurredAt,
+                                    },
+                                },
+                            },
+                        };
+                    }
+
+                    if (path === "/world-map/marches/{marchId}/snapshot") {
+                        const marchId = typeof body.march_id === "string" && body.march_id.trim().length > 0
+                            ? body.march_id.trim()
+                            : "march_attack_0000";
+                        return {
+                            status_code: 200,
+                            body: {
+                                status: "ok",
+                                march_id: marchId,
+                                phase: "returned",
+                                eta_seconds: 0,
+                                distance_tiles: 0,
+                                observed_at: typeof body.observed_at === "string" && body.observed_at.trim().length > 0
+                                    ? body.observed_at.trim()
+                                    : nowIso(),
                             },
                         };
                     }

@@ -12,6 +12,7 @@ import {
 import {
   DeterministicWorldMapMarchSnapshotService,
 } from "./world-map-march-snapshot-service.ts";
+import { DeterministicWorldMapTerrainPassabilityResolver } from "./world-map-terrain-passability-resolver.ts";
 
 const HOSTILE_ATTACK_TIE_FIXTURE_40V40 = {
   fixture_id: "attack_fixture_tie_40v40",
@@ -271,4 +272,65 @@ test("hostile attack service rejects dispatch when deterministic path crosses im
       error instanceof WorldMapHostileAttackOperationError
       && error.code === "path_blocked_impassable",
   );
+});
+
+test("hostile attack service uses shared terrain passability resolver fixture rows for deterministic route checks", () => {
+  const repository = new InMemoryWorldMapMarchStateRepository();
+  const terrainResolver = new DeterministicWorldMapTerrainPassabilityResolver({
+    fixture_rows: [
+      {
+        world_seed: "seed_world_alpha",
+        map_size: 16,
+        coordinate: { x: 1, y: 2 },
+        passable: true,
+      },
+      {
+        world_seed: "seed_world_alpha",
+        map_size: 16,
+        coordinate: { x: 2, y: 2 },
+        passable: true,
+      },
+      {
+        world_seed: "seed_world_alpha",
+        map_size: 16,
+        coordinate: { x: 3, y: 2 },
+        passable: true,
+      },
+      {
+        world_seed: "seed_world_alpha",
+        map_size: 16,
+        coordinate: { x: 4, y: 2 },
+        passable: true,
+      },
+    ],
+  });
+  const service = new DeterministicWorldMapHostileAttackService(
+    new DeterministicWorldMapMarchDispatchService(repository),
+    new DeterministicWorldMapMarchSnapshotService(repository),
+    {
+      march_state_repository: repository,
+      world_seed: "seed_world_alpha",
+      map_size: 16,
+      terrain_passability_resolver: terrainResolver,
+    },
+  );
+
+  const response = service.resolveHostileAttack({
+    march_id: "march_attack_fixture_passable",
+    source_settlement_id: "settlement_alpha",
+    target_settlement_id: "settlement_hostile",
+    origin: { x: 0, y: 2 },
+    target: { x: 4, y: 2 },
+    defender_garrison_strength: 20,
+    dispatched_units: [
+      {
+        unit_id: "watch_levy",
+        unit_count: 8,
+        unit_attack: 4,
+      },
+    ],
+  });
+
+  assert.equal(response.march_id, "march_attack_fixture_passable");
+  assert.equal(response.march_state, "march_state_resolved");
 });

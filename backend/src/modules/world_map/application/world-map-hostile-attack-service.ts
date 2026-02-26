@@ -1,6 +1,8 @@
 import type {
   WorldMapHostileAttackResolvedResponseDto,
   WorldMapMarchCombatOutcome,
+  WorldMapTerrainPassabilityResolver,
+  WorldMapTerrainPassabilitySeedTableV1,
 } from "../domain";
 import {
   WORLD_MAP_HOSTILE_ATTACK_FLOW,
@@ -13,13 +15,13 @@ import type {
   WorldMapMarchSnapshotService,
 } from "./world-map-march-snapshot-service";
 import { WorldMapMarchDispatchOperationError } from "./world-map-march-dispatch-service";
+import { DeterministicWorldMapTerrainPassabilityResolver } from "./world-map-terrain-passability-resolver";
 
 const DEFAULT_ARMY_NAME = "Raid Column";
 const DEFAULT_TARGET_TILE_LABEL = "Hostile Settlement";
 const DEFAULT_MAX_ACTIVE_MARCHES = 2;
 const DEFAULT_WORLD_SEED = "seed_world_alpha";
 const DEFAULT_MAP_SIZE = 16;
-const IMPASSABLE_TILE_HASH_MODULUS = 11;
 
 const OUTCOME_LOSS_RATIOS: Readonly<Record<WorldMapMarchCombatOutcome, {
   readonly attacker: number;
@@ -115,6 +117,11 @@ export class DeterministicWorldMapHostileAttackService
         WorldMapMarchStateRepository,
         "listActiveMarchRuntimeStates"
       >;
+      readonly terrain_passability_resolver?: WorldMapTerrainPassabilityResolver;
+      readonly terrain_passability_seed?: Pick<
+        WorldMapTerrainPassabilitySeedTableV1,
+        "rows"
+      >;
       readonly resolve_tile_passable?: (input: {
         readonly world_seed: string;
         readonly map_size: number;
@@ -132,8 +139,13 @@ export class DeterministicWorldMapHostileAttackService
     this.worldSeed = normalizeFallbackText(options?.world_seed, DEFAULT_WORLD_SEED);
     this.mapSize = normalizeMinimumPositiveInteger(options?.map_size, DEFAULT_MAP_SIZE);
     this.marchStateRepository = options?.march_state_repository;
+    const terrainPassabilityResolver =
+      options?.terrain_passability_resolver
+      ?? new DeterministicWorldMapTerrainPassabilityResolver({
+        fixture_seed_table: options?.terrain_passability_seed,
+      });
     this.resolveTilePassable = options?.resolve_tile_passable
-      ?? resolveDeterministicTilePassable;
+      ?? ((input) => terrainPassabilityResolver.resolveTilePassable(input));
   }
 
   resolveHostileAttack(
@@ -503,36 +515,4 @@ function isCoordinateWithinMapBounds(input: {
     && input.coordinate.y >= 0
     && input.coordinate.x < input.map_size
     && input.coordinate.y < input.map_size;
-}
-
-function resolveDeterministicTilePassable(input: {
-  readonly world_seed: string;
-  readonly map_size: number;
-  readonly coordinate: {
-    readonly x: number;
-    readonly y: number;
-  };
-}): boolean {
-  if (
-    !isCoordinateWithinMapBounds({
-      coordinate: input.coordinate,
-      map_size: input.map_size,
-    })
-  ) {
-    return false;
-  }
-
-  const hash = hashDeterministicSeed(
-    `${input.world_seed}:${input.coordinate.x}:${input.coordinate.y}`,
-  );
-  return hash % IMPASSABLE_TILE_HASH_MODULUS !== 0;
-}
-
-function hashDeterministicSeed(value: string): number {
-  let hash = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
 }

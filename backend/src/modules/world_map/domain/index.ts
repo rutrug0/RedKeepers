@@ -4,3 +4,4 @@ export * from "./world-map-march-dispatch-contract";
 export * from "./world-map-hostile-attack-contract";
 export * from "./world-map-lifecycle-contract";
 export * from "./world-map-neutral-gathering-contract";
+export * from "./world-map-terrain-passability-contract";

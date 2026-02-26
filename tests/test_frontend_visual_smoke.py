@@ -123,9 +123,9 @@ class FrontendVisualSmokeHelperTests(unittest.TestCase):
         )
         self.assertEqual(path, baseline_dir / "hero-wireframes--desktop-1440.png")
 
-    def test_first_slice_action_feedback_paths_cover_build_train_scout_success_and_failure(self) -> None:
+    def test_first_slice_action_feedback_paths_cover_build_train_scout_and_hostile_attack(self) -> None:
         paths = smoke._required_action_feedback_paths("first-slice-shell")
-        self.assertEqual(len(paths), 6)
+        self.assertEqual(len(paths), 7)
         path_ids = {path["path_id"] for path in paths}
         self.assertEqual(
             path_ids,
@@ -136,8 +136,16 @@ class FrontendVisualSmokeHelperTests(unittest.TestCase):
                 "train_failure_feedback",
                 "scout_success_feedback",
                 "scout_failure_feedback",
+                "hostile_attack_completion_feedback",
             },
         )
+        hostile_path = next(path for path in paths if path["path_id"] == "hostile_attack_completion_feedback")
+        self.assertEqual(
+            hostile_path["pre_click_selector"],
+            '[data-worldmap-marker-id="marker_hostile_ruin_holdfast"]',
+        )
+        self.assertEqual(hostile_path["trigger_selector"], '[data-worldmap-adapter-action="attack"]')
+        self.assertEqual(hostile_path["expected_content_key"], "event.combat.placeholder_skirmish_win")
 
     def test_non_shell_surface_has_no_action_feedback_paths(self) -> None:
         self.assertEqual(smoke._required_action_feedback_paths("hero-wireframes"), [])
