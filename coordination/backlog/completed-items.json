@@ -3695,5 +3695,45 @@
     ],
     "assigned_agent": "mara-voss",
     "commit_sha": "513fab114e12562e63437168fab6222e26ccc597"
+  },
+  {
+    "id": "RK-AUTO-STALL-0007-F01",
+    "title": "Resolve blocked parent dependency for queued model-policy drift audit item",
+    "description": "Decide disposition for blocked `RK-M1-0004-F01-F01-F01-ESC-F01-F01` (requeue with narrowed validation scope or defer/retire) so queued child `RK-M1-0005-F02-F01-ESC-F01` is either made runnable or explicitly closed.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0007"
+    ],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "A documented disposition exists for blocked parent `RK-M1-0004-F01-F01-F01-ESC-F01-F01`.",
+      "Queued child `RK-M1-0005-F02-F01-ESC-F01` is updated to a valid dependency state (dependency-ready or explicitly closed/deferred).",
+      "python tools/orchestrator.py status does not report this queued child as stalled on a blocked parent."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T13:24:27.776130+00:00",
+    "updated_at": "2026-02-26T13:28:19.420840+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Note: [coordination/backlog/completed-items.json](D:/RedKeepers/coordination/backlog/completed-items.json) is also dirty in the workspace from daemon/runtime activity and was not edited as part of this task.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0007",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "025d20ee50baf404294d4eb6fcd8dabc61c3794e"
   }
 ]

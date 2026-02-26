@@ -1248,5 +1248,50 @@
             "command": "python tools/orchestrator.py status",
             "result": "pass"
         }
+    },
+    {
+        "ts": "2026-02-26T13:31:50.612425+00:00",
+        "item_id": "RK-AUTO-STALL-0008",
+        "status": "completed",
+        "summary": "Resolved dependency stall by requeueing blocked `RK-M0-0007` (dependencies already completed) and consolidating duplicated superseded escalation artifacts out of active blocked backlog.",
+        "queue_recovery": {
+            "requeued_item_ids": [
+                "RK-M0-0007"
+            ],
+            "consolidated_blocked_removed_ids": [
+                "RK-M1-0001-ESC",
+                "RK-M1-0001-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC-ESC"
+            ],
+            "notes": "Removed duplicated escalation-chain entries from blocked active backlog; archived audit records remain in blocked-archived-items.json."
+        },
+        "validation": {
+            "command": "python tools/orchestrator.py status",
+            "result": "pass"
+        },
+        "proposed_work_items": [
+            {
+                "title": "Guard against non-actionable blocked reasons causing queue deadlock",
+                "owner_role": "qa",
+                "milestone": "M0",
+                "priority": "normal",
+                "description": "Add a backlog health check that flags blocked items with empty/non-actionable blocker reasons (for example `- None.`) and either auto-requeues when dependencies are complete or routes explicit lead triage before those items can block queued dependents.",
+                "inputs": [
+                    "tools/orchestrator.py",
+                    "tools/queue_manager.py",
+                    "coordination/backlog/blocked-items.json",
+                    "tests/"
+                ],
+                "acceptance_criteria": [
+                    "Blocked items with non-actionable blocker reasons are detected during daemon status/run checks.",
+                    "When dependencies are complete, affected blocked items can be requeued automatically or a deterministic triage action is emitted.",
+                    "Regression coverage prevents dependency-ready starvation from recurring due to `- None.` blocker reasons."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]
