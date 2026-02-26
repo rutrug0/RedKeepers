@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 TOOLS_DIR = Path(__file__).resolve().parents[1] / "tools"
@@ -12,7 +13,69 @@ if str(TOOLS_DIR) not in sys.path:
 import frontend_visual_smoke as smoke  # noqa: E402
 
 
+class _FakeLocator:
+    def __init__(self, count: int) -> None:
+        self._count = count
+
+    def count(self) -> int:
+        return self._count
+
+
+class _FakeKeyboard:
+    def __init__(self) -> None:
+        self.presses: list[str] = []
+
+    def press(self, key: str) -> None:
+        self.presses.append(key)
+
+
+class _FakePage:
+    def __init__(
+        self,
+        *,
+        region_tab_count: int = 1,
+        representative_control_count: int = 1,
+        prefers_reduced_motion: bool = True,
+        worldmap_selected: bool = True,
+        scroll_calls: list[dict[str, str]] | None = None,
+    ) -> None:
+        self._region_tab_count = region_tab_count
+        self._representative_control_count = representative_control_count
+        self._prefers_reduced_motion = prefers_reduced_motion
+        self._worldmap_selected = worldmap_selected
+        self._scroll_calls = scroll_calls if scroll_calls is not None else []
+        self.keyboard = _FakeKeyboard()
+
+    def locator(self, selector: str) -> _FakeLocator:
+        if selector == ".region-tab":
+            return _FakeLocator(self._region_tab_count)
+        if selector == ".ghost-btn, .mock-state-btn":
+            return _FakeLocator(self._representative_control_count)
+        return _FakeLocator(0)
+
+    def evaluate(self, script: str) -> object:
+        if "prefers-reduced-motion: reduce" in script:
+            return self._prefers_reduced_motion
+        if 'data-target="worldmap-panel"' in script:
+            return self._worldmap_selected
+        if "window.__rkScrollCalls || []" in script:
+            return self._scroll_calls
+        return None
+
+
 class FrontendVisualSmokeHelperTests(unittest.TestCase):
+    def test_default_devices_include_mobile_390_and_360_profiles(self) -> None:
+        with mock.patch.object(sys, "argv", ["frontend_visual_smoke.py"]):
+            args = smoke.parse_args()
+        self.assertIn("mobile-390", args.devices)
+        self.assertIn("mobile-360", args.devices)
+        self.assertEqual(smoke.DEVICE_PROFILES["mobile-390"]["viewport"]["width"], 390)
+        self.assertEqual(smoke.DEVICE_PROFILES["mobile-360"]["viewport"]["width"], 360)
+
+    def test_shell_surface_container_selector_is_shell(self) -> None:
+        self.assertEqual(smoke._surface_container_selector("first-slice-shell"), ".shell")
+        self.assertIsNone(smoke._surface_container_selector("hero-wireframes"))
+
     def test_parse_px_handles_numeric_and_invalid_values(self) -> None:
         self.assertEqual(smoke._parse_px("2px"), 2.0)
         self.assertEqual(smoke._parse_px("0"), 0.0)
@@ -78,6 +141,62 @@ class FrontendVisualSmokeHelperTests(unittest.TestCase):
 
     def test_non_shell_surface_has_no_action_feedback_paths(self) -> None:
         self.assertEqual(smoke._required_action_feedback_paths("hero-wireframes"), [])
+
+    def test_collect_accessibility_issues_reports_missing_region_tabs(self) -> None:
+        page = _FakePage(region_tab_count=0)
+        issues = smoke._collect_accessibility_issues(page)
+        self.assertEqual(issues, ["keyboard navigation check failed: no .region-tab controls found"])
+
+    def test_collect_accessibility_issues_passes_keyboard_focus_and_reduced_motion_checks(self) -> None:
+        page = _FakePage(
+            scroll_calls=[
+                {
+                    "targetId": "worldmap-panel",
+                    "behavior": "auto",
+                }
+            ]
+        )
+        focus_style = {
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "boxShadow": "none",
+        }
+
+        with (
+            mock.patch.object(smoke, "_install_scroll_capture", return_value=None),
+            mock.patch.object(smoke, "_tab_until_focus", side_effect=[True, True]),
+            mock.patch.object(smoke, "_active_focus_style", side_effect=[focus_style, focus_style]),
+        ):
+            issues = smoke._collect_accessibility_issues(page)
+
+        self.assertEqual(issues, [])
+        self.assertEqual(page.keyboard.presses, ["ArrowRight", "Enter"])
+
+    def test_collect_accessibility_issues_fails_when_region_activation_uses_smooth_scroll(self) -> None:
+        page = _FakePage(
+            scroll_calls=[
+                {
+                    "targetId": "worldmap-panel",
+                    "behavior": "smooth",
+                }
+            ]
+        )
+        focus_style = {
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "boxShadow": "none",
+        }
+
+        with (
+            mock.patch.object(smoke, "_install_scroll_capture", return_value=None),
+            mock.patch.object(smoke, "_tab_until_focus", side_effect=[True, True]),
+            mock.patch.object(smoke, "_active_focus_style", side_effect=[focus_style, focus_style]),
+        ):
+            issues = smoke._collect_accessibility_issues(page)
+
+        self.assertTrue(
+            any("reduced-motion check failed: worldmap-panel activation requested smooth scrolling" in issue for issue in issues)
+        )
 
 
 if __name__ == "__main__":

@@ -121,10 +121,10 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 4,
     "created_at": "2026-02-25T15:31:58.488198+00:00",
-    "updated_at": "2026-02-26T15:41:02.295430+00:00",
+    "updated_at": "2026-02-26T17:27:48.659441+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -216,46 +216,5 @@
     "last_unblocked_reason": "automatic blocked revisit (1/2)",
     "last_blocker_reason": "retry threshold exceeded; escalated",
     "blocked_revisit_count": 1
-  },
-  {
-    "id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
-    "title": "Requeue RK-M1-0005-F02-F01-ESC-F03 with scoped validation commands",
-    "description": "Create a narrow rerun of RK-M1-0005-F02-F01-ESC-F03 that validates only frontend visual blocked-outcome behavior and its dedicated regression tests, avoiding unrelated full-suite failures from `unittest discover`.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0005-F02-F01-ESC"
-    ],
-    "inputs": [
-      "tools/orchestrator.py",
-      "tools/frontend_visual_smoke.py",
-      "tests/test_frontend_visual_blocked_outcome.py",
-      "tests/test_frontend_visual_status_blocked_detection.py",
-      "coordination/runtime/run-history.jsonl"
-    ],
-    "acceptance_criteria": [
-      "Validation scope excludes `python -m unittest discover -s tests` and uses only targeted frontend-visual blocker tests plus relevant orchestrator status checks.",
-      "A blocked frontend visual run (`STATUS: BLOCKED`) is recorded as blocked with actionable environment reason and does not increment retry_count.",
-      "No retry-threshold escalation item is created from environment-blocked frontend visual validation outcomes."
-    ],
-    "validation_commands": [
-      "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_frontend_visual_status_blocked_detection",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T17:22:24.923426+00:00",
-    "updated_at": "2026-02-26T17:24:08.316975+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
-    "assigned_agent": "tomas-grell"
   }
 ]

@@ -371,5 +371,19 @@
                                     "node --check client-web/app.js",
                                     "python tools/orchestrator.py status"
                                 ]
+    },
+    {
+        "ts":  "2026-02-26T17:26:55.5936180Z",
+        "item_id":  "RK-M1-0005-F02-F01",
+        "status":  "completed",
+        "summary":  "Added deterministic smoke-helper regression tests that lock the client shell accessibility/mobile requirements: default 390px+360px device coverage, shell container targeting for overflow checks, keyboard tab/focus-visible flow for region tabs and representative controls, and reduced-motion rejection of smooth scroll requests.",
+        "files":  [
+                      "tests/test_frontend_visual_smoke.py",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "python -m unittest tests.test_frontend_visual_smoke",
+                                    "python tools/orchestrator.py status"
+                                ]
     }
 ]
