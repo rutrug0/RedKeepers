@@ -1,0 +1,179 @@
+{
+  "schema_version": "rk-v1-first-slice-playable-manifest",
+  "manifest_id": "first_slice_playable_manifest_lock_v1",
+  "slice_id": "m0_first_vertical_slice",
+  "source_docs": [
+    "docs/design/first-vertical-slice.md",
+    "docs/design/v1-starter-data-tables.md",
+    "docs/design/m0-hostile-settlement-combat-fixtures.md",
+    "docs/design/first-slice-progression-target-matrix.md"
+  ],
+  "retention_rationale": {
+    "next_1_to_5_min_goal": "Stabilize core resources, complete one upgrade, and send one scout/hostile action against a legible fixed target.",
+    "session_goal": "Finish one coherent settlement plus map-combat loop without browsing hidden systems or extra civilization choices.",
+    "return_hook": "Queued build/train completions and a deterministic hostile target create a clear reason to return and retry with stronger marches."
+  },
+  "complexity_caps_locked": {
+    "playable_civilization_profiles": 1,
+    "primary_settlements": 1,
+    "foreign_hostile_profiles": 1,
+    "core_resources": 4,
+    "playable_buildings": 6,
+    "playable_units": 4,
+    "map_interaction_flows": 1
+  },
+  "canonical_playable_now": {
+    "civilization_profile_id": "cinder_throne_legates",
+    "primary_settlement": {
+      "settlement_id": "settlement_alpha",
+      "settlement_name": "Cinderwatch Hold",
+      "role": "player_primary"
+    },
+    "foreign_hostile_profile": {
+      "profile_id": "foreign_settlement_profile_v1_ruin_holdfast",
+      "settlement_id": "settlement_hostile",
+      "settlement_name": "Ruin Holdfast",
+      "owner_faction_id": "cinder_breaker_raiders",
+      "target_tile_label": "Ruin Holdfast",
+      "map_coordinate": {
+        "x": 2,
+        "y": 1
+      },
+      "defender_garrison_strength": 40
+    },
+    "resources": [
+      "food",
+      "wood",
+      "stone",
+      "iron"
+    ],
+    "buildings": [
+      "grain_plot",
+      "timber_camp",
+      "stone_quarry",
+      "iron_pit",
+      "barracks",
+      "rally_post"
+    ],
+    "units": [
+      "watch_levy",
+      "bow_crew",
+      "trail_scout",
+      "light_raider"
+    ],
+    "map_fixture_ids": {
+      "world_id": "world_alpha",
+      "world_seed": "seed_world_alpha",
+      "hostile_target_settlement_id": "settlement_hostile",
+      "scout_tile_ids": [
+        "tile_unknown_demo",
+        "tile_quiet_watch",
+        "tile_hostile_glade"
+      ],
+      "deterministic_attack_fixture_ids": [
+        "attack_fixture_attacker_win_50v40",
+        "attack_fixture_attacker_loss_30v40",
+        "attack_fixture_tie_40v40"
+      ]
+    }
+  },
+  "stub_post_slice": [
+    {
+      "domain": "civilizations",
+      "id": "mirebound_covenant",
+      "source_slice_status": "balance_stub",
+      "stub_post_slice": true,
+      "excluded_from_default_first_session_flow_reason": "Additional civilization choice increases onboarding decision load; first slice locks one civ profile."
+    },
+    {
+      "domain": "civilizations",
+      "id": "graveforge_clans",
+      "source_slice_status": "balance_stub",
+      "stub_post_slice": true,
+      "excluded_from_default_first_session_flow_reason": "Additional civilization choice is deferred until one-civ progression readability is validated."
+    },
+    {
+      "domain": "buildings",
+      "id": "palisade",
+      "source_slice_status": "data_stub_post_slice",
+      "stub_post_slice": true,
+      "excluded_from_default_first_session_flow_reason": "Defense-line unlocks are deferred to avoid adding extra early-session queue competition."
+    },
+    {
+      "domain": "buildings",
+      "id": "granary",
+      "source_slice_status": "data_stub_post_slice",
+      "stub_post_slice": true,
+      "excluded_from_default_first_session_flow_reason": "Storage pressure systems are post-slice; first slice uses flat base storage caps for simpler economy readability."
+    },
+    {
+      "domain": "buildings",
+      "id": "warehouse",
+      "source_slice_status": "data_stub_post_slice",
+      "stub_post_slice": true,
+      "excluded_from_default_first_session_flow_reason": "Storage expansion thresholds are deferred to keep first-session goals legible and short."
+    },
+    {
+      "domain": "buildings",
+      "id": "watchtower",
+      "source_slice_status": "data_stub_post_slice",
+      "stub_post_slice": true,
+      "excluded_from_default_first_session_flow_reason": "Additional warning/vision systems are deferred until baseline scout and hostile loops are stable."
+    },
+    {
+      "domain": "buildings",
+      "id": "guardhouse",
+      "source_slice_status": "data_stub_post_slice",
+      "stub_post_slice": true,
+      "excluded_from_default_first_session_flow_reason": "Garrison-capacity extensions are out of scope for the one-hostile deterministic combat slice."
+    },
+    {
+      "domain": "units",
+      "id": "ram_team",
+      "source_slice_status": "data_stub_post_slice",
+      "stub_post_slice": true,
+      "excluded_from_default_first_session_flow_reason": "Siege progression is deferred; first-session combat uses four baseline unit lines."
+    },
+    {
+      "domain": "unit_variants",
+      "id": "ember_rams",
+      "source_slice_status": "data_stub_post_slice",
+      "stub_post_slice": true,
+      "excluded_from_default_first_session_flow_reason": "Siege flavor variant remains locked until post-slice siege activation."
+    },
+    {
+      "domain": "heroes",
+      "id": "hero_unlock_post_onboarding_v1",
+      "source_slice_status": "data_stub_post_slice",
+      "stub_post_slice": true,
+      "excluded_from_default_first_session_flow_reason": "Hero assignment and cooldown systems are explicitly gated to post-slice milestones."
+    }
+  ],
+  "default_consumption_contract": {
+    "backend": {
+      "enable_only_civilization_ids": [
+        "cinder_throne_legates"
+      ],
+      "enable_only_primary_settlement_ids": [
+        "settlement_alpha"
+      ],
+      "enable_only_foreign_hostile_profile_ids": [
+        "foreign_settlement_profile_v1_ruin_holdfast"
+      ],
+      "hide_by_source_slice_status": [
+        "balance_stub",
+        "data_stub_post_slice"
+      ]
+    },
+    "frontend": {
+      "default_session_entry_settlement_id": "settlement_alpha",
+      "default_hostile_target_settlement_id": "settlement_hostile",
+      "show_only_playable_resource_building_unit_sets": true,
+      "hide_stub_post_slice_in_default_player_ui": true
+    },
+    "content": {
+      "scope_tag_for_default_first_session_flow": "playable_now",
+      "suppress_stub_post_slice_in_starter_pools": true
+    }
+  }
+}

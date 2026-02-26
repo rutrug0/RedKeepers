@@ -537,5 +537,40 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-26T21:02:25.0000000Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-AUTO-BACKLOG-0005-F02",
+    "status": "done",
+    "summary": "Published a single first-slice playable manifest lock with canonical IDs for one civ profile, one primary settlement, one hostile fixture profile, and capped playable resource/building/unit sets, plus explicit stub_post_slice exclusions and reasons for default first-session flows.",
+    "changed_files": [
+      "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Validate first-slice runtime seeds against playable manifest lock",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Add a startup/CI validation step that cross-checks active first-slice seeds and default transport fixtures against `first-slice-playable-manifest.json` (IDs and caps) to prevent accidental scope drift.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0005-F02"
+        ],
+        "inputs": [
+          "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
+          "backend/src/app/config/seeds/v1/first-slice-enablement.json",
+          "backend/src/app/config/seeds/v1/world-map-tile-seed-fixtures.json"
+        ],
+        "acceptance_criteria": [
+          "Validation fails if enabled civ/resource/building/unit IDs diverge from `canonical_playable_now` in the manifest",
+          "Validation fails if default primary settlement or hostile fixture IDs diverge from manifest lock values",
+          "CI output reports exact mismatched IDs to support quick correction without bespoke migration logic"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]
