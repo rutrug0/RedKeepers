@@ -1096,5 +1096,67 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T12:00:48.7390284Z",
+        "item_id": "RK-AUTO-BACKLOG-0003-F01-F02-ESC",
+        "status": "completed",
+        "summary": "Escalation root cause identified: RK-AUTO-BACKLOG-0003-F01-F02 failed on shared client-shell visual smoke validation unrelated to the standalone hero wireframe deliverables, then auto-escalated immediately under zero-retry policy.",
+        "root_cause": "Validation-scope mismatch plus immediate escalation policy. The source task output was standalone files (client-web/hero-wireframes.html and client-web/hero-wireframes.css), but frontend validation ran strict shared-shell smoke against client-web/index.html; that check reported 100% diffs and keyboard/reduced-motion failures and, with max_retries_per_item_per_agent=0, converted the first failed validation directly into retry-threshold escalation.",
+        "evidence": {
+            "source_item": "RK-AUTO-BACKLOG-0003-F01-F02 in coordination/runtime/run-history.jsonl (2026-02-26T11:57:08Z) failed validation on python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+            "smoke_report": "coordination/runtime/frontend-visual/report.json captured all devices failed with 100% diff and world-map tab/reduced-motion checks failing",
+            "delivered_files": "agents/sera-kest/outbox.json for RK-AUTO-BACKLOG-0003-F01-F02 lists only client-web/hero-wireframes.html and client-web/hero-wireframes.css as product changes",
+            "retry_policy": "coordination/policies/retry-policy.yaml currently sets max_retries_per_item_per_agent to 0, so first failed validation escalates immediately"
+        },
+        "proposed_work_items": [
+            {
+                "title": "Requeue hero wireframe task with page-scoped visual QA target",
+                "owner_role": "frontend",
+                "milestone": "M2",
+                "priority": "high",
+                "description": "Create a replacement for RK-AUTO-BACKLOG-0003-F01-F02 that validates the standalone hero wireframe page directly (hero-wireframes.html) and does not require unrelated first-slice shell parity checks on index.html.",
+                "dependencies": [],
+                "inputs": [
+                    "client-web/hero-wireframes.html",
+                    "client-web/hero-wireframes.css",
+                    "tools/frontend_visual_smoke.py",
+                    "coordination/runtime/frontend-visual/baseline/"
+                ],
+                "acceptance_criteria": [
+                    "Validation target is explicitly set to hero-wireframes page URL (not default index.html shell path)",
+                    "Dedicated baseline screenshots exist for hero-wireframe page across desktop/tablet/mobile profiles used by visual smoke",
+                    "Work item can complete without first-slice shell a11y regressions blocking the standalone M2 wireframe artifact"
+                ],
+                "validation_commands": [
+                    "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "title": "Stabilize shared client-shell visual smoke baseline and interaction checks",
+                "owner_role": "frontend",
+                "milestone": "M1",
+                "priority": "normal",
+                "description": "Investigate and fix current index.html smoke failures (100% visual diff and world-map keyboard/reduced-motion checks) as a separate shell-regression item so M0/M1 validation remains trustworthy.",
+                "dependencies": [],
+                "inputs": [
+                    "client-web/index.html",
+                    "client-web/styles.css",
+                    "client-web/app.js",
+                    "coordination/runtime/frontend-visual/report.json",
+                    "tools/frontend_visual_smoke.py"
+                ],
+                "acceptance_criteria": [
+                    "Frontend visual smoke passes on default index.html target for desktop-1440, tablet-1024, mobile-390, and mobile-360 within configured thresholds",
+                    "Keyboard ArrowRight+Enter activates world-map tab and reduced-motion checks record non-smooth scroll behavior",
+                    "Updated baseline artifacts are committed only after deterministic pass is demonstrated in strict mode"
+                ],
+                "validation_commands": [
+                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]

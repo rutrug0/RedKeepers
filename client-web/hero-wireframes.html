@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RedKeepers Hero UI Wireframes (Deferred M2)</title>
+  <link rel="stylesheet" href="./hero-wireframes.css" />
+</head>
+<body class="hero-wireframes-body">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="hero-page-header">
+    <p class="eyebrow">Design-only wireframe surface</p>
+    <h1>Hero Assignment, Ability, and Cooldown Feedback</h1>
+    <div class="chip-row" aria-label="Scope metadata">
+      <span class="chip">Deferred Track: M2</span>
+      <span class="chip">Art: Placeholder Only</span>
+      <span class="chip">Runtime: Not Integrated</span>
+    </div>
+  </header>
+
+  <main id="main-content" class="wireframe-main">
+    <section class="surface" aria-labelledby="surface-roster-title">
+      <header class="surface-header">
+        <div>
+          <p class="eyebrow">Settlement Surface</p>
+          <h2 id="surface-roster-title">Hero Roster Card Wireframes</h2>
+        </div>
+      </header>
+      <div class="hero-card-grid">
+        <article class="hero-card state-ready" aria-label="Hero card ready state">
+          <header class="hero-card__header">
+            <span class="placeholder-badge">CIV BADGE</span>
+            <span class="state-pill ok">Ready</span>
+          </header>
+          <div class="portrait-placeholder" aria-hidden="true">PORTRAIT PLACEHOLDER</div>
+          <p class="hero-name">Legion Prefect (Placeholder)</p>
+          <p class="hero-meta">Cinder Throne Legates</p>
+          <div class="wire-row">
+            <span>Ability</span>
+            <strong>Iron Mandate</strong>
+          </div>
+          <div class="wire-row">
+            <span>Cooldown</span>
+            <strong>Available now</strong>
+          </div>
+          <button type="button" class="ghost-btn">Assign to Army</button>
+        </article>
+
+        <article class="hero-card state-cooldown" aria-label="Hero card cooldown state">
+          <header class="hero-card__header">
+            <span class="placeholder-badge">CIV BADGE</span>
+            <span class="state-pill warn">Cooldown</span>
+          </header>
+          <div class="portrait-placeholder" aria-hidden="true">PORTRAIT PLACEHOLDER</div>
+          <p class="hero-name">Fen Oracle (Placeholder)</p>
+          <p class="hero-meta">Mirebound Covenant</p>
+          <div class="wire-row">
+            <span>Ability</span>
+            <strong>Rotwrit Veil</strong>
+          </div>
+          <div class="wire-row">
+            <span>Cooldown</span>
+            <strong>03:42:15 remaining</strong>
+          </div>
+          <div class="cooldown-track" aria-hidden="true">
+            <span style="width: 39%;"></span>
+          </div>
+          <button type="button" class="ghost-btn" disabled>On Cooldown</button>
+        </article>
+
+        <article class="hero-card state-unassigned" aria-label="Hero card unassigned state">
+          <header class="hero-card__header">
+            <span class="placeholder-badge">CIV BADGE</span>
+            <span class="state-pill danger">Unassigned</span>
+          </header>
+          <div class="portrait-placeholder" aria-hidden="true">PORTRAIT PLACEHOLDER</div>
+          <p class="hero-name">Ashen Smith (Placeholder)</p>
+          <p class="hero-meta">Graveforge Clans</p>
+          <div class="wire-row">
+            <span>Ability</span>
+            <strong>Anvil Oath</strong>
+          </div>
+          <div class="wire-row">
+            <span>Status</span>
+            <strong>No active army link</strong>
+          </div>
+          <button type="button" class="ghost-btn">Assign to Army</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="surface" aria-labelledby="surface-dispatch-title">
+      <header class="surface-header">
+        <div>
+          <p class="eyebrow">Dispatch Intent Surface</p>
+          <h2 id="surface-dispatch-title">Army Dispatch Modal Wireframe</h2>
+        </div>
+      </header>
+      <div class="modal-wireframe" role="group" aria-label="Dispatch modal placeholder">
+        <header class="modal-wireframe__header">
+          <h3>Dispatch Army (Placeholder)</h3>
+          <span class="chip">Target Tile: Ruin Site 412,198</span>
+        </header>
+        <div class="modal-wireframe__content">
+          <section class="wire-panel">
+            <h4>Hero Assignment</h4>
+            <label class="field-label" for="hero-select">Assign hero</label>
+            <select id="hero-select">
+              <option selected>Legion Prefect (Ready)</option>
+              <option>Fen Oracle (Cooldown)</option>
+              <option>Ashen Smith (Unassigned)</option>
+            </select>
+            <div class="wire-row">
+              <span>Current state</span>
+              <strong>Assigned to 2nd Vanguard</strong>
+            </div>
+            <div class="wire-row">
+              <span>Tutorial cue</span>
+              <strong>Step 1: Assign hero to army</strong>
+            </div>
+          </section>
+
+          <section class="wire-panel">
+            <h4>Active Ability Slot</h4>
+            <article class="ability-slot">
+              <header>
+                <span class="state-pill ok">Enabled</span>
+                <strong>Iron Mandate</strong>
+              </header>
+              <p>Army attack +12% and morale loss reduction +15% for first 90s of battle.</p>
+              <div class="wire-row">
+                <span>Cooldown on use</span>
+                <strong>6h</strong>
+              </div>
+              <div class="wire-row">
+                <span>Tutorial cue</span>
+                <strong>Step 2: Use one active ability</strong>
+              </div>
+            </article>
+
+            <div class="wire-state-strip" aria-label="Ability state samples">
+              <span class="chip chip-tight">Ready</span>
+              <span class="chip chip-tight">Disabled: No Hero</span>
+              <span class="chip chip-tight">Cooldown: 03:42:15</span>
+            </div>
+          </section>
+        </div>
+
+        <section class="wire-panel precommit-panel" aria-label="Pre-commit effect preview">
+          <h4>Before Action Commit</h4>
+          <ul>
+            <li>Projected effect: +12% attack, -15% morale loss (first 90s only)</li>
+            <li>Activation timing: Triggers at combat start if enabled</li>
+            <li>Cooldown result: Ability enters 6h cooldown immediately after activation</li>
+          </ul>
+          <div class="modal-actions">
+            <button type="button" class="ghost-btn">Cancel</button>
+            <button type="button" class="primary-btn">Commit Dispatch (Placeholder)</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="surface" aria-labelledby="surface-feedback-title">
+      <header class="surface-header">
+        <div>
+          <p class="eyebrow">Feedback Surface</p>
+          <h2 id="surface-feedback-title">Event Feed and Combat Feedback Wireframes</h2>
+        </div>
+      </header>
+      <div class="feedback-layout">
+        <section class="wire-panel">
+          <h4>Event Feed States</h4>
+          <ol class="event-list">
+            <li class="event-row">
+              <strong>hero_assigned</strong>
+              <span>Legion Prefect assigned to 2nd Vanguard (dispatch modal)</span>
+            </li>
+            <li class="event-row">
+              <strong>hero_ability_activated</strong>
+              <span>Iron Mandate triggered at first combat contact (+12% atk, -15% morale loss)</span>
+            </li>
+            <li class="event-row">
+              <strong>hero_ability_cooldown_complete</strong>
+              <span>Iron Mandate cooldown complete. Ability ready again.</span>
+            </li>
+          </ol>
+        </section>
+
+        <section class="wire-panel">
+          <h4>Combat Delta Summary</h4>
+          <div class="combat-row">
+            <span>Army attack</span>
+            <strong>128 -> 143 (+12%)</strong>
+          </div>
+          <div class="combat-row">
+            <span>Morale loss per cycle</span>
+            <strong>20 -> 17 (-15%)</strong>
+          </div>
+          <div class="combat-row">
+            <span>Modifier window</span>
+            <strong>00:00 - 01:30 battle time</strong>
+          </div>
+          <div class="cooldown-notice" role="status">
+            Cooldown active until 18:40 UTC. Next power window is clearly scheduled in feed and hero card.
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

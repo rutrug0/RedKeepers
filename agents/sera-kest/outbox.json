@@ -186,5 +186,36 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-26T11:55:17.6827506Z",
+    "item_id": "RK-AUTO-BACKLOG-0003-F01-F02",
+    "status": "completed",
+    "summary": "Created a standalone placeholder-first hero UI wireframe page covering settlement hero roster cards, dispatch modal assignment/ability pre-commit clarity, and event/combat cooldown feedback states using shared UI style tokens without integrating hero flows into first-slice runtime.",
+    "files": [
+      "client-web/hero-wireframes.html",
+      "client-web/hero-wireframes.css",
+      "agents/sera-kest/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Gate and integrate hero wireframes after vertical-slice sign-off",
+        "owner_role": "frontend",
+        "milestone": "M2",
+        "priority": "medium",
+        "description": "After docs/design/vertical-slice-done-v1.md passes all gates, integrate the deferred hero wireframe surfaces into the client shell behind explicit mock state controls while preserving placeholder-only assets.",
+        "acceptance_criteria": [
+          "Integration is blocked unless vertical slice gates are marked PASS in docs/design/vertical-slice-done-v1.md",
+          "Settlement hero card, dispatch ability slot, and feedback surfaces render from a shared hero mock state model in client-web",
+          "Hero UI remains optional and does not alter first-session flow or mandatory tutorial path before unlock"
+        ],
+        "dependencies": [
+          "docs/design/vertical-slice-done-v1.md PASS"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

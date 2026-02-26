@@ -3276,5 +3276,45 @@
     ],
     "assigned_agent": "mara-voss",
     "commit_sha": "ed06e35fc8789f2d9481304080a7d7e3f067055f"
+  },
+  {
+    "id": "RK-AUTO-STALL-0006-F01",
+    "title": "Normalize unresolved dependency roots in active queued first-slice chain",
+    "description": "Audit queued items still blocked by missing dependency IDs and either restore/remap those dependency roots or explicitly defer affected items so dependency links only reference trackable backlog entries.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0006"
+    ],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-archived-items.json"
+    ],
+    "acceptance_criteria": [
+      "Each queued dependency reference resolves to an existing ID in active, blocked, completed, or archived backlog records with a documented disposition.",
+      "At least one currently waiting first-slice queued item is made dependency-ready or explicitly deferred due to unresolved external prerequisites.",
+      "python tools/orchestrator.py status shows dependency-ready queued work and no immediate stall on the next daemon pass."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T11:46:11.634405+00:00",
+    "updated_at": "2026-02-26T11:52:11.935256+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [completed-items.json](/D:/RedKeepers/coordination/backlog/completed-items.json:3145) is also modified by daemon runtime activity during validation (`RK-AUTO-STALL-0006` completion record); I did not manually edit that file.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0006",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "a3f40b460d0d6d87b8bc36388f17c5bffa74ffdc"
   }
 ]
