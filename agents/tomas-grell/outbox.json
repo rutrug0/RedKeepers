@@ -350,5 +350,19 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-26T08:27:56.8248421Z",
+    "item_id": "RK-AUTO-STALL-0001-F01",
+    "status": "completed",
+    "summary": "Normalized queued backlog dependency references by replacing non-item/archived dependencies with valid backlog IDs and removing an out-of-scope queued duplicate that was already deferred in blocked-archived items.",
+    "checks": [
+      "python tools/orchestrator.py status (pass)",
+      "dependency audit: queued dependencies against work/completed/blocked IDs (issues=0, dependency_ready=2)"
+    ],
+    "changed_files": [
+      "coordination/backlog/work-items.json",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]
