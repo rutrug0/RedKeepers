@@ -14,6 +14,7 @@ export type WorldMapHostileAttackEventPayloadKey =
 export interface WorldMapHostileAttackEventPayload {
   readonly payload_key: WorldMapHostileAttackEventPayloadKey;
   readonly content_key: string;
+  readonly content_key_aliases?: readonly string[];
   readonly occurred_at: Date;
   readonly tokens: Readonly<Record<string, string>>;
 }

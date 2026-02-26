@@ -5665,5 +5665,48 @@
     "runtime_seconds": 253.77,
     "started_at": "2026-02-26T20:09:18.343005+00:00",
     "finished_at": "2026-02-26T20:13:32.104609+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F04-F01",
+    "title": "Map hostile dispatch error codes to specific narrative content keys in client feed rendering",
+    "description": "Update hostile attack UI adapters to map `source_target_not_foreign`, `max_active_marches_reached`, `path_blocked_impassable`, and `march_already_exists` to the new `event.world.hostile_dispatch_failed_*` keys instead of only using the generic failure template.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F04"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+    ],
+    "acceptance_criteria": [
+      "Each hostile dispatch failure error_code resolves to a deterministic content key in the `event.world.hostile_dispatch_failed_*` namespace",
+      "Event feed shows the mapped narrative copy with expected tokens per failure case",
+      "Generic `event.world.hostile_dispatch_failed` remains as fallback for unknown error codes"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:58:29.119307+00:00",
+    "updated_at": "2026-02-26T20:16:23.603341+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `python tools/orchestrator.py status` passed (daemon running; active item is this task)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F04",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "d1f888498bd805cda17786838c1233acfcb0ab7d",
+    "resolved_by_agent": "sera-kest",
+    "resolved_by_role": "frontend",
+    "runtime_seconds": 162.55,
+    "started_at": "2026-02-26T20:13:39.521892+00:00",
+    "finished_at": "2026-02-26T20:16:22.078460+00:00"
   }
 ]

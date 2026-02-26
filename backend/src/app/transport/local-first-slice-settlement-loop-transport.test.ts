@@ -267,15 +267,27 @@ test("local first-slice transport serves deterministic hostile settlement attack
   );
   assert.equal(
     response.body.event_payloads.dispatch_sent.content_key,
-    "event.world.march_started",
+    "event.world.hostile_dispatch_en_route",
+  );
+  assert.deepStrictEqual(
+    response.body.event_payloads.dispatch_sent.content_key_aliases,
+    ["event.world.march_started"],
   );
   assert.equal(
     response.body.event_payloads.march_arrived.content_key,
-    "event.world.march_returned",
+    "event.world.hostile_post_battle_returned",
+  );
+  assert.deepStrictEqual(
+    response.body.event_payloads.march_arrived.content_key_aliases,
+    ["event.world.march_returned"],
   );
   assert.equal(
     response.body.event_payloads.combat_resolved.content_key,
-    "event.combat.placeholder_skirmish_win",
+    "event.combat.hostile_resolve_attacker_win",
+  );
+  assert.deepStrictEqual(
+    response.body.event_payloads.combat_resolved.content_key_aliases,
+    ["event.combat.placeholder_skirmish_win"],
   );
   assert.equal(response.body.losses.attacker_units_lost, 2);
   assert.equal(response.body.losses.defender_garrison_lost, 40);

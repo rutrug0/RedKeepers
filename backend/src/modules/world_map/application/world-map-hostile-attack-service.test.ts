@@ -91,15 +91,27 @@ test("hostile attack service resolves deterministic attacker-win losses and pers
   );
   assert.equal(
     response.event_payloads.dispatch_sent.content_key,
-    "event.world.march_started",
+    "event.world.hostile_dispatch_en_route",
+  );
+  assert.deepStrictEqual(
+    response.event_payloads.dispatch_sent.content_key_aliases,
+    ["event.world.march_started"],
   );
   assert.equal(
     response.event_payloads.march_arrived.content_key,
-    "event.world.march_returned",
+    "event.world.hostile_post_battle_returned",
+  );
+  assert.deepStrictEqual(
+    response.event_payloads.march_arrived.content_key_aliases,
+    ["event.world.march_returned"],
   );
   assert.equal(
     response.event_payloads.combat_resolved.content_key,
-    "event.combat.placeholder_skirmish_win",
+    "event.combat.hostile_resolve_attacker_win",
+  );
+  assert.deepStrictEqual(
+    response.event_payloads.combat_resolved.content_key_aliases,
+    ["event.combat.placeholder_skirmish_win"],
   );
 
   const persisted = repository.readMarchRuntimeState({
@@ -176,7 +188,65 @@ test("hostile attack service resolves tie fixture attack_fixture_tie_40v40 as de
   );
   assert.equal(
     response.event_payloads.combat_resolved.content_key,
-    "event.combat.placeholder_skirmish_loss",
+    "event.combat.hostile_resolve_tie_defender_holds",
+  );
+  assert.deepStrictEqual(
+    response.event_payloads.combat_resolved.content_key_aliases,
+    ["event.combat.placeholder_skirmish_loss"],
+  );
+  assert.equal(
+    response.event_payloads.march_arrived.content_key,
+    "event.world.hostile_defeat_force_shattered",
+  );
+  assert.deepStrictEqual(
+    response.event_payloads.march_arrived.content_key_aliases,
+    ["event.world.march_returned"],
+  );
+});
+
+test("hostile attack service emits defender-win hostile combat narrative key for non-tie outcomes", () => {
+  const repository = new InMemoryWorldMapMarchStateRepository();
+  const service = new DeterministicWorldMapHostileAttackService(
+    new DeterministicWorldMapMarchDispatchService(repository),
+    new DeterministicWorldMapMarchSnapshotService(repository),
+  );
+
+  const response = service.resolveHostileAttack({
+    march_id: "march_attack_defender_strong",
+    source_settlement_id: "settlement_alpha",
+    source_settlement_name: "Cinderwatch Hold",
+    target_settlement_id: "settlement_hostile",
+    target_settlement_name: "Ruin Holdfast",
+    target_tile_label: "Ruin Holdfast",
+    origin: { x: 0, y: 0 },
+    target: { x: 1, y: 0 },
+    defender_garrison_strength: 40,
+    dispatched_units: [
+      {
+        unit_id: "watch_levy",
+        unit_count: 6,
+        unit_attack: 5,
+      },
+    ],
+    departed_at: new Date("2026-02-26T19:30:00.000Z"),
+  });
+
+  assert.equal(response.combat_outcome, "defender_win");
+  assert.equal(
+    response.event_payloads.combat_resolved.content_key,
+    "event.combat.hostile_resolve_defender_win",
+  );
+  assert.deepStrictEqual(
+    response.event_payloads.combat_resolved.content_key_aliases,
+    ["event.combat.placeholder_skirmish_loss"],
+  );
+  assert.equal(
+    response.event_payloads.march_arrived.content_key,
+    "event.world.hostile_defeat_force_shattered",
+  );
+  assert.deepStrictEqual(
+    response.event_payloads.march_arrived.content_key_aliases,
+    ["event.world.march_returned"],
   );
 });
 

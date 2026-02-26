@@ -1906,4 +1906,32 @@
 
                                 ]
     }
+,
+    {
+        "timestamp_utc":  "2026-02-26T20:20:37.8288976Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0004-F04-F02",
+        "status":  "done",
+        "summary":  "Adopted seeded hostile narrative keys in hostile attack resolved payload selection by emitting deterministic `event.combat.hostile_*` outcomes and deterministic post-combat `event.world.hostile_*` return/defeat keys, while preserving legacy content keys as explicit aliases.",
+        "changed_files":  [
+                              "backend/src/modules/world_map/domain/world-map-hostile-attack-contract.ts",
+                              "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+                              "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+                              "backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --experimental-strip-types --check backend/src/modules/world_map/domain/world-map-hostile-attack-contract.ts backend/src/modules/world_map/application/world-map-hostile-attack-service.ts backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                                    "node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.test.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "TypeScript strip-types checks passed for touched files. Node test execution is still blocked in this environment by existing repository-level strip-types/ESM runtime limits (`ERR_UNSUPPORTED_DIR_IMPORT`, `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX`)."
+                    },
+        "proposed_work_items":  [
+
+                                ]
+    }
 ]

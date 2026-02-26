@@ -22,6 +22,10 @@ const DEFAULT_TARGET_TILE_LABEL = "Hostile Settlement";
 const DEFAULT_MAX_ACTIVE_MARCHES = 2;
 const DEFAULT_WORLD_SEED = "seed_world_alpha";
 const DEFAULT_MAP_SIZE = 16;
+const WORLD_MAP_LEGACY_MARCH_STARTED_KEY = "event.world.march_started";
+const WORLD_MAP_LEGACY_MARCH_RETURNED_KEY = "event.world.march_returned";
+const COMBAT_LEGACY_SKIRMISH_WIN_KEY = "event.combat.placeholder_skirmish_win";
+const COMBAT_LEGACY_SKIRMISH_LOSS_KEY = "event.combat.placeholder_skirmish_loss";
 
 const OUTCOME_LOSS_RATIOS: Readonly<Record<WorldMapMarchCombatOutcome, {
   readonly attacker: number;
@@ -238,7 +242,8 @@ export class DeterministicWorldMapHostileAttackService
 
     const dispatchEvent = {
       payload_key: "dispatch_sent" as const,
-      content_key: "event.world.march_started",
+      content_key: "event.world.hostile_dispatch_en_route",
+      content_key_aliases: [WORLD_MAP_LEGACY_MARCH_STARTED_KEY],
       occurred_at: new Date(dispatch.departed_at.getTime()),
       tokens: {
         army_name: armyName,
@@ -246,32 +251,38 @@ export class DeterministicWorldMapHostileAttackService
         target_tile_label: targetTileLabel,
       },
     };
+    const postCombatWorldNarrative = resolvePostCombatWorldNarrativeContent({
+      combat_outcome: combatOutcome,
+      attacker_units_remaining: attackerUnitsRemaining,
+    });
     const marchArrivedEvent = {
       payload_key: "march_arrived" as const,
-      content_key: "event.world.march_returned",
+      content_key: postCombatWorldNarrative.content_key,
+      content_key_aliases: postCombatWorldNarrative.content_key_aliases,
       occurred_at: new Date(dispatch.arrives_at.getTime()),
       tokens: {
         army_name: armyName,
         settlement_name: sourceSettlementName,
+        target_tile_label: targetTileLabel,
+        attacker_units_remaining: `${attackerUnitsRemaining}`,
         haul_summary: `combat:${combatOutcome};attacker_remaining:${attackerUnitsRemaining};defender_remaining:${defenderGarrisonRemaining}`,
       },
     };
+    const combatNarrative = resolveCombatNarrativeContent({
+      combat_outcome: combatOutcome,
+      attacker_strength: attackerStrength,
+      defender_strength: defenderStrength,
+    });
     const combatResolvedEvent = {
       payload_key: "combat_resolved" as const,
-      content_key: combatOutcome === "attacker_win"
-        ? "event.combat.placeholder_skirmish_win"
-        : "event.combat.placeholder_skirmish_loss",
+      content_key: combatNarrative.content_key,
+      content_key_aliases: combatNarrative.content_key_aliases,
       occurred_at: new Date(resolvedAt.getTime()),
-      tokens: combatOutcome === "attacker_win"
-        ? {
-          army_name: armyName,
-          target_tile_label: targetTileLabel,
-        }
-        : {
-          army_name: armyName,
-          target_tile_label: targetTileLabel,
-          settlement_name: sourceSettlementName,
-        },
+      tokens: {
+        army_name: armyName,
+        target_tile_label: targetTileLabel,
+        settlement_name: sourceSettlementName,
+      },
     };
 
     return {
@@ -399,6 +410,61 @@ function resolveCombatOutcome(
   defenderStrength: number,
 ): WorldMapMarchCombatOutcome {
   return attackerStrength > defenderStrength ? "attacker_win" : "defender_win";
+}
+
+function resolveCombatNarrativeContent(input: {
+  readonly combat_outcome: WorldMapMarchCombatOutcome;
+  readonly attacker_strength: number;
+  readonly defender_strength: number;
+}): {
+  readonly content_key: string;
+  readonly content_key_aliases: readonly string[];
+} {
+  if (input.combat_outcome === "attacker_win") {
+    return {
+      content_key: "event.combat.hostile_resolve_attacker_win",
+      content_key_aliases: [COMBAT_LEGACY_SKIRMISH_WIN_KEY],
+    };
+  }
+
+  if (input.attacker_strength === input.defender_strength) {
+    return {
+      content_key: "event.combat.hostile_resolve_tie_defender_holds",
+      content_key_aliases: [COMBAT_LEGACY_SKIRMISH_LOSS_KEY],
+    };
+  }
+
+  return {
+    content_key: "event.combat.hostile_resolve_defender_win",
+    content_key_aliases: [COMBAT_LEGACY_SKIRMISH_LOSS_KEY],
+  };
+}
+
+function resolvePostCombatWorldNarrativeContent(input: {
+  readonly combat_outcome: WorldMapMarchCombatOutcome;
+  readonly attacker_units_remaining: number;
+}): {
+  readonly content_key: string;
+  readonly content_key_aliases: readonly string[];
+} {
+  if (input.combat_outcome === "attacker_win") {
+    return {
+      content_key: "event.world.hostile_post_battle_returned",
+      content_key_aliases: [WORLD_MAP_LEGACY_MARCH_RETURNED_KEY],
+    };
+  }
+
+  if (input.attacker_units_remaining > 0) {
+    return {
+      content_key: "event.world.hostile_retreat_completed",
+      content_key_aliases: [WORLD_MAP_LEGACY_MARCH_RETURNED_KEY],
+    };
+  }
+
+  return {
+    content_key: "event.world.hostile_defeat_force_shattered",
+    content_key_aliases: [WORLD_MAP_LEGACY_MARCH_RETURNED_KEY],
+  };
 }
 
 function resolveAttackerUnitLosses(
