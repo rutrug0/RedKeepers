@@ -330,8 +330,18 @@
                                                                     "python tools/frontend_visual_smoke.py --update-baseline --max-overflow-px 0 --max-diff-percent 0.5 --strict",
                                                                     "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
                                                                     "python tools/orchestrator.py status"
-                                                                ]
+                                        ]
                                     }
                                 ]
+    },
+    {
+        "ts":  "2026-02-26T15:29:35.0148592Z",
+        "item_id":  "RK-M0-0012-F01-F01",
+        "status":  "completed",
+        "summary":  "Replaced client-web settlement action local simulation stubs with a first-slice transport invocation bridge that calls backend route contracts for tick/build/train, wired world-map Send Scouts to the world-map tile interact transport route, and mapped unavailable_tile scout failures through the existing event-key narrative flow.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ]
     }
 ]

@@ -61,6 +61,10 @@
       "Scouting returns to quiet from {target_tile_label}; no active host disturbed the roads.",
     "event.scout.return_hostile":
       "Scouts from {target_tile_label} report hostile movement ({hostile_force_estimate}); garrisons should tighten watch.",
+    "event.world.scout_unavailable_tile":
+      "Scout dispatch to {target_tile_label} aborted: tile is unavailable for this route.",
+    "event.scout.unavailable_tile":
+      "Scout dispatch to {target_tile_label} aborted: tile is unavailable for this route.",
     "event.settlement.name_assigned":
       "Surveyors record the new holding as {settlement_name}. The name enters the ledger.",
   });
@@ -156,6 +160,7 @@
           populated: {
             coords: "412 / 198",
             region: "Black Reed March",
+            selected_tile_id: "tile_0412_0198",
             markers: [
               { className: "settlement", label: "Your Keep", selected: true },
               { className: "allied", label: "Ally Camp", selected: false },
@@ -432,6 +437,9 @@
     last_outcome: null,
     next_correlation_id: 1,
   };
+  const worldMapActionRuntime = {
+    pending_action: null,
+  };
 
   const cloneResourceValues = (values) => {
     const normalized = {};
@@ -439,36 +447,6 @@
       normalized[resourceId] = Number(values?.[resourceId]) || 0;
     }
     return normalized;
-  };
-
-  const computeMissingResources = (available, required) => ({
-    food: Math.max(0, required.food - available.food),
-    wood: Math.max(0, required.wood - available.wood),
-    stone: Math.max(0, required.stone - available.stone),
-    iron: Math.max(0, required.iron - available.iron),
-  });
-
-  const subtractResourceValues = (left, right) => ({
-    food: Math.max(0, left.food - right.food),
-    wood: Math.max(0, left.wood - right.wood),
-    stone: Math.max(0, left.stone - right.stone),
-    iron: Math.max(0, left.iron - right.iron),
-  });
-
-  const hasAnyMissingResource = (missing) =>
-    missing.food > 0 || missing.wood > 0 || missing.stone > 0 || missing.iron > 0;
-
-  const computeScaledLevelValue = (levelOneValue, multiplier, fromLevel, minimumValue = 0) => {
-    if (!Number.isFinite(levelOneValue) || !Number.isFinite(multiplier)) {
-      return minimumValue;
-    }
-
-    const scaled = Math.ceil(levelOneValue * Math.pow(multiplier, fromLevel));
-    if (!Number.isFinite(scaled)) {
-      return minimumValue;
-    }
-
-    return Math.max(minimumValue, scaled);
   };
 
   const formatEtaFromSeconds = (durationSeconds) => {
@@ -479,281 +457,235 @@
   };
 
   const toIsoOrValue = (value) => (value instanceof Date ? value.toISOString() : value);
+  const firstSliceTransportRoutes = Object.freeze({
+    settlement_tick: "/settlements/{settlementId}/tick",
+    building_upgrade: "/settlements/{settlementId}/buildings/{buildingId}/upgrade",
+    unit_train: "/settlements/{settlementId}/units/{unitId}/train",
+    world_map_tile_interact: "/world-map/tiles/{tileId}/interact",
+  });
 
-  const createFirstSliceClientContractAdapter = () => {
-    const buildingDefinition = {
-      building_id: "grain_plot",
-      display_name: "Grain Plot",
-      max_level_v1: 10,
-      build_time_l1_s: 90,
-      build_time_mult_per_level: 1.45,
-      cost_food_l1: 40,
-      cost_wood_l1: 60,
-      cost_stone_l1: 20,
-      cost_iron_l1: 0,
-      cost_mult_per_level: 1.55,
-    };
-    const unitDefinition = {
-      unit_id: "watch_levy",
-      display_name: "Watch Levy",
-      train_time_s: 45,
-      cost_food: 35,
-      cost_wood: 20,
-      cost_stone: 10,
-      cost_iron: 0,
-    };
-
-    const waitForStub = () => new Promise((resolve) => setTimeout(resolve, 170));
-
-    return {
-      tickSettlementCommand: async (input) => {
-        await waitForStub();
-
-        const durationMs = Math.max(0, Number(input.duration_ms) || 0);
-        const resourceStock = cloneResourceValues(input.resource_stock_by_id);
-
-        if (input.simulate_failure) {
-          return {
-            schema_version: "rk-v1-settlement-resource-tick",
-            status: "failed",
-            failure_code: "projection_unavailable",
-            settlement_id: input.settlement_id,
-            settlement_name: input.settlement_name,
-            duration_ms: durationMs,
-            resource_delta_by_id: {
-              food: 0,
-              wood: 0,
-              stone: 0,
-              iron: 0,
-            },
-            resource_stock_by_id: resourceStock,
-            projection_reason_codes: ["tick_window_clamped_to_zero"],
-            placeholder_events: [],
-          };
+  const resolveIsoInstant = (value, fallbackIso) => {
+    if (value instanceof Date && Number.isFinite(value.getTime())) {
+      return value.toISOString();
+    }
+    if (typeof value === "string") {
+      const normalized = value.trim();
+      if (normalized.length > 0) {
+        const parsed = new Date(normalized);
+        if (!Number.isNaN(parsed.getTime())) {
+          return parsed.toISOString();
         }
-
-        const resourceDeltaById = {
-          food: 0,
-          wood: 0,
-          stone: 0,
-          iron: 0,
-        };
-        const resourceStockAfterById = cloneResourceValues(resourceStock);
-
-        for (const resourceId of firstSliceResourceIds) {
-          const gain = Math.floor(
-            ((Number(input.passive_prod_per_h_by_id?.[resourceId]) || 0) * durationMs) / 3600000,
-          );
-          const cap = Math.max(1, Number(input.storage_cap_by_id?.[resourceId]) || 1);
-          const nextValue = Math.min(cap, resourceStockAfterById[resourceId] + Math.max(0, gain));
-          resourceDeltaById[resourceId] = nextValue - resourceStockAfterById[resourceId];
-          resourceStockAfterById[resourceId] = nextValue;
-        }
-
-        return {
-          schema_version: "rk-v1-settlement-resource-tick",
-          status: "accepted",
-          settlement_id: input.settlement_id,
-          settlement_name: input.settlement_name,
-          duration_ms: durationMs,
-          resource_delta_by_id: resourceDeltaById,
-          resource_stock_by_id: resourceStockAfterById,
-          projection_reason_codes: ["passive_prod_base"],
-          placeholder_events: [
-            {
-              payload: {
-                schema_version: "rk-v1-settlement-resource-tick-event",
-                event_key: "event.economy.tick_passive_income",
-                settlement_id: input.settlement_id,
-                settlement_name: input.settlement_name,
-                duration_ms: durationMs,
-                resource_delta_by_id: resourceDeltaById,
-                resource_stock_by_id: resourceStockAfterById,
-                reason_codes: ["passive_prod_base"],
-              },
-            },
-          ],
-        };
-      },
-      buildUpgradeCommand: async (input) => {
-        await waitForStub();
-
-        const requestedAtMs = input.requested_at.getTime();
-        const fromLevel = Math.max(0, Math.trunc(Number(input.current_level) || 0));
-        const costById = {
-          food: computeScaledLevelValue(
-            buildingDefinition.cost_food_l1,
-            buildingDefinition.cost_mult_per_level,
-            fromLevel,
-          ),
-          wood: computeScaledLevelValue(
-            buildingDefinition.cost_wood_l1,
-            buildingDefinition.cost_mult_per_level,
-            fromLevel,
-          ),
-          stone: computeScaledLevelValue(
-            buildingDefinition.cost_stone_l1,
-            buildingDefinition.cost_mult_per_level,
-            fromLevel,
-          ),
-          iron: computeScaledLevelValue(
-            buildingDefinition.cost_iron_l1,
-            buildingDefinition.cost_mult_per_level,
-            fromLevel,
-          ),
-        };
-        const availableStockById = cloneResourceValues(input.resource_stock_by_id);
-
-        if (input.simulate_failure) {
-          const requiredCostById = {
-            food: costById.food + 30,
-            wood: costById.wood + 20,
-            stone: costById.stone + 10,
-            iron: costById.iron,
-          };
-          return {
-            schema_version: "rk-v1-building-upgrade-command-result",
-            status: "failed",
-            failure_code: "insufficient_resources",
-            settlement_id: input.settlement_id,
-            building_id: input.building_id,
-            required_cost_by_id: requiredCostById,
-            available_stock_by_id: availableStockById,
-            missing_resources_by_id: computeMissingResources(availableStockById, requiredCostById),
-          };
-        }
-
-        const missingResourcesById = computeMissingResources(availableStockById, costById);
-        if (hasAnyMissingResource(missingResourcesById)) {
-          return {
-            schema_version: "rk-v1-building-upgrade-command-result",
-            status: "failed",
-            failure_code: "insufficient_resources",
-            settlement_id: input.settlement_id,
-            building_id: input.building_id,
-            required_cost_by_id: costById,
-            available_stock_by_id: availableStockById,
-            missing_resources_by_id: missingResourcesById,
-          };
-        }
-
-        const toLevel = fromLevel + 1;
-        const upgradeDurationS = computeScaledLevelValue(
-          buildingDefinition.build_time_l1_s,
-          buildingDefinition.build_time_mult_per_level,
-          fromLevel,
-          1,
-        );
-        const upgradeEndsAt = new Date(requestedAtMs + upgradeDurationS * 1000);
-        const resourceStockAfterById = subtractResourceValues(availableStockById, costById);
-
-        return {
-          schema_version: "rk-v1-building-upgrade-command-result",
-          status: "accepted",
-          settlement_id: input.settlement_id,
-          settlement_name: input.settlement_name,
-          building_id: buildingDefinition.building_id,
-          building_label: buildingDefinition.display_name,
-          from_level: fromLevel,
-          to_level: toLevel,
-          upgrade_duration_s: upgradeDurationS,
-          upgrade_ends_at: upgradeEndsAt,
-          resource_cost_by_id: costById,
-          resource_stock_after_by_id: resourceStockAfterById,
-          placeholder_events: [
-            {
-              payload: {
-                schema_version: "rk-v1-building-upgrade-command-event",
-                event_key: "event.buildings.upgrade_started",
-                settlement_id: input.settlement_id,
-                settlement_name: input.settlement_name,
-                building_id: buildingDefinition.building_id,
-                building_label: buildingDefinition.display_name,
-                from_level: fromLevel,
-                to_level: toLevel,
-                upgrade_ends_at_iso: upgradeEndsAt.toISOString(),
-                resource_cost_by_id: costById,
-              },
-            },
-          ],
-        };
-      },
-      trainUnitCommand: async (input) => {
-        await waitForStub();
-
-        const quantity = Math.max(1, Math.trunc(Number(input.quantity) || 1));
-        const requestedAtMs = input.requested_at.getTime();
-        const availableStockById = cloneResourceValues(input.resource_stock_by_id);
-        const requiredCostById = {
-          food: unitDefinition.cost_food * quantity,
-          wood: unitDefinition.cost_wood * quantity,
-          stone: unitDefinition.cost_stone * quantity,
-          iron: unitDefinition.cost_iron * quantity,
-        };
-
-        if (input.simulate_failure) {
-          const queueAvailableAt = new Date(requestedAtMs + 90_000);
-          return {
-            schema_version: "rk-v1-unit-train-command-result",
-            status: "failed",
-            failure_code: "cooldown",
-            settlement_id: input.settlement_id,
-            unit_id: input.unit_id,
-            queue_available_at: queueAvailableAt,
-            cooldown_remaining_ms: queueAvailableAt.getTime() - requestedAtMs,
-          };
-        }
-
-        const missingResourcesById = computeMissingResources(availableStockById, requiredCostById);
-        if (hasAnyMissingResource(missingResourcesById)) {
-          return {
-            schema_version: "rk-v1-unit-train-command-result",
-            status: "failed",
-            failure_code: "insufficient_resources",
-            settlement_id: input.settlement_id,
-            unit_id: input.unit_id,
-            quantity,
-            required_cost_by_id: requiredCostById,
-            available_stock_by_id: availableStockById,
-            missing_resources_by_id: missingResourcesById,
-          };
-        }
-
-        const trainingDurationS = Math.max(1, quantity * unitDefinition.train_time_s);
-        const trainingCompleteAt = new Date(requestedAtMs + trainingDurationS * 1000);
-        const resourceStockAfterById = subtractResourceValues(availableStockById, requiredCostById);
-
-        return {
-          schema_version: "rk-v1-unit-train-command-result",
-          status: "accepted",
-          settlement_id: input.settlement_id,
-          settlement_name: input.settlement_name,
-          unit_id: unitDefinition.unit_id,
-          unit_label: unitDefinition.display_name,
-          quantity,
-          training_duration_s: trainingDurationS,
-          training_complete_at: trainingCompleteAt,
-          resource_cost_by_id: requiredCostById,
-          resource_stock_after_by_id: resourceStockAfterById,
-          placeholder_events: [
-            {
-              payload: {
-                schema_version: "rk-v1-unit-train-command-event",
-                event_key: "event.units.training_started",
-                settlement_id: input.settlement_id,
-                settlement_name: input.settlement_name,
-                unit_id: unitDefinition.unit_id,
-                unit_label: unitDefinition.display_name,
-                quantity,
-                training_complete_at_iso: trainingCompleteAt.toISOString(),
-                resource_cost_by_id: requiredCostById,
-              },
-            },
-          ],
-        };
-      },
-    };
+      }
+    }
+    return fallbackIso;
   };
+
+  const resolveWindowTransportBridge = () => {
+    const transportBridge = window.__RK_FIRST_SLICE_SETTLEMENT_LOOP_TRANSPORT__;
+    if (transportBridge && typeof transportBridge.invoke === "function") {
+      return transportBridge;
+    }
+    return null;
+  };
+
+  const interpolateTransportRoutePath = (routeTemplate, path = {}) =>
+    String(routeTemplate).replace(/\{([^}]+)\}/g, (_, tokenName) => {
+      const rawValue = path?.[tokenName];
+      const normalizedValue = rawValue === undefined || rawValue === null ? "" : String(rawValue);
+      return encodeURIComponent(normalizedValue);
+    });
+
+  const invokeFirstSliceTransportRoute = async (routeTemplate, request) => {
+    const transportBridge = resolveWindowTransportBridge();
+    if (transportBridge !== null) {
+      try {
+        const bridgeResponse = await Promise.resolve(transportBridge.invoke(routeTemplate, request));
+        if (
+          bridgeResponse
+          && Number.isFinite(bridgeResponse.status_code)
+          && Object.prototype.hasOwnProperty.call(bridgeResponse, "body")
+        ) {
+          return bridgeResponse;
+        }
+
+        return {
+          status_code: 500,
+          body: {
+            code: "transport_invalid_response",
+            message: `Transport bridge returned an invalid response for '${routeTemplate}'.`,
+          },
+        };
+      } catch (error) {
+        return {
+          status_code: 500,
+          body: {
+            code: "transport_handler_error",
+            message: error instanceof Error ? error.message : "Transport bridge invocation failed.",
+          },
+        };
+      }
+    }
+
+    const routePath = interpolateTransportRoutePath(routeTemplate, request?.path);
+
+    try {
+      const response = await fetch(routePath, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(request?.body || {}),
+      });
+
+      let responseBody = {};
+      try {
+        responseBody = await response.json();
+      } catch {
+        responseBody = {};
+      }
+
+      return {
+        status_code: response.status,
+        body: responseBody,
+      };
+    } catch (error) {
+      return {
+        status_code: 503,
+        body: {
+          code: "transport_unreachable",
+          message: error instanceof Error ? error.message : "Transport endpoint is unreachable.",
+        },
+      };
+    }
+  };
+
+  const unwrapFirstSliceTransportSuccess = (routeTemplate, transportResponse) => {
+    if (transportResponse?.status_code === 200) {
+      return transportResponse.body;
+    }
+
+    const errorCode =
+      typeof transportResponse?.body?.code === "string" && transportResponse.body.code.length > 0
+        ? transportResponse.body.code
+        : "transport_handler_error";
+    const errorMessage =
+      typeof transportResponse?.body?.message === "string" && transportResponse.body.message.length > 0
+        ? transportResponse.body.message
+        : `Transport invocation failed for '${routeTemplate}'.`;
+    const error = new Error(errorMessage);
+    error.code = errorCode;
+    error.status_code =
+      Number.isFinite(transportResponse?.status_code) ? Math.trunc(transportResponse.status_code) : 500;
+    throw error;
+  };
+
+  const createFirstSliceClientContractAdapter = () => ({
+    tickSettlementCommand: async (input) => {
+      const nowIso = new Date().toISOString();
+      const requestedAtIso = resolveIsoInstant(input.requested_at, nowIso);
+      const requestedAtMs = new Date(requestedAtIso).getTime();
+      const durationMs = Math.max(0, Math.floor(Number(input.duration_ms) || 0));
+      const tickEndedAtIso = new Date(requestedAtMs + durationMs).toISOString();
+
+      const transportResponse = await invokeFirstSliceTransportRoute(
+        firstSliceTransportRoutes.settlement_tick,
+        {
+          path: {
+            settlementId: input.settlement_id,
+          },
+          body: {
+            settlement_id: input.settlement_id,
+            flow_version: "v1",
+            tick_started_at: requestedAtIso,
+            tick_ended_at: tickEndedAtIso,
+            settlement_name: input.settlement_name,
+            resource_stock_by_id: input.resource_stock_by_id,
+            storage_cap_by_id: input.storage_cap_by_id,
+            passive_prod_per_h_by_id: input.passive_prod_per_h_by_id,
+            correlation_id: input.correlation_id,
+          },
+        },
+      );
+      return unwrapFirstSliceTransportSuccess(firstSliceTransportRoutes.settlement_tick, transportResponse);
+    },
+    buildUpgradeCommand: async (input) => {
+      const requestedAtIso = resolveIsoInstant(input.requested_at, new Date().toISOString());
+
+      const transportResponse = await invokeFirstSliceTransportRoute(
+        firstSliceTransportRoutes.building_upgrade,
+        {
+          path: {
+            settlementId: input.settlement_id,
+            buildingId: input.building_id,
+          },
+          body: {
+            settlement_id: input.settlement_id,
+            building_id: input.building_id,
+            flow_version: "v1",
+            current_level: Number(input.current_level) || 0,
+            requested_at: requestedAtIso,
+            settlement_name: input.settlement_name,
+            resource_stock_by_id: input.resource_stock_by_id,
+            cooldown_ends_at: resolveIsoInstant(input.cooldown_ends_at, ""),
+            active_upgrade_ends_at: resolveIsoInstant(input.active_upgrade_ends_at, ""),
+            correlation_id: input.correlation_id,
+          },
+        },
+      );
+      return unwrapFirstSliceTransportSuccess(firstSliceTransportRoutes.building_upgrade, transportResponse);
+    },
+    trainUnitCommand: async (input) => {
+      const requestedAtIso = resolveIsoInstant(input.requested_at, new Date().toISOString());
+
+      const transportResponse = await invokeFirstSliceTransportRoute(
+        firstSliceTransportRoutes.unit_train,
+        {
+          path: {
+            settlementId: input.settlement_id,
+            unitId: input.unit_id,
+          },
+          body: {
+            settlement_id: input.settlement_id,
+            unit_id: input.unit_id,
+            flow_version: "v1",
+            quantity: Number(input.quantity) || 0,
+            requested_at: requestedAtIso,
+            barracks_level: Number(input.barracks_level) || 0,
+            settlement_name: input.settlement_name,
+            resource_stock_by_id: input.resource_stock_by_id,
+            queue_available_at: resolveIsoInstant(input.queue_available_at, ""),
+            training_time_multiplier: Number(input.training_time_multiplier) || undefined,
+            correlation_id: input.correlation_id,
+          },
+        },
+      );
+      return unwrapFirstSliceTransportSuccess(firstSliceTransportRoutes.unit_train, transportResponse);
+    },
+    scoutTileInteractCommand: async (input) => {
+      const transportResponse = await invokeFirstSliceTransportRoute(
+        firstSliceTransportRoutes.world_map_tile_interact,
+        {
+          path: {
+            tileId: input.tile_id,
+          },
+          body: {
+            settlement_id: input.settlement_id,
+            tile_id: input.tile_id,
+            interaction_type: "scout",
+            flow_version: "v1",
+            settlement_name: input.settlement_name,
+            player_id: input.player_id,
+            assignment_context_type: input.assignment_context_type,
+            assignment_context_id: input.assignment_context_id,
+          },
+        },
+      );
+      return unwrapFirstSliceTransportSuccess(
+        firstSliceTransportRoutes.world_map_tile_interact,
+        transportResponse,
+      );
+    },
+  });
 
   const firstSliceClientContractAdapter = createFirstSliceClientContractAdapter();
 
@@ -811,6 +743,10 @@
 
     if (contentKey.startsWith("event.units.")) {
       return contentKey.replace("event.units.", "event.train.");
+    }
+
+    if (contentKey.startsWith("event.world.scout_")) {
+      return contentKey.replace("event.world.", "event.scout.");
     }
 
     return contentKey;
@@ -928,7 +864,7 @@
     }
 
     const status = response.status === "failed" ? "failed" : "accepted";
-    return `${actionType.toUpperCase()} ${status} | ${response.schema_version || "contract stub"}`;
+    return `${actionType.toUpperCase()} ${status} | ${response.schema_version || response.flow || "contract stub"}`;
   };
 
   const setLastActionOutcome = (actionType, response, contentKey, tokens) => {
@@ -998,7 +934,8 @@
         cooldown: "event.build.failure_cooldown",
         invalid_state: "event.build.failure_invalid_state",
       };
-      const failureKey = failureKeyByCode[response.failure_code] || "event.build.failure_invalid_state";
+      const failureCode = response.error_code || response.failure_code;
+      const failureKey = failureKeyByCode[failureCode] || "event.build.failure_invalid_state";
       const failureTokens = {
         ...response,
         settlement_name: settlementActionRuntime.settlement_name,
@@ -1037,7 +974,8 @@
         cooldown: "event.train.failure_cooldown",
         invalid_state: "event.train.failure_invalid_state",
       };
-      const failureKey = failureKeyByCode[response.failure_code] || "event.train.failure_invalid_state";
+      const failureCode = response.error_code || response.failure_code;
+      const failureKey = failureKeyByCode[failureCode] || "event.train.failure_invalid_state";
       const failureTokens = {
         ...response,
         settlement_name: settlementActionRuntime.settlement_name,
@@ -1061,49 +999,192 @@
     setLastActionOutcome("train", response, appended.contentKey, appended.tokens);
   };
 
+  const resolveActionErrorCode = (error) => {
+    if (typeof error?.code === "string" && error.code.trim().length > 0) {
+      return error.code.trim();
+    }
+    return "transport_handler_error";
+  };
+
+  const resolveActionErrorMessage = (error) => {
+    if (error instanceof Error && error.message.trim().length > 0) {
+      return error.message.trim();
+    }
+    return "Action invocation failed.";
+  };
+
+  const handleActionInvocationError = (actionType, error, context = {}) => {
+    const errorCode = resolveActionErrorCode(error);
+    const failureContentKeyByAction = {
+      tick: "event.tick.passive_gain_stalled",
+      build: "event.build.failure_invalid_state",
+      train: "event.train.failure_invalid_state",
+      scout: "event.scout.unavailable_tile",
+    };
+    const failureMetaByAction = {
+      tick: "Just now | Economy | TICK adapter",
+      build: "Just now | Settlement | BUILD adapter",
+      train: "Just now | Military | TRAIN adapter",
+      scout: "Just now | World | SCOUT adapter",
+    };
+
+    const failureContentKey = failureContentKeyByAction[actionType] || "event.tick.passive_gain_stalled";
+    const fallbackTileLabel =
+      typeof context.target_tile_label === "string" && context.target_tile_label.trim().length > 0
+        ? context.target_tile_label
+        : `Frontier Tile ${context.tile_id || "tile_unknown"}`;
+    const failureTokensByAction = {
+      tick: {
+        settlement_name: settlementActionRuntime.settlement_name,
+        duration_ms: Number(context.duration_ms) || 0,
+      },
+      build: {
+        building_id: context.building_id || "building_unknown",
+        settlement_name: settlementActionRuntime.settlement_name,
+        invalid_reason: errorCode,
+      },
+      train: {
+        unit_id: context.unit_id || "unit_unknown",
+        settlement_name: settlementActionRuntime.settlement_name,
+        invalid_reason: errorCode,
+      },
+      scout: {
+        settlement_name: settlementActionRuntime.settlement_name,
+        target_tile_label: fallbackTileLabel,
+      },
+    };
+    const failureTokens = failureTokensByAction[actionType] || failureTokensByAction.tick;
+
+    appendEventFeedEntry({
+      contentKey: failureContentKey,
+      tokens: failureTokens,
+      meta: failureMetaByAction[actionType] || "Just now | Adapter",
+      priority: "medium",
+    });
+    setLastActionOutcome(
+      actionType,
+      {
+        status: "failed",
+        flow: "transport.invocation_error",
+        message: resolveActionErrorMessage(error),
+      },
+      failureContentKey,
+      failureTokens,
+    );
+  };
+
+  const resolveSelectedWorldMapTileId = () => {
+    const currentMapScenario = getPanelScenario("worldMap").scenario;
+    const scenarioTileId =
+      typeof currentMapScenario?.selected_tile_id === "string"
+        ? currentMapScenario.selected_tile_id.trim()
+        : "";
+    if (scenarioTileId.length > 0) {
+      return scenarioTileId;
+    }
+
+    const populatedScenarioTileId =
+      typeof mockClientShellState.panels.worldMap.scenarios.populated.selected_tile_id === "string"
+        ? mockClientShellState.panels.worldMap.scenarios.populated.selected_tile_id.trim()
+        : "";
+    if (populatedScenarioTileId.length > 0) {
+      return populatedScenarioTileId;
+    }
+
+    return "tile_0412_0198";
+  };
+
+  const resolveSelectedWorldMapTileLabel = (tileId) => {
+    const currentMapScenario = getPanelScenario("worldMap").scenario;
+    const selectedType =
+      typeof currentMapScenario?.selectedTile?.Type === "string"
+        ? currentMapScenario.selectedTile.Type.trim()
+        : "";
+    if (
+      selectedType.length > 0
+      && selectedType !== "No Selection"
+      && selectedType !== "Syncing"
+      && selectedType !== "Unavailable"
+    ) {
+      return selectedType;
+    }
+
+    return `Frontier Tile ${tileId}`;
+  };
+
+  const applyScoutActionResult = (response) => {
+    const isFailure = response?.status === "failed";
+    const fallbackBackendContentKey = isFailure
+      ? "event.world.scout_unavailable_tile"
+      : "event.world.scout_dispatched";
+    const backendContentKey = response?.event?.content_key || fallbackBackendContentKey;
+    const contentKey = mapBackendEventKeyToClientKey(backendContentKey);
+    const fallbackTileId = typeof response?.tile_id === "string" ? response.tile_id : resolveSelectedWorldMapTileId();
+    const eventTokens = response?.event?.tokens || {
+      settlement_name: settlementActionRuntime.settlement_name,
+      target_tile_label: resolveSelectedWorldMapTileLabel(fallbackTileId),
+    };
+    const tokens = mapPlaceholderEventTokens(contentKey, eventTokens);
+
+    appendEventFeedEntry({
+      contentKey,
+      tokens,
+      meta: "Just now | World | SCOUT adapter",
+      priority: isFailure ? "medium" : "normal",
+    });
+    setLastActionOutcome("scout", response, contentKey, tokens);
+  };
+
   const runSettlementContractAction = async (actionType) => {
     if (settlementActionRuntime.pending_action !== null) {
       return;
     }
 
     settlementActionRuntime.pending_action = actionType;
+    const shouldFail = settlementActionRuntime.action_outcome_mode === "failure";
+    const requestedAt = new Date();
+    const correlationId = `rk-client-web-${settlementActionRuntime.next_correlation_id++}`;
+    const tickDurationMs = shouldFail ? 0 : 60_000;
     renderPanels();
 
     try {
-      const shouldFail = settlementActionRuntime.action_outcome_mode === "failure";
-      const requestedAt = new Date();
-      const correlationId = `rk-client-web-${settlementActionRuntime.next_correlation_id++}`;
-
       if (actionType === "tick") {
         const response = await firstSliceClientContractAdapter.tickSettlementCommand({
           settlement_id: settlementActionRuntime.settlement_id,
           settlement_name: settlementActionRuntime.settlement_name,
           requested_at: requestedAt,
-          duration_ms: 60_000,
+          duration_ms: tickDurationMs,
           resource_stock_by_id: settlementActionRuntime.resource_stock_by_id,
           storage_cap_by_id: settlementActionRuntime.storage_cap_by_id,
           passive_prod_per_h_by_id: settlementActionRuntime.passive_prod_per_h_by_id,
-          simulate_failure: shouldFail,
           correlation_id: correlationId,
         });
         applyTickActionResult(response);
       }
 
       if (actionType === "build") {
+        const buildResourceStock = shouldFail
+          ? {
+            food: 0,
+            wood: 0,
+            stone: 0,
+            iron: 0,
+          }
+          : settlementActionRuntime.resource_stock_by_id;
         const response = await firstSliceClientContractAdapter.buildUpgradeCommand({
           settlement_id: settlementActionRuntime.settlement_id,
           settlement_name: settlementActionRuntime.settlement_name,
           building_id: "grain_plot",
           current_level: settlementActionRuntime.building_level_by_id.grain_plot || 0,
           requested_at: requestedAt,
-          resource_stock_by_id: settlementActionRuntime.resource_stock_by_id,
-          simulate_failure: shouldFail,
+          resource_stock_by_id: buildResourceStock,
           correlation_id: correlationId,
         });
         applyBuildActionResult(response);
       }
 
       if (actionType === "train") {
+        const queueAvailableAt = shouldFail ? new Date(requestedAt.getTime() + 90_000) : undefined;
         const response = await firstSliceClientContractAdapter.trainUnitCommand({
           settlement_id: settlementActionRuntime.settlement_id,
           settlement_name: settlementActionRuntime.settlement_name,
@@ -1112,13 +1193,50 @@
           requested_at: requestedAt,
           barracks_level: 1,
           resource_stock_by_id: settlementActionRuntime.resource_stock_by_id,
-          simulate_failure: shouldFail,
+          queue_available_at: queueAvailableAt,
           correlation_id: correlationId,
         });
         applyTrainActionResult(response);
       }
+    } catch (error) {
+      if (actionType === "tick") {
+        handleActionInvocationError("tick", error, { duration_ms: tickDurationMs });
+      } else if (actionType === "build") {
+        handleActionInvocationError("build", error, { building_id: "grain_plot" });
+      } else if (actionType === "train") {
+        handleActionInvocationError("train", error, { unit_id: "watch_levy" });
+      }
     } finally {
       settlementActionRuntime.pending_action = null;
+      renderPanels();
+    }
+  };
+
+  const runWorldMapContractAction = async (actionType) => {
+    if (actionType !== "scout" || worldMapActionRuntime.pending_action !== null) {
+      return;
+    }
+
+    worldMapActionRuntime.pending_action = actionType;
+    renderPanels();
+
+    const tileId = resolveSelectedWorldMapTileId();
+    const targetTileLabel = resolveSelectedWorldMapTileLabel(tileId);
+
+    try {
+      const response = await firstSliceClientContractAdapter.scoutTileInteractCommand({
+        settlement_id: settlementActionRuntime.settlement_id,
+        settlement_name: settlementActionRuntime.settlement_name,
+        tile_id: tileId,
+      });
+      applyScoutActionResult(response);
+    } catch (error) {
+      handleActionInvocationError("scout", error, {
+        tile_id: tileId,
+        target_tile_label: targetTileLabel,
+      });
+    } finally {
+      worldMapActionRuntime.pending_action = null;
       renderPanels();
     }
   };
@@ -1362,7 +1480,7 @@
     const lastOutcome = settlementActionRuntime.last_outcome;
     const outcomeNarrative = lastOutcome
       ? getNarrativeText(lastOutcome.contentKey, lastOutcome.tokens)
-      : "No adapter calls yet. Trigger Tick, Build, or Train to see contract payload outcomes.";
+      : "No adapter calls yet. Trigger Tick, Build, Train, or Scout to see contract payload outcomes.";
     const outcomeClass = lastOutcome
       ? lastOutcome.status === "failed"
         ? "action-outcome is-failed"
@@ -1374,7 +1492,7 @@
         <section class="subpanel compact">
           <div class="subpanel__head">
             <h3>First-Slice Action Adapter</h3>
-            <span class="chip chip--small">Contract Stub</span>
+            <span class="chip chip--small">Transport Bridge</span>
           </div>
           <p class="subpanel-note">Outcome path</p>
           <div class="segment-row segment-row--dual" role="group" aria-label="Settlement action outcome path">
@@ -1468,8 +1586,23 @@
       )
       .join("");
 
+    const isMapActionPending = worldMapActionRuntime.pending_action !== null;
     const actionItems = (scenario.actions || [])
-      .map((label) => `<button type="button" class="action-btn">${escapeHtml(label)}</button>`)
+      .map((label) => {
+        const normalizedLabel = String(label).trim().toLowerCase();
+        const isScoutAction = normalizedLabel.startsWith("send scouts");
+        const isDisabled =
+          mode !== "populated"
+          || isMapActionPending
+          || settlementActionRuntime.pending_action !== null;
+        const displayLabel = isScoutAction && worldMapActionRuntime.pending_action === "scout"
+          ? "Scouting..."
+          : label;
+
+        return `<button type="button" class="action-btn"${
+          isScoutAction ? ' data-worldmap-adapter-action="scout"' : ""
+        } ${isDisabled ? "disabled" : ""}>${escapeHtml(displayLabel)}</button>`;
+      })
       .join("");
 
     if (mode === "loading") {
@@ -1829,6 +1962,15 @@
       const actionType = settlementActionButton.getAttribute("data-settlement-adapter-action");
       if (actionType === "tick" || actionType === "build" || actionType === "train") {
         void runSettlementContractAction(actionType);
+      }
+      return;
+    }
+
+    const worldMapActionButton = event.target.closest("[data-worldmap-adapter-action]");
+    if (worldMapActionButton) {
+      const actionType = worldMapActionButton.getAttribute("data-worldmap-adapter-action");
+      if (actionType === "scout") {
+        void runWorldMapContractAction(actionType);
       }
       return;
     }

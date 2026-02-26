@@ -246,35 +246,38 @@
     "generated_from_item_id": "RK-HUMAN-0001"
   },
   {
-    "id": "RK-M0-0012-F01",
-    "title": "Wire first-slice settlement loop contract adapters into a concrete backend transport",
-    "description": "Bind the new tick/upgrade/train/scout endpoint handlers to the chosen runtime transport (HTTP or local RPC) and expose route wiring so client integration can call the backend contract shapes directly instead of local stub adapters.",
+    "id": "RK-M0-0012-F01-F01",
+    "title": "Replace client web local loop stubs with backend transport invocation bridge",
+    "description": "Connect `client-web` settlement action adapter calls to the new backend first-slice transport route invocations (direct bridge/dev shim) so tick/build/train/scout actions no longer rely on duplicated local simulation logic.",
     "milestone": "M0",
     "type": "feature",
     "priority": "normal",
-    "owner_role": "backend",
+    "owner_role": "frontend",
     "preferred_agent": null,
     "dependencies": [
-      "RK-M0-0012"
+      "RK-M0-0012-F01"
     ],
-    "inputs": [],
+    "inputs": [
+      "client-web/app.js",
+      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts"
+    ],
     "acceptance_criteria": [
-      "Transport wiring exposes routes for settlement tick, building upgrade, unit train, and world-map scout interaction using the new endpoint handlers.",
-      "Error-code responses for insufficient_resources, cooldown, and unavailable_tile propagate through transport without key renames.",
-      "A smoke path demonstrates client-facing invocation against at least one wired runtime route."
+      "Client settlement tick/build/train action calls invoke the backend transport routes and consume returned contract payloads directly.",
+      "Client world-map scout interaction path invokes backend transport route and handles unavailable_tile failure via existing event key flow.",
+      "Client-side action adapter no longer duplicates first-slice economic/build/train/scout simulation rules that now exist in backend handlers."
     ],
     "validation_commands": [],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-26T14:30:10.563290+00:00",
-    "updated_at": "2026-02-26T15:19:41.983460+00:00",
+    "created_at": "2026-02-26T15:19:43.800016+00:00",
+    "updated_at": "2026-02-26T15:30:47.705887+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M0-0012",
-    "assigned_agent": "ilya-fen"
+    "generated_from_item_id": "RK-M0-0012-F01",
+    "assigned_agent": "sera-kest"
   }
 ]
