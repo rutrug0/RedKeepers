@@ -3288,6 +3288,188 @@ def process_one(
     return 0
 
 
+def _load_jsonl_records(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    records: list[dict[str, Any]] = []
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            for raw in handle:
+                line = raw.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(entry, dict):
+                    records.append(entry)
+    except OSError:
+        return []
+    return records
+
+
+def _float_or_none(value: Any) -> float | None:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return None
+    if parsed < 0:
+        return None
+    return parsed
+
+
+def build_completion_metrics_snapshot(root: Path) -> dict[str, Any]:
+    completed = load_json(root / "coordination" / "backlog" / "completed-items.json", [])
+    if not isinstance(completed, list):
+        completed = []
+    history = _load_jsonl_records(root / "coordination" / "runtime" / "run-history.jsonl")
+
+    latest_completed_run: dict[str, dict[str, Any]] = {}
+    for row in history:
+        if str(row.get("result", "")).strip().lower() != "completed":
+            continue
+        item_id = str(row.get("item_id", "")).strip()
+        if not item_id:
+            continue
+        existing = latest_completed_run.get(item_id)
+        if existing is None or str(row.get("ts", "")) > str(existing.get("ts", "")):
+            latest_completed_run[item_id] = row
+
+    item_rows: list[dict[str, Any]] = []
+    for item in completed:
+        if not isinstance(item, dict):
+            continue
+        item_id = str(item.get("id", "")).strip()
+        if not item_id:
+            continue
+        history_row = latest_completed_run.get(item_id, {})
+        runtime = _float_or_none(item.get("runtime_seconds"))
+        if runtime is None:
+            runtime = _float_or_none(history_row.get("runtime_seconds"))
+
+        resolved_by_agent = str(item.get("resolved_by_agent", "")).strip()
+        if not resolved_by_agent:
+            resolved_by_agent = str(item.get("assigned_agent", "")).strip()
+        if not resolved_by_agent:
+            resolved_by_agent = str(history_row.get("agent_id", "")).strip()
+
+        resolved_by_role = str(item.get("resolved_by_role", "")).strip()
+        if not resolved_by_role:
+            resolved_by_role = str(item.get("owner_role", "")).strip()
+
+        started_at = str(item.get("started_at", "")).strip() or str(history_row.get("started_at", "")).strip() or None
+        finished_at = (
+            str(item.get("finished_at", "")).strip()
+            or str(item.get("updated_at", "")).strip()
+            or str(history_row.get("finished_at", "")).strip()
+            or str(history_row.get("ts", "")).strip()
+            or None
+        )
+
+        item_rows.append(
+            {
+                "item_id": item_id,
+                "title": str(item.get("title", "")).strip(),
+                "resolved_by_agent": resolved_by_agent or None,
+                "resolved_by_role": resolved_by_role or None,
+                "runtime_seconds": runtime,
+                "started_at": started_at,
+                "finished_at": finished_at,
+            }
+        )
+
+    by_agent: dict[str, dict[str, Any]] = {}
+    for row in item_rows:
+        agent_id = row.get("resolved_by_agent") or "unassigned"
+        bucket = by_agent.setdefault(
+            str(agent_id),
+            {
+                "agent_id": str(agent_id),
+                "completed_items": 0,
+                "runtime_total_seconds": 0.0,
+                "runtime_count": 0,
+            },
+        )
+        bucket["completed_items"] = int(bucket.get("completed_items", 0)) + 1
+        runtime = _float_or_none(row.get("runtime_seconds"))
+        if runtime is not None:
+            bucket["runtime_total_seconds"] = float(bucket.get("runtime_total_seconds", 0.0)) + runtime
+            bucket["runtime_count"] = int(bucket.get("runtime_count", 0)) + 1
+
+    agent_rows: list[dict[str, Any]] = []
+    for bucket in by_agent.values():
+        runtime_count = int(bucket.get("runtime_count", 0))
+        total_runtime = float(bucket.get("runtime_total_seconds", 0.0))
+        agent_rows.append(
+            {
+                "agent_id": bucket["agent_id"],
+                "completed_items": int(bucket.get("completed_items", 0)),
+                "runtime_total_seconds": round(total_runtime, 2),
+                "runtime_count": runtime_count,
+                "runtime_avg_seconds": round(total_runtime / runtime_count, 2) if runtime_count > 0 else None,
+            }
+        )
+    agent_rows.sort(
+        key=lambda row: (
+            -int(row.get("completed_items", 0)),
+            -(float(row.get("runtime_total_seconds", 0.0))),
+            str(row.get("agent_id", "")),
+        )
+    )
+
+    longest_items = [row for row in item_rows if _float_or_none(row.get("runtime_seconds")) is not None]
+    longest_items.sort(key=lambda row: -float(row.get("runtime_seconds") or 0.0))
+
+    return {
+        "completed_items": len(item_rows),
+        "with_resolver": sum(1 for row in item_rows if row.get("resolved_by_agent")),
+        "with_runtime": len(longest_items),
+        "agent_rows": agent_rows,
+        "longest_items": longest_items,
+    }
+
+
+def cmd_metrics(*, top_agents: int, top_items: int) -> int:
+    ensure_python_runtime_configuration()
+    migrate_legacy_runtime_files()
+    snapshot = build_completion_metrics_snapshot(ROOT)
+
+    top_agents = max(1, int(top_agents))
+    top_items = max(1, int(top_items))
+
+    print("Completion Metrics")
+    print(f"Completed items: {snapshot.get('completed_items', 0)}")
+    print(f"With resolver: {snapshot.get('with_resolver', 0)}")
+    print(f"With runtime: {snapshot.get('with_runtime', 0)}")
+
+    agent_rows = snapshot.get("agent_rows", [])
+    if agent_rows:
+        print("By agent:")
+        for row in agent_rows[:top_agents]:
+            avg = row.get("runtime_avg_seconds")
+            avg_text = f"{avg:.2f}s" if isinstance(avg, (int, float)) else "n/a"
+            print(
+                "  - "
+                f"{row.get('agent_id')}: completed={row.get('completed_items', 0)} "
+                f"runtime_total={float(row.get('runtime_total_seconds', 0.0)):.2f}s "
+                f"runtime_avg={avg_text} "
+                f"runtime_count={row.get('runtime_count', 0)}"
+            )
+
+    longest = snapshot.get("longest_items", [])
+    if longest:
+        print(f"Longest completed items (top {top_items}):")
+        for row in longest[:top_items]:
+            runtime = float(row.get("runtime_seconds") or 0.0)
+            print(
+                "  - "
+                f"{row.get('item_id')} | {runtime:.2f}s | {row.get('resolved_by_agent') or 'unassigned'} | "
+                f"{row.get('title')}"
+            )
+    return 0
+
+
 def cmd_status() -> int:
     ensure_python_runtime_configuration()
     migrate_legacy_runtime_files()
@@ -3525,6 +3707,9 @@ def build_parser() -> argparse.ArgumentParser:
     once_p.add_argument("--verbose", action="store_true")
 
     sub.add_parser("status", help="Show high-level daemon status")
+    metrics_p = sub.add_parser("metrics", help="Show completed-work metrics")
+    metrics_p.add_argument("--top-agents", type=int, default=10)
+    metrics_p.add_argument("--top-items", type=int, default=10)
     return parser
 
 
@@ -3534,6 +3719,8 @@ def main() -> int:
 
     if args.command == "status":
         return cmd_status()
+    if args.command == "metrics":
+        return cmd_metrics(top_agents=args.top_agents, top_items=args.top_items)
     if args.command == "once":
         return cmd_run(once=True, sleep_seconds=0, dry_run=args.dry_run, verbose=args.verbose, keep_alive=False)
     if args.command == "run":

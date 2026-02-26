@@ -1935,5 +1935,48 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T17:40:59.8101526Z",
+        "item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F02",
+        "status": "completed",
+        "summary": "Requeued source item RK-M1-0005-F02-F01-ESC-F03 from blocked backlog with scoped frontend-visual validation commands and reset retry/escalation metadata to prevent unrelated-suite re-escalation.",
+        "queue_recovery": {
+            "requeued_item_ids": [
+                "RK-M1-0005-F02-F01-ESC-F03"
+            ],
+            "blocked_removed_ids": [
+                "RK-M1-0005-F02-F01-ESC-F03"
+            ],
+            "source_item_updates": {
+                "validation_commands": [
+                    "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_frontend_visual_status_blocked_detection",
+                    "python tools/orchestrator.py status"
+                ],
+                "status": "queued",
+                "retry_count": 0,
+                "blocker_reason": null,
+                "last_failure_reason": null,
+                "last_blocker_reason": null,
+                "last_unblocked_reason": "manual requeue by RK-M1-0005-F02-F01-ESC-F03-ESC-F02",
+                "blocked_revisit_count": 0
+            }
+        },
+        "validation": {
+            "commands": [
+                "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_frontend_visual_status_blocked_detection",
+                "python tools/orchestrator.py status"
+            ],
+            "results": [
+                "pass (8 tests)",
+                "pass"
+            ]
+        },
+        "files": [
+            "coordination/backlog/work-items.json",
+            "coordination/backlog/blocked-items.json",
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": []
     }
 ]

@@ -179,34 +179,44 @@
     "blocked_revisit_count": 1
   },
   {
-    "id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
-    "title": "Escalation: Treat frontend visual `STATUS: BLOCKED` validation results as block-state outcomes",
-    "description": "Investigate repeated failure for item RK-M1-0005-F02-F01-ESC-F03. Reason: retry threshold exceeded",
+    "id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F02",
+    "title": "Unblock RK-M1-0005-F02-F01-ESC-F03 by scoping validation commands and requeueing",
+    "description": "Update source-item backlog metadata so `RK-M1-0005-F02-F01-ESC-F03` validates only frontend visual blocked-outcome checks, then clear blocked retry/escalation state and requeue it for a deterministic rerun.",
     "milestone": "M1",
-    "type": "qa",
+    "type": "feature",
     "priority": "high",
     "owner_role": "lead",
     "preferred_agent": null,
-    "dependencies": [],
+    "dependencies": [
+      "RK-M1-0005-F02-F01-ESC"
+    ],
     "inputs": [
-      "coordination/state/run-history.jsonl",
-      "coordination/backlog/work-items.json"
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "tools/orchestrator.py",
+      "tests/test_frontend_visual_blocked_outcome.py",
+      "tests/test_frontend_visual_status_blocked_detection.py"
     ],
     "acceptance_criteria": [
-      "Root cause identified",
-      "Follow-up work items created or item unblocked"
+      "`RK-M1-0005-F02-F01-ESC-F03` validation excludes `python -m unittest discover -s tests` and uses only targeted frontend-visual blocker tests plus status check.",
+      "Source item is requeued with cleared blocker metadata so retry-threshold escalation from unrelated suite failures does not recur.",
+      "A rerun records environment `STATUS: BLOCKED` outcomes as blocked with actionable blocker reason and no escalation."
     ],
-    "validation_commands": [],
+    "validation_commands": [
+      "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_frontend_visual_status_blocked_detection",
+      "python tools/orchestrator.py status"
+    ],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-26T17:36:23.427452+00:00",
-    "updated_at": "2026-02-26T17:38:41.632086+00:00",
+    "created_at": "2026-02-26T17:38:43.522022+00:00",
+    "updated_at": "2026-02-26T17:42:05.231479+00:00",
     "estimated_effort": "S",
-    "token_budget": 6000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "source_item_id": "RK-M1-0005-F02-F01-ESC-F03",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
     "assigned_agent": "mara-voss"
   }
 ]

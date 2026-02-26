@@ -41,12 +41,20 @@ class QueueIntegrityTests(unittest.TestCase):
             ]
             queue.blocked = []
 
-            queue.mark_completed("RK-1", "new summary", commit_sha="newsha")
+            queue.mark_completed(
+                "RK-1",
+                "new summary",
+                commit_sha="newsha",
+                runtime_seconds=12.34,
+                resolved_by_agent="mara-voss",
+            )
 
         self.assertEqual(len(queue.completed), 1)
         self.assertEqual(queue.completed[0]["id"], "RK-1")
         self.assertEqual(queue.completed[0]["commit_sha"], "newsha")
         self.assertEqual(queue.completed[0]["result_summary"], "new summary")
+        self.assertEqual(queue.completed[0]["runtime_seconds"], 12.34)
+        self.assertEqual(queue.completed[0]["resolved_by_agent"], "mara-voss")
 
     def test_archive_duplicate_repair_keeps_latest_entry(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
