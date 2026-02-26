@@ -73,6 +73,12 @@
       "{army_name} wins a brief skirmish near {target_tile_label}. Losses are light; survivors regroup for orders.",
     "event.combat.placeholder_skirmish_loss":
       "{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.",
+    "event.combat.placeholder_skirmish_attacker_win":
+      "{army_name} wins a brief skirmish near {target_tile_label}. Losses are light; survivors regroup for orders.",
+    "event.combat.placeholder_skirmish_defender_win":
+      "{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.",
+    "event.combat.placeholder_skirmish_tie_defender_holds":
+      "{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.",
     "event.world.hostile_dispatch_target_required":
       "Select a foreign settlement tile before dispatching a hostile march.",
     "event.world.hostile_dispatch_failed":
@@ -926,34 +932,63 @@
         ? formatTemplateTokenValue(tokens[tokenName])
         : match,
     );
+  const normalizeHostileAttackEventKeyAlias = (contentKey) => {
+    const normalizedContentKey = String(contentKey || "").trim();
+    if (normalizedContentKey.length < 1) {
+      return "";
+    }
+
+    if (normalizedContentKey === "event.world.hostile_dispatch_accepted") {
+      return "event.world.march_started";
+    }
+    if (normalizedContentKey === "event.world.hostile_post_battle_returned") {
+      return "event.world.march_returned";
+    }
+
+    if (!normalizedContentKey.startsWith("event.combat.placeholder_skirmish_")) {
+      return normalizedContentKey;
+    }
+
+    const skirmishSuffix = normalizedContentKey.slice("event.combat.placeholder_skirmish_".length);
+    if (skirmishSuffix === "attacker_win") {
+      return "event.combat.placeholder_skirmish_win";
+    }
+    if (skirmishSuffix === "defender_win" || skirmishSuffix === "tie_defender_holds") {
+      return "event.combat.placeholder_skirmish_loss";
+    }
+
+    return normalizedContentKey;
+  };
   const mapBackendEventKeyToClientKey = (contentKey) => {
     if (!contentKey) {
       return "";
     }
 
+    let mappedContentKey = contentKey;
     if (contentKey === "event.economy.tick_passive_income") {
-      return "event.tick.passive_income";
+      mappedContentKey = "event.tick.passive_income";
     }
 
-    if (contentKey.startsWith("event.buildings.")) {
-      return contentKey.replace("event.buildings.", "event.build.");
+    if (mappedContentKey.startsWith("event.buildings.")) {
+      mappedContentKey = mappedContentKey.replace("event.buildings.", "event.build.");
     }
 
-    if (contentKey.startsWith("event.units.")) {
-      return contentKey.replace("event.units.", "event.train.");
+    if (mappedContentKey.startsWith("event.units.")) {
+      mappedContentKey = mappedContentKey.replace("event.units.", "event.train.");
     }
 
-    if (contentKey.startsWith("event.world.scout_")) {
-      return contentKey.replace("event.world.", "event.scout.");
+    if (mappedContentKey.startsWith("event.world.scout_")) {
+      mappedContentKey = mappedContentKey.replace("event.world.", "event.scout.");
     }
 
-    return contentKey;
+    return normalizeHostileAttackEventKeyAlias(mappedContentKey);
   };
   const getNarrativeTemplateWithFallback = (contentKey) => {
     if (!contentKey) {
       return "";
     }
 
+    const normalizedContentKey = normalizeHostileAttackEventKeyAlias(contentKey);
     const candidates = [];
     const addCandidate = (candidate) => {
       if (candidate && !candidates.includes(candidate)) {
@@ -961,26 +996,34 @@
       }
     };
 
+    addCandidate(normalizedContentKey);
     addCandidate(contentKey);
 
-    if (contentKey.startsWith("event.buildings.")) {
-      addCandidate(contentKey.replace("event.buildings.", "event.build."));
-    } else if (contentKey.startsWith("event.units.")) {
-      addCandidate(contentKey.replace("event.units.", "event.train."));
-    } else if (contentKey.startsWith("event.economy.")) {
-      addCandidate(contentKey.replace("event.economy.tick_passive_income", "event.tick.passive_income"));
-    } else if (contentKey.startsWith("event.world.scout_")) {
-      addCandidate(contentKey.replace("event.world.", "event.scout."));
+    if (normalizedContentKey.startsWith("event.buildings.")) {
+      addCandidate(normalizedContentKey.replace("event.buildings.", "event.build."));
+    } else if (normalizedContentKey.startsWith("event.units.")) {
+      addCandidate(normalizedContentKey.replace("event.units.", "event.train."));
+    } else if (normalizedContentKey.startsWith("event.economy.")) {
+      addCandidate(
+        normalizedContentKey.replace("event.economy.tick_passive_income", "event.tick.passive_income"),
+      );
+    } else if (normalizedContentKey.startsWith("event.world.scout_")) {
+      addCandidate(normalizedContentKey.replace("event.world.", "event.scout."));
+    } else if (normalizedContentKey.startsWith("event.combat.placeholder_skirmish_")) {
+      addCandidate("event.combat.placeholder_skirmish_win");
+      addCandidate("event.combat.placeholder_skirmish_loss");
     }
 
-    if (contentKey.startsWith("event.build.")) {
-      addCandidate(contentKey.replace("event.build.", "event.buildings."));
-    } else if (contentKey.startsWith("event.train.")) {
-      addCandidate(contentKey.replace("event.train.", "event.units."));
-    } else if (contentKey.startsWith("event.tick.")) {
-      addCandidate(contentKey.replace("event.tick.passive_income", "event.economy.tick_passive_income"));
-    } else if (contentKey.startsWith("event.scout.")) {
-      addCandidate(contentKey.replace("event.scout.", "event.world.scout_"));
+    if (normalizedContentKey.startsWith("event.build.")) {
+      addCandidate(normalizedContentKey.replace("event.build.", "event.buildings."));
+    } else if (normalizedContentKey.startsWith("event.train.")) {
+      addCandidate(normalizedContentKey.replace("event.train.", "event.units."));
+    } else if (normalizedContentKey.startsWith("event.tick.")) {
+      addCandidate(
+        normalizedContentKey.replace("event.tick.passive_income", "event.economy.tick_passive_income"),
+      );
+    } else if (normalizedContentKey.startsWith("event.scout.")) {
+      addCandidate(normalizedContentKey.replace("event.scout.", "event.world.scout_"));
     }
 
     return candidates.find((key) => placeholderNarrativeSeedTemplates[key]);
@@ -1680,7 +1723,9 @@
       resolvedPayloads.combat_resolved
       || resolvedPayloads.march_arrived
       || resolvedPayloads.dispatch_sent;
-    const outcomeContentKey = primaryOutcomePayload?.content_key || "event.world.march_started";
+    const outcomeContentKey = mapBackendEventKeyToClientKey(
+      primaryOutcomePayload?.content_key || "event.world.march_started",
+    );
     const outcomeTokens = mapPlaceholderEventTokens(
       outcomeContentKey,
       primaryOutcomePayload?.tokens || {
@@ -2403,11 +2448,15 @@
           if (!payload || typeof payload.content_key !== "string") {
             return "";
           }
-          const narrative = getNarrativeText(payload.content_key, payload.tokens || {});
+          const contentKey = mapBackendEventKeyToClientKey(payload.content_key);
+          const narrative = getNarrativeText(
+            contentKey,
+            mapPlaceholderEventTokens(contentKey, payload.tokens || {}),
+          );
           return `
             <li class="event-item${payloadKey === "combat_resolved" ? " priority-high" : ""}" data-payload-key="${escapeHtml(payload.payload_key || payloadKey)}">
               <p class="event-item__title">${escapeHtml(narrative)}</p>
-              <p class="event-item__meta">${escapeHtml(`${payload.payload_key || payloadKey} | ${payload.content_key} | ${formatEventMetaTimestamp(payload.occurred_at)}`)}</p>
+              <p class="event-item__meta">${escapeHtml(`${payload.payload_key || payloadKey} | ${contentKey} | ${formatEventMetaTimestamp(payload.occurred_at)}`)}</p>
             </li>
           `;
         })

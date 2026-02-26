@@ -483,8 +483,22 @@
                                                                     "python -m unittest tests.test_frontend_visual_smoke",
                                                                     "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
                                                                     "python tools/orchestrator.py status"
-                                                                ]
+                                        ]
                                     }
+                                ]
+    },
+    {
+        "ts":  "2026-02-26T20:01:32.7616561Z",
+        "item_id":  "RK-AUTO-BACKLOG-0004-F01-F02",
+        "status":  "completed",
+        "summary":  "Added hostile attack placeholder key normalization in the web client so transport/event payload aliases resolve to existing narrative templates for `event.world.march_started`, `event.world.march_returned`, and `event.combat.placeholder_skirmish_*`, preventing missing-template fallback labels in the event feed and hostile outcome panel.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "python -m unittest tests.test_rk_m0_0011_first_slice_loop_smoke"
                                 ]
     }
 ]

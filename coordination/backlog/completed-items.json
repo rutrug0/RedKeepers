@@ -5505,5 +5505,47 @@
     "runtime_seconds": 371.23,
     "started_at": "2026-02-26T19:46:11.852404+00:00",
     "finished_at": "2026-02-26T19:52:23.084089+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F04",
+    "title": "Author placeholder hostile-loop copy pack for map dispatch and combat events",
+    "description": "Create a placeholder-only content pack for hostile world-map flow: foreign settlement labels plus event-feed text templates covering dispatch, travel, resolve, and failure states using stable key identifiers.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F03"
+    ],
+    "inputs": [
+      "docs/design/world-map-v1-phasing.md",
+      "docs/design/game-vision.md",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "Content artifact includes at least 20 placeholder strings spanning hostile dispatch success/failure, march arrival, combat resolve, and retreat/defeat outcomes.",
+      "String keys align with stable event-key naming conventions consumed by frontend event feed rendering.",
+      "Copy remains original dark-fantasy tone and explicitly marked replaceable placeholder content."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:16:22.546990+00:00",
+    "updated_at": "2026-02-26T19:58:28.975908+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": "- [agents/nika-thorn/outbox.json](D:\\RedKeepers\\agents\\nika-thorn\\outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
+    "assigned_agent": "nika-thorn",
+    "commit_sha": "ef5a61c707aa2c6127d87c52dbe1c9a25603ab18",
+    "resolved_by_agent": "nika-thorn",
+    "resolved_by_role": "content",
+    "runtime_seconds": 356.97,
+    "started_at": "2026-02-26T19:52:30.381449+00:00",
+    "finished_at": "2026-02-26T19:58:27.359097+00:00"
   }
 ]

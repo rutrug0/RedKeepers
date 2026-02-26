@@ -35,42 +35,6 @@
     "generated_from_item_id": "RK-HUMAN-0001-F03"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0004-F04",
-    "title": "Author placeholder hostile-loop copy pack for map dispatch and combat events",
-    "description": "Create a placeholder-only content pack for hostile world-map flow: foreign settlement labels plus event-feed text templates covering dispatch, travel, resolve, and failure states using stable key identifiers.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "content",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0004-F03"
-    ],
-    "inputs": [
-      "docs/design/world-map-v1-phasing.md",
-      "docs/design/game-vision.md",
-      "docs/design/first-vertical-slice.md"
-    ],
-    "acceptance_criteria": [
-      "Content artifact includes at least 20 placeholder strings spanning hostile dispatch success/failure, march arrival, combat resolve, and retreat/defeat outcomes.",
-      "String keys align with stable event-key naming conventions consumed by frontend event feed rendering.",
-      "Copy remains original dark-fantasy tone and explicitly marked replaceable placeholder content."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T19:16:22.546990+00:00",
-    "updated_at": "2026-02-26T19:58:27.365390+00:00",
-    "estimated_effort": "S",
-    "token_budget": 6000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
-    "assigned_agent": "nika-thorn"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0004-F06",
     "title": "Add critical golden-path smoke for full first-slice loop including attack resolve",
     "description": "Add a release-blocking smoke path that verifies the full first-slice loop (tick, build, train, map interaction, hostile dispatch, deterministic combat resolve, event feed output) using scoped checks only.",
@@ -129,17 +93,18 @@
       "No regressions in existing scout/build/train event rendering behavior."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T19:27:21.718445+00:00",
-    "updated_at": "2026-02-26T19:27:21.718445+00:00",
+    "updated_at": "2026-02-26T20:02:28.296514+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F01"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F01",
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-AUTO-BACKLOG-0004-F03-F01",
@@ -241,5 +206,75 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F01-F01"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F04-F01",
+    "title": "Map hostile dispatch error codes to specific narrative content keys in client feed rendering",
+    "description": "Update hostile attack UI adapters to map `source_target_not_foreign`, `max_active_marches_reached`, `path_blocked_impassable`, and `march_already_exists` to the new `event.world.hostile_dispatch_failed_*` keys instead of only using the generic failure template.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F04"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+    ],
+    "acceptance_criteria": [
+      "Each hostile dispatch failure error_code resolves to a deterministic content key in the `event.world.hostile_dispatch_failed_*` namespace",
+      "Event feed shows the mapped narrative copy with expected tokens per failure case",
+      "Generic `event.world.hostile_dispatch_failed` remains as fallback for unknown error codes"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:58:29.119307+00:00",
+    "updated_at": "2026-02-26T19:58:29.119307+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F04"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F04-F02",
+    "title": "Adopt new hostile combat/retreat narrative keys in world-map hostile attack response payloads",
+    "description": "Extend hostile attack service/event payload selection so combat and retreat states can emit the newly seeded `event.combat.hostile_*` and `event.world.hostile_*` keys while keeping existing keys backward-compatible.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F04"
+    ],
+    "inputs": [
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+    ],
+    "acceptance_criteria": [
+      "Hostile attack resolved responses can emit at least one new `event.combat.hostile_*` key for combat outcomes",
+      "Retreat/defeat responses emit a deterministic `event.world.hostile_*` post-combat key when applicable",
+      "Existing keys (`event.world.march_started`, `event.world.march_returned`, `event.combat.placeholder_skirmish_*`) remain valid aliases during transition"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:58:29.119307+00:00",
+    "updated_at": "2026-02-26T19:58:29.119307+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F04"
   }
 ]
