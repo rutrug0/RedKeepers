@@ -42,6 +42,24 @@ class FrontendVisualSmokeHelperTests(unittest.TestCase):
         }
         self.assertFalse(smoke._focus_indicator_visible(style))
 
+    def test_surface_detection_distinguishes_shell_and_hero_wireframes(self) -> None:
+        self.assertEqual(smoke._surface_id_from_url("http://127.0.0.1:4173/index.html"), "first-slice-shell")
+        self.assertEqual(smoke._surface_id_from_url("http://127.0.0.1:4173/hero-wireframes.html"), "hero-wireframes")
+
+    def test_baseline_path_for_shell_uses_legacy_device_filename(self) -> None:
+        baseline_dir = Path("coordination/runtime/frontend-visual/baseline")
+        path = smoke._baseline_path_for_device(baseline_dir, "http://127.0.0.1:4173/index.html", "desktop-1440")
+        self.assertEqual(path, baseline_dir / "desktop-1440.png")
+
+    def test_baseline_path_for_hero_wireframes_is_page_scoped(self) -> None:
+        baseline_dir = Path("coordination/runtime/frontend-visual/baseline")
+        path = smoke._baseline_path_for_device(
+            baseline_dir,
+            "http://127.0.0.1:4173/hero-wireframes.html",
+            "desktop-1440",
+        )
+        self.assertEqual(path, baseline_dir / "hero-wireframes--desktop-1440.png")
+
 
 if __name__ == "__main__":
     unittest.main()

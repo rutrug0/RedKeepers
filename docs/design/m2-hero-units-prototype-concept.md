@@ -23,13 +23,59 @@ Related backlog item: `RK-AUTO-BACKLOG-0003-F01`
 - No hero gear system, no talent tree, no hero-only resource, no bespoke battle mode in prototype pass.
 - Unlock heroes only after core settlement loop mastery (post-onboarding progression milestone), not in first-session flow.
 
-## Civilization Hero Ability Draft (Stat-Driven)
+## Data-Table Ready Definitions (M2 Prototype)
 
-| Civilization | Hero ID | Active Ability | Shared Effect Template (Initial) | Cooldown Target |
-| --- | --- | --- | --- | --- |
-| Cinder Throne Legates | `hero_legion_prefect` | Iron Mandate | Army attack +12% and morale loss reduction +15% for first 90s of battle | 6h |
-| Mirebound Covenant | `hero_fen_oracle` | Rotwrit Veil | Scout visibility radius +1 for next scouting action and ambush chance +10% on first contact | 8h |
-| Graveforge Clans | `hero_ashen_smith` | Anvil Oath | Siege durability +18% and march speed penalty reduction +8% for next siege march | 8h |
+### Hero Unlock Gate (Post-Onboarding)
+
+`heroes.unlock_gates_v1`
+
+| unlock_gate_id | gate_name | min_settlement_level | min_barracks_level | min_completed_attacks | min_completed_scouts | tutorial_dependency | slice_status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `hero_unlock_post_onboarding_v1` | Post-Onboarding Hero Access | 4 | 2 | 1 | 1 | `tutorial_core_v1_complete` | `data_stub_post_slice` |
+
+Notes:
+- Gate is intentionally post-onboarding and keeps first-slice tutorial flow unchanged.
+- All values are minimum threshold checks with AND semantics.
+
+### Shared Ability Modifier Templates
+
+`heroes.ability_modifiers_v1`
+
+| modifier_id | domain | stat_key | op | value | duration_s | charge_count | trigger_window | stack_rule | notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `mod_army_attack_mult_1p12_90s` | `combat` | `army_attack_mult` | `mul` | `1.12` | 90 | 0 | `battle_start` | `exclusive_by_stat` | Applies at battle start for 90s |
+| `mod_morale_loss_mult_0p85_90s` | `combat` | `morale_loss_taken_mult` | `mul` | `0.85` | 90 | 0 | `battle_start` | `exclusive_by_stat` | Reduces morale loss taken |
+| `mod_scout_visibility_radius_add_1_next` | `scout` | `scout_visibility_radius` | `add` | `1` | 0 | 1 | `next_scout_action` | `exclusive_by_stat` | Consumed by next scout action |
+| `mod_ambush_chance_mult_1p10_first_contact` | `scout` | `ambush_chance_mult` | `mul` | `1.10` | 0 | 1 | `first_contact` | `exclusive_by_stat` | Applied on first contact only |
+| `mod_siege_durability_mult_1p18_next_march` | `siege` | `siege_durability_mult` | `mul` | `1.18` | 0 | 1 | `next_siege_march` | `exclusive_by_stat` | Consumed by next siege march |
+| `mod_march_speed_penalty_mult_0p92_next_march` | `logistics` | `march_speed_penalty_mult` | `mul` | `0.92` | 0 | 1 | `next_siege_march` | `exclusive_by_stat` | Reduces penalty severity by 8% |
+
+Template semantics:
+- `duration_s = 0` means event-scoped usage (charge/trigger limited), not a timed buff.
+- `charge_count = 0` means time-window modifier only; `charge_count = 1` means single-use.
+- `stack_rule = exclusive_by_stat` keeps one active hero modifier per affected stat key.
+
+### Hero Definitions and Active Ability Map
+
+`heroes.hero_definitions_v1`
+
+| hero_id | civilization_id | display_name | unlock_gate_id | active_ability_id | cooldown_s | slice_status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `hero_legion_prefect` | `cinder_throne_legates` | Legion Prefect | `hero_unlock_post_onboarding_v1` | `ability_iron_mandate` | 21600 | `data_stub_post_slice` |
+| `hero_fen_oracle` | `mirebound_covenant` | Fen Oracle | `hero_unlock_post_onboarding_v1` | `ability_rotwrit_veil` | 28800 | `data_stub_post_slice` |
+| `hero_ashen_smith` | `graveforge_clans` | Ashen Smith | `hero_unlock_post_onboarding_v1` | `ability_anvil_oath` | 28800 | `data_stub_post_slice` |
+
+`heroes.active_abilities_v1`
+
+| ability_id | hero_id | ability_name | modifier_ids | target_scope | cast_timing | cooldown_s |
+| --- | --- | --- | --- | --- | --- | --- |
+| `ability_iron_mandate` | `hero_legion_prefect` | Iron Mandate | `mod_army_attack_mult_1p12_90s,mod_morale_loss_mult_0p85_90s` | `assigned_army` | `pre_dispatch_or_battle_start` | 21600 |
+| `ability_rotwrit_veil` | `hero_fen_oracle` | Rotwrit Veil | `mod_scout_visibility_radius_add_1_next,mod_ambush_chance_mult_1p10_first_contact` | `assigned_scout_detachment` | `pre_dispatch` | 28800 |
+| `ability_anvil_oath` | `hero_ashen_smith` | Anvil Oath | `mod_siege_durability_mult_1p18_next_march,mod_march_speed_penalty_mult_0p92_next_march` | `assigned_siege_column` | `pre_dispatch` | 28800 |
+
+Scope checks:
+- Exactly one active ability per hero for prototype scope.
+- All effects use shared numeric modifier rows; no bespoke hero-only mechanics.
 
 ## Minimum Onboarding/Tutorial Impact
 

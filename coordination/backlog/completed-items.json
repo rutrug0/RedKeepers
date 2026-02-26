@@ -3316,5 +3316,37 @@
     "generated_from_item_id": "RK-AUTO-STALL-0006",
     "assigned_agent": "mara-voss",
     "commit_sha": "a3f40b460d0d6d87b8bc36388f17c5bffa74ffdc"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F02-ESC",
+    "title": "Escalation: Design hero UI wireframes for assignment, ability use, and cooldown feedback",
+    "description": "Investigate repeated failure for item RK-AUTO-BACKLOG-0003-F01-F02. Reason: retry threshold exceeded",
+    "milestone": "M2",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T11:57:08.734797+00:00",
+    "updated_at": "2026-02-26T12:01:48.799495+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": "- I did not modify existing pre-existing dirty files from other agents/runs (`agents/sera-kest/outbox.json`, backlog JSONs, hero wireframe files).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-AUTO-BACKLOG-0003-F01-F02",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "85221b5f733c2fe64d6ca0b3de83d04d275c9dcb"
   }
 ]

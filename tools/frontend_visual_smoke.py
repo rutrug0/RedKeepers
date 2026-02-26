@@ -7,7 +7,7 @@ import shutil
 import threading
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import urlparse
 
@@ -100,9 +100,70 @@ class _StaticServer:
             self._thread.join(timeout=2)
 
 
-def _panel_checks(page: Any) -> list[str]:
+def _normalized_url_path(url: str) -> str:
+    parsed = urlparse(url)
+    path = (parsed.path or "").strip()
+    if not path:
+        return "/"
+    if not path.startswith("/"):
+        path = f"/{path}"
+    return path.lower()
+
+
+def _surface_id_from_url(url: str) -> str:
+    path = _normalized_url_path(url)
+    if path in {"/", "/index.html"}:
+        return "first-slice-shell"
+    if path.endswith("/hero-wireframes.html"):
+        return "hero-wireframes"
+    return "generic-page"
+
+
+def _surface_required_selectors(surface_id: str) -> list[str]:
+    if surface_id == "first-slice-shell":
+        return ["#settlement-panel", "#worldmap-panel", "#event-feed-panel"]
+    if surface_id == "hero-wireframes":
+        return [".wireframe-main", ".hero-card-grid", ".modal-wireframe", ".feedback-layout"]
+    return []
+
+
+def _surface_container_selector(surface_id: str) -> str | None:
+    if surface_id == "first-slice-shell":
+        return ".shell"
+    return None
+
+
+def _surface_baseline_prefix(url: str) -> str:
+    surface_id = _surface_id_from_url(url)
+    if surface_id == "first-slice-shell":
+        return ""
+    path = _normalized_url_path(url)
+    name = PurePosixPath(path).name or "index.html"
+    stem = PurePosixPath(name).stem or "surface"
+    safe = "".join(ch if (ch.isalnum() or ch in {"-", "_"}) else "-" for ch in stem.lower())
+    safe = safe.strip("-_")
+    return safe or "surface"
+
+
+def _screenshot_path_for_device(output_dir: Path, url: str, device_name: str) -> Path:
+    prefix = _surface_baseline_prefix(url)
+    if prefix:
+        return output_dir / f"{prefix}--{device_name}.png"
+    return output_dir / f"{device_name}.png"
+
+
+def _baseline_path_for_device(baseline_dir: Path, url: str, device_name: str) -> Path:
+    prefix = _surface_baseline_prefix(url)
+    if prefix:
+        return baseline_dir / f"{prefix}--{device_name}.png"
+    return baseline_dir / f"{device_name}.png"
+
+
+def _selector_presence_issues(page: Any, selectors: list[str]) -> list[str]:
+    if not selectors:
+        return []
     missing: list[str] = []
-    for selector in ["#settlement-panel", "#worldmap-panel", "#event-feed-panel"]:
+    for selector in selectors:
         count = page.locator(selector).count()
         if count == 0:
             missing.append(f"missing selector {selector}")
@@ -117,15 +178,16 @@ def _overflow_value(page: Any) -> int:
     )
 
 
-def _shell_overflow_value(page: Any) -> int | None:
+def _container_overflow_value(page: Any, selector: str) -> int | None:
     value = page.evaluate(
-        """() => {
-            const shell = document.querySelector(".shell");
-            if (!shell) {
+        """(targetSelector) => {
+            const target = document.querySelector(targetSelector);
+            if (!target) {
                 return null;
             }
-            return Math.max(0, shell.scrollWidth - shell.clientWidth);
-        }"""
+            return Math.max(0, target.scrollWidth - target.clientWidth);
+        }""",
+        selector,
     )
     if value is None:
         return None
@@ -290,6 +352,22 @@ def _collect_accessibility_issues(page: Any) -> list[str]:
     return issues
 
 
+def _collect_basic_accessibility_issues(page: Any) -> list[str]:
+    issues: list[str] = []
+    interactive_selector = "a[href], button, select, textarea, input:not([type='hidden'])"
+    if page.locator(interactive_selector).count() == 0:
+        return ["keyboard navigation check failed: no interactive controls found"]
+
+    if not _tab_until_focus(page, interactive_selector):
+        issues.append("keyboard navigation check failed: tab sequence did not reach an interactive control")
+        return issues
+
+    focus_style = _active_focus_style(page)
+    if not _focus_indicator_visible(focus_style):
+        issues.append("focus-visible check failed: interactive control did not expose a visible focus indicator")
+    return issues
+
+
 def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     requested_devices = [name.strip() for name in args.devices.split(",") if name.strip()]
     unknown = [name for name in requested_devices if name not in DEVICE_PROFILES]
@@ -309,10 +387,14 @@ def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     args.baseline_dir.mkdir(parents=True, exist_ok=True)
+    surface_id = _surface_id_from_url(args.url)
+    required_selectors = _surface_required_selectors(surface_id)
+    container_selector = _surface_container_selector(surface_id)
     run_ts = utc_now_iso()
     report: dict[str, Any] = {
         "generated_at": run_ts,
         "url": args.url,
+        "surface": surface_id,
         "strict": bool(args.strict),
         "max_diff_percent": float(args.max_diff_percent),
         "devices": [],
@@ -352,27 +434,27 @@ def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
                 page = context.new_page()
                 try:
                     page.goto(args.url, wait_until="networkidle", timeout=30000)
-                    missing = _panel_checks(page)
+                    missing = _selector_presence_issues(page, required_selectors)
                     overflow = _overflow_value(page)
-                    shell_overflow = _shell_overflow_value(page)
+                    shell_overflow = _container_overflow_value(page, container_selector) if container_selector else None
                     device_result["document_overflow_px"] = overflow
                     device_result["shell_overflow_px"] = shell_overflow
                     if missing:
                         device_result["issues"].extend(missing)
                     if overflow > args.max_overflow_px:
                         device_result["issues"].append(f"horizontal overflow {overflow}px > {args.max_overflow_px}px")
-                    if shell_overflow is None:
-                        device_result["issues"].append("missing shell container .shell")
-                    elif shell_overflow > args.max_overflow_px:
+                    if container_selector and shell_overflow is None:
+                        device_result["issues"].append(f"missing container {container_selector}")
+                    elif container_selector and shell_overflow > args.max_overflow_px:
                         device_result["issues"].append(
                             f"shell overflow {shell_overflow}px > {args.max_overflow_px}px"
                         )
 
-                    shot_path = args.output_dir / f"{device_name}.png"
+                    shot_path = _screenshot_path_for_device(args.output_dir, args.url, device_name)
                     page.screenshot(path=str(shot_path), full_page=True)
                     device_result["screenshot_path"] = str(shot_path)
 
-                    baseline_path = args.baseline_dir / f"{device_name}.png"
+                    baseline_path = _baseline_path_for_device(args.baseline_dir, args.url, device_name)
                     device_result["baseline_path"] = str(baseline_path)
                     if args.update_baseline:
                         shutil.copyfile(shot_path, baseline_path)
@@ -390,7 +472,10 @@ def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
                     else:
                         device_result["issues"].append("baseline screenshot missing")
 
-                    device_result["issues"].extend(_collect_accessibility_issues(page))
+                    if surface_id == "first-slice-shell":
+                        device_result["issues"].extend(_collect_accessibility_issues(page))
+                    else:
+                        device_result["issues"].extend(_collect_basic_accessibility_issues(page))
                 finally:
                     context.close()
 

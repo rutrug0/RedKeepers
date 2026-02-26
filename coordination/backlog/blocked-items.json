@@ -652,5 +652,77 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01",
     "assigned_agent": "sera-kest",
     "last_failure_reason": "validation failed or commit failed"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F02-ESC-F01",
+    "title": "Requeue hero wireframe task with page-scoped visual QA target",
+    "description": "Create a replacement for RK-AUTO-BACKLOG-0003-F01-F02 that validates the standalone hero wireframe page directly (hero-wireframes.html) and does not require unrelated first-slice shell parity checks on index.html.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "client-web/hero-wireframes.html",
+      "client-web/hero-wireframes.css",
+      "tools/frontend_visual_smoke.py",
+      "coordination/runtime/frontend-visual/baseline/"
+    ],
+    "acceptance_criteria": [
+      "Validation target is explicitly set to hero-wireframes page URL (not default index.html shell path)",
+      "Dedicated baseline screenshots exist for hero-wireframe page across desktop/tablet/mobile profiles used by visual smoke",
+      "Work item can complete without first-slice shell a11y regressions blocking the standalone M2 wireframe artifact"
+    ],
+    "validation_commands": [
+      "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:01:49.000467+00:00",
+    "updated_at": "2026-02-26T12:06:53.743891+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "Note: `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` were already changing from daemon activity and were not edited as part of this implementation.",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F02-ESC",
+    "assigned_agent": "sera-kest"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F01",
+    "title": "Finalize M2 hero definitions and shared ability modifier table",
+    "description": "Convert the deferred hero concept into data-table ready definitions (hero IDs, unlock gate, active ability effects, cooldown targets) without introducing bespoke mechanics.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "docs/design/v1-starter-data-tables.md",
+      "docs/design/vertical-slice-done-v1.md"
+    ],
+    "acceptance_criteria": [
+      "Hero definitions are expressed as IDs and numeric modifiers compatible with existing stat-driven model",
+      "Exactly one active ability per civilization hero is defined for prototype scope",
+      "Unlock gate is post-onboarding and does not alter first-slice tutorial flow"
+    ],
+    "validation_commands": [],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-26T11:43:39.057865+00:00",
+    "updated_at": "2026-02-26T12:08:33.384984+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "- None.",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01",
+    "assigned_agent": "rowan-hale"
   }
 ]

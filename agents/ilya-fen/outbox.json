@@ -1132,5 +1132,57 @@
         "proposed_work_items":  [
 
                                 ]
+    },
+    {
+        "timestamp_utc":  "2026-02-26T12:11:19.6178772Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0003-F01-F03",
+        "status":  "done",
+        "summary":  "Added a deferred M2 backend plan doc defining hero runtime state schema, assignment linkage, shared modifier-pipeline integration hooks for combat/scout resolution, and stable event keys for assignment/activation/cooldown completion.",
+        "changed_files":  [
+                              "docs/design/m2-hero-runtime-schema-and-resolver-hook-plan.md",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Implement hero runtime persistence contracts and repositories",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M2",
+                                        "priority":  "medium",
+                                        "description":  "Create schema migrations and repository interfaces/implementations for hero runtime states, assignment bindings, and hero modifier runtime instances exactly as defined in the M2 backend hero runtime schema plan.",
+                                        "acceptance_criteria":  [
+                                                                    "Runtime persistence includes `heroes.hero_runtime_states_v1`, `heroes.hero_assignment_bindings_v1`, and `heroes.hero_modifier_instances_v1` tables with documented uniqueness/consistency constraints.",
+                                                                    "Repository contracts support atomic assignment updates and ability activation writes with optimistic concurrency.",
+                                                                    "No hero-specific combat/scout formulas are introduced in persistence layer."
+                                                                ]
+                                    },
+                                    {
+                                        "title":  "Wire hero modifier instances into shared action modifier aggregation",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M2",
+                                        "priority":  "medium",
+                                        "description":  "Extend the shared numeric modifier aggregation path used by action resolution so combat/scout calculators consume hero ability effects from runtime modifier instances by domain/trigger window/context.",
+                                        "acceptance_criteria":  [
+                                                                    "Action resolution reads hero modifier runtime instances through the same numeric aggregation interface as other modifier sources.",
+                                                                    "Combat and scout resolvers consume resolved numeric stats without hero-id branches.",
+                                                                    "Charge and expiry consumption for hero modifier instances executes in the shared post-resolution modifier lifecycle path."
+                                                                ]
+                                    },
+                                    {
+                                        "title":  "Define and validate hero runtime event token fixtures",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M2",
+                                        "priority":  "low",
+                                        "description":  "Add machine-readable event token fixtures and validation for `event.hero.assigned`, `event.hero.ability_activated`, and `event.hero.cooldown_complete` so client event feed rendering can rely on stable keys and required token sets.",
+                                        "acceptance_criteria":  [
+                                                                    "A hero runtime event-token table defines required tokens for assignment, activation, and cooldown completion event keys.",
+                                                                    "Loader/validator rejects mismatched key-to-token mappings and duplicate identities.",
+                                                                    "Contract tests assert emitted hero runtime events conform to the declared key/token fixtures."
+                                                                ]
+                                    }
+                                ]
     }
 ]

@@ -21,6 +21,8 @@ Outputs:
 
 - Current screenshots: `coordination/runtime/frontend-visual/current/*.png`
 - Baselines: `coordination/runtime/frontend-visual/baseline/*.png`
+  - Shell (`/index.html`) keeps legacy names: `<device>.png`
+  - Non-shell pages use page-scoped names: `<page-stem>--<device>.png`
 - Report: `coordination/runtime/frontend-visual/report.json`
 
 ## Setup (One-Time)
@@ -44,6 +46,12 @@ python tools/frontend_visual_smoke.py --update-baseline --strict
 
 ```powershell
 python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5
+```
+
+Hero wireframe page validation example:
+
+```powershell
+python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --strict --max-overflow-px 0 --max-diff-percent 0.5
 ```
 
 ## Daemon Integration (Optional Gate)

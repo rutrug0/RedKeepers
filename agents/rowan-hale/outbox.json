@@ -405,5 +405,40 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-26T12:06:59.379095+00:00",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-AUTO-BACKLOG-0003-F01-F01",
+    "status": "done",
+    "summary": "Finalized M2 hero prototype definitions into data-table-ready rows: shared post-onboarding unlock gate, shared numeric ability modifier templates, and one active ability per civilization hero with cooldowns.",
+    "changed_files": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Implement M2 hero seed tables and validators from finalized definitions",
+        "owner_role": "backend",
+        "milestone": "M2",
+        "priority": "medium",
+        "description": "Create seed/config tables for `heroes.unlock_gates_v1`, `heroes.ability_modifiers_v1`, `heroes.hero_definitions_v1`, and `heroes.active_abilities_v1` using the finalized IDs and numeric values.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0003-F01-F01",
+          "Vertical Slice Done v1 PASS"
+        ],
+        "inputs": [
+          "docs/design/m2-hero-units-prototype-concept.md",
+          "backend/src/modules"
+        ],
+        "acceptance_criteria": [
+          "All hero/ability/modifier IDs from design are represented in machine-readable seed/config format",
+          "Cooldown and modifier fields are numeric and validated by schema checks",
+          "No bespoke hero-only mechanics are introduced outside shared modifier pipeline"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]

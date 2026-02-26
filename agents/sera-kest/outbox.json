@@ -1,221 +1,258 @@
-[
-  {
-    "ts": "2026-02-25T13:24:09.7573990Z",
-    "item_id": "RK-M1-0002",
-    "status": "completed",
-    "summary": "Documented early Steam and Android packaging options/constraints for the web-first client, with tradeoffs and recommended defaults (Steam: Tauri, Android: Capacitor).",
-    "files": [
-      "docs/architecture/client-cross-platform-strategy.md"
-    ]
-  },
-  {
-    "ts": "2026-02-25T13:52:11.5100380Z",
-    "item_id": "RK-M1-0002",
-    "status": "completed",
-    "summary": "Verified the M1 packaging decision note already covers Steam and Android paths, constraints, tradeoffs, and recommended defaults; no documentation changes required in this run.",
-    "files": [
-      "agents/sera-kest/outbox.json"
-    ]
-  },
-  {
-    "ts": "2026-02-25T14:26:42.7261130Z",
-    "item_id": "RK-M1-0005",
-    "status": "completed",
-    "summary": "Built a web-first responsive client shell wireframe with placeholder settlement management, world map viewport, and player event feed panels, including keyboard-focusable region navigation and mobile-safe spacing.",
-    "files": [
-      "client-web/index.html",
-      "client-web/styles.css",
-      "client-web/app.js",
-      "agents/sera-kest/outbox.json"
-    ],
-    "proposed_work_items": [
-      {
-        "title": "Add mock data state to client shell wireframe",
-        "owner_role": "frontend",
-        "milestone": "M1",
-        "priority": "medium",
-        "description": "Replace hard-coded placeholder values in the settlement, map, and event panels with a local mock data model so future UI iterations can test empty/loading/error and selection states without backend dependencies.",
-        "acceptance_criteria": [
-          "Client shell reads panel content from a single mock state source in client-web/",
-          "At least loading and populated placeholder states are demonstrated for all three regions",
-          "Components remain art-agnostic and use placeholder assets/blocks only"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      },
-      {
-        "title": "Frontend QA pass for accessibility and mobile shell interactions",
-        "owner_role": "frontend",
-        "milestone": "M1",
-        "priority": "medium",
-        "description": "Run a focused QA pass on the client shell wireframe for keyboard navigation, focus visibility, reduced-motion behavior, and common mobile viewport sizes, then patch issues found.",
-        "acceptance_criteria": [
-          "Region navigation is operable with keyboard only across desktop and mobile layouts",
-          "No clipped content or unusable controls at common mobile widths (360px and 390px)",
-          "Focus indicators remain visible on all interactive placeholder controls"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      }
-    ]
-  },
-  {
-    "ts": "2026-02-25T15:27:36.6730499Z",
-    "item_id": "RK-M1-0005-F01",
-    "status": "completed",
-    "summary": "Replaced hard-coded settlement, map, and event panel values with a single local mock state model in client-web/app.js, adding per-panel loading/populated preview toggles and data-driven placeholder rendering without backend dependencies.",
-    "files": [
-      "client-web/index.html",
-      "client-web/styles.css",
-      "client-web/app.js",
-      "agents/sera-kest/outbox.json"
-    ],
-    "proposed_work_items": [
-      {
-        "title": "Add empty and error mock scenarios for client shell panels",
-        "owner_role": "frontend",
-        "milestone": "M1",
-        "priority": "medium",
-        "description": "Extend the local mock panel state model so settlement, world map, and event feed each include empty and error scenarios, with the existing mock-state toggles able to switch to them for UI iteration and QA.",
-        "acceptance_criteria": [
-          "Settlement, world map, and event feed mock state definitions each include empty and error scenarios in client-web/app.js (or a shared client-web mock state module)",
-          "Per-panel mock-state controls expose empty and error alongside loading and populated",
-          "Empty and error views remain placeholder-art-only and stay within the first vertical slice shell"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      }
-    ]
-  },
-  {
-    "ts": "2026-02-25T15:30:48.318477Z",
-    "item_id": "RK-M1-0005-F02",
-    "status": "completed",
-    "summary": "Ran a focused QA/fix pass on the client shell wireframe for keyboard navigation, focus visibility, reduced-motion scrolling, and narrow mobile layouts (360px/390px), patching tab scroll behavior, map viewport focus rings, and small-screen header/control wrapping.",
-    "files": [
-      "client-web/app.js",
-      "client-web/styles.css",
-      "agents/sera-kest/outbox.json"
-    ],
-    "proposed_work_items": [
-      {
-        "title": "Add automated a11y and mobile viewport smoke checks for client shell",
-        "owner_role": "frontend",
-        "milestone": "M1",
-        "priority": "medium",
-        "description": "Add a lightweight browser-based smoke test (keyboard tab sequence + focus-visible assertions + 360px/390px viewport snapshots) for the client shell wireframe so future UI changes do not regress accessibility or mobile usability.",
-        "acceptance_criteria": [
-          "Automated check runs the client shell at 360px and 390px widths and verifies no horizontal overflow on the main shell container",
-          "Keyboard navigation test covers region tab activation and confirms visible focus styling on representative controls",
-          "Reduced-motion mode test confirms region navigation does not request smooth scrolling"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      }
-    ]
-  },
-  {
-    "ts": "2026-02-25T16:03:23.1218819Z",
-    "item_id": "RK-M1-0007-F01",
-    "status": "completed",
-    "summary": "Wired a subset of placeholder narrative seed keys into client-web mock state, rendering event feed rows through template token substitution (`event.*`) and adding a civ intro briefing block backed by a stable `civ_intro.*` key.",
-    "files": [
-      "client-web/app.js",
-      "agents/sera-kest/outbox.json"
-    ]
-  },
-  {
-    "ts": "2026-02-25T16:21:51.1781357Z",
-    "item_id": "RK-M1-0005-F01-F01",
-    "status": "completed",
-    "summary": "Extended client-shell mock panel states with empty and error scenarios for settlement, world map, and event feed, and updated per-panel state toggles/renderers so loading/populated/empty/error can be previewed for UI iteration and QA using placeholder-only views.",
-    "files": [
-      "client-web/app.js",
-      "agents/sera-kest/outbox.json"
-    ]
-  },
-  {
-    "ts": "2026-02-25T18:48:59.2535755Z",
-    "item_id": "RK-M1-0005-F02-F01",
-    "status": "completed",
-    "summary": "Extended browser smoke automation with keyboard/focus/reduced-motion accessibility assertions and shell-container overflow checks at mobile viewports (360px/390px), plus helper test coverage and QA docs updates.",
-    "files": [
-      "tools/frontend_visual_smoke.py",
-      "tests/test_frontend_visual_smoke.py",
-      "docs/operations/frontend-visual-qa.md",
-      "agents/sera-kest/outbox.json"
-    ]
-  },
-  {
-    "ts": "2026-02-25T20:45:00.0000000Z",
-    "item_id": "RK-M0-0010-F01",
-    "status": "completed",
-    "summary": "Added namespaced event keys for client shell event rendering with fallback support for legacy module keys, and updated mock event-feed rows to include tick/build/train/scout outcome keys.",
-    "files": [
-      "client-web/app.js",
-      "client-android-capacitor/www/app.js",
-      "agents/sera-kest/outbox.json"
-    ]
-  },
-  {
-    "ts": "2026-02-25T20:47:11.0000000Z",
-    "item_id": "RK-M0-0015-F01",
-    "status": "completed",
-    "summary": "Wired new event.tick.*, event.build.*, event.train.*, and event.scout.* placeholders into the client feed renderer, and updated mock feed events to show both success and failure variants with dynamic tokens.",
-    "files": [
-      "client-web/app.js",
-      "agents/sera-kest/outbox.json"
-    ],
-    "proposed_work_items": [
-      {
-        "title": "Add richer token rendering for object/array narrative values",
-        "owner_role": "frontend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Handle non-scalar event token values (for example resource requirement dictionaries) with stable, readable rendering in feed templates.",
-        "acceptance_criteria": [
-          "Nested token payloads for resource maps render as ordered, human-readable strings in event feed rows",
-          "No placeholder placeholders remain for supported token keys used by tick/build/train/scout failure templates"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      }
-    ]
-  },
-  {
-    "ts": "2026-02-26T11:55:17.6827506Z",
-    "item_id": "RK-AUTO-BACKLOG-0003-F01-F02",
-    "status": "completed",
-    "summary": "Created a standalone placeholder-first hero UI wireframe page covering settlement hero roster cards, dispatch modal assignment/ability pre-commit clarity, and event/combat cooldown feedback states using shared UI style tokens without integrating hero flows into first-slice runtime.",
-    "files": [
-      "client-web/hero-wireframes.html",
-      "client-web/hero-wireframes.css",
-      "agents/sera-kest/outbox.json"
-    ],
-    "proposed_work_items": [
-      {
-        "title": "Gate and integrate hero wireframes after vertical-slice sign-off",
-        "owner_role": "frontend",
-        "milestone": "M2",
-        "priority": "medium",
-        "description": "After docs/design/vertical-slice-done-v1.md passes all gates, integrate the deferred hero wireframe surfaces into the client shell behind explicit mock state controls while preserving placeholder-only assets.",
-        "acceptance_criteria": [
-          "Integration is blocked unless vertical slice gates are marked PASS in docs/design/vertical-slice-done-v1.md",
-          "Settlement hero card, dispatch ability slot, and feedback surfaces render from a shared hero mock state model in client-web",
-          "Hero UI remains optional and does not alter first-session flow or mandatory tutorial path before unlock"
-        ],
-        "dependencies": [
-          "docs/design/vertical-slice-done-v1.md PASS"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      }
-    ]
-  }
+﻿[
+    {
+        "ts":  "2026-02-25T13:24:09.7573990Z",
+        "item_id":  "RK-M1-0002",
+        "status":  "completed",
+        "summary":  "Documented early Steam and Android packaging options/constraints for the web-first client, with tradeoffs and recommended defaults (Steam: Tauri, Android: Capacitor).",
+        "files":  [
+                      "docs/architecture/client-cross-platform-strategy.md"
+                  ]
+    },
+    {
+        "ts":  "2026-02-25T13:52:11.5100380Z",
+        "item_id":  "RK-M1-0002",
+        "status":  "completed",
+        "summary":  "Verified the M1 packaging decision note already covers Steam and Android paths, constraints, tradeoffs, and recommended defaults; no documentation changes required in this run.",
+        "files":  [
+                      "agents/sera-kest/outbox.json"
+                  ]
+    },
+    {
+        "ts":  "2026-02-25T14:26:42.7261130Z",
+        "item_id":  "RK-M1-0005",
+        "status":  "completed",
+        "summary":  "Built a web-first responsive client shell wireframe with placeholder settlement management, world map viewport, and player event feed panels, including keyboard-focusable region navigation and mobile-safe spacing.",
+        "files":  [
+                      "client-web/index.html",
+                      "client-web/styles.css",
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Add mock data state to client shell wireframe",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M1",
+                                        "priority":  "medium",
+                                        "description":  "Replace hard-coded placeholder values in the settlement, map, and event panels with a local mock data model so future UI iterations can test empty/loading/error and selection states without backend dependencies.",
+                                        "acceptance_criteria":  [
+                                                                    "Client shell reads panel content from a single mock state source in client-web/",
+                                                                    "At least loading and populated placeholder states are demonstrated for all three regions",
+                                                                    "Components remain art-agnostic and use placeholder assets/blocks only"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    },
+                                    {
+                                        "title":  "Frontend QA pass for accessibility and mobile shell interactions",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M1",
+                                        "priority":  "medium",
+                                        "description":  "Run a focused QA pass on the client shell wireframe for keyboard navigation, focus visibility, reduced-motion behavior, and common mobile viewport sizes, then patch issues found.",
+                                        "acceptance_criteria":  [
+                                                                    "Region navigation is operable with keyboard only across desktop and mobile layouts",
+                                                                    "No clipped content or unusable controls at common mobile widths (360px and 390px)",
+                                                                    "Focus indicators remain visible on all interactive placeholder controls"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "ts":  "2026-02-25T15:27:36.6730499Z",
+        "item_id":  "RK-M1-0005-F01",
+        "status":  "completed",
+        "summary":  "Replaced hard-coded settlement, map, and event panel values with a single local mock state model in client-web/app.js, adding per-panel loading/populated preview toggles and data-driven placeholder rendering without backend dependencies.",
+        "files":  [
+                      "client-web/index.html",
+                      "client-web/styles.css",
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Add empty and error mock scenarios for client shell panels",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M1",
+                                        "priority":  "medium",
+                                        "description":  "Extend the local mock panel state model so settlement, world map, and event feed each include empty and error scenarios, with the existing mock-state toggles able to switch to them for UI iteration and QA.",
+                                        "acceptance_criteria":  [
+                                                                    "Settlement, world map, and event feed mock state definitions each include empty and error scenarios in client-web/app.js (or a shared client-web mock state module)",
+                                                                    "Per-panel mock-state controls expose empty and error alongside loading and populated",
+                                                                    "Empty and error views remain placeholder-art-only and stay within the first vertical slice shell"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "ts":  "2026-02-25T15:30:48.318477Z",
+        "item_id":  "RK-M1-0005-F02",
+        "status":  "completed",
+        "summary":  "Ran a focused QA/fix pass on the client shell wireframe for keyboard navigation, focus visibility, reduced-motion scrolling, and narrow mobile layouts (360px/390px), patching tab scroll behavior, map viewport focus rings, and small-screen header/control wrapping.",
+        "files":  [
+                      "client-web/app.js",
+                      "client-web/styles.css",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Add automated a11y and mobile viewport smoke checks for client shell",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M1",
+                                        "priority":  "medium",
+                                        "description":  "Add a lightweight browser-based smoke test (keyboard tab sequence + focus-visible assertions + 360px/390px viewport snapshots) for the client shell wireframe so future UI changes do not regress accessibility or mobile usability.",
+                                        "acceptance_criteria":  [
+                                                                    "Automated check runs the client shell at 360px and 390px widths and verifies no horizontal overflow on the main shell container",
+                                                                    "Keyboard navigation test covers region tab activation and confirms visible focus styling on representative controls",
+                                                                    "Reduced-motion mode test confirms region navigation does not request smooth scrolling"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "ts":  "2026-02-25T16:03:23.1218819Z",
+        "item_id":  "RK-M1-0007-F01",
+        "status":  "completed",
+        "summary":  "Wired a subset of placeholder narrative seed keys into client-web mock state, rendering event feed rows through template token substitution (`event.*`) and adding a civ intro briefing block backed by a stable `civ_intro.*` key.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ]
+    },
+    {
+        "ts":  "2026-02-25T16:21:51.1781357Z",
+        "item_id":  "RK-M1-0005-F01-F01",
+        "status":  "completed",
+        "summary":  "Extended client-shell mock panel states with empty and error scenarios for settlement, world map, and event feed, and updated per-panel state toggles/renderers so loading/populated/empty/error can be previewed for UI iteration and QA using placeholder-only views.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ]
+    },
+    {
+        "ts":  "2026-02-25T18:48:59.2535755Z",
+        "item_id":  "RK-M1-0005-F02-F01",
+        "status":  "completed",
+        "summary":  "Extended browser smoke automation with keyboard/focus/reduced-motion accessibility assertions and shell-container overflow checks at mobile viewports (360px/390px), plus helper test coverage and QA docs updates.",
+        "files":  [
+                      "tools/frontend_visual_smoke.py",
+                      "tests/test_frontend_visual_smoke.py",
+                      "docs/operations/frontend-visual-qa.md",
+                      "agents/sera-kest/outbox.json"
+                  ]
+    },
+    {
+        "ts":  "2026-02-25T20:45:00.0000000Z",
+        "item_id":  "RK-M0-0010-F01",
+        "status":  "completed",
+        "summary":  "Added namespaced event keys for client shell event rendering with fallback support for legacy module keys, and updated mock event-feed rows to include tick/build/train/scout outcome keys.",
+        "files":  [
+                      "client-web/app.js",
+                      "client-android-capacitor/www/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ]
+    },
+    {
+        "ts":  "2026-02-25T20:47:11.0000000Z",
+        "item_id":  "RK-M0-0015-F01",
+        "status":  "completed",
+        "summary":  "Wired new event.tick.*, event.build.*, event.train.*, and event.scout.* placeholders into the client feed renderer, and updated mock feed events to show both success and failure variants with dynamic tokens.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Add richer token rendering for object/array narrative values",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Handle non-scalar event token values (for example resource requirement dictionaries) with stable, readable rendering in feed templates.",
+                                        "acceptance_criteria":  [
+                                                                    "Nested token payloads for resource maps render as ordered, human-readable strings in event feed rows",
+                                                                    "No placeholder placeholders remain for supported token keys used by tick/build/train/scout failure templates"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "ts":  "2026-02-26T11:55:17.6827506Z",
+        "item_id":  "RK-AUTO-BACKLOG-0003-F01-F02",
+        "status":  "completed",
+        "summary":  "Created a standalone placeholder-first hero UI wireframe page covering settlement hero roster cards, dispatch modal assignment/ability pre-commit clarity, and event/combat cooldown feedback states using shared UI style tokens without integrating hero flows into first-slice runtime.",
+        "files":  [
+                      "client-web/hero-wireframes.html",
+                      "client-web/hero-wireframes.css",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Gate and integrate hero wireframes after vertical-slice sign-off",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M2",
+                                        "priority":  "medium",
+                                        "description":  "After docs/design/vertical-slice-done-v1.md passes all gates, integrate the deferred hero wireframe surfaces into the client shell behind explicit mock state controls while preserving placeholder-only assets.",
+                                        "acceptance_criteria":  [
+                                                                    "Integration is blocked unless vertical slice gates are marked PASS in docs/design/vertical-slice-done-v1.md",
+                                                                    "Settlement hero card, dispatch ability slot, and feedback surfaces render from a shared hero mock state model in client-web",
+                                                                    "Hero UI remains optional and does not alter first-session flow or mandatory tutorial path before unlock"
+                                                                ],
+                                        "dependencies":  [
+                                                             "docs/design/vertical-slice-done-v1.md PASS"
+                                                         ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "ts":  "2026-02-26T12:05:34.9427853Z",
+        "item_id":  "RK-AUTO-BACKLOG-0003-F01-F02-ESC-F01",
+        "status":  "blocked",
+        "summary":  "Updated frontend visual smoke to use URL-scoped validation surfaces, including hero-wireframes-specific selector/a11y checks and page-scoped baseline filenames so shell-only checks do not gate the standalone hero wireframe artifact. Added dedicated hero baseline artifacts for desktop/tablet/mobile profile variants, but strict smoke validation remains environment-blocked because Playwright is not installed.",
+        "files":  [
+                      "tools/frontend_visual_smoke.py",
+                      "tests/test_frontend_visual_smoke.py",
+                      "docs/operations/frontend-visual-qa.md",
+                      "coordination/runtime/frontend-visual/baseline/hero-wireframes--desktop-1440.png",
+                      "coordination/runtime/frontend-visual/baseline/hero-wireframes--tablet-1024.png",
+                      "coordination/runtime/frontend-visual/baseline/hero-wireframes--mobile-390.png",
+                      "coordination/runtime/frontend-visual/baseline/hero-wireframes--mobile-360.png",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Regenerate hero wireframe visual baselines with Playwright-enabled runtime",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M2",
+                                        "priority":  "high",
+                                        "description":  "Install Playwright + Chromium in the active validation interpreter and rerun hero-wireframes visual smoke in baseline update mode so page-scoped baseline images represent the actual hero wireframe surface instead of copied placeholders.",
+                                        "acceptance_criteria":  [
+                                                                    "`python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --update-baseline --max-overflow-px 0 --max-diff-percent 0.5 --strict` completes successfully",
+                                                                    "Page-scoped baseline files `hero-wireframes--desktop-1440.png`, `hero-wireframes--tablet-1024.png`, `hero-wireframes--mobile-390.png`, and `hero-wireframes--mobile-360.png` are regenerated from live hero-wireframes screenshots",
+                                                                    "Follow-up strict run without `--update-baseline` passes at configured thresholds for the hero page"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python -m pip install playwright pillow",
+                                                                    "python -m playwright install chromium",
+                                                                    "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --update-baseline --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
+    }
 ]
