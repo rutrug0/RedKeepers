@@ -34,5 +34,8 @@ export interface WorldMapMarchStateRepository {
   readMarchRuntimeState(input: {
     readonly march_id: string;
   }): WorldMapMarchRuntimeState | null;
+  listActiveMarchRuntimeStates(input: {
+    readonly settlement_id: string;
+  }): readonly WorldMapMarchRuntimeState[];
   saveMarchRuntimeState(snapshot: WorldMapMarchRuntimeState): WorldMapMarchRuntimeState;
 }

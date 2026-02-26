@@ -281,6 +281,108 @@ test("local first-slice transport serves deterministic hostile settlement attack
   assert.equal(response.body.losses.defender_garrison_lost, 40);
 });
 
+test("local first-slice transport returns hostile attack failure contract codes for march cap and blocked path", () => {
+  const capTransport = createDeterministicFirstSliceSettlementLoopLocalRpcTransport({
+    world_map_march_state_repository: new InMemoryWorldMapMarchStateRepository([
+      {
+        march_id: "march_existing_1",
+        settlement_id: "settlement_alpha",
+        march_revision: 1,
+        march_state: "march_state_in_transit",
+        origin: { x: 0, y: 0 },
+        target: { x: 1, y: 0 },
+        departed_at: new Date("2026-02-26T19:00:00.000Z"),
+        seconds_per_tile: 30,
+        attacker_strength: 10,
+        defender_strength: 5,
+      },
+      {
+        march_id: "march_existing_2",
+        settlement_id: "settlement_alpha",
+        march_revision: 1,
+        march_state: "march_state_in_transit",
+        origin: { x: 0, y: 0 },
+        target: { x: 2, y: 0 },
+        departed_at: new Date("2026-02-26T19:00:00.000Z"),
+        seconds_per_tile: 30,
+        attacker_strength: 10,
+        defender_strength: 5,
+      },
+    ]),
+  });
+
+  const capResponse = capTransport.invoke(POST_WORLD_MAP_SETTLEMENT_ATTACK_ROUTE, {
+    path: {
+      targetSettlementId: "settlement_hostile",
+    },
+    body: {
+      flow_version: "v1",
+      march_id: "march_attack_cap_fail",
+      source_settlement_id: "settlement_alpha",
+      target_settlement_id: "settlement_hostile",
+      origin: {
+        x: 0,
+        y: 0,
+      },
+      target: {
+        x: 1,
+        y: 1,
+      },
+      defender_garrison_strength: 40,
+      dispatched_units: [
+        {
+          unit_id: "watch_levy",
+          unit_count: 10,
+          unit_attack: 5,
+        },
+      ],
+    },
+  });
+  assert.equal(capResponse.status_code, 200);
+  if (capResponse.status_code === 200) {
+    assert.equal(capResponse.body.status, "failed");
+    if (capResponse.body.status === "failed") {
+      assert.equal(capResponse.body.error_code, "max_active_marches_reached");
+    }
+  }
+
+  const blockedPathTransport = createDeterministicFirstSliceSettlementLoopLocalRpcTransport();
+  const blockedPathResponse = blockedPathTransport.invoke(POST_WORLD_MAP_SETTLEMENT_ATTACK_ROUTE, {
+    path: {
+      targetSettlementId: "settlement_hostile",
+    },
+    body: {
+      flow_version: "v1",
+      march_id: "march_attack_blocked",
+      source_settlement_id: "settlement_alpha",
+      target_settlement_id: "settlement_hostile",
+      origin: {
+        x: 0,
+        y: 2,
+      },
+      target: {
+        x: 4,
+        y: 2,
+      },
+      defender_garrison_strength: 40,
+      dispatched_units: [
+        {
+          unit_id: "watch_levy",
+          unit_count: 10,
+          unit_attack: 5,
+        },
+      ],
+    },
+  });
+  assert.equal(blockedPathResponse.status_code, 200);
+  if (blockedPathResponse.status_code === 200) {
+    assert.equal(blockedPathResponse.body.status, "failed");
+    if (blockedPathResponse.body.status === "failed") {
+      assert.equal(blockedPathResponse.body.error_code, "path_blocked_impassable");
+    }
+  }
+});
+
 test("local first-slice transport keeps unavailable_tile error_code for world-map scout failures", () => {
   const transport = createDeterministicFirstSliceSettlementLoopLocalRpcTransport({
     resolve_tile_available: () => false,

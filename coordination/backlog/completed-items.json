@@ -5422,5 +5422,50 @@
     "runtime_seconds": 166.5,
     "started_at": "2026-02-26T19:27:27.021245+00:00",
     "finished_at": "2026-02-26T19:30:13.517113+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F02",
+    "title": "Wire client world-map hostile dispatch and combat outcome panels",
+    "description": "Implement the client-shell hostile dispatch path on world map: select a foreign settlement tile, send one deterministic attack, and render lifecycle + combat outcome feedback in the event feed using backend payload keys.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F01",
+      "RK-M0-0013"
+    ],
+    "inputs": [
+      "client-web/",
+      "docs/design/world-map-v1-phasing.md",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "World map inspect/selection flow allows dispatching one hostile march to at least one foreign settlement placeholder.",
+      "Client renders dispatch, travel, and combat resolution outcomes from backend event keys without local combat simulation fallback logic.",
+      "UI preserves in-slice constraints (placeholder art, no hero requirement, no alliance/diplomacy expansion)."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:16:22.546990+00:00",
+    "updated_at": "2026-02-26T19:46:06.393634+00:00",
+    "estimated_effort": "S",
+    "token_budget": 9000,
+    "result_summary": "- `python tools/orchestrator.py status` (pass)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "f0f6258c3e5a96a3bc0324934ed1db52f1538ab7",
+    "resolved_by_agent": "sera-kest",
+    "resolved_by_role": "frontend",
+    "runtime_seconds": 524.22,
+    "started_at": "2026-02-26T19:37:19.857385+00:00",
+    "finished_at": "2026-02-26T19:46:04.076729+00:00"
   }
 ]

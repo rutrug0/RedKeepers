@@ -5,6 +5,7 @@ import type {
 import {
   WORLD_MAP_HOSTILE_ATTACK_FLOW,
 } from "../domain";
+import type { WorldMapMarchStateRepository } from "../ports";
 import type {
   WorldMapMarchDispatchService,
 } from "./world-map-march-dispatch-service";
@@ -15,6 +16,10 @@ import { WorldMapMarchDispatchOperationError } from "./world-map-march-dispatch-
 
 const DEFAULT_ARMY_NAME = "Raid Column";
 const DEFAULT_TARGET_TILE_LABEL = "Hostile Settlement";
+const DEFAULT_MAX_ACTIVE_MARCHES = 2;
+const DEFAULT_WORLD_SEED = "seed_world_alpha";
+const DEFAULT_MAP_SIZE = 16;
+const IMPASSABLE_TILE_HASH_MODULUS = 11;
 
 const OUTCOME_LOSS_RATIOS: Readonly<Record<WorldMapMarchCombatOutcome, {
   readonly attacker: number;
@@ -64,7 +69,9 @@ export interface WorldMapHostileAttackService {
 
 export type WorldMapHostileAttackOperationErrorCode =
   | "source_target_not_foreign"
-  | "march_already_exists";
+  | "march_already_exists"
+  | "max_active_marches_reached"
+  | "path_blocked_impassable";
 
 export class WorldMapHostileAttackOperationError extends Error {
   readonly status_code = 409;
@@ -81,10 +88,53 @@ export class WorldMapHostileAttackOperationError extends Error {
 export class DeterministicWorldMapHostileAttackService
   implements WorldMapHostileAttackService
 {
+  private readonly maxActiveMarches: number;
+  private readonly worldSeed: string;
+  private readonly mapSize: number;
+  private readonly marchStateRepository?: Pick<
+    WorldMapMarchStateRepository,
+    "listActiveMarchRuntimeStates"
+  >;
+  private readonly resolveTilePassable: (input: {
+    readonly world_seed: string;
+    readonly map_size: number;
+    readonly coordinate: {
+      readonly x: number;
+      readonly y: number;
+    };
+  }) => boolean;
+
   constructor(
     private readonly marchDispatchService: WorldMapMarchDispatchService,
     private readonly marchSnapshotService: WorldMapMarchSnapshotService,
-  ) {}
+    options?: {
+      readonly max_active_marches?: number;
+      readonly world_seed?: string;
+      readonly map_size?: number;
+      readonly march_state_repository?: Pick<
+        WorldMapMarchStateRepository,
+        "listActiveMarchRuntimeStates"
+      >;
+      readonly resolve_tile_passable?: (input: {
+        readonly world_seed: string;
+        readonly map_size: number;
+        readonly coordinate: {
+          readonly x: number;
+          readonly y: number;
+        };
+      }) => boolean;
+    },
+  ) {
+    this.maxActiveMarches = normalizeMinimumPositiveInteger(
+      options?.max_active_marches,
+      DEFAULT_MAX_ACTIVE_MARCHES,
+    );
+    this.worldSeed = normalizeFallbackText(options?.world_seed, DEFAULT_WORLD_SEED);
+    this.mapSize = normalizeMinimumPositiveInteger(options?.map_size, DEFAULT_MAP_SIZE);
+    this.marchStateRepository = options?.march_state_repository;
+    this.resolveTilePassable = options?.resolve_tile_passable
+      ?? resolveDeterministicTilePassable;
+  }
 
   resolveHostileAttack(
     input: WorldMapHostileAttackCommandInput,
@@ -127,18 +177,26 @@ export class DeterministicWorldMapHostileAttackService
     const defenderStrength = normalizeNonNegativeInteger(
       input.defender_garrison_strength,
     );
+    const origin = {
+      x: normalizeFiniteGridCoordinate(input.origin.x),
+      y: normalizeFiniteGridCoordinate(input.origin.y),
+    };
+    const target = {
+      x: normalizeFiniteGridCoordinate(input.target.x),
+      y: normalizeFiniteGridCoordinate(input.target.y),
+    };
+
+    this.assertMarchCapNotExceeded(sourceSettlementId);
+    this.assertRoutePassable({
+      origin,
+      target,
+    });
 
     const dispatch = this.dispatchMarchWithMappedErrors({
       march_id: marchId,
       settlement_id: sourceSettlementId,
-      origin: {
-        x: normalizeFiniteNumber(input.origin.x),
-        y: normalizeFiniteNumber(input.origin.y),
-      },
-      target: {
-        x: normalizeFiniteNumber(input.target.x),
-        y: normalizeFiniteNumber(input.target.y),
-      },
+      origin,
+      target,
       departed_at: input.departed_at,
       seconds_per_tile: normalizeOptionalPositiveInteger(input.seconds_per_tile),
       attacker_strength: attackerStrength,
@@ -268,6 +326,60 @@ export class DeterministicWorldMapHostileAttackService
       throw error;
     }
   }
+
+  private assertMarchCapNotExceeded(sourceSettlementId: string): void {
+    if (this.marchStateRepository === undefined) {
+      return;
+    }
+
+    const activeMarches = this.marchStateRepository.listActiveMarchRuntimeStates({
+      settlement_id: sourceSettlementId,
+    });
+    if (activeMarches.length >= this.maxActiveMarches) {
+      throw new WorldMapHostileAttackOperationError(
+        "max_active_marches_reached",
+        `Settlement '${sourceSettlementId}' reached active march cap ${this.maxActiveMarches}.`,
+      );
+    }
+  }
+
+  private assertRoutePassable(input: {
+    readonly origin: {
+      readonly x: number;
+      readonly y: number;
+    };
+    readonly target: {
+      readonly x: number;
+      readonly y: number;
+    };
+  }): void {
+    const routeTiles = resolveDeterministicRouteTiles(input);
+    for (const tile of routeTiles) {
+      if (
+        !isCoordinateWithinMapBounds({
+          coordinate: tile,
+          map_size: this.mapSize,
+        })
+      ) {
+        throw new WorldMapHostileAttackOperationError(
+          "path_blocked_impassable",
+          `Deterministic route blocked at out-of-bounds tile (${tile.x}, ${tile.y}).`,
+        );
+      }
+
+      const isPassable = this.resolveTilePassable({
+        world_seed: this.worldSeed,
+        map_size: this.mapSize,
+        coordinate: tile,
+      });
+      if (!isPassable) {
+        throw new WorldMapHostileAttackOperationError(
+          "path_blocked_impassable",
+          `Deterministic route blocked by impassable tile (${tile.x}, ${tile.y}).`,
+        );
+      }
+    }
+  }
 }
 
 function resolveCombatOutcome(
@@ -324,6 +436,13 @@ function normalizeOptionalPositiveInteger(value: number | undefined): number | u
   return Math.max(1, Math.trunc(value));
 }
 
+function normalizeMinimumPositiveInteger(value: number | undefined, fallback: number): number {
+  if (value === undefined || !Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.max(1, Math.trunc(value));
+}
+
 function normalizeNonNegativeInteger(value: number): number {
   if (!Number.isFinite(value)) {
     return 0;
@@ -336,4 +455,84 @@ function normalizeFiniteNumber(value: number): number {
     return 0;
   }
   return value;
+}
+
+function normalizeFiniteGridCoordinate(value: number): number {
+  return Math.trunc(normalizeFiniteNumber(value));
+}
+
+function resolveDeterministicRouteTiles(input: {
+  readonly origin: {
+    readonly x: number;
+    readonly y: number;
+  };
+  readonly target: {
+    readonly x: number;
+    readonly y: number;
+  };
+}): readonly {
+  readonly x: number;
+  readonly y: number;
+}[] {
+  const routeTiles: Array<{ readonly x: number; readonly y: number }> = [];
+  let cursorX = input.origin.x;
+  let cursorY = input.origin.y;
+  const xDirection = Math.sign(input.target.x - input.origin.x);
+  const yDirection = Math.sign(input.target.y - input.origin.y);
+
+  while (cursorX !== input.target.x) {
+    cursorX += xDirection;
+    routeTiles.push({ x: cursorX, y: cursorY });
+  }
+  while (cursorY !== input.target.y) {
+    cursorY += yDirection;
+    routeTiles.push({ x: cursorX, y: cursorY });
+  }
+
+  return routeTiles;
+}
+
+function isCoordinateWithinMapBounds(input: {
+  readonly coordinate: {
+    readonly x: number;
+    readonly y: number;
+  };
+  readonly map_size: number;
+}): boolean {
+  return input.coordinate.x >= 0
+    && input.coordinate.y >= 0
+    && input.coordinate.x < input.map_size
+    && input.coordinate.y < input.map_size;
+}
+
+function resolveDeterministicTilePassable(input: {
+  readonly world_seed: string;
+  readonly map_size: number;
+  readonly coordinate: {
+    readonly x: number;
+    readonly y: number;
+  };
+}): boolean {
+  if (
+    !isCoordinateWithinMapBounds({
+      coordinate: input.coordinate,
+      map_size: input.map_size,
+    })
+  ) {
+    return false;
+  }
+
+  const hash = hashDeterministicSeed(
+    `${input.world_seed}:${input.coordinate.x}:${input.coordinate.y}`,
+  );
+  return hash % IMPASSABLE_TILE_HASH_MODULUS !== 0;
+}
+
+function hashDeterministicSeed(value: string): number {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
 }

@@ -7,6 +7,7 @@ import {
 } from "./world-map-march-dispatch-service.ts";
 import {
   DeterministicWorldMapHostileAttackService,
+  WorldMapHostileAttackOperationError,
 } from "./world-map-hostile-attack-service.ts";
 import {
   DeterministicWorldMapMarchSnapshotService,
@@ -116,5 +117,99 @@ test("hostile attack service resolves deterministic defender-win losses on tie",
   assert.equal(
     response.event_payloads.combat_resolved.content_key,
     "event.combat.placeholder_skirmish_loss",
+  );
+});
+
+test("hostile attack service rejects dispatch when active march cap is reached", () => {
+  const repository = new InMemoryWorldMapMarchStateRepository([
+    {
+      march_id: "march_existing_1",
+      settlement_id: "settlement_alpha",
+      march_revision: 1,
+      march_state: "march_state_in_transit",
+      origin: { x: 0, y: 0 },
+      target: { x: 1, y: 0 },
+      departed_at: new Date("2026-02-26T19:00:00.000Z"),
+      seconds_per_tile: 30,
+      attacker_strength: 10,
+      defender_strength: 5,
+    },
+    {
+      march_id: "march_existing_2",
+      settlement_id: "settlement_alpha",
+      march_revision: 1,
+      march_state: "march_state_in_transit",
+      origin: { x: 0, y: 0 },
+      target: { x: 2, y: 0 },
+      departed_at: new Date("2026-02-26T19:00:00.000Z"),
+      seconds_per_tile: 30,
+      attacker_strength: 10,
+      defender_strength: 5,
+    },
+  ]);
+  const service = new DeterministicWorldMapHostileAttackService(
+    new DeterministicWorldMapMarchDispatchService(repository),
+    new DeterministicWorldMapMarchSnapshotService(repository),
+    {
+      march_state_repository: repository,
+      max_active_marches: 2,
+    },
+  );
+
+  assert.throws(
+    () =>
+      service.resolveHostileAttack({
+        march_id: "march_attack_cap_fail",
+        source_settlement_id: "settlement_alpha",
+        target_settlement_id: "settlement_hostile",
+        origin: { x: 0, y: 0 },
+        target: { x: 2, y: 1 },
+        defender_garrison_strength: 50,
+        dispatched_units: [
+          {
+            unit_id: "watch_levy",
+            unit_count: 10,
+            unit_attack: 5,
+          },
+        ],
+      }),
+    (error: unknown) =>
+      error instanceof WorldMapHostileAttackOperationError
+      && error.code === "max_active_marches_reached",
+  );
+});
+
+test("hostile attack service rejects dispatch when deterministic path crosses impassable tile", () => {
+  const repository = new InMemoryWorldMapMarchStateRepository();
+  const service = new DeterministicWorldMapHostileAttackService(
+    new DeterministicWorldMapMarchDispatchService(repository),
+    new DeterministicWorldMapMarchSnapshotService(repository),
+    {
+      march_state_repository: repository,
+      world_seed: "seed_world_alpha",
+      map_size: 16,
+    },
+  );
+
+  assert.throws(
+    () =>
+      service.resolveHostileAttack({
+        march_id: "march_attack_blocked",
+        source_settlement_id: "settlement_alpha",
+        target_settlement_id: "settlement_hostile",
+        origin: { x: 0, y: 2 },
+        target: { x: 4, y: 2 },
+        defender_garrison_strength: 30,
+        dispatched_units: [
+          {
+            unit_id: "watch_levy",
+            unit_count: 8,
+            unit_attack: 4,
+          },
+        ],
+      }),
+    (error: unknown) =>
+      error instanceof WorldMapHostileAttackOperationError
+      && error.code === "path_blocked_impassable",
   );
 });

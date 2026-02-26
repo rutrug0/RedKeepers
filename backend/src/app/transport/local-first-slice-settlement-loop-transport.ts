@@ -306,6 +306,12 @@ export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
     ?? new DeterministicWorldMapHostileAttackService(
       new DeterministicWorldMapMarchDispatchService(worldMapMarchStateRepository),
       worldMapMarchSnapshotService,
+      {
+        march_state_repository: worldMapMarchStateRepository,
+        max_active_marches: 2,
+        world_seed: DEFAULT_WORLD_SEED,
+        map_size: 16,
+      },
     );
   const worldMapTileStateRepository =
     options?.world_map_tile_state_repository ?? new InMemoryWorldMapTileStateRepository();

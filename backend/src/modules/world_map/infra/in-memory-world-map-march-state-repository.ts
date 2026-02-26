@@ -25,6 +25,22 @@ export class InMemoryWorldMapMarchStateRepository
     return cloneMarchRuntimeState(state);
   }
 
+  listActiveMarchRuntimeStates(input: {
+    readonly settlement_id: string;
+  }): readonly WorldMapMarchRuntimeState[] {
+    const settlementId = input.settlement_id.trim();
+    const activeStates: WorldMapMarchRuntimeState[] = [];
+    for (const state of this.statesById.values()) {
+      if (
+        state.settlement_id === settlementId
+        && state.march_state !== "march_state_resolved"
+      ) {
+        activeStates.push(cloneMarchRuntimeState(state));
+      }
+    }
+    return activeStates;
+  }
+
   saveMarchRuntimeState(snapshot: WorldMapMarchRuntimeState): WorldMapMarchRuntimeState {
     const normalized = normalizeRuntimeState(snapshot);
     this.statesById.set(normalized.march_id, normalized);

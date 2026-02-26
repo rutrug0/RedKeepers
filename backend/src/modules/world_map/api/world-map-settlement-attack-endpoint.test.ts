@@ -148,3 +148,113 @@ test("POST /world-map/settlements/{targetSettlementId}/attack returns failed con
   assert.equal(response.error_code, "source_target_not_foreign");
   assert.equal(response.flow, "world_map.hostile_attack_v1");
 });
+
+test("POST /world-map/settlements/{targetSettlementId}/attack returns failed contract when active march cap is reached", () => {
+  const repository = new InMemoryWorldMapMarchStateRepository([
+    {
+      march_id: "march_existing_1",
+      settlement_id: "settlement_alpha",
+      march_revision: 1,
+      march_state: "march_state_in_transit",
+      origin: { x: 0, y: 0 },
+      target: { x: 1, y: 0 },
+      departed_at: new Date("2026-02-26T19:00:00.000Z"),
+      seconds_per_tile: 30,
+      attacker_strength: 10,
+      defender_strength: 5,
+    },
+    {
+      march_id: "march_existing_2",
+      settlement_id: "settlement_alpha",
+      march_revision: 1,
+      march_state: "march_state_in_transit",
+      origin: { x: 0, y: 0 },
+      target: { x: 2, y: 0 },
+      departed_at: new Date("2026-02-26T19:00:00.000Z"),
+      seconds_per_tile: 30,
+      attacker_strength: 10,
+      defender_strength: 5,
+    },
+  ]);
+  const endpoint = new WorldMapSettlementAttackEndpointHandler(
+    new DeterministicWorldMapHostileAttackService(
+      new DeterministicWorldMapMarchDispatchService(repository),
+      new DeterministicWorldMapMarchSnapshotService(repository),
+      {
+        march_state_repository: repository,
+        max_active_marches: 2,
+      },
+    ),
+  );
+
+  const response = endpoint.handlePostSettlementAttackContract({
+    path: {
+      targetSettlementId: "settlement_hostile",
+    },
+    body: {
+      flow_version: "v1",
+      march_id: "march_attack_cap_fail",
+      source_settlement_id: "settlement_alpha",
+      target_settlement_id: "settlement_hostile",
+      origin: { x: 0, y: 0 },
+      target: { x: 1, y: 1 },
+      defender_garrison_strength: 40,
+      dispatched_units: [
+        {
+          unit_id: "watch_levy",
+          unit_count: 10,
+          unit_attack: 5,
+        },
+      ],
+    },
+  });
+
+  assert.equal(response.status, "failed");
+  if (response.status !== "failed") {
+    return;
+  }
+  assert.equal(response.error_code, "max_active_marches_reached");
+});
+
+test("POST /world-map/settlements/{targetSettlementId}/attack returns failed contract when deterministic route is blocked", () => {
+  const repository = new InMemoryWorldMapMarchStateRepository();
+  const endpoint = new WorldMapSettlementAttackEndpointHandler(
+    new DeterministicWorldMapHostileAttackService(
+      new DeterministicWorldMapMarchDispatchService(repository),
+      new DeterministicWorldMapMarchSnapshotService(repository),
+      {
+        march_state_repository: repository,
+        world_seed: "seed_world_alpha",
+        map_size: 16,
+      },
+    ),
+  );
+
+  const response = endpoint.handlePostSettlementAttackContract({
+    path: {
+      targetSettlementId: "settlement_hostile",
+    },
+    body: {
+      flow_version: "v1",
+      march_id: "march_attack_blocked",
+      source_settlement_id: "settlement_alpha",
+      target_settlement_id: "settlement_hostile",
+      origin: { x: 0, y: 2 },
+      target: { x: 4, y: 2 },
+      defender_garrison_strength: 30,
+      dispatched_units: [
+        {
+          unit_id: "watch_levy",
+          unit_count: 8,
+          unit_attack: 4,
+        },
+      ],
+    },
+  });
+
+  assert.equal(response.status, "failed");
+  if (response.status !== "failed") {
+    return;
+  }
+  assert.equal(response.error_code, "path_blocked_impassable");
+});
