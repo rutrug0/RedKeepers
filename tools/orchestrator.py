@@ -36,6 +36,13 @@ EVENTS_LOG_PATH = RUNTIME_DIR / "daemon-events.jsonl"
 RUN_HISTORY_PATH = RUNTIME_DIR / "run-history.jsonl"
 LOW_QUEUE_WATERMARK = 2
 MODEL_POLICY_DRIFT_BLOCKER_CATEGORY = "model_policy_drift"
+VALIDATION_SCOPE_WAIVER_FIELD = "validation_scope_waiver"
+VALIDATION_SCOPE_PRECHECK_COMMAND = "validation scope preflight"
+FULL_SUITE_DISCOVERY_COMMAND = "python -m unittest discover -s tests"
+SCOPED_VALIDATION_COMMAND_EXPECTATIONS = (
+    "python -m unittest tests.<target_module>",
+    "python tools/orchestrator.py status",
+)
 
 
 def ensure_python_runtime_configuration() -> tuple[str, str | None]:
@@ -50,6 +57,19 @@ def ensure_python_runtime_configuration() -> tuple[str, str | None]:
 
 def _bool_env(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _boolish(value: Any, default: bool) -> bool:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    text = str(value).strip().lower()
+    if text in {"1", "true", "yes", "on"}:
+        return True
+    if text in {"0", "false", "no", "off"}:
+        return False
+    return default
 
 
 def _int_env(name: str, default: int, *, min_value: int = 0) -> int:
@@ -433,6 +453,141 @@ def format_dependency_warning_lines(warnings: list[dict[str, str]], *, max_lines
     remainder = len(warnings) - len(rendered)
     if remainder > 0:
         rendered.append(f"- ... and {remainder} more dependency normalization warnings.")
+    return rendered
+
+
+def _dedupe_validation_commands(commands: list[str]) -> list[str]:
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for command in commands:
+        normalized = str(command).strip()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        deduped.append(normalized)
+    return deduped
+
+
+def _configured_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]) -> list[str]:
+    commands: list[str] = []
+    defaults = commit_rules.get("default_validation_commands", [])
+    if isinstance(defaults, list):
+        commands.extend([str(cmd) for cmd in defaults if str(cmd).strip()])
+    item_cmds = item.get("validation_commands", [])
+    if isinstance(item_cmds, list):
+        commands.extend([str(cmd) for cmd in item_cmds if str(cmd).strip()])
+    return _dedupe_validation_commands(commands)
+
+
+def _has_validation_scope_waiver(item: dict[str, Any]) -> bool:
+    waiver_keys = (
+        VALIDATION_SCOPE_WAIVER_FIELD,
+        "allow_full_suite_validation",
+        "full_suite_scope_waiver",
+    )
+    for key in waiver_keys:
+        if _boolish(item.get(key), False):
+            return True
+    scope_cfg = item.get("validation_scope")
+    if isinstance(scope_cfg, dict):
+        for key in ("waiver", "allow_full_suite_validation", "full_suite_scope_waiver", VALIDATION_SCOPE_WAIVER_FIELD):
+            if _boolish(scope_cfg.get(key), False):
+                return True
+    return False
+
+
+def _validation_scope_token(item: dict[str, Any]) -> str:
+    scope_cfg = item.get("validation_scope")
+    if isinstance(scope_cfg, dict):
+        for key in ("scope", "kind", "mode"):
+            token = str(scope_cfg.get(key, "")).strip().lower()
+            if token:
+                return token
+        return ""
+    return str(scope_cfg or "").strip().lower()
+
+
+def _is_narrow_qa_scope_item(item: dict[str, Any]) -> bool:
+    owner_role = str(item.get("owner_role", "")).strip().lower()
+    if owner_role != "qa":
+        return False
+    scope_token = _validation_scope_token(item)
+    if scope_token in {"full", "full-suite", "full_suite", "broad"}:
+        return False
+    if scope_token in {"narrow", "targeted", "scoped"}:
+        return True
+    if _boolish(item.get("narrow_scope"), False):
+        return True
+    if str(item.get("generated_from_item_id", "")).strip():
+        return True
+    if str(item.get("source_item_id", "")).strip():
+        return True
+    item_id = str(item.get("id", "")).strip().upper()
+    return "-F" in item_id or "-ESC" in item_id
+
+
+def _validation_scope_mismatch_row(item: dict[str, Any], commit_rules: dict[str, Any]) -> dict[str, Any] | None:
+    if not _is_narrow_qa_scope_item(item):
+        return None
+    if _has_validation_scope_waiver(item):
+        return None
+    configured = _configured_validation_commands(item, commit_rules)
+    offending = [command for command in configured if _is_full_suite_validation_command(command)]
+    if not offending:
+        return None
+    item_id = str(item.get("id", "")).strip() or "<unknown>"
+    return {
+        "item_id": item_id,
+        "commands": offending,
+    }
+
+
+def validation_scope_preflight_error(item: dict[str, Any], commit_rules: dict[str, Any]) -> str | None:
+    mismatch = _validation_scope_mismatch_row(item, commit_rules)
+    if mismatch is None:
+        return None
+    item_id = str(mismatch.get("item_id", "<unknown>"))
+    command = str((mismatch.get("commands") or [FULL_SUITE_DISCOVERY_COMMAND])[0])
+    expected = ", ".join(SCOPED_VALIDATION_COMMAND_EXPECTATIONS)
+    return (
+        f"{item_id}: narrow QA scope is configured with full-suite discovery command '{command}' without explicit "
+        f"scope waiver. Remediation: replace full-suite discovery with scoped validation commands ({expected}), "
+        f"or set {VALIDATION_SCOPE_WAIVER_FIELD}: true when full-suite coverage is intentional."
+    )
+
+
+def find_validation_scope_mismatches(queue: QueueManager, commit_rules: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for item in queue.active:
+        if not isinstance(item, dict):
+            continue
+        if item.get("status") != "queued":
+            continue
+        mismatch = _validation_scope_mismatch_row(item, commit_rules)
+        if mismatch is not None:
+            rows.append(mismatch)
+    return rows
+
+
+def format_validation_scope_warning_lines(rows: list[dict[str, Any]], *, max_lines: int = 8) -> list[str]:
+    if not rows:
+        return []
+    rendered: list[str] = []
+    expected = " and ".join(f"`{command}`" for command in SCOPED_VALIDATION_COMMAND_EXPECTATIONS)
+    for row in rows[:max_lines]:
+        item_id = str(row.get("item_id", "<unknown>"))
+        commands = [str(command) for command in row.get("commands", []) if str(command).strip()]
+        command_text = ", ".join(f"`{command}`" for command in commands[:2]) if commands else f"`{FULL_SUITE_DISCOVERY_COMMAND}`"
+        if len(commands) > 2:
+            command_text = f"{command_text}, +{len(commands) - 2} more"
+        rendered.append(
+            f"- {item_id}: narrow QA scope includes full-suite validation command {command_text} without explicit "
+            f"waiver. Action: replace with scoped commands ({expected}) or set `{VALIDATION_SCOPE_WAIVER_FIELD}: true` "
+            "when full-suite discovery is intentional."
+        )
+    remainder = len(rows) - len(rendered)
+    if remainder > 0:
+        rendered.append(f"- ... and {remainder} more validation scope warnings.")
     return rendered
 
 
@@ -2162,25 +2317,7 @@ def _classify_validation_or_commit_failure(validation_results: list[dict[str, An
 
 
 def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]) -> list[str]:
-    commands: list[str] = []
-    defaults = commit_rules.get("default_validation_commands", [])
-    if isinstance(defaults, list):
-        commands.extend([str(cmd) for cmd in defaults if str(cmd).strip()])
-    item_cmds = item.get("validation_commands", [])
-    if isinstance(item_cmds, list):
-        commands.extend([str(cmd) for cmd in item_cmds if str(cmd).strip()])
-
-    def _boolish(value: Any, default: bool) -> bool:
-        if value is None:
-            return default
-        if isinstance(value, bool):
-            return value
-        text = str(value).strip().lower()
-        if text in {"1", "true", "yes", "on"}:
-            return True
-        if text in {"0", "false", "no", "off"}:
-            return False
-        return default
+    commands = _configured_validation_commands(item, commit_rules)
 
     visual_cfg = commit_rules.get("frontend_visual_qa", {})
     if not isinstance(visual_cfg, dict):
@@ -2244,15 +2381,7 @@ def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]
                 ]
             commands.extend(platform_commands)
 
-    deduped: list[str] = []
-    seen: set[str] = set()
-    for command in commands:
-        normalized = str(command).strip()
-        if not normalized or normalized in seen:
-            continue
-        seen.add(normalized)
-        deduped.append(normalized)
-    commands = deduped
+    commands = _dedupe_validation_commands(commands)
 
     scope_cfg = commit_rules.get("validation_scope_guard", {})
     if not isinstance(scope_cfg, dict):
@@ -2274,6 +2403,19 @@ def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]
 
 
 def run_validation_for_item(root: Path, item: dict[str, Any], commit_rules: dict[str, Any]) -> tuple[bool, list[dict[str, Any]]]:
+    preflight_error = validation_scope_preflight_error(item, commit_rules)
+    if preflight_error:
+        return (
+            False,
+            [
+                {
+                    "command": VALIDATION_SCOPE_PRECHECK_COMMAND,
+                    "exit_code": 2,
+                    "stdout_tail": f"STATUS: BLOCKED {preflight_error}",
+                    "stderr_tail": "",
+                }
+            ],
+        )
     commands = build_validation_commands(item, commit_rules)
     if not commands:
         return True, []
@@ -2405,6 +2547,29 @@ def platform_web_packaging_environment_blocker_reason(validation_results: list[d
         if not detail:
             detail = "Web vertical-slice packaging reported STATUS: BLOCKED"
         return f"Platform web packaging blocked by environment: {detail}"
+    return None
+
+
+def validation_scope_mismatch_blocker_reason(validation_results: list[dict[str, Any]]) -> str | None:
+    for result in validation_results:
+        if not isinstance(result, dict):
+            continue
+        command = str(result.get("command", "")).strip().lower()
+        if command != VALIDATION_SCOPE_PRECHECK_COMMAND:
+            continue
+        stdout_tail = str(result.get("stdout_tail", ""))
+        stderr_tail = str(result.get("stderr_tail", ""))
+        status, detail = _extract_status_line(f"{stdout_tail}\n{stderr_tail}")
+        if status != "BLOCKED":
+            continue
+        if detail:
+            return detail
+        expected = ", ".join(SCOPED_VALIDATION_COMMAND_EXPECTATIONS)
+        return (
+            "Validation scope preflight blocked narrow QA execution. "
+            f"Remediation: use scoped validation commands ({expected}) or set "
+            f"{VALIDATION_SCOPE_WAIVER_FIELD}: true for explicit full-suite coverage."
+        )
     return None
 
 
@@ -2552,6 +2717,15 @@ def process_one(
             "Normalized queued dependencies to known backlog ids",
             warning_count=len(dependency_warnings),
             warnings=format_dependency_warning_lines(dependency_warnings, max_lines=5),
+        )
+    validation_scope_mismatches = find_validation_scope_mismatches(queue, policies["commit"])
+    if validation_scope_mismatches:
+        emit_event(
+            "queue_health",
+            "Detected narrow QA items configured with full-suite validation discovery",
+            count=len(validation_scope_mismatches),
+            item_ids=[str(row.get("item_id", "")) for row in validation_scope_mismatches],
+            warnings=format_validation_scope_warning_lines(validation_scope_mismatches, max_lines=5),
         )
 
     model_policy_drift_audit = run_queued_model_policy_drift_audit(
@@ -3066,6 +3240,8 @@ def process_one(
             blocker_reason = frontend_visual_environment_blocker_reason(validation_results, root=ROOT)
             if blocker_reason is None:
                 blocker_reason = platform_web_packaging_environment_blocker_reason(validation_results)
+            if blocker_reason is None:
+                blocker_reason = validation_scope_mismatch_blocker_reason(validation_results)
             if blocker_reason:
                 emit_event(
                     "blocked",
@@ -3541,6 +3717,7 @@ def cmd_status() -> int:
     queue = QueueManager(ROOT)
     queue.load()
     dependency_warnings = normalize_queued_item_dependencies(queue, archived_ids=load_blocked_archived_ids())
+    validation_scope_mismatches = find_validation_scope_mismatches(queue, policies["commit"])
     non_actionable_blocked = find_non_actionable_blocked_items(queue)
     model_policy_drift = run_queued_model_policy_drift_audit(
         queue=queue,
@@ -3567,6 +3744,10 @@ def cmd_status() -> int:
     if dependency_warnings:
         print("Dependency normalization warnings:")
         for line in format_dependency_warning_lines(dependency_warnings):
+            print(line)
+    if validation_scope_mismatches:
+        print("Validation scope warnings:")
+        for line in format_validation_scope_warning_lines(validation_scope_mismatches):
             print(line)
     if non_actionable_blocked:
         print("Backlog health warnings:")

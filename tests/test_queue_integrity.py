@@ -308,6 +308,96 @@ class QueueIntegrityTests(unittest.TestCase):
         self.assertIn("dependency_ready=1", text)
         self.assertIn("Dependency normalization warnings:", text)
 
+    def test_cmd_status_reports_validation_scope_warning_for_narrow_qa_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            backlog = root / "coordination" / "backlog"
+            runtime = root / "coordination" / "runtime"
+            static_state = root / "coordination" / "state"
+            backlog.mkdir(parents=True, exist_ok=True)
+            runtime.mkdir(parents=True, exist_ok=True)
+            static_state.mkdir(parents=True, exist_ok=True)
+
+            work_items = [
+                {
+                    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F03",
+                    "title": "narrow qa validation mismatch",
+                    "description": "regression guard",
+                    "milestone": "M1",
+                    "type": "feature",
+                    "priority": "normal",
+                    "owner_role": "qa",
+                    "preferred_agent": None,
+                    "dependencies": [],
+                    "inputs": [],
+                    "acceptance_criteria": ["x"],
+                    "validation_commands": ["python -m unittest discover -s tests"],
+                    "status": "queued",
+                    "retry_count": 0,
+                    "created_at": "2026-02-26T08:00:00+00:00",
+                    "updated_at": "2026-02-26T08:00:00+00:00",
+                    "estimated_effort": "S",
+                    "token_budget": 1,
+                    "result_summary": None,
+                    "blocker_reason": None,
+                    "escalation_target": "Mara Voss",
+                }
+            ]
+            (backlog / "work-items.json").write_text(json.dumps(work_items), encoding="utf-8")
+            (backlog / "completed-items.json").write_text("[]\n", encoding="utf-8")
+            (backlog / "blocked-items.json").write_text("[]\n", encoding="utf-8")
+            (backlog / "blocked-archived-items.json").write_text("[]\n", encoding="utf-8")
+            (runtime / "daemon-state.json").write_text("{}\n", encoding="utf-8")
+            (static_state / "agents.json").write_text(
+                json.dumps(
+                    {
+                        "tomas-grell": {
+                            "display_name": "Tomas Grell",
+                            "role": "qa",
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            out = io.StringIO()
+            with (
+                mock.patch.object(orchestrator, "ROOT", root),
+                mock.patch.object(orchestrator, "RUNTIME_DIR", runtime),
+                mock.patch.object(orchestrator, "STATIC_STATE_DIR", static_state),
+                mock.patch.object(orchestrator, "DAEMON_STATE_PATH", runtime / "daemon-state.json"),
+                mock.patch.object(orchestrator, "BLOCKED_ARCHIVED_PATH", backlog / "blocked-archived-items.json"),
+                mock.patch.object(orchestrator, "validate_environment", return_value=[]),
+                redirect_stdout(out),
+            ):
+                rc = orchestrator.cmd_status()
+
+        self.assertEqual(rc, 0)
+        text = out.getvalue()
+        self.assertIn("Validation scope warnings:", text)
+        self.assertIn("RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F03", text)
+        self.assertIn("python -m unittest tests.<target_module>", text)
+        self.assertIn("validation_scope_waiver: true", text)
+
+    def test_validation_scope_preflight_blocks_narrow_qa_discovery_without_waiver(self) -> None:
+        item = {
+            "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F03",
+            "owner_role": "qa",
+            "validation_commands": ["python -m unittest discover -s tests"],
+        }
+        ok, results = orchestrator.run_validation_for_item(Path.cwd(), item, {"default_validation_commands": []})
+
+        self.assertFalse(ok)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["command"], "validation scope preflight")
+        self.assertEqual(results[0]["exit_code"], 2)
+        self.assertIn("STATUS: BLOCKED", results[0]["stdout_tail"])
+        self.assertIn("python -m unittest tests.<target_module>", results[0]["stdout_tail"])
+        self.assertIn("validation_scope_waiver: true", results[0]["stdout_tail"])
+        blocker_reason = orchestrator.validation_scope_mismatch_blocker_reason(results)
+        self.assertIsNotNone(blocker_reason)
+        self.assertIn("RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F03", blocker_reason)
+
 
 if __name__ == "__main__":
     unittest.main()
