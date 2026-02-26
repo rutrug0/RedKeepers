@@ -6,6 +6,7 @@ import type {
   HeroAbilityActivationWriteInput,
   HeroAssignmentBinding,
   HeroAssignmentBoundContextType,
+  HeroAssignmentContextOwnershipReadRepositories,
   HeroAssignmentMutationApplied,
   HeroAssignmentMutationInput,
   HeroModifierLifecycleApplied,
@@ -22,6 +23,8 @@ import { InMemoryHeroRuntimePersistenceRepository } from "./in-memory-hero-runti
 
 export interface FileBackedHeroRuntimePersistenceRepositoryOptions {
   readonly storage_file_path?: string;
+  readonly assignment_context_ownership_read_repositories?:
+    HeroAssignmentContextOwnershipReadRepositories;
 }
 
 interface PersistedHeroRuntimeState {
@@ -84,13 +87,17 @@ export class FileBackedHeroRuntimePersistenceRepository
     "backend/tmp/hero-runtime-persistence.json";
 
   private readonly storageFilePath: string;
-  private readonly inMemory = new InMemoryHeroRuntimePersistenceRepository();
+  private readonly inMemory: InMemoryHeroRuntimePersistenceRepository;
 
   constructor(input?: FileBackedHeroRuntimePersistenceRepositoryOptions) {
     const configuredPath = input?.storage_file_path?.trim();
     this.storageFilePath = configuredPath && configuredPath.length > 0
       ? configuredPath
       : FileBackedHeroRuntimePersistenceRepository.DEFAULT_STORAGE_FILE_PATH;
+    this.inMemory = new InMemoryHeroRuntimePersistenceRepository({
+      assignment_context_ownership_read_repositories:
+        input?.assignment_context_ownership_read_repositories,
+    });
     this.reloadFromStorage();
   }
 

@@ -119,6 +119,33 @@ export interface HeroAssignmentMutationInput {
     | null;
 }
 
+export interface HeroAssignmentArmyOwnershipReadRepository {
+  isArmyOwnedByPlayer(input: {
+    readonly player_id: string;
+    readonly army_id: string;
+  }): boolean;
+}
+
+export interface HeroAssignmentScoutDetachmentOwnershipReadRepository {
+  isScoutDetachmentOwnedByPlayer(input: {
+    readonly player_id: string;
+    readonly scout_detachment_id: string;
+  }): boolean;
+}
+
+export interface HeroAssignmentSiegeColumnOwnershipReadRepository {
+  isSiegeColumnOwnedByPlayer(input: {
+    readonly player_id: string;
+    readonly siege_column_id: string;
+  }): boolean;
+}
+
+export interface HeroAssignmentContextOwnershipReadRepositories {
+  readonly army: HeroAssignmentArmyOwnershipReadRepository;
+  readonly scout_detachment: HeroAssignmentScoutDetachmentOwnershipReadRepository;
+  readonly siege_column: HeroAssignmentSiegeColumnOwnershipReadRepository;
+}
+
 export interface HeroAbilityActivationWriteInput {
   readonly player_id: string;
   readonly hero_id: string;
@@ -134,6 +161,7 @@ export interface HeroAbilityActivationWriteInput {
 export type HeroRuntimeWriteConflictCode =
   | "runtime_not_found"
   | "revision_conflict"
+  | "assignment_context_not_owned"
   | "context_already_bound"
   | "assignment_id_conflict"
   | "assignment_context_mismatch"

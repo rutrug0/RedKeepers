@@ -1,10 +1,18 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
+import type {
+  HeroAssignmentBoundContextType,
+  HeroAssignmentContextOwnershipReadRepositories,
+} from "../ports";
 import { InMemoryHeroRuntimePersistenceRepository } from "./in-memory-hero-runtime-persistence-repository";
 
 test("applyAssignmentMutation updates runtime and bindings atomically", () => {
-  const repository = new InMemoryHeroRuntimePersistenceRepository();
+  const repository = new InMemoryHeroRuntimePersistenceRepository({
+    assignment_context_ownership_read_repositories: createOwnershipReadRepositories({
+      owned_armies: ["player_a::army_1"],
+    }),
+  });
   const seededAt = new Date("2026-02-26T12:00:00.000Z");
 
   repository.ensureRuntimeState({
@@ -123,8 +131,134 @@ test("applyAssignmentMutation enforces optimistic concurrency", () => {
   );
 });
 
+test("applyAssignmentMutation validates assignment context ownership for all bound context types", () => {
+  const contextCases: readonly {
+    readonly context_type: HeroAssignmentBoundContextType;
+    readonly context_id: string;
+  }[] = [
+    {
+      context_type: "army",
+      context_id: "army_55",
+    },
+    {
+      context_type: "scout_detachment",
+      context_id: "scout_55",
+    },
+    {
+      context_type: "siege_column",
+      context_id: "siege_55",
+    },
+  ];
+
+  for (const contextCase of contextCases) {
+    const playerId = `player_${contextCase.context_type}`;
+    const seededAt = new Date("2026-02-26T12:07:00.000Z");
+    const assignedAt = new Date("2026-02-26T12:08:00.000Z");
+
+    const allowedRepository = new InMemoryHeroRuntimePersistenceRepository({
+      assignment_context_ownership_read_repositories:
+        createOwnershipReadRepositoriesForPlayerContext({
+          player_id: playerId,
+          context_type: contextCase.context_type,
+          context_id: contextCase.context_id,
+        }),
+    });
+    const allowedHeroId = `hero_allowed_${contextCase.context_type}`;
+    allowedRepository.ensureRuntimeState({
+      hero_runtime_id: `${playerId}::${allowedHeroId}`,
+      player_id: playerId,
+      hero_id: allowedHeroId,
+      active_ability_id: "ability_guard",
+      unlock_state: "unlocked",
+      readiness_state: "ready",
+      updated_at: seededAt,
+    });
+
+    const allowedResult = allowedRepository.applyAssignmentMutation({
+      player_id: playerId,
+      hero_id: allowedHeroId,
+      expected_revision: 0,
+      now: assignedAt,
+      assignment: {
+        assignment_id: `bind_allowed_${contextCase.context_type}`,
+        assignment_context_type: contextCase.context_type,
+        assignment_context_id: contextCase.context_id,
+      },
+    });
+    assert.equal(allowedResult.status, "applied");
+    if (allowedResult.status === "applied") {
+      assert.equal(allowedResult.result.runtime_state.revision, 1);
+      assert.equal(
+        allowedResult.result.runtime_state.assignment_context_type,
+        contextCase.context_type,
+      );
+      assert.equal(
+        allowedResult.result.runtime_state.assignment_context_id,
+        contextCase.context_id,
+      );
+      assert.equal(
+        allowedResult.result.active_binding?.assignment_context_type,
+        contextCase.context_type,
+      );
+      assert.equal(
+        allowedResult.result.active_binding?.assignment_context_id,
+        contextCase.context_id,
+      );
+    }
+
+    const rejectedRepository = new InMemoryHeroRuntimePersistenceRepository({
+      assignment_context_ownership_read_repositories: createOwnershipReadRepositories(),
+    });
+    const rejectedHeroId = `hero_rejected_${contextCase.context_type}`;
+    rejectedRepository.ensureRuntimeState({
+      hero_runtime_id: `${playerId}::${rejectedHeroId}`,
+      player_id: playerId,
+      hero_id: rejectedHeroId,
+      active_ability_id: "ability_guard",
+      unlock_state: "unlocked",
+      readiness_state: "ready",
+      updated_at: seededAt,
+    });
+
+    const rejectedResult = rejectedRepository.applyAssignmentMutation({
+      player_id: playerId,
+      hero_id: rejectedHeroId,
+      expected_revision: 0,
+      now: assignedAt,
+      assignment: {
+        assignment_id: `bind_rejected_${contextCase.context_type}`,
+        assignment_context_type: contextCase.context_type,
+        assignment_context_id: contextCase.context_id,
+      },
+    });
+    assert.equal(rejectedResult.status, "conflict");
+    if (rejectedResult.status === "conflict") {
+      assert.equal(rejectedResult.conflict_code, "assignment_context_not_owned");
+    }
+
+    const rejectedRuntime = rejectedRepository.readRuntimeState({
+      player_id: playerId,
+      hero_id: rejectedHeroId,
+    });
+    assert.equal(rejectedRuntime?.revision, 0);
+    assert.equal(rejectedRuntime?.assignment_context_type, "none");
+    assert.equal(rejectedRuntime?.assignment_context_id, undefined);
+    assert.equal(
+      rejectedRepository.readActiveAssignmentBinding({
+        player_id: playerId,
+        hero_id: rejectedHeroId,
+      }),
+      null,
+    );
+  }
+});
+
 test("applyAbilityActivation writes cooldown and modifier rows with revision checks", () => {
-  const repository = new InMemoryHeroRuntimePersistenceRepository();
+  const repository = new InMemoryHeroRuntimePersistenceRepository({
+    assignment_context_ownership_read_repositories: createOwnershipReadRepositories({
+      owned_armies: ["player_c::army_5"],
+    }),
+  });
   repository.ensureRuntimeState({
     hero_runtime_id: "player_c::hero_valen",
     player_id: "player_c",
@@ -407,3 +541,49 @@ test("applyModifierLifecycle updates charge- and expiry-based runtime modifier s
   assert.equal(expiredRows[0].remaining_charges, 0);
   assert.equal(expiredRows[0].consumed_at, undefined);
 });
+
+function createOwnershipReadRepositories(input?: {
+  readonly owned_armies?: readonly string[];
+  readonly owned_scout_detachments?: readonly string[];
+  readonly owned_siege_columns?: readonly string[];
+}): HeroAssignmentContextOwnershipReadRepositories {
+  const ownedArmies = new Set(input?.owned_armies ?? []);
+  const ownedScoutDetachments = new Set(input?.owned_scout_detachments ?? []);
+  const ownedSiegeColumns = new Set(input?.owned_siege_columns ?? []);
+
+  return {
+    army: {
+      isArmyOwnedByPlayer: (ownership) =>
+        ownedArmies.has(`${ownership.player_id}::${ownership.army_id}`),
+    },
+    scout_detachment: {
+      isScoutDetachmentOwnedByPlayer: (ownership) =>
+        ownedScoutDetachments.has(
+          `${ownership.player_id}::${ownership.scout_detachment_id}`,
+        ),
+    },
+    siege_column: {
+      isSiegeColumnOwnedByPlayer: (ownership) =>
+        ownedSiegeColumns.has(
+          `${ownership.player_id}::${ownership.siege_column_id}`,
+        ),
+    },
+  };
+}
+
+function createOwnershipReadRepositoriesForPlayerContext(input: {
+  readonly player_id: string;
+  readonly context_type: HeroAssignmentBoundContextType;
+  readonly context_id: string;
+}): HeroAssignmentContextOwnershipReadRepositories {
+  const ownershipKey = `${input.player_id}::${input.context_id}`;
+  return createOwnershipReadRepositories({
+    owned_armies: input.context_type === "army" ? [ownershipKey] : [],
+    owned_scout_detachments: input.context_type === "scout_detachment"
+      ? [ownershipKey]
+      : [],
+    owned_siege_columns: input.context_type === "siege_column"
+      ? [ownershipKey]
+      : [],
+  });
+}

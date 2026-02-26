@@ -25,7 +25,7 @@ Constraint coverage in this migration:
 
 Notes:
 
-- Context ownership validation ("assignment context belongs to the same player") remains an application/repository check because context rows are module-owned outside this migration.
+- Context ownership validation ("assignment context belongs to the same player") is enforced in repository writes via injected context-owning read ports (`army`, `scout_detachment`, `siege_column`), because context rows are module-owned outside this migration.
 - `exclusive_by_stat` uniqueness for modifier instances is also enforced in repository writes, because stack rule source data lives outside runtime instance rows.
 
 ## Runtime Execution Test

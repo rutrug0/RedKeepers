@@ -3,6 +3,7 @@ import type {
   HeroAbilityActivationWriteInput,
   HeroAssignmentBinding,
   HeroAssignmentBoundContextType,
+  HeroAssignmentContextOwnershipReadRepositories,
   HeroAssignmentContextType,
   HeroAssignmentMutationApplied,
   HeroAssignmentMutationInput,
@@ -27,10 +28,17 @@ export class InMemoryHeroRuntimePersistenceRepository
   private readonly runtimeByHeroKey = new Map<string, HeroRuntimeState>();
   private readonly assignmentBindingById = new Map<string, HeroAssignmentBinding>();
   private readonly modifierInstanceById = new Map<string, HeroModifierInstance>();
+  private readonly assignmentContextOwnershipReadRepositories:
+    HeroAssignmentContextOwnershipReadRepositories;
 
   constructor(input?: {
     readonly initial_snapshot?: HeroRuntimePersistenceSnapshot;
+    readonly assignment_context_ownership_read_repositories?:
+      HeroAssignmentContextOwnershipReadRepositories;
   }) {
+    this.assignmentContextOwnershipReadRepositories =
+      input?.assignment_context_ownership_read_repositories
+      ?? createRejectingContextOwnershipReadRepositories();
     if (input?.initial_snapshot !== undefined) {
       this.replaceSnapshot(input.initial_snapshot);
     }
@@ -248,6 +256,18 @@ export class InMemoryHeroRuntimePersistenceRepository
       input.assignment.assignment_context_id,
       "assignment.assignment_context_id",
     );
+
+    if (!this.isAssignmentContextOwnedByPlayer({
+      player_id: playerId,
+      assignment_context_type: assignmentContextType,
+      assignment_context_id: assignmentContextId,
+    })) {
+      return createConflict(
+        "assignment_context_not_owned",
+        `Context '${assignmentContextType}:${assignmentContextId}' is not owned by player '${playerId}'.`,
+        existingRuntime,
+      );
+    }
 
     const activeBindingInContext = this.findActiveBindingByContext({
       player_id: playerId,
@@ -606,6 +626,34 @@ export class InMemoryHeroRuntimePersistenceRepository
 
     return false;
   }
+
+  private isAssignmentContextOwnedByPlayer(input: {
+    readonly player_id: string;
+    readonly assignment_context_type: HeroAssignmentBoundContextType;
+    readonly assignment_context_id: string;
+  }): boolean {
+    switch (input.assignment_context_type) {
+      case "army":
+        return this.assignmentContextOwnershipReadRepositories.army.isArmyOwnedByPlayer({
+          player_id: input.player_id,
+          army_id: input.assignment_context_id,
+        });
+      case "scout_detachment":
+        return this.assignmentContextOwnershipReadRepositories.scout_detachment
+          .isScoutDetachmentOwnedByPlayer({
+            player_id: input.player_id,
+            scout_detachment_id: input.assignment_context_id,
+          });
+      case "siege_column":
+        return this.assignmentContextOwnershipReadRepositories.siege_column
+          .isSiegeColumnOwnedByPlayer({
+            player_id: input.player_id,
+            siege_column_id: input.assignment_context_id,
+          });
+      default:
+        return false;
+    }
+  }
 }
 
 function createConflict(
@@ -625,6 +673,21 @@ function createConflict(
 
 function toHeroRuntimeKey(playerId: string, heroId: string): string {
   return `${playerId}::${heroId}`;
+}
+
+function createRejectingContextOwnershipReadRepositories():
+  HeroAssignmentContextOwnershipReadRepositories {
+  return {
+    army: {
+      isArmyOwnedByPlayer: () => false,
+    },
+    scout_detachment: {
+      isScoutDetachmentOwnedByPlayer: () => false,
+    },
+    siege_column: {
+      isSiegeColumnOwnedByPlayer: () => false,
+    },
+  };
 }
 
 function normalizeRuntimeState(input: HeroRuntimeState): HeroRuntimeState {

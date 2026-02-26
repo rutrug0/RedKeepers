@@ -1,3 +1,3 @@
 # heroes/ports
 
-Persistence contracts for hero runtime state, assignment bindings, and runtime modifier instance writes.
+Persistence contracts for hero runtime state, assignment bindings, runtime modifier instance writes, and assignment-context ownership read ports.

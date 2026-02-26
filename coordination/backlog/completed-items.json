@@ -3448,5 +3448,38 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
     "assigned_agent": "ilya-fen",
     "commit_sha": "a63c7e0d0ab3cbbf9e0f2cedbe1fb272417e9bf4"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F01-F01",
+    "title": "Add hero runtime migration execution tests against the selected DB runtime",
+    "description": "Add migration-runner validation that applies the hero runtime migration and proves uniqueness/consistency constraints for runtime rows, assignment bindings, and modifier instances in a real database environment.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F03-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Automated test setup can apply `20260226_000001_create_hero_runtime_tables_v1.sql` end-to-end.",
+      "Tests verify active assignment uniqueness constraints and readiness/cooldown consistency checks fail invalid writes.",
+      "Tests verify rollback/reset path leaves the schema clean for repeatable CI runs."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:42:50.305580+00:00",
+    "updated_at": "2026-02-26T13:02:15.279208+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Existing unrelated modifications in `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` were left untouched.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "817b5cc63753a0c5ef4e31c175cd17d76f669333"
   }
 ]
