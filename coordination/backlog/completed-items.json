@@ -2414,5 +2414,44 @@
     ],
     "assigned_agent": "mara-voss",
     "commit_sha": "681e267f5430269dfb3df50de728c0ebc52f8961"
+  },
+  {
+    "id": "RK-AUTO-STALL-0002-F01",
+    "title": "Normalize queued dependency references to real backlog IDs",
+    "description": "Audit queued items and replace non-item dependency strings (for example `tests package`) with valid backlog IDs or explicit blocked/deferred state transitions.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0002"
+    ],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/backlog/completed-items.json"
+    ],
+    "acceptance_criteria": [
+      "All queued item dependencies resolve to existing IDs in work/blocked/completed backlog files",
+      "Items with intentionally external prerequisites are moved out of active queued state with explicit blocker reasons",
+      "`python tools/orchestrator.py status` still reports at least one dependency-ready queued item after cleanup"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T08:33:04.913743+00:00",
+    "updated_at": "2026-02-26T08:37:26.064253+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Note: `coordination/backlog/completed-items.json` is currently dirty in the workspace from daemon activity; it was not edited for this work item.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0002",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "dce469ef69fdd212944f12294184bbf9461c9f84"
   }
 ]

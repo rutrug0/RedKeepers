@@ -751,5 +751,17 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "ts":  "2026-02-26T08:40:00+00:00",
+        "item_id":  "RK-AUTO-STALL-0002-F02",
+        "status":  "completed",
+        "summary":  "Removed phantom dependency for `RK-M1-0005-F02-F01-ESC-F02` and recorded disposition for `RK-M0-0002` as retired.",
+        "dependency_disposition":  {
+                                     "dependency_id":  "RK-M0-0002",
+                                     "decision":  "retired",
+                                     "rationale":  "Archived as non-actionable blocked work with no completed replacement scope; no active queued item has a required dependency relationship to it."
+                                 },
+        "result":  "Updated RK-M1-0005-F02-F01-ESC-F02.dependencies to [] and confirmed no queued items are stalled solely on `RK-M0-0002`."
     }
 ]
