@@ -4964,5 +4964,46 @@
     "runtime_seconds": 198.09,
     "started_at": "2026-02-26T18:07:38.274165+00:00",
     "finished_at": "2026-02-26T18:10:56.375305+00:00"
+  },
+  {
+    "id": "RK-HUMAN-0001-F03",
+    "title": "Add hero attachment path for marches using shared modifier model",
+    "description": "Define and stage hero-to-march assignment rules and cooldown/modifier hooks as a post-slice extension of the shared stat-driven system.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F02"
+    ],
+    "inputs": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "docs/design/world-map-v1-phasing.md"
+    ],
+    "acceptance_criteria": [
+      "Hero assignment lifecycle for marches is defined without bespoke combat branches.",
+      "Hero impact is represented through existing shared modifier tables.",
+      "Tutorial/onboarding impact remains optional and outside first-session critical path."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T13:42:24.193702+00:00",
+    "updated_at": "2026-02-26T18:14:13.943652+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Parsed `agents/rowan-hale/outbox.json` via `ConvertFrom-Json` successfully (`outbox_json_valid`).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-HUMAN-0001",
+    "assigned_agent": "rowan-hale",
+    "commit_sha": "8680d5ef02042780cc409085e56bd7915278c3a2",
+    "resolved_by_agent": "rowan-hale",
+    "resolved_by_role": "design",
+    "runtime_seconds": 189.39,
+    "started_at": "2026-02-26T18:11:03.218050+00:00",
+    "finished_at": "2026-02-26T18:14:12.609355+00:00"
   }
 ]
