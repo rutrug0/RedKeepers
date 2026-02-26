@@ -5627,5 +5627,43 @@
     "runtime_seconds": 137.95,
     "started_at": "2026-02-26T20:02:34.828076+00:00",
     "finished_at": "2026-02-26T20:04:52.767993+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F01-F01-F01",
+    "title": "Unify deterministic terrain-passability source across world-map systems",
+    "description": "Move hostile-attack impassable-tile evaluation from local hash rule to a shared world-map terrain resolver backed by a deterministic fixture/seed contract so movement/path checks and future map queries use one authoritative passability source.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F01-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "A shared terrain passability resolver exists under world_map domain/application and is consumed by hostile attack path validation.",
+      "Resolver behavior is deterministic for a given world_seed/map_size and can be fixture-driven for tests.",
+      "Existing hostile attack acceptance and failure contracts remain unchanged (`max_active_marches_reached`, `path_blocked_impassable`)."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:52:25.104071+00:00",
+    "updated_at": "2026-02-26T20:13:34.278188+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Running hostile-attack tests remains blocked by existing repository/runtime limitation: `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` (TypeScript parameter properties in `world-map-march-dispatch-service.ts`).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F01-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "dfc34b0b3d001f4a61fa261098145658c16d4fd3",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 253.77,
+    "started_at": "2026-02-26T20:09:18.343005+00:00",
+    "finished_at": "2026-02-26T20:13:32.104609+00:00"
   }
 ]

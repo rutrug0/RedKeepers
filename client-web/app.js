@@ -83,6 +83,14 @@
       "Select a foreign settlement tile before dispatching a hostile march.",
     "event.world.hostile_dispatch_failed":
       "Hostile march dispatch failed ({error_code}) near {target_tile_label}: {message}",
+    "event.world.hostile_dispatch_failed_source_target_not_foreign":
+      "Dispatch denied: {source_settlement_name} cannot declare hostile action against its own banner.",
+    "event.world.hostile_dispatch_failed_max_active_marches_reached":
+      "Dispatch denied: {source_settlement_name} has no free march slot; active columns must resolve first.",
+    "event.world.hostile_dispatch_failed_path_blocked_impassable":
+      "Dispatch denied: route to {target_tile_label} breaks on impassable ground.",
+    "event.world.hostile_dispatch_failed_march_already_exists":
+      "Dispatch denied: march id {march_id} already carries a standing war order.",
     "event.settlement.name_assigned":
       "Surveyors record the new holding as {settlement_name}. The name enters the ledger.",
   });
@@ -983,6 +991,19 @@
 
     return normalizeHostileAttackEventKeyAlias(mappedContentKey);
   };
+  const hostileDispatchFailureContentKeyByCode = Object.freeze({
+    source_target_not_foreign: "event.world.hostile_dispatch_failed_source_target_not_foreign",
+    max_active_marches_reached: "event.world.hostile_dispatch_failed_max_active_marches_reached",
+    path_blocked_impassable: "event.world.hostile_dispatch_failed_path_blocked_impassable",
+    march_already_exists: "event.world.hostile_dispatch_failed_march_already_exists",
+  });
+  const resolveHostileDispatchFailureContentKey = (errorCode) => {
+    const normalizedErrorCode = String(errorCode || "").trim().toLowerCase();
+    if (normalizedErrorCode.length < 1) {
+      return "event.world.hostile_dispatch_failed";
+    }
+    return hostileDispatchFailureContentKeyByCode[normalizedErrorCode] || "event.world.hostile_dispatch_failed";
+  };
   const getNarrativeTemplateWithFallback = (contentKey) => {
     if (!contentKey) {
       return "";
@@ -1439,7 +1460,10 @@
       attack: "Just now | World | HOSTILE ATTACK adapter",
     };
 
-    const failureContentKey = failureContentKeyByAction[actionType] || "event.tick.passive_gain_stalled";
+    const failureContentKey =
+      actionType === "attack"
+        ? resolveHostileDispatchFailureContentKey(errorCode)
+        : failureContentKeyByAction[actionType] || "event.tick.passive_gain_stalled";
     const fallbackTileLabel =
       typeof context.target_tile_label === "string" && context.target_tile_label.trim().length > 0
         ? context.target_tile_label
@@ -1467,6 +1491,8 @@
         target_tile_label: fallbackTileLabel,
         error_code: errorCode,
         message: resolveActionErrorMessage(error),
+        source_settlement_name: settlementActionRuntime.settlement_name,
+        march_id: context.march_id || "march_unknown",
       },
     };
     const failureTokens = failureTokensByAction[actionType] || failureTokensByAction.tick;
@@ -1691,11 +1717,14 @@
     const targetSettlementId = context?.target_settlement_id || "settlement_hostile";
     const isFailedContract = response?.status === "failed";
     if (isFailedContract) {
-      const failureContentKey = "event.world.hostile_dispatch_failed";
+      const failureErrorCode = response?.error_code || response?.failure_code || "hostile_dispatch_failed";
+      const failureContentKey = resolveHostileDispatchFailureContentKey(failureErrorCode);
       const failureTokens = {
         target_tile_label: targetTileLabel,
-        error_code: response?.error_code || "hostile_dispatch_failed",
+        error_code: failureErrorCode,
         message: response?.message || "Contract rejected by world-map attack endpoint.",
+        source_settlement_name: response?.source_settlement_name || settlementActionRuntime.settlement_name,
+        march_id: response?.march_id || context?.march_id || "march_unknown",
       };
       appendEventFeedEntry({
         contentKey: failureContentKey,
@@ -1707,10 +1736,12 @@
         status: "failed",
         flow: response?.flow || "world_map.hostile_attack_v1",
         march_id: response?.march_id || context?.march_id || "march_unknown",
+        content_key: failureContentKey,
         target_tile_label: targetTileLabel,
         target_settlement_id: targetSettlementId,
-        error_code: response?.error_code || "hostile_dispatch_failed",
+        error_code: failureErrorCode,
         message: response?.message || "Hostile march dispatch failed.",
+        source_settlement_name: response?.source_settlement_name || settlementActionRuntime.settlement_name,
         updated_at: new Date().toISOString(),
       };
       setLastActionOutcome("attack", response, failureContentKey, failureTokens);
@@ -2423,12 +2454,18 @@
       }
 
       if (hostileDispatchOutcome.status === "failed") {
+        const failedNarrativeContentKey =
+          typeof hostileDispatchOutcome.content_key === "string" && hostileDispatchOutcome.content_key.trim().length > 0
+            ? hostileDispatchOutcome.content_key
+            : resolveHostileDispatchFailureContentKey(hostileDispatchOutcome.error_code);
         const tokens = {
           target_tile_label: hostileDispatchOutcome.target_tile_label,
           error_code: hostileDispatchOutcome.error_code,
           message: hostileDispatchOutcome.message,
+          source_settlement_name: hostileDispatchOutcome.source_settlement_name,
+          march_id: hostileDispatchOutcome.march_id,
         };
-        const failedNarrative = getNarrativeText("event.world.hostile_dispatch_failed", tokens);
+        const failedNarrative = getNarrativeText(failedNarrativeContentKey, tokens);
         return `
           <section class="subpanel compact">
             <h3>Hostile Dispatch Outcome</h3>
