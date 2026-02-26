@@ -53,17 +53,18 @@
       "Tutorial/onboarding impact remains optional and outside first-session critical path."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T13:42:24.193702+00:00",
-    "updated_at": "2026-02-26T13:42:24.193702+00:00",
+    "updated_at": "2026-02-26T18:14:12.634937+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-HUMAN-0001"
+    "generated_from_item_id": "RK-HUMAN-0001",
+    "assigned_agent": "rowan-hale"
   },
   {
     "id": "RK-HUMAN-0001-F04",
@@ -99,43 +100,6 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-HUMAN-0001"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0003-F01-F02",
-    "title": "Design hero UI wireframes for assignment, ability use, and cooldown feedback",
-    "description": "Create placeholder-first wireframes for hero roster card, army dispatch ability slot, and event/combat feedback surfaces defined in the concept doc.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "docs/design/m2-hero-units-prototype-concept.md",
-      "docs/design/ui-style-guide.md"
-    ],
-    "acceptance_criteria": [
-      "Wireframes cover settlement hero card, dispatch modal controls, and feedback/event states",
-      "Cooldown readability and effect clarity are visible before action commit",
-      "All visuals remain placeholder/wireframe quality and avoid final art dependencies"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 1,
-    "created_at": "2026-02-26T11:43:39.057865+00:00",
-    "updated_at": "2026-02-26T18:10:56.416581+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01",
-    "assigned_agent": "sera-kest",
-    "last_failure_reason": "validation failed or commit failed",
-    "last_unblocked_reason": "automatic blocked revisit (1/2)",
-    "last_blocker_reason": "retry threshold exceeded; escalated",
-    "blocked_revisit_count": 1
   },
   {
     "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F03",
@@ -175,5 +139,39 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F02-F01",
+    "title": "Run dedicated hero wireframe visual smoke after environment unblocks browser execution",
+    "description": "Execute strict multi-device visual smoke for hero-wireframes.html in a Playwright-capable runtime to confirm cooldown readability and pre-commit effect clarity remain stable as deferred M2 design artifacts evolve.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F02"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Strict visual smoke passes for hero-wireframes desktop/tablet/mobile captures at configured thresholds",
+      "No layout overflow or clipped cooldown/effect text appears at 1440, 1024, 390, and 360 widths",
+      "Baseline artifacts for hero-wireframes are regenerated only from live page captures in the validated runtime"
+    ],
+    "validation_commands": [
+      "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T18:10:57.931109+00:00",
+    "updated_at": "2026-02-26T18:10:57.931109+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F02"
   }
 ]

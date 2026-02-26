@@ -440,5 +440,66 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-26T18:13:38.6218091Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-HUMAN-0001-F03",
+    "status": "done",
+    "summary": "Defined a deferred M2 hero-to-march attachment path with deterministic assignment lifecycle, dispatch validation rules, cooldown activation hooks, and explicit shared-modifier-only combat integration while keeping onboarding optional and outside first-session critical flow.",
+    "changed_files": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "docs/design/world-map-v1-phasing.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Implement M2 dispatch validation and hero attachment lifecycle for marches",
+        "owner_role": "backend",
+        "milestone": "M2",
+        "priority": "medium",
+        "description": "Add post-slice dispatch validation for optional `hero_id`, enforce one-hero-per-march and single-active-assignment constraints, and persist deterministic attach/detach transitions across march start and return.",
+        "dependencies": [
+          "RK-HUMAN-0001-F03",
+          "Vertical Slice Done v1 PASS"
+        ],
+        "inputs": [
+          "docs/design/world-map-v1-phasing.md",
+          "docs/design/m2-hero-units-prototype-concept.md",
+          "docs/design/m2-hero-runtime-schema-and-resolver-hook-plan.md",
+          "backend/src/modules/world_map",
+          "backend/src/modules/heroes"
+        ],
+        "acceptance_criteria": [
+          "Dispatch rejects invalid hero attachment with stable error codes (`feature_not_in_slice`, `hero_unavailable`, `hero_already_assigned`, `hero_target_scope_mismatch`)",
+          "A march can carry at most one hero attachment and hero detach occurs deterministically on return completion",
+          "No hero-specific combat/scout branches are introduced in resolvers"
+        ],
+        "validation_commands": []
+      },
+      {
+        "title": "Integrate optional post-onboarding hero attach UX in dispatch flow",
+        "owner_role": "frontend",
+        "milestone": "M2",
+        "priority": "low",
+        "description": "Expose an optional hero attach control and cooldown/readiness preview in dispatch UI after unlock while preserving a fully functional no-hero dispatch path.",
+        "dependencies": [
+          "RK-HUMAN-0001-F03",
+          "Vertical Slice Done v1 PASS"
+        ],
+        "inputs": [
+          "docs/design/m2-hero-units-prototype-concept.md",
+          "docs/design/world-map-v1-phasing.md",
+          "client-web/hero-wireframes.html"
+        ],
+        "acceptance_criteria": [
+          "Players can dispatch marches without selecting a hero and still complete core loop actions",
+          "Hero attach UI appears only after unlock and presents clear cooldown/readiness states before commit",
+          "Event/combat feedback surfaces show hero modifier deltas using shared event keys"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]

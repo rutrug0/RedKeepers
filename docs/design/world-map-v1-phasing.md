@@ -23,7 +23,7 @@ This plan converts the requested world-map direction into first-slice-safe scope
 - Placeholder visuals and text only.
 
 ### Explicitly Deferred (Post-Slice)
-- Hero attached to marches.
+- Hero attached to marches (single-slot, shared-modifier pipeline).
 - Neutral entities/structures and neutral combat loops.
 - Resource gathering nodes and ambush gameplay.
 - Near-real-time movement/combat interpolation.
@@ -60,10 +60,42 @@ Compromise: lock v1 to tick/timer simulation and defer realtime interpolation.
 4. Requested 1-2 month worlds exceeds prototype runtime needs.
 Compromise: add world metadata field (`season_length_days`) without implementing rollover scheduler in v1.
 
+## M2 Deferred Contract: Hero Attachment to Marches
+
+Activation gate:
+- Enabled only after `docs/design/vertical-slice-done-v1.md` gates are PASS.
+- Any v1 dispatch request carrying `hero_id` before that gate returns `error_code=feature_not_in_slice`.
+
+Additive dispatch contract:
+- `hero_id` remains optional on dispatch payload.
+- One march supports at most one attached hero in M2 prototype.
+
+Validation rules at dispatch:
+- Hero must be owned by requester and pass unlock gate (`hero_unlock_post_onboarding_v1`).
+- Hero must be `readiness_state=ready` (not on cooldown).
+- Hero must not already be actively attached to another context.
+- If hero ability target scope mismatches dispatch intent, reject with `error_code=hero_target_scope_mismatch`.
+
+Attachment lifecycle (deterministic):
+1. `pre_dispatch`: hero selected; no modifier is active yet.
+2. `dispatch_accept`: hero linked to created `march_id`; emit `event.hero.assigned`.
+3. `in_transit`: no hero-specific tick branch; standard march timer rules remain unchanged.
+4. `ability_activation` (`pre_dispatch` or `battle_start`): create shared modifier instances from `heroes.ability_modifiers_v1`, set cooldown, emit `event.hero.ability_activated`.
+5. `resolution_return`: march resolves and returns using existing deterministic flow; hero impact appears only as modifier deltas in reports.
+6. `detach`: on return completion, hero attachment clears and hero waits for cooldown completion if applicable.
+
+Shared modifier requirement:
+- Movement/combat/scout calculators consume the same aggregated numeric stat bundle used by non-hero modifiers.
+- `hero_id` is an attachment/context handle, not a combat branch selector.
+
+Onboarding guard:
+- Hero tutorial/tooltips remain post-onboarding and optional.
+- First-session critical path remains unchanged even when M2 hero attachment is enabled.
+
 ## Post-Slice Evolution Path
 
 1. Add neutral nodes + gather loop with fixed output tables and deterministic ambush trigger windows.
-2. Add hero runtime to marches (single hero slot, cooldown + modifier hooks).
+2. Add hero runtime to marches using the deferred contract above (single hero slot, cooldown + shared modifier hooks).
 3. Add multi-march concurrency with partial orders/queueing and march collision rules.
 4. Shift from tick polling to near-real-time state streaming/interpolation while preserving deterministic server authority.
 5. Add seasonal lifecycle automation (world open/lock/archive/reset cadence).

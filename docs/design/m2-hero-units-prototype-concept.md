@@ -77,6 +77,33 @@ Scope checks:
 - Exactly one active ability per hero for prototype scope.
 - All effects use shared numeric modifier rows; no bespoke hero-only mechanics.
 
+### Hero-to-March Assignment Path (Post-Slice)
+
+`heroes.march_attachment_rules_v1`
+
+| rule_id | stage | rule_check | result_on_pass | reject_code | notes |
+| --- | --- | --- | --- | --- | --- |
+| `rule_hero_feature_gate_post_slice` | `dispatch_submit` | Vertical-slice gates are all PASS and hero feature flag is enabled | Evaluate next rule | `feature_not_in_slice` | Keeps hero attachment unavailable during first-slice loop |
+| `rule_hero_unlock_and_ready` | `dispatch_submit` | `unlock_state=unlocked` and `readiness_state=ready` | Allow hero attachment | `hero_unavailable` | Cooldown/lock uses shared runtime state only |
+| `rule_single_hero_per_march` | `dispatch_submit` | `hero_id` is null or exactly one hero id value | Create one attachment | `hero_slot_invalid` | No multi-hero march composition in prototype |
+| `rule_single_active_attachment_per_hero` | `dispatch_submit` | Hero has no other active assignment binding | Bind hero to this dispatch/march context | `hero_already_assigned` | Prevents hidden overlap power spikes |
+| `rule_release_on_march_return` | `march_return_resolved` | Return resolution completed | Set `assignment_context_type=none` unless manually re-assigned | `n/a` | Attachment lifetime is tied to one march lifecycle |
+
+`heroes.hero_march_lifecycle_v1`
+
+| phase | hero_state | march_state | system_feedback | implementation_note |
+| --- | --- | --- | --- | --- |
+| `pre_dispatch_selected` | `ready`, assigned to pending dispatch context | `not_created` | Dispatch preview shows hero badge + ability readiness | Pure assignment; no modifiers active yet |
+| `dispatch_committed` | `ready`, bound to `march_id` | `march_state_in_transit` | `event.hero.assigned` | `hero_id` copied into march payload for observability only |
+| `ability_activated` | `on_cooldown` | `march_state_in_transit` or combat start | `event.hero.ability_activated` + cooldown timer | Modifier instances are created from `heroes.ability_modifiers_v1` |
+| `march_resolved` | `on_cooldown` or `ready` | `march_state_resolved` | Combat report shows modifier deltas | Combat math still consumes shared resolved stats only |
+| `return_complete` | detached (`assignment_context_type=none`) | `closed` | `event.hero.unassigned` (optional) | Hero can be attached to a new march |
+
+Shared modifier contract for march flow:
+- Hero abilities may activate at `pre_dispatch` or `battle_start`, but only by expanding `modifier_ids` into shared runtime modifier instances.
+- March movement/combat/scout resolution reads the shared aggregated numeric stats; no hero-identity branch is added.
+- Cooldown completion remains tick-driven and emits the same shared readiness event.
+
 ## Minimum Onboarding/Tutorial Impact
 
 - No hero prompts in the first-slice tutorial path.
@@ -87,6 +114,7 @@ Scope checks:
   - New player can ignore heroes and still complete core session goals.
   - Hero tutorial adds <=2 minutes to first hero session.
   - No new mandatory glossary/tutorial branch in M0/M1.
+  - March dispatch remains fully playable without hero interaction when the player skips hero guidance.
 
 ## Required UI Surface Changes (Post-Slice Only)
 
