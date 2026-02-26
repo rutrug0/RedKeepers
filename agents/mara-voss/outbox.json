@@ -946,5 +946,43 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T11:37:08.1337304Z",
+        "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
+        "status": "completed",
+        "summary": "Escalation root cause confirmed: source item retries were consumed by unrelated full-suite unittest failures, not by missing codex model-preflight regression coverage.",
+        "root_cause": "Validation scope mismatch. `RK-M1-0004-F01-F01-F01-ESC-F01-F01` validates with `python -m unittest discover -s tests`, but the codex preflight tests pass in isolation while unrelated scaffold-smoke assertions fail and trigger retry-threshold escalation.",
+        "evidence": {
+            "run_history_source_item": "coordination/runtime/run-history.jsonl entries at 2026-02-26T09:15:12Z, 09:18:17Z, and 09:21:18Z all show `failed_validation` on full-suite discover for RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+            "targeted_preflight_validation": "2026-02-26: `python -m unittest tests.test_model_preflight_paths tests.test_codex_preflight` -> pass (21 tests)",
+            "full_suite_validation": "2026-02-26: `python -m unittest discover -s tests` -> fail; current deterministic failures are in tests/test_m1_scaffold_smoke.py marker assertions (`resource-grid`, `map-stage`, `event-list`)"
+        },
+        "proposed_work_items": [
+            {
+                "title": "Requeue codex model-preflight regression item with scoped validation commands",
+                "owner_role": "qa",
+                "milestone": "M1",
+                "priority": "high",
+                "description": "Create a replacement/requeue for `RK-M1-0004-F01-F01-F01-ESC-F01-F01` that validates only codex model-access preflight regression targets so unrelated baseline tests cannot cause false retry-threshold escalation.",
+                "dependencies": [],
+                "inputs": [
+                    "tests/test_model_preflight_paths.py",
+                    "tests/test_codex_preflight.py",
+                    "coordination/runtime/run-history.jsonl",
+                    "coordination/backlog/blocked-items.json",
+                    "coordination/backlog/work-items.json"
+                ],
+                "acceptance_criteria": [
+                    "Validation uses focused commands for the codex preflight scope (`tests.test_model_preflight_paths` and `tests.test_codex_preflight`) instead of full-suite discovery",
+                    "The requeued item completes without retry-threshold escalation when those focused checks pass",
+                    "Blocked source item `RK-M1-0004-F01-F01-F01-ESC-F01-F01` is closed with an audit note pointing to validation-scope mismatch"
+                ],
+                "validation_commands": [
+                    "python -m unittest tests.test_model_preflight_paths tests.test_codex_preflight",
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]

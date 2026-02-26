@@ -3002,5 +3002,45 @@
     "last_failure_reason": "validation failed or commit failed",
     "recovered_from_stale_in_progress": true,
     "commit_sha": "112b150440a020eed4443870bbd6f3a0569d7cf4"
+  },
+  {
+    "id": "RK-AUTO-STALL-0005-F01",
+    "title": "Prevent archived-item resurrection during stale in-progress recovery",
+    "description": "Add orchestrator guards so items present in blocked-archived backlog cannot be reinserted into active work queue during stale-run recovery, and emit explicit disposition logs.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0005"
+    ],
+    "inputs": [
+      "tools/orchestrator.py",
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-archived-items.json"
+    ],
+    "acceptance_criteria": [
+      "Recovery flow skips archived IDs and logs their disposition instead of requeueing them",
+      "Reproduced stale-run fixture no longer reintroduces RK-AUTO-BACKLOG-0003-F01 or RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
+      "python tools/orchestrator.py status still reports at least one dependency-ready queued item after recovery"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T09:09:45.062502+00:00",
+    "updated_at": "2026-02-26T11:35:44.570346+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` also changed in the working tree due daemon/backlog runtime activity; they were not edited as part of this implementation.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0005",
+    "assigned_agent": "tomas-grell",
+    "recovered_from_stale_in_progress": true,
+    "commit_sha": "dac1a26af6e27ad3ef1d0ccf5192a228e6ac6c81"
   }
 ]

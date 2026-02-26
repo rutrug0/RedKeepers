@@ -287,45 +287,6 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
   },
   {
-    "id": "RK-AUTO-STALL-0005-F01",
-    "title": "Prevent archived-item resurrection during stale in-progress recovery",
-    "description": "Add orchestrator guards so items present in blocked-archived backlog cannot be reinserted into active work queue during stale-run recovery, and emit explicit disposition logs.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-STALL-0005"
-    ],
-    "inputs": [
-      "tools/orchestrator.py",
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/blocked-archived-items.json"
-    ],
-    "acceptance_criteria": [
-      "Recovery flow skips archived IDs and logs their disposition instead of requeueing them",
-      "Reproduced stale-run fixture no longer reintroduces RK-AUTO-BACKLOG-0003-F01 or RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
-      "python tools/orchestrator.py status still reports at least one dependency-ready queued item after recovery"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T09:09:45.062502+00:00",
-    "updated_at": "2026-02-26T11:35:43.000691+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-STALL-0005",
-    "assigned_agent": "tomas-grell",
-    "recovered_from_stale_in_progress": true
-  },
-  {
     "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
     "title": "Escalation: Add regression tests for codex model access preflight paths",
     "description": "Investigate repeated failure for item RK-M1-0004-F01-F01-F01-ESC-F01-F01. Reason: retry threshold exceeded",
@@ -344,15 +305,16 @@
       "Follow-up work items created or item unblocked"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T09:21:18.947180+00:00",
-    "updated_at": "2026-02-26T09:21:18.947180+00:00",
+    "updated_at": "2026-02-26T11:37:52.761716+00:00",
     "estimated_effort": "S",
     "token_budget": 6000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "source_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+    "source_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+    "assigned_agent": "mara-voss"
   }
 ]
