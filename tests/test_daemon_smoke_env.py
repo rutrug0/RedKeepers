@@ -36,6 +36,7 @@ def _write_smoke_fixture(root: Path, *, omit_state: str | None = None) -> None:
         "retry-policy.yaml",
         "model-policy.yaml",
         "commit-guard-rules.yaml",
+        "runtime-policy.yaml",
     ]
 
     for name in queue_files:
@@ -65,7 +66,7 @@ class HealthCheckRequiredFilesTests(unittest.TestCase):
 
         self.assertTrue(any("missing required file:" in err for err in errors))
         self.assertTrue(any("work-items.json" in err for err in errors))
-        self.assertTrue(any("daemon-state.json" in err for err in errors))
+        self.assertTrue(any("agents.json" in err for err in errors))
         self.assertTrue(any("routing-rules.yaml" in err for err in errors))
 
 
@@ -86,7 +87,7 @@ class SmokeDaemonEnvTests(unittest.TestCase):
         text = out.getvalue()
         self.assertIn("Smoke validation passed.", text)
         self.assertIn("queue: active=0 completed=0 blocked=0", text)
-        self.assertIn("policies: parsed=4", text)
+        self.assertIn("policies: parsed=5", text)
         self.assertIn("state: parsed=5", text)
 
     def test_smoke_main_fails_when_required_state_file_missing(self) -> None:

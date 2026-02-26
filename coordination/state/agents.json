@@ -28,7 +28,7 @@
     "display_name": "Sera Kest",
     "role": "frontend",
     "title": "Frontend / Game Client Engineer",
-    "model": "gpt-5.3-codex-spark",
+    "model": "default",
     "reasoning": "standard",
     "responsibilities": [
       "Build web-first client shell and UI",
@@ -40,7 +40,7 @@
     "display_name": "Rowan Hale",
     "role": "design",
     "title": "Game Designer / Balance Designer",
-    "model": "gpt-5.3-codex-spark",
+    "model": "default",
     "reasoning": "medium",
     "responsibilities": [
       "Define core loops and progression pacing",
@@ -52,7 +52,7 @@
     "display_name": "Nika Thorn",
     "role": "content",
     "title": "Content & Narrative Systems",
-    "model": "gpt-5.3-codex-spark",
+    "model": "default",
     "reasoning": "low",
     "responsibilities": [
       "Produce original dark-fantasy themed flavor content",

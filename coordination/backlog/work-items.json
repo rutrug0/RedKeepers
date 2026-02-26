@@ -1,41 +1,5 @@
 [
   {
-    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
-    "title": "Add regression tests for codex model access preflight paths",
-    "description": "Create focused tests that cover startup status preflight failures, fallback selection preflight behavior, and blocked run_history/model_stats fields for unsupported model profiles.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "tools/codex_worker.py",
-      "tools/health_checks.py",
-      "tools/orchestrator.py",
-      "tests"
-    ],
-    "acceptance_criteria": [
-      "status validation fails fast with exact unsupported-model reason when policy model is inaccessible and no usable fallback exists",
-      "execution selects configured fallback when primary model preflight fails and proceeds to run",
-      "blocked run_history and model-stats entries include model_requested/model_used/fallback fields"
-    ],
-    "validation_commands": [
-      "python -m unittest discover -s tests"
-    ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:01:08.893118+00:00",
-    "updated_at": "2026-02-26T09:09:44.278537+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "tomas-grell",
-    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01"
-  },
-  {
     "id": "RK-M0-0008",
     "title": "Wire client shell actions to first-slice backend contracts",
     "description": "Add a thin client adapter layer so settlement tick, build, and train actions invoke backend-first-slice contract endpoints/stubs and update mock state/event feed.",
@@ -275,7 +239,7 @@
     "status": "queued",
     "retry_count": 0,
     "created_at": "2026-02-25T18:32:27.509162+00:00",
-    "updated_at": "2026-02-26T09:09:44.278537+00:00",
+    "updated_at": "2026-02-26T09:11:49.160357+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -308,17 +272,20 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
-    "retry_count": 0,
+    "status": "validating",
+    "retry_count": 1,
     "created_at": "2026-02-25T18:52:07.843340+00:00",
-    "updated_at": "2026-02-26T09:09:44.278537+00:00",
+    "updated_at": "2026-02-26T11:30:46.461394+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC"
+    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC",
+    "assigned_agent": "tomas-grell",
+    "last_failure_reason": "validation failed or commit failed",
+    "recovered_from_stale_in_progress": true
   },
   {
     "id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
@@ -359,131 +326,72 @@
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
   },
   {
-    "id": "RK-AUTO-STALL-0005",
-    "title": "Resolve queue dependency stall",
-    "description": "The daemon detected queued work items that are not dependency-ready because one or more dependencies are currently blocked. Review blocked items, requeue/close obsolete items, and restore runnable work.",
+    "id": "RK-AUTO-STALL-0005-F01",
+    "title": "Prevent archived-item resurrection during stale in-progress recovery",
+    "description": "Add orchestrator guards so items present in blocked-archived backlog cannot be reinserted into active work queue during stale-run recovery, and emit explicit disposition logs.",
     "milestone": "M0",
-    "type": "qa",
+    "type": "feature",
     "priority": "high",
-    "owner_role": "lead",
-    "preferred_agent": "mara-voss",
-    "dependencies": [],
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0005"
+    ],
     "inputs": [
+      "tools/orchestrator.py",
       "coordination/backlog/work-items.json",
-      "coordination/backlog/blocked-items.json",
-      "coordination/runtime/run-history.jsonl"
+      "coordination/backlog/blocked-archived-items.json"
     ],
     "acceptance_criteria": [
-      "At least one dependency-stalled queued item is made runnable or explicitly closed",
-      "Blocked/obsolete queue artifacts are documented or consolidated",
-      "Backlog no longer stalls immediately on next daemon run"
+      "Recovery flow skips archived IDs and logs their disposition instead of requeueing them",
+      "Reproduced stale-run fixture no longer reintroduces RK-AUTO-BACKLOG-0003-F01 or RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
+      "python tools/orchestrator.py status still reports at least one dependency-ready queued item after recovery"
     ],
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "validating",
+    "status": "queued",
     "retry_count": 0,
-    "created_at": "2026-02-26T09:04:52.543064+00:00",
-    "updated_at": "2026-02-26T09:09:37.072681+00:00",
+    "created_at": "2026-02-26T09:09:45.062502+00:00",
+    "updated_at": "2026-02-26T09:13:57.777113+00:00",
     "estimated_effort": "S",
-    "token_budget": 10000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "queue_stall_recovery",
-    "stall_snapshot": [
-      {
-        "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
-        "title": "Add regression tests for codex model access preflight paths",
-        "unmet_dependencies": [
-          "tests package"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-M0-0008",
-        "title": "Wire client shell actions to first-slice backend contracts",
-        "unmet_dependencies": [
-          "RK-M0-0007"
-        ],
-        "blocked_dependencies": [
-          "RK-M0-0007"
-        ]
-      },
-      {
-        "item_id": "RK-M0-0011",
-        "title": "Add first-slice loop smoke checks across backend contracts and client actions",
-        "unmet_dependencies": [
-          "RK-M0-0007",
-          "RK-M0-0008"
-        ],
-        "blocked_dependencies": [
-          "RK-M0-0007"
-        ]
-      },
-      {
-        "item_id": "RK-M1-0005-F02-F01-ESC-F01",
-        "title": "Add queued-item model-policy drift audit after policy updates",
-        "unmet_dependencies": [
-          "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-M0-0012",
-        "title": "Expose first-slice settlement loop contract endpoints",
-        "unmet_dependencies": [
-          "RK-M0-0007"
-        ],
-        "blocked_dependencies": [
-          "RK-M0-0007"
-        ]
-      },
-      {
-        "item_id": "RK-M0-0013",
-        "title": "Add action availability gating and cooldown feedback in client shell",
-        "unmet_dependencies": [
-          "RK-M0-0008",
-          "RK-M0-0012"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-M0-0016",
-        "title": "Automate first-slice visual smoke baselines across desktop/tablet/mobile",
-        "unmet_dependencies": [
-          "RK-M0-0011",
-          "RK-M0-0013"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-AUTO-BACKLOG-0003-F01",
-        "title": "Prototype hero unit system for multiple civilizations",
-        "unmet_dependencies": [
-          "first vertical slice sign-off"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-M1-0005-F02-F01-ESC-F02",
-        "title": "Add frontend visual QA dependency preflight to daemon environment checks",
-        "unmet_dependencies": [
-          "RK-M0-0002"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
-        "title": "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
-        "unmet_dependencies": [
-          "RK-M1-0005-F02-F01-ESC-F03"
-        ],
-        "blocked_dependencies": [
-          "RK-M1-0005-F02-F01-ESC-F03"
-        ]
-      }
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0005",
+    "assigned_agent": "tomas-grell",
+    "recovered_from_stale_in_progress": true
+  },
+  {
+    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
+    "title": "Escalation: Add regression tests for codex model access preflight paths",
+    "description": "Investigate repeated failure for item RK-M1-0004-F01-F01-F01-ESC-F01-F01. Reason: retry threshold exceeded",
+    "milestone": "M1",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
     ],
-    "assigned_agent": "mara-voss"
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T09:21:18.947180+00:00",
+    "updated_at": "2026-02-26T09:21:18.947180+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
   }
 ]

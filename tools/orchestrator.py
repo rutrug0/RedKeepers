@@ -14,6 +14,7 @@ from codex_worker import codex_model_access_preflight_error, run_agent
 from git_guard import changed_files, commit_changes, current_branch, is_git_repo, run_validation_commands
 from health_checks import validate_environment
 from model_stats import ModelStatsTracker
+from python_runtime import enforce_python_environment
 from prompt_builder import build_prompt
 from queue_manager import QueueManager
 from schemas import append_jsonl, load_json, load_yaml_like, save_json_atomic, utc_now_iso
@@ -32,6 +33,16 @@ LOCK_FILE = RUNTIME_DIR / "daemon.lock"
 EVENTS_LOG_PATH = RUNTIME_DIR / "daemon-events.jsonl"
 RUN_HISTORY_PATH = RUNTIME_DIR / "run-history.jsonl"
 LOW_QUEUE_WATERMARK = 2
+
+
+def ensure_python_runtime_configuration() -> tuple[str, str | None]:
+    merged_env, command, executable = enforce_python_environment(root=ROOT)
+    os.environ["REDKEEPERS_PYTHON_CMD"] = merged_env.get("REDKEEPERS_PYTHON_CMD", command)
+    path_value = merged_env.get("PATH") or merged_env.get("Path")
+    if path_value:
+        os.environ["PATH"] = path_value
+        os.environ["Path"] = path_value
+    return command, executable
 
 
 def _bool_env(name: str) -> bool:
@@ -1261,8 +1272,84 @@ def build_status_payload(
     daemon_state: dict[str, Any],
     queue: QueueManager,
     stats: dict[str, Any],
+    agents: dict[str, dict[str, Any]] | None = None,
+    routing_rules: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return {"daemon": daemon_state, "queue": queue_counts(queue), "agent_stats": stats}
+    payload: dict[str, Any] = {"daemon": daemon_state, "queue": queue_counts(queue), "agent_stats": stats}
+    if agents is not None and routing_rules is not None:
+        payload["agent_workload"] = build_agent_workload_payload(queue=queue, agents=agents, routing_rules=routing_rules)
+    return payload
+
+
+def build_agent_workload_payload(
+    *,
+    queue: QueueManager,
+    agents: dict[str, dict[str, Any]],
+    routing_rules: dict[str, Any],
+) -> dict[str, Any]:
+    completed_ids = {str(item.get("id", "")).strip() for item in queue.completed if isinstance(item, dict)}
+    counts: dict[str, dict[str, int]] = {}
+
+    for agent_id in agents:
+        counts[agent_id] = {
+            "ready": 0,
+            "waiting": 0,
+            "running": 0,
+            "blocked": 0,
+            "completed": 0,
+            "open": 0,
+        }
+
+    def _owner_agent(item: dict[str, Any]) -> str:
+        agent_id, _cfg = select_agent_for_item(item, agents, routing_rules)
+        if agent_id not in counts:
+            counts[agent_id] = {
+                "ready": 0,
+                "waiting": 0,
+                "running": 0,
+                "blocked": 0,
+                "completed": 0,
+                "open": 0,
+            }
+        return agent_id
+
+    def _is_dependency_ready(item: dict[str, Any]) -> bool:
+        deps_raw = item.get("dependencies", [])
+        if not isinstance(deps_raw, list):
+            return False
+        deps = [str(dep).strip() for dep in deps_raw if str(dep).strip()]
+        return all(dep in completed_ids for dep in deps)
+
+    for item in queue.active:
+        if not isinstance(item, dict):
+            continue
+        agent_id = _owner_agent(item)
+        status = str(item.get("status", "")).strip().lower()
+        if status == "queued":
+            if _is_dependency_ready(item):
+                counts[agent_id]["ready"] += 1
+            else:
+                counts[agent_id]["waiting"] += 1
+            counts[agent_id]["open"] += 1
+            continue
+        if status in {"assigned", "running", "validating"}:
+            counts[agent_id]["running"] += 1
+            counts[agent_id]["open"] += 1
+            continue
+
+    for item in queue.blocked:
+        if not isinstance(item, dict):
+            continue
+        agent_id = _owner_agent(item)
+        counts[agent_id]["blocked"] += 1
+
+    for item in queue.completed:
+        if not isinstance(item, dict):
+            continue
+        agent_id = _owner_agent(item)
+        counts[agent_id]["completed"] += 1
+
+    return {"agents": counts}
 
 
 def select_agent_for_item(item: dict[str, Any], agents: dict[str, dict[str, Any]], routing: dict[str, Any]) -> tuple[str, dict[str, Any]]:
@@ -1292,7 +1379,6 @@ def resolve_execution_profile(
 
     model = _clean(policy_cfg.get("model")) or _clean(agent_cfg.get("model"))
     reasoning = _clean(policy_cfg.get("reasoning")) or _clean(agent_cfg.get("reasoning"))
-    fallback_model = _clean(policy_cfg.get("fallback_model")) or _clean(model_policy.get("default_fallback_model"))
     selection_reason = "agent_policy"
 
     def _effort_rank(value: Any) -> int | None:
@@ -1351,36 +1437,26 @@ def resolve_execution_profile(
 
             light_model = _clean(light_cfg.get("model"))
             light_reasoning = _clean(light_cfg.get("reasoning"))
-            light_fallback = _clean(light_cfg.get("fallback_model"))
             if role_ok and priority_ok and effort_ok and token_ok and light_model:
                 model = light_model
                 selection_reason = "lightweight_task_override"
             if role_ok and priority_ok and effort_ok and token_ok and light_reasoning:
                 reasoning = light_reasoning
-            if role_ok and priority_ok and effort_ok and token_ok and light_fallback:
-                fallback_model = light_fallback
 
         should_upgrade = priority == "critical" or retry_count > 0
         escalation_cfg = (model_policy.get("escalation_upgrade", {}) or {}).get("critical_or_repeated_failure", {})
         if should_upgrade and isinstance(escalation_cfg, dict):
             upgraded_model = _clean(escalation_cfg.get("model"))
             upgraded_reasoning = _clean(escalation_cfg.get("reasoning"))
-            upgraded_fallback = _clean(escalation_cfg.get("fallback_model"))
             if upgraded_model:
                 model = upgraded_model
                 selection_reason = "escalation_upgrade"
             if upgraded_reasoning:
                 reasoning = upgraded_reasoning
-            if upgraded_fallback:
-                fallback_model = upgraded_fallback
-
-    if fallback_model == model:
-        fallback_model = None
 
     return {
         "model": model,
         "reasoning": reasoning,
-        "fallback_model": fallback_model,
         "selection_reason": selection_reason,
     }
 
@@ -1596,12 +1672,25 @@ def frontend_visual_environment_blocker_reason(validation_results: list[dict[str
         command = str(result.get("command", ""))
         effective_command = str(result.get("effective_command", ""))
         command_text = f"{command}\n{effective_command}".lower()
-        if "frontend_visual_smoke.py" not in command_text:
-            continue
 
         stdout_tail = str(result.get("stdout_tail", ""))
         stderr_tail = str(result.get("stderr_tail", ""))
         combined_text = f"{stdout_tail}\n{stderr_tail}"
+        combined_lower = combined_text.lower()
+
+        # If status preflight reports missing Playwright for frontend visual QA,
+        # treat it as an environment blocker instead of a retryable validation failure.
+        if "tools/orchestrator.py status" in command_text:
+            if "frontend visual qa is enabled" in combined_lower and "playwright is not importable" in combined_lower:
+                for line in combined_text.splitlines():
+                    stripped = line.strip().lstrip("- ").strip()
+                    lowered = stripped.lower()
+                    if "frontend visual qa is enabled" in lowered and "playwright is not importable" in lowered:
+                        return f"Frontend visual smoke blocked by environment: {stripped}"
+                return "Frontend visual smoke blocked by environment: Playwright is not importable in the active Python interpreter."
+
+        if "frontend_visual_smoke.py" not in command_text:
+            continue
 
         summary = _extract_frontend_visual_blocked_summary(combined_text)
         report_status = ""
@@ -1670,6 +1759,7 @@ def process_one(
     model_stats_tracker: ModelStatsTracker | None = None,
     model_stats: dict[str, Any] | None = None,
 ) -> int:
+    ensure_python_runtime_configuration()
     repaired = repair_backlog_archive_duplicates(ROOT)
     if repaired["completed_removed"] or repaired["blocked_removed"]:
         emit_event(
@@ -1781,7 +1871,17 @@ def process_one(
             queue_counts=queue_counts(queue),
             milestone_progress=milestone_progress(queue),
         )
-        print(render_status(build_status_payload(daemon_state=daemon_state, queue=queue, stats=stats)))
+        print(
+            render_status(
+                build_status_payload(
+                    daemon_state=daemon_state,
+                    queue=queue,
+                    stats=stats,
+                    agents=agents,
+                    routing_rules=policies["routing"],
+                )
+            )
+        )
         return 0
 
     agent_id, agent_cfg = select_agent_for_item(item, agents, policies["routing"])
@@ -1793,8 +1893,6 @@ def process_one(
     )
     requested_model = execution_profile.get("model")
     selected_model = requested_model
-    preflight_fallback_model = execution_profile.get("fallback_model")
-    selected_fallback_used = False
     emit_event(
         "select",
         "Selected work item",
@@ -1807,7 +1905,6 @@ def process_one(
         milestone=item.get("milestone"),
         model=requested_model,
         reasoning=execution_profile.get("reasoning"),
-        fallback_model=execution_profile.get("fallback_model"),
         model_selection=execution_profile.get("selection_reason"),
     )
 
@@ -1828,38 +1925,22 @@ def process_one(
             last_run_summary=f"Dry run selected {item['id']} for {agent_id}",
             lock_held=True,
         )
-        print(render_status(build_status_payload(daemon_state=daemon_state, queue=queue, stats=stats)))
+        print(
+            render_status(
+                build_status_payload(
+                    daemon_state=daemon_state,
+                    queue=queue,
+                    stats=stats,
+                    agents=agents,
+                    routing_rules=policies["routing"],
+                )
+            )
+        )
         return 0
 
     preflight_error = codex_model_access_preflight_error(requested_model or "")
-    preflight_fallback_error: str | None = None
-    if preflight_error is not None and preflight_fallback_model:
-        preflight_fallback_error = codex_model_access_preflight_error(preflight_fallback_model)
-        if preflight_fallback_error is None:
-            selected_model = preflight_fallback_model
-            selected_fallback_used = True
-            emit_event(
-                "model_preflight",
-                "Configured model not accessible; using configured fallback model",
-                item_id=item["id"],
-                agent_id=agent_id,
-                requested_model=requested_model,
-                selected_model=selected_model,
-                reason=preflight_error,
-            )
-
-    if preflight_error is not None and not selected_fallback_used:
-        blocker_reason = (
-            f"{preflight_error}. Remediation: update model-policy.yaml to an accessible model or configure an "
-            f"accessible fallback_model for this agent/escalation path."
-            if preflight_fallback_model is None
-            else (
-                f"{preflight_error}. Fallback model '{preflight_fallback_model}' is also not accessible: "
-                f"{preflight_fallback_error}."
-                " Remediation: update model-policy.yaml to an accessible model or configure an "
-                "accessible fallback model."
-            )
-        )
+    if preflight_error is not None:
+        blocker_reason = f"{preflight_error}. Remediation: update model-policy.yaml to an accessible model."
         emit_event("blocked", "Model preflight blocked execution", item_id=item["id"], agent_id=agent_id, reason=blocker_reason)
         emit_event(
             "resolution",
@@ -1906,7 +1987,7 @@ def process_one(
                 "exit_code": 1,
                 "model_requested": requested_model,
                 "model_used": selected_model,
-                "fallback_used": selected_fallback_used,
+                "fallback_used": False,
             },
         )
         return 0
@@ -1934,12 +2015,8 @@ def process_one(
         model=selected_model,
         requested_model=requested_model,
         reasoning=execution_profile.get("reasoning"),
-        fallback_model=execution_profile.get("fallback_model"),
         model_selection=execution_profile.get("selection_reason"),
     )
-    runtime_fallback_model = execution_profile.get("fallback_model")
-    if selected_fallback_used and runtime_fallback_model == selected_model:
-        runtime_fallback_model = None
     worker_started = time.monotonic()
     worker_timeout = int(policies.get("retry", {}).get("worker_timeout_seconds", 900))
     worker_box: dict[str, Any] = {}
@@ -1951,7 +2028,6 @@ def process_one(
                 agent_id=agent_id,
                 prompt=prompt,
                 model=selected_model,
-                fallback_model=runtime_fallback_model,
                 timeout_seconds=worker_timeout,
                 dry_run=False,
             )
@@ -1984,7 +2060,7 @@ def process_one(
     run_used_model = worker.used_model
     if run_used_model is None:
         run_used_model = worker.requested_model
-    run_fallback_used = selected_fallback_used or worker.fallback_used
+    run_fallback_used = worker.fallback_used
     emit_event(
         "agent_end",
         "Agent execution finished",
@@ -2388,7 +2464,17 @@ def process_one(
                 queue_counts=queue_counts(queue),
                 milestone_progress=milestone_progress(queue),
             )
-            print(render_status(build_status_payload(daemon_state=daemon_state, queue=queue, stats=stats)))
+            print(
+                render_status(
+                    build_status_payload(
+                        daemon_state=daemon_state,
+                        queue=queue,
+                        stats=stats,
+                        agents=agents,
+                        routing_rules=policies["routing"],
+                    )
+                )
+            )
             return 3
 
         emit_event("failed", "Agent run failed; item will be retried or escalated", item_id=item["id"], agent_id=agent_id, reason=worker.summary)
@@ -2469,11 +2555,22 @@ def process_one(
         queue_counts=queue_counts(queue),
         milestone_progress=milestone_progress(queue),
     )
-    print(render_status(build_status_payload(daemon_state=daemon_state, queue=queue, stats=stats)))
+    print(
+        render_status(
+            build_status_payload(
+                daemon_state=daemon_state,
+                queue=queue,
+                stats=stats,
+                agents=agents,
+                routing_rules=policies["routing"],
+            )
+        )
+    )
     return 0
 
 
 def cmd_status() -> int:
+    ensure_python_runtime_configuration()
     migrate_legacy_runtime_files()
     repair_backlog_archive_duplicates(ROOT)
     errors = validate_environment(ROOT)
@@ -2484,12 +2581,23 @@ def cmd_status() -> int:
         return 2
 
     agents = load_agent_catalog(ROOT)
+    policies = load_policies(ROOT)
     queue = QueueManager(ROOT)
     queue.load()
     dependency_warnings = normalize_queued_item_dependencies(queue, archived_ids=load_blocked_archived_ids())
     stats = StatsTracker(ROOT, agents).load()
     daemon_state = load_json(DAEMON_STATE_PATH, default_daemon_state())
-    print(render_status(build_status_payload(daemon_state=daemon_state, queue=queue, stats=stats)))
+    print(
+        render_status(
+            build_status_payload(
+                daemon_state=daemon_state,
+                queue=queue,
+                stats=stats,
+                agents=agents,
+                routing_rules=policies["routing"],
+            )
+        )
+    )
     if dependency_warnings:
         print("Dependency normalization warnings:")
         for line in format_dependency_warning_lines(dependency_warnings):
@@ -2498,6 +2606,7 @@ def cmd_status() -> int:
 
 
 def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool, keep_alive: bool) -> int:
+    python_command, python_executable = ensure_python_runtime_configuration()
     migrate_legacy_runtime_files()
     lock = DaemonLock(os.getpid())
     model_stats_tracker: ModelStatsTracker | None = None
@@ -2532,6 +2641,8 @@ def cmd_run(*, once: bool, sleep_seconds: int, dry_run: bool, verbose: bool, kee
         dry_run=dry_run,
         keep_alive=keep_alive,
         session_id=session_id,
+        python_command=python_command,
+        python_executable=python_executable,
     )
     set_daemon_state(lock_held=True, state="idle", last_error=None, session_id=session_id)
     try:

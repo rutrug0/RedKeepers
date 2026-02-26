@@ -78,6 +78,7 @@ def main() -> int:
         "retry-policy.yaml",
         "model-policy.yaml",
         "commit-guard-rules.yaml",
+        "runtime-policy.yaml",
     ]
     parsed_policies = 0
     for name in policy_files:

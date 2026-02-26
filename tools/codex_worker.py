@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from python_runtime import enforce_python_environment
+
 DEFAULT_CODEX_COMMAND = "codex exec"
 _MODEL_ACCESS_PRECHECK_TIMEOUT_SECONDS = 20
 _MODEL_ACCESS_PRECHECK_CACHE: dict[str, str | None] = {}
@@ -211,6 +213,9 @@ def codex_model_access_preflight_error(model: str) -> str | None:
         _MODEL_ACCESS_PRECHECK_CACHE[normalized_model] = command_error
         return command_error
 
+    env_for_worker, _python_command, _python_executable = enforce_python_environment(
+        root=Path(__file__).resolve().parents[1]
+    )
     probe_command = _with_model_arg(_without_model_arg(command), normalized_model)
     proc, immediate_error = _execute_codex(
         command=probe_command,
@@ -218,6 +223,7 @@ def codex_model_access_preflight_error(model: str) -> str | None:
         project_root=Path(__file__).resolve().parents[1],
         timeout_seconds=_MODEL_ACCESS_PRECHECK_TIMEOUT_SECONDS,
         tokens_in_est=_estimate_tokens("Health check"),
+        env=env_for_worker,
     )
     if immediate_error is not None:
         immediate_error.requested_model = model
@@ -276,6 +282,7 @@ def _execute_codex(
     project_root: Path,
     timeout_seconds: int,
     tokens_in_est: int,
+    env: dict[str, str] | None = None,
 ) -> tuple[subprocess.CompletedProcess[str] | None, WorkerResult | None]:
     try:
         proc = subprocess.run(
@@ -288,6 +295,7 @@ def _execute_codex(
             cwd=project_root,
             timeout=timeout_seconds,
             check=False,
+            env=env,
         )
     except FileNotFoundError as exc:
         return None, WorkerResult(
@@ -339,15 +347,12 @@ def run_agent(
     agent_id: str,
     prompt: str,
     model: str | None = None,
-    fallback_model: str | None = None,
     timeout_seconds: int = 900,
     dry_run: bool = False,
 ) -> WorkerResult:
     requested_model = (model or "").strip() or None
     selected_model = _normalize_model_name(requested_model)
-    fallback_model_clean = _normalize_model_name((fallback_model or "").strip() or None)
     force_default_model = os.environ.get("REDKEEPERS_USE_DEFAULT_MODEL", "").strip().lower() in {"1", "true", "yes", "on"}
-    precheck_forced_default = False
 
     if dry_run:
         return WorkerResult(
@@ -393,27 +398,19 @@ def run_agent(
 
     if force_default_model:
         selected_model = None
-        fallback_model_clean = None
-    elif selected_model:
-        precheck_error = codex_model_access_preflight_error(selected_model)
-        if precheck_error and _looks_like_model_access_error(precheck_error, ""):
-            precheck_forced_default = True
-            selected_model = None
-            fallback_model_clean = None
 
     tokens_in_est = _estimate_tokens(prompt)
     used_model = selected_model
-    fallback_used = False
-    default_model_retry_used = False
+    env_for_worker, _python_command, _python_executable = enforce_python_environment(root=project_root)
 
     effective_command = _with_model_arg(command, selected_model)
-    executed_command = list(effective_command)
     proc, immediate_error = _execute_codex(
         command=effective_command,
         prompt=prompt,
         project_root=project_root,
         timeout_seconds=timeout_seconds,
         tokens_in_est=tokens_in_est,
+        env=env_for_worker,
     )
     if immediate_error is not None:
         immediate_error.requested_model = requested_model
@@ -424,69 +421,7 @@ def run_agent(
     stdout = (proc.stdout or "").strip()
     stderr = (proc.stderr or "").strip()
 
-    can_retry_with_fallback = (
-        proc.returncode != 0
-        and selected_model is not None
-        and fallback_model_clean is not None
-        and fallback_model_clean != selected_model
-        and _looks_like_model_access_error(stdout, stderr)
-    )
-    if can_retry_with_fallback:
-        retry_command = _with_model_arg(command, fallback_model_clean)
-        retry_proc, retry_error = _execute_codex(
-            command=retry_command,
-            prompt=prompt,
-            project_root=project_root,
-            timeout_seconds=timeout_seconds,
-            tokens_in_est=tokens_in_est,
-        )
-        if retry_error is not None:
-            retry_error.requested_model = requested_model
-            retry_error.used_model = fallback_model_clean
-            retry_error.fallback_used = True
-            return retry_error
-        if retry_proc is not None:
-            proc = retry_proc
-            stdout = (proc.stdout or "").strip()
-            stderr = (proc.stderr or "").strip()
-            used_model = fallback_model_clean
-            fallback_used = True
-            executed_command = list(retry_command)
-
-    can_retry_with_default = (
-        proc.returncode != 0
-        and selected_model is not None
-        and _looks_like_model_access_error(stdout, stderr)
-    )
-    if can_retry_with_default:
-        default_command = _without_model_arg(command)
-        if default_command and default_command != executed_command:
-            default_proc, default_error = _execute_codex(
-                command=default_command,
-                prompt=prompt,
-                project_root=project_root,
-                timeout_seconds=timeout_seconds,
-                tokens_in_est=tokens_in_est,
-            )
-            if default_error is not None:
-                default_error.requested_model = requested_model
-                default_error.used_model = None
-                default_error.fallback_used = fallback_used
-                return default_error
-            if default_proc is not None:
-                proc = default_proc
-                stdout = (proc.stdout or "").strip()
-                stderr = (proc.stderr or "").strip()
-                used_model = None
-                default_model_retry_used = True
-
     summary = stdout.splitlines()[-1] if stdout else (stderr.splitlines()[-1] if stderr else "No output")
-    if fallback_used:
-        summary = f"{summary} (fallback model used: {used_model})"
-    if default_model_retry_used:
-        summary = f"{summary} (default model retry used)"
-    if precheck_forced_default:
-        summary = f"{summary} (model precheck switched to default model)"
     if force_default_model:
         summary = f"{summary} (default model forced by REDKEEPERS_USE_DEFAULT_MODEL)"
     status = "completed" if proc.returncode == 0 else "failed"
@@ -505,5 +440,5 @@ def run_agent(
         blocker_reason=summary[:500] if status == "blocked" else None,
         requested_model=requested_model,
         used_model=used_model,
-        fallback_used=fallback_used,
+        fallback_used=False,
     )

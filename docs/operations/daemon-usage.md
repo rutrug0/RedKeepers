@@ -2,6 +2,7 @@
 
 ## Commands
 
+- `run-daemon.bat [status|once|run ...]` : Windows launcher that pins daemon + validation + agent subprocesses to the configured Python interpreter
 - `python tools/orchestrator.py status` : show high-level daemon and queue status
 - `python tools/orchestrator.py once --dry-run` : select next item without running an agent
 - `python tools/orchestrator.py once` : process one item
@@ -20,6 +21,10 @@
 - `REDKEEPERS_USE_DEFAULT_MODEL=1` : do not pin `--model` in worker calls; use the Codex account default model (recommended when account/model entitlement differs from policy)
 - `REDKEEPERS_AGENT_HEARTBEAT_SECONDS` : override heartbeat interval (default `60`, minimum `5`)
 - `REDKEEPERS_COLOR_LOGS=auto|1|0` : colorize daemon event output (`auto` uses TTY detection; `NO_COLOR` disables colors)
+
+Python runtime pinning:
+- `coordination/policies/runtime-policy.yaml` can set `python_command` to a specific interpreter path.
+- Daemon enforces this launcher for validation commands and injects it into worker/subagent environment (`REDKEEPERS_PYTHON_CMD` + PATH precedence).
 
 ## Smoke Validation (PowerShell)
 

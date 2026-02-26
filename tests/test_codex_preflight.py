@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -127,8 +128,7 @@ class HealthCheckPreflightIntegrationTests(unittest.TestCase):
             errors,
             [
                 "model 'gpt-unsupported' is not accessible: model is unsupported for this account. Remediation: "
-                "update model-policy.yaml to an accessible model, or configure an accessible fallback_model for this "
-                "agent/escalation path.",
+                "update model-policy.yaml to an accessible model.",
             ]
         )
 
@@ -179,8 +179,7 @@ class HealthCheckPreflightIntegrationTests(unittest.TestCase):
             errors,
             [
                 "model 'gpt-unsupported-escalation' is not accessible: escalation model is unsupported for this account. "
-                "Remediation: update model-policy.yaml to an accessible model, or configure an accessible fallback_model "
-                "for this agent/escalation path.",
+                "Remediation: update model-policy.yaml to an accessible model.",
             ]
         )
 
@@ -197,6 +196,24 @@ class HealthCheckPreflightIntegrationTests(unittest.TestCase):
                 errors = health_checks.validate_environment(root)
 
         self.assertIn("Codex command preflight failed: test", errors)
+
+    def test_validate_environment_reports_invalid_runtime_python_command(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._write_required_files(root)
+            (root / "coordination" / "policies" / "runtime-policy.yaml").write_text(
+                json.dumps({"python_command": "__missing_python_for_test__"}) + "\n",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(
+                health_checks,
+                "codex_command_preflight_error",
+                return_value=None,
+            ):
+                errors = health_checks.validate_environment(root)
+
+        self.assertTrue(any("runtime-policy.yaml python_command is configured but not resolvable" in err for err in errors))
 
     def test_validate_environment_ignores_non_definitive_model_precheck_timeouts(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -223,6 +240,107 @@ class HealthCheckPreflightIntegrationTests(unittest.TestCase):
 
         self.assertFalse(any("model 'gpt-5.3-codex-spark' is not accessible" in err for err in errors))
 
+    def test_validate_environment_reports_playwright_missing_when_frontend_visual_qa_enabled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._write_required_files(root)
+            (root / "coordination" / "policies" / "commit-guard-rules.yaml").write_text(
+                json.dumps({"frontend_visual_qa": {"enabled": True}}) + "\n",
+                encoding="utf-8",
+            )
+
+            with (
+                mock.patch.object(health_checks, "_playwright_import_error", return_value="No module named 'playwright'"),
+                mock.patch.object(health_checks, "codex_command_preflight_error", return_value=None),
+            ):
+                errors = health_checks.validate_environment(root)
+
+        joined = "\n".join(errors)
+        self.assertIn("frontend visual QA is enabled but Playwright is not importable", joined)
+        self.assertIn("-m pip install playwright pillow", joined)
+        self.assertIn("-m playwright install chromium", joined)
+
+    def test_playwright_preflight_probe_uses_validation_python_launcher_override(self) -> None:
+        with (
+            mock.patch.dict(health_checks.os.environ, {"REDKEEPERS_PYTHON_CMD": "py -3.11"}, clear=False),
+            mock.patch.object(
+                health_checks.subprocess,
+                "run",
+                return_value=subprocess.CompletedProcess(
+                    args="",
+                    returncode=1,
+                    stdout="",
+                    stderr="ModuleNotFoundError: No module named 'playwright'\n",
+                ),
+            ) as run_mock,
+        ):
+            error = health_checks._playwright_import_error()
+
+        self.assertIsNotNone(error)
+        assert error is not None
+        self.assertIn("No module named 'playwright'", error)
+        self.assertTrue(run_mock.call_args.args[0].startswith("py -3.11 -c "))
+        self.assertTrue(run_mock.call_args.kwargs["shell"])
+
+    def test_validate_environment_playwright_remediation_uses_python_cmd_override(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._write_required_files(root)
+            (root / "coordination" / "policies" / "commit-guard-rules.yaml").write_text(
+                json.dumps({"frontend_visual_qa": {"enabled": True}}) + "\n",
+                encoding="utf-8",
+            )
+
+            with (
+                mock.patch.dict(health_checks.os.environ, {"REDKEEPERS_PYTHON_CMD": "py -3.11"}, clear=False),
+                mock.patch.object(health_checks, "_playwright_import_error", return_value="No module named 'playwright'"),
+                mock.patch.object(health_checks, "codex_command_preflight_error", return_value=None),
+            ):
+                errors = health_checks.validate_environment(root)
+
+        joined = "\n".join(errors)
+        self.assertIn(
+            "active Python interpreter used by orchestrator validation commands (py -3.11)",
+            joined,
+        )
+        self.assertIn("py -3.11 -m pip install playwright pillow", joined)
+        self.assertIn("py -3.11 -m playwright install chromium", joined)
+
+    def test_validate_environment_skips_playwright_error_when_frontend_visual_qa_disabled_by_env(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._write_required_files(root)
+            (root / "coordination" / "policies" / "commit-guard-rules.yaml").write_text(
+                json.dumps({"frontend_visual_qa": {"enabled": True}}) + "\n",
+                encoding="utf-8",
+            )
+
+            with (
+                mock.patch.dict(health_checks.os.environ, {"REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA": "0"}, clear=False),
+                mock.patch.object(health_checks, "_playwright_import_error", return_value="No module named 'playwright'"),
+                mock.patch.object(health_checks, "codex_command_preflight_error", return_value=None),
+            ):
+                errors = health_checks.validate_environment(root)
+
+        self.assertFalse(any("Playwright is not importable" in err for err in errors))
+
+    def test_validate_environment_has_no_frontend_visual_error_when_playwright_is_importable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._write_required_files(root)
+            (root / "coordination" / "policies" / "commit-guard-rules.yaml").write_text(
+                json.dumps({"frontend_visual_qa": {"enabled": True}}) + "\n",
+                encoding="utf-8",
+            )
+
+            with (
+                mock.patch.object(health_checks, "_playwright_import_error", return_value=None),
+                mock.patch.object(health_checks, "codex_command_preflight_error", return_value=None),
+            ):
+                errors = health_checks.validate_environment(root)
+
+        self.assertFalse(any("Playwright is not importable" in err for err in errors))
+
     @staticmethod
     def _write_required_files(root: Path) -> None:
         required_json_lists = [
@@ -239,6 +357,7 @@ class HealthCheckPreflightIntegrationTests(unittest.TestCase):
             root / "coordination" / "policies" / "retry-policy.yaml",
             root / "coordination" / "policies" / "model-policy.yaml",
             root / "coordination" / "policies" / "commit-guard-rules.yaml",
+            root / "coordination" / "policies" / "runtime-policy.yaml",
         ]
 
         for path in required_json_lists:

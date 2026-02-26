@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import os
 import re
 import subprocess
-import sys
 from pathlib import Path
 from typing import Any
 
+from python_runtime import preferred_python_command
 
 def _run(command: str, cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
@@ -19,25 +18,8 @@ def _run(command: str, cwd: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
-def _quote_if_needed(raw: str) -> str:
-    text = raw.strip()
-    if not text:
-        return text
-    if text.startswith('"') and text.endswith('"'):
-        return text
-    if " " in text:
-        return f'"{text}"'
-    return text
-
-
 def _preferred_python_command() -> str:
-    override = os.environ.get("REDKEEPERS_PYTHON_CMD", "").strip()
-    if override:
-        return override
-    executable = (sys.executable or "").strip()
-    if executable:
-        return _quote_if_needed(executable)
-    return "python"
+    return preferred_python_command(root=Path(__file__).resolve().parents[1])
 
 
 def _normalize_validation_command(command: str) -> str:

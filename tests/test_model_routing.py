@@ -22,14 +22,12 @@ class ExecutionProfileTests(unittest.TestCase):
                     "rowan-hale": {
                         "model": "GPT-5.3-Codex-Spark",
                         "reasoning": "medium",
-                        "fallback_model": "gpt-5-mini",
                     }
                 }
             },
         )
         self.assertEqual(profile["model"], "GPT-5.3-Codex-Spark")
         self.assertEqual(profile["reasoning"], "medium")
-        self.assertEqual(profile["fallback_model"], "gpt-5-mini")
         self.assertEqual(profile["selection_reason"], "agent_policy")
 
     def test_agent_catalog_model_used_when_policy_missing(self) -> None:
@@ -40,7 +38,6 @@ class ExecutionProfileTests(unittest.TestCase):
         )
         self.assertEqual(profile["model"], "gpt-5-mini")
         self.assertEqual(profile["reasoning"], "low")
-        self.assertIsNone(profile["fallback_model"])
         self.assertEqual(profile["selection_reason"], "agent_policy")
 
     def test_retry_count_upgrades_to_escalation_model(self) -> None:
@@ -52,7 +49,6 @@ class ExecutionProfileTests(unittest.TestCase):
                     "tomas-grell": {
                         "model": "GPT-5.3-Codex-Spark",
                         "reasoning": "medium",
-                        "fallback_model": "gpt-5-mini",
                     }
                 },
                 "escalation_upgrade": {
@@ -77,7 +73,6 @@ class ExecutionProfileTests(unittest.TestCase):
                     "nika-thorn": {
                         "model": "GPT-5.3-Codex-Spark",
                         "reasoning": "low",
-                        "fallback_model": "gpt-5-mini",
                     }
                 },
                 "escalation_upgrade": {

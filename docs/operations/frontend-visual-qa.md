@@ -73,3 +73,7 @@ If you want to force launcher style, set:
 ```powershell
 $env:REDKEEPERS_PYTHON_CMD='py'
 ```
+
+For stable daemon/agent behavior on Windows, prefer launching via `run-daemon.bat` and keep
+`coordination/policies/runtime-policy.yaml` `python_command` aligned with the interpreter where
+Playwright is installed.

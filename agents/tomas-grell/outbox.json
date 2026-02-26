@@ -394,5 +394,124 @@
       "coordination/backlog/work-items.json",
       "agents/tomas-grell/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-26T10:00:00Z",
+    "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01",
+    "status": "completed",
+    "summary": "Added regression coverage for codex model-access preflight paths across startup validation, fallback execution selection, and blocked run metadata recording.",
+    "checks": [
+      "python -m unittest discover -s tests -p test_model_preflight_paths.py"
+    ],
+    "changed_files": [
+      "tests/test_model_preflight_paths.py",
+      "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
+    "ts": "2026-02-26T09:17:13.4821863Z",
+    "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+    "status": "completed",
+    "summary": "Stabilized and landed focused regression tests for codex model-access preflight paths: startup unsupported-model validation, configured fallback selection during preflight, and blocked run metadata fields in run history/model stats.",
+    "checks": [
+      "python -m unittest tests/test_model_preflight_paths.py (pass)",
+      "python -m unittest discover -s tests (fails: pre-existing failures in tests/test_daemon_smoke_env.py and tests/test_m1_scaffold_smoke.py)"
+    ],
+    "changed_files": [
+      "tests/test_model_preflight_paths.py",
+      "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
+    "ts": "2026-02-26T09:19:58.8934924Z",
+    "item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+    "status": "completed",
+    "summary": "Validated codex model-access preflight regression coverage for unsupported-model startup failure, configured fallback selection on preflight failure, and blocked run-history/model-stats model metadata fields.",
+    "checks": [
+      "python -m unittest tests.test_model_preflight_paths (pass)",
+      "python -m unittest tests.test_codex_preflight (pass)",
+      "python -m unittest discover -s tests (fails: pre-existing unrelated failures in tests/test_daemon_smoke_env.py, tests/test_m1_scaffold_smoke.py, tests/test_queue_integrity.py)"
+    ],
+    "changed_files": [
+      "agents/tomas-grell/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Stabilize full unittest discover baseline after recent queue-status changes",
+        "owner_role": "qa",
+        "milestone": "M1",
+        "priority": "normal",
+        "description": "Resolve current non-preflight failures surfaced by `python -m unittest discover -s tests` so feature-specific regression runs are not masked by unrelated baseline failures.",
+        "acceptance_criteria": [
+          "python -m unittest discover -s tests passes without failures in tests/test_daemon_smoke_env.py",
+          "python -m unittest discover -s tests passes without failures in tests/test_m1_scaffold_smoke.py",
+          "python -m unittest discover -s tests passes without failures in tests/test_queue_integrity.py"
+        ],
+        "inputs": [
+          "tests/test_daemon_smoke_env.py",
+          "tests/test_m1_scaffold_smoke.py",
+          "tests/test_queue_integrity.py",
+          "tools/orchestrator.py",
+          "client-web/index.html"
+        ],
+        "validation_commands": [
+          "python -m unittest discover -s tests"
+        ]
+      }
+    ]
+  },
+  {
+    "ts": "2026-02-26T09:22:58.452184Z",
+    "item_id": "RK-M1-0005-F02-F01-ESC-F02",
+    "status": "completed",
+    "summary": "Added frontend visual QA dependency preflight in environment validation so daemon status/run now fail fast with active-interpreter Playwright import errors and explicit remediation commands for Playwright + Chromium runtime.",
+    "checks": [
+      "python -m unittest tests.test_codex_preflight -v (pass)",
+      "python tools/orchestrator.py status (fails as expected: frontend visual QA enabled and playwright missing in active interpreter)",
+      "$env:REDKEEPERS_ENABLE_FRONTEND_VISUAL_QA='0'; python tools/orchestrator.py status (pass)"
+    ],
+    "changed_files": [
+      "tools/health_checks.py",
+      "tests/test_codex_preflight.py",
+      "agents/tomas-grell/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Provision Playwright + Chromium in daemon Python runtime",
+        "owner_role": "platform",
+        "milestone": "M1",
+        "priority": "high",
+        "description": "Install frontend visual QA runtime dependencies in the exact Python interpreter used by the daemon so frontend visual smoke checks can execute instead of blocking during preflight.",
+        "acceptance_criteria": [
+          "Running `python tools/orchestrator.py status` no longer reports Playwright import preflight errors when frontend_visual_qa is enabled",
+          "Running `python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5` launches Chromium successfully in the daemon environment"
+        ],
+        "inputs": [
+          "tools/health_checks.py",
+          "tools/frontend_visual_smoke.py",
+          "coordination/policies/commit-guard-rules.yaml",
+          "docs/operations/frontend-visual-qa.md"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status",
+          "python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5"
+        ]
+      }
+    ]
+  },
+  {
+    "ts": "2026-02-26T11:29:07.6837593Z",
+    "item_id": "RK-M1-0005-F02-F01-ESC-F02",
+    "status": "completed",
+    "summary": "Refined frontend visual QA dependency preflight messaging to explicitly reference the active Python interpreter used by orchestrator validation commands, while preserving actionable Playwright and Chromium remediation guidance.",
+    "checks": [
+      "python -m unittest tests.test_codex_preflight tests.test_frontend_visual_status_blocked_detection (pass)",
+      "python tools/orchestrator.py status (pass)"
+    ],
+    "changed_files": [
+      "tools/health_checks.py",
+      "tests/test_codex_preflight.py",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]

@@ -15,17 +15,17 @@
       "daily_token_budget": 300000
     },
     "sera-kest": {
-      "model": "gpt-5.3-codex-spark",
+      "model": "default",
       "reasoning": "standard",
       "daily_token_budget": 220000
     },
     "rowan-hale": {
-      "model": "gpt-5.3-codex-spark",
+      "model": "default",
       "reasoning": "medium",
       "daily_token_budget": 120000
     },
     "nika-thorn": {
-      "model": "gpt-5.3-codex-spark",
+      "model": "default",
       "reasoning": "low",
       "daily_token_budget": 100000
     },
@@ -52,7 +52,7 @@
     ],
     "max_estimated_effort": "S",
     "max_token_budget": 12000,
-    "model": "gpt-5.3-codex-spark",
+    "model": "default",
     "reasoning": "medium"
   },
   "escalation_upgrade": {

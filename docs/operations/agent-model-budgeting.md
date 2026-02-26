@@ -15,7 +15,5 @@ Runtime behavior:
   - Lightweight override: if `lightweight_task_override` conditions match (role, priority, effort, token budget), daemon swaps to the configured fast model.
   - Per-task upgrade: if work item priority is `critical` or `retry_count > 0`, daemon applies `escalation_upgrade.critical_or_repeated_failure` when configured.
 - The worker passes the selected model to Codex CLI via `--model`.
-- If a configured model fails with model-access/model-availability errors and `fallback_model` is configured, the worker retries once with the fallback model.
-- In this ChatGPT-account setup, fallback model is intentionally unset because `gpt-5-mini` is not available via Codex for this account.
-- If pinned model access is rejected, worker can automatically retry with default account model; you can also force this behavior via `REDKEEPERS_USE_DEFAULT_MODEL=1`.
-- `coordination/runtime/run-history.jsonl` records `model_requested`, `model_used`, and `fallback_used` for each run.
+- If pinned model access is rejected, the daemon blocks the item during preflight with remediation guidance.
+- `coordination/runtime/run-history.jsonl` records `model_requested` and `model_used` for each run.
