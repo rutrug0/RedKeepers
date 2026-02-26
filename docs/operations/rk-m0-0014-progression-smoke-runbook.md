@@ -10,7 +10,6 @@ Smoke tests resolve profile input in this order:
 
 1. `RK_M0_0014_PROGRESSION_PROFILE` if set.
 2. `coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json` when present.
-3. `tests/fixtures/rk-m0-0014-progression-profile.json` only as fallback.
 
 Expected generated artifact path (CI/default progression run output):
 
@@ -41,10 +40,11 @@ Equivalent wrapper:
 scripts/generate_rk_m0_0014_progression_profile.ps1
 ```
 
-Default source for generation is resolved in this order:
+Default source for generation is the pipeline output:
 
-- `coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.replay.json` (pipeline/replay output)
-- `tests/fixtures/rk-m0-0014-progression-profile.json` (legacy fixture fallback)
+- `coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.replay.json`
+
+The generator does not accept a user-specified source path; it always reads this backend replay artifact.
 
 Output is written deterministically to:
 
@@ -80,4 +80,4 @@ When simulation seeds change:
 3. Re-run smoke against that artifact:
    - `set "RK_M0_0014_PROGRESSION_PROFILE=coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.json" && python -m unittest tests.test_m0_0014_progression_smoke`
 4. Refresh `tests/fixtures/rk-m0-0014-progression-profile.json` only when intentional fallback parity is required for local/offline execution.
-5. If pipeline output location changes, update `PIPELINE_PROFILE_PATH` in `tests/test_m0_0014_progression_smoke.py` and this runbook in the same change.
+5. If pipeline output location changes, update `DEFAULT_REPLAY_PROFILE_PATH` in `tools/rk_m0_0014_progression_profile.py`, `PIPELINE_PROFILE_PATH` in `tests/test_m0_0014_progression_smoke.py`, and this runbook in the same change.

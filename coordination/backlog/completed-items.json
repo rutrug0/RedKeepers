@@ -2048,5 +2048,38 @@
     "generated_from_item_id": "RK-M0-0006-F01-F01",
     "assigned_agent": "ilya-fen",
     "commit_sha": "77651738208b7b4a43f2537a8e1429f397e21056"
+  },
+  {
+    "id": "RK-M0-0014-F01-F01-F01-F01",
+    "title": "Generate RK-M0-0014 profile directly from backend seed replay",
+    "description": "Replace fixture-as-seed copy behavior with deterministic replay from first-slice backend seed fixtures when that pipeline is introduced, so profile regeneration remains tied to source seed tables and policy logic.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0014-F01-F01-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Generator output is produced from serialized seed fixtures or replay pipeline output instead of a static fixture copy.",
+      "Generator command and path remain unchanged for callers (`python tools/rk_m0_0014_progression_profile.py`).",
+      "Rerunning generation with unchanged seeds produces byte-for-byte identical output."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T21:12:49.642701+00:00",
+    "updated_at": "2026-02-25T21:19:05.398374+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "If you want, I can execute the generator once with the new source path once the backend replay artifact is available and confirm byte-for-byte stability end-to-end.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M0-0014-F01-F01-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "a5d50570beb8b017c651f007a61726ad67c0f7ec"
   }
 ]

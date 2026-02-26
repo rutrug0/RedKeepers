@@ -3,26 +3,16 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SEED_PROFILE_PATH = (
-    ROOT
-    / "tests"
-    / "fixtures"
-    / "rk-m0-0014-progression-profile.json"
-)
 DEFAULT_REPLAY_PROFILE_PATH = (
     ROOT
     / "coordination"
     / "runtime"
     / "first-slice-progression"
     / "rk-m0-0014-progression-profile.replay.json"
-)
-DEFAULT_SOURCE_PROFILE_PATHS = (
-    DEFAULT_REPLAY_PROFILE_PATH,
-    DEFAULT_SEED_PROFILE_PATH,
 )
 DEFAULT_OUTPUT_PROFILE_PATH = (
     ROOT
@@ -57,45 +47,26 @@ def _extract_profile_payload(data: Any, source_path: Path) -> dict[str, Any]:
     if isinstance(data, dict) and _is_profile_payload(data):
         return data
 
-    if not isinstance(data, dict):
-        raise ValueError(f"seed source must be a JSON object: {source_path}")
-
-    for key in ("profile", "payload", "seed_profile", "replay", "replay_payload", "result", "data"):
-        nested = data.get(key)
-        if isinstance(nested, dict) and _is_profile_payload(nested):
-            return nested
-
     raise ValueError(f"seed source is not a progression profile payload: {source_path}")
 
 
-def _resolve_seed_profile_path(raw_path: Optional[str]) -> Path:
-    if raw_path is not None:
-        path = raw_path.strip()
-        if path:
-            resolved = _resolve_repo_relative_path(path)
-            if not resolved.is_file():
-                raise ValueError(f"seed profile not found: {resolved}")
-            return resolved
-
-    for candidate in DEFAULT_SOURCE_PROFILE_PATHS:
-        if candidate.is_file():
-            return candidate
-
+def _resolve_replay_profile_path() -> Path:
+    if DEFAULT_REPLAY_PROFILE_PATH.is_file():
+        return DEFAULT_REPLAY_PROFILE_PATH
     raise ValueError(
-        "No progression profile source found. Checked:\n"
-        f"- {DEFAULT_REPLAY_PROFILE_PATH} (replay output)\n"
-        f"- {DEFAULT_SEED_PROFILE_PATH} (legacy fixture)"
+        "No progression replay source found. Expected:\n"
+        f"- {DEFAULT_REPLAY_PROFILE_PATH} (pipeline replay output)"
     )
 
 
 def _load_profile(source_path: Path) -> dict[str, Any]:
     if not source_path.is_file():
-        raise ValueError(f"seed profile not found: {source_path}")
+        raise ValueError(f"replay profile not found: {source_path}")
 
     data = json.loads(source_path.read_text(encoding="utf-8"))
     profile = _extract_profile_payload(data, source_path)
     if not _is_profile_payload(profile):
-        raise ValueError(f"seed profile missing required key(s) {REQUIRED_TOP_LEVEL_KEYS}: {source_path}")
+        raise ValueError(f"replay profile missing required key(s) {REQUIRED_TOP_LEVEL_KEYS}: {source_path}")
 
     return profile
 
@@ -115,14 +86,6 @@ def _parse_args() -> argparse.Namespace:
         )
     )
     parser.add_argument(
-        "--seed-profile",
-        default=None,
-        help=(
-            "Optional path to source progression profile seed/replay output."
-            " If omitted, the command prefers replay output then falls back to fixture seed."
-        ),
-    )
-    parser.add_argument(
         "--output",
         default=str(DEFAULT_OUTPUT_PROFILE_PATH),
         help="Output path for generated RK-M0-0014 profile JSON.",
@@ -139,9 +102,9 @@ def _parse_args() -> argparse.Namespace:
 def main() -> int:
     args = _parse_args()
     try:
-        seed_profile_path = _resolve_seed_profile_path(args.seed_profile)
+        replay_profile_path = _resolve_replay_profile_path()
         output_profile_path = _resolve_repo_relative_path(args.output)
-        profile = _load_profile(seed_profile_path)
+        profile = _load_profile(replay_profile_path)
         _write_profile(profile, output_profile_path, indent=max(int(args.indent), 0))
     except (ValueError, json.JSONDecodeError, OSError) as exc:
         print(f"STATUS: BLOCKED\n{exc}")
@@ -150,7 +113,7 @@ def main() -> int:
     print(
         "STATUS: COMPLETED\n"
         f"Generated RK-M0-0014 profile: {output_profile_path}\n"
-        f"source: {seed_profile_path}\n"
+        f"source: {replay_profile_path}\n"
         f"settlement snapshots: {len(profile['settlement_snapshots'])}\n"
         f"scout snapshots: {len(profile['event_scout_snapshots'])}"
     )

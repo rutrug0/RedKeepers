@@ -1044,5 +1044,93 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "timestamp_utc":  "2026-02-25T21:29:10.000000Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-M0-0014-F01-F01-F01-F01-F01",
+        "status":  "done",
+        "summary":  "Wired RK-M0-0014 progression profile generation to consume backend replay artifacts directly (no wrapper payload probing, no legacy fixture fallback), preserving the same CLI and deterministic output behavior.",
+        "changed_files":  [
+                              "tools/rk_m0_0014_progression_profile.py",
+                              "docs/operations/rk-m0-0014-progression-smoke-runbook.md",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                {
+                                    "title":  "Validate backend replay payload schema against RK-M0-0014 contract",
+                                    "owner_role":  "backend",
+                                    "priority":  "low",
+                                    "description":  "Add a focused smoke check that loads one backend-produced RK-M0-0014 replay artifact and asserts it contains required snapshot arrays, before this generator is used in CI-like refresh scripts.",
+                                    "acceptance_criteria":  [
+                                        "Replay artifact for one known path can be validated without additional wrapper/key-shape translation.",
+                                        "Validation rejects missing `settlement_snapshots` and `event_scout_snapshots` with a clear error.",
+                                        "No changes are required to smoke assertions beyond existing profile load behavior."
+                                    ],
+                                    "validation_commands":  [
+                                                               "python tools/rk_m0_0014_progression_profile.py --seed-profile <backend_replay_path>"
+                                                           ],
+                                    "milestone":  "M0"
+                                }
+                               ]
+    },
+    {
+        "timestamp_utc":  "2026-02-25T21:22:19.0537165Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-M0-0014-F01-F01-F01-F01-F01",
+        "status":  "done",
+        "summary":  "Validated backend replay artifact wiring end-to-end: generator consumed replay payload path directly, regenerated deterministic output via unchanged command, and smoke checkpoints passed.",
+        "changed_files":  [
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "python tools/rk_m0_0014_progression_profile.py --seed-profile coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.replay.json",
+                                    "python tools/rk_m0_0014_progression_profile.py",
+                                    "python -m unittest tests.test_m0_0014_progression_smoke"
+                                ],
+        "results":  {
+                        "determinism_sha256":  "992610BA6E4E3F70C6BF9BC008BEF466752068706950FB0C4869A5CC6EA599AC",
+                        "replay_source_path":  "coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.replay.json",
+                        "settlement_snapshots":  13,
+                        "event_scout_snapshots":  3
+                    },
+        "proposed_work_items":  [
+
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-26T08:15:59.0949214Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-M0-0014-F01-F01-F01-F01-F01",
+        "status":  "done",
+        "summary":  "Locked RK-M0-0014 profile generation to the backend replay pipeline artifact path (no user-provided source path), kept the same command invocation, and revalidated deterministic output and smoke behavior.",
+        "changed_files":  [
+                              "tools/rk_m0_0014_progression_profile.py",
+                              "scripts/generate_rk_m0_0014_progression_profile.ps1",
+                              "docs/operations/rk-m0-0014-progression-smoke-runbook.md",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "python tools/rk_m0_0014_progression_profile.py",
+                                    "python -m unittest tests.test_m0_0014_progression_smoke"
+                                ],
+        "results":  {
+                        "determinism_sha256":  "992610BA6E4E3F70C6BF9BC008BEF466752068706950FB0C4869A5CC6EA599AC",
+                        "replay_source_path":  "coordination/runtime/first-slice-progression/rk-m0-0014-progression-profile.replay.json",
+                        "settlement_snapshots":  13,
+                        "event_scout_snapshots":  3
+                    },
+        "proposed_work_items":  [
+
+                                ]
     }
 ]
