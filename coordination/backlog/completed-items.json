@@ -3074,5 +3074,45 @@
     "source_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
     "assigned_agent": "mara-voss",
     "commit_sha": "6e500ad7d76d0673a637f380257137ee698450e5"
+  },
+  {
+    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01",
+    "title": "Requeue codex model-preflight regression item with scoped validation commands",
+    "description": "Create a replacement/requeue for `RK-M1-0004-F01-F01-F01-ESC-F01-F01` that validates only codex model-access preflight regression targets so unrelated baseline tests cannot cause false retry-threshold escalation.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "tests/test_model_preflight_paths.py",
+      "tests/test_codex_preflight.py",
+      "coordination/runtime/run-history.jsonl",
+      "coordination/backlog/blocked-items.json",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Validation uses focused commands for the codex preflight scope (`tests.test_model_preflight_paths` and `tests.test_codex_preflight`) instead of full-suite discovery",
+      "The requeued item completes without retry-threshold escalation when those focused checks pass",
+      "Blocked source item `RK-M1-0004-F01-F01-F01-ESC-F01-F01` is closed with an audit note pointing to validation-scope mismatch"
+    ],
+    "validation_commands": [
+      "python -m unittest tests.test_model_preflight_paths tests.test_codex_preflight",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T11:37:54.199125+00:00",
+    "updated_at": "2026-02-26T11:41:41.947828+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `coordination/backlog/work-items.json` was already dirty before this run and was not modified by this task.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "9bf87c15bca00bf48076ae65b8f4371ada0b54e8"
   }
 ]

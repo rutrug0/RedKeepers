@@ -327,5 +327,83 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-26T11:42:17.6225896Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-AUTO-BACKLOG-0003-F01",
+    "status": "done",
+    "summary": "Produced a post-slice (M2) hero unit prototype concept with explicit queue gate (blocked until vertical slice sign-off), minimum onboarding/tutorial impact, and required UI surface changes while keeping M0/M1 implementation deferred.",
+    "changed_files": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Finalize M2 hero definitions and shared ability modifier table",
+        "owner_role": "design",
+        "milestone": "M2",
+        "priority": "medium",
+        "description": "Convert the deferred hero concept into data-table ready definitions (hero IDs, unlock gate, active ability effects, cooldown targets) without introducing bespoke mechanics.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0003-F01",
+          "Vertical Slice Done v1 PASS"
+        ],
+        "inputs": [
+          "docs/design/m2-hero-units-prototype-concept.md",
+          "docs/design/v1-starter-data-tables.md",
+          "docs/design/vertical-slice-done-v1.md"
+        ],
+        "acceptance_criteria": [
+          "Hero definitions are expressed as IDs and numeric modifiers compatible with existing stat-driven model",
+          "Exactly one active ability per civilization hero is defined for prototype scope",
+          "Unlock gate is post-onboarding and does not alter first-slice tutorial flow"
+        ],
+        "validation_commands": []
+      },
+      {
+        "title": "Design hero UI wireframes for assignment, ability use, and cooldown feedback",
+        "owner_role": "frontend",
+        "milestone": "M2",
+        "priority": "medium",
+        "description": "Create placeholder-first wireframes for hero roster card, army dispatch ability slot, and event/combat feedback surfaces defined in the concept doc.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0003-F01",
+          "Vertical Slice Done v1 PASS"
+        ],
+        "inputs": [
+          "docs/design/m2-hero-units-prototype-concept.md",
+          "docs/design/ui-style-guide.md"
+        ],
+        "acceptance_criteria": [
+          "Wireframes cover settlement hero card, dispatch modal controls, and feedback/event states",
+          "Cooldown readability and effect clarity are visible before action commit",
+          "All visuals remain placeholder/wireframe quality and avoid final art dependencies"
+        ],
+        "validation_commands": []
+      },
+      {
+        "title": "Plan backend hero runtime schema and combat hook integration",
+        "owner_role": "backend",
+        "milestone": "M2",
+        "priority": "medium",
+        "description": "Prepare schema and resolver plan for hero assignment state, active ability cooldowns, and combat/scout modifier application using existing action-resolution flow.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0003-F01",
+          "Vertical Slice Done v1 PASS"
+        ],
+        "inputs": [
+          "docs/design/m2-hero-units-prototype-concept.md",
+          "backend/src/modules"
+        ],
+        "acceptance_criteria": [
+          "Schema plan includes hero readiness/cooldown state and assignment linkage to army context",
+          "Ability effects apply through shared numeric modifier pipeline rather than bespoke combat paths",
+          "Event keys for assignment/activation/cooldown completion are defined for client consumption"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]

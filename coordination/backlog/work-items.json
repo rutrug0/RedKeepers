@@ -236,17 +236,18 @@
       "No implementation work starts during M0/M1 first-slice delivery"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-25T18:32:27.509162+00:00",
-    "updated_at": "2026-02-26T09:11:49.160357+00:00",
+    "updated_at": "2026-02-26T11:43:37.481185+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
+    "assigned_agent": "rowan-hale"
   },
   {
     "id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
@@ -285,44 +286,5 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
-  },
-  {
-    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01",
-    "title": "Requeue codex model-preflight regression item with scoped validation commands",
-    "description": "Create a replacement/requeue for `RK-M1-0004-F01-F01-F01-ESC-F01-F01` that validates only codex model-access preflight regression targets so unrelated baseline tests cannot cause false retry-threshold escalation.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "tests/test_model_preflight_paths.py",
-      "tests/test_codex_preflight.py",
-      "coordination/runtime/run-history.jsonl",
-      "coordination/backlog/blocked-items.json",
-      "coordination/backlog/work-items.json"
-    ],
-    "acceptance_criteria": [
-      "Validation uses focused commands for the codex preflight scope (`tests.test_model_preflight_paths` and `tests.test_codex_preflight`) instead of full-suite discovery",
-      "The requeued item completes without retry-threshold escalation when those focused checks pass",
-      "Blocked source item `RK-M1-0004-F01-F01-F01-ESC-F01-F01` is closed with an audit note pointing to validation-scope mismatch"
-    ],
-    "validation_commands": [
-      "python -m unittest tests.test_model_preflight_paths tests.test_codex_preflight",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T11:37:54.199125+00:00",
-    "updated_at": "2026-02-26T11:41:39.645898+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
-    "assigned_agent": "tomas-grell"
   }
 ]
