@@ -5132,5 +5132,49 @@
     "runtime_seconds": 427.83,
     "started_at": "2026-02-26T18:34:14.911758+00:00",
     "finished_at": "2026-02-26T18:41:22.745056+00:00"
+  },
+  {
+    "id": "RK-HUMAN-0001-F03-F01",
+    "title": "Implement M2 dispatch validation and hero attachment lifecycle for marches",
+    "description": "Add post-slice dispatch validation for optional `hero_id`, enforce one-hero-per-march and single-active-assignment constraints, and persist deterministic attach/detach transitions across march start and return.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F03"
+    ],
+    "inputs": [
+      "docs/design/world-map-v1-phasing.md",
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "docs/design/m2-hero-runtime-schema-and-resolver-hook-plan.md",
+      "backend/src/modules/world_map",
+      "backend/src/modules/heroes"
+    ],
+    "acceptance_criteria": [
+      "Dispatch rejects invalid hero attachment with stable error codes (`feature_not_in_slice`, `hero_unavailable`, `hero_already_assigned`, `hero_target_scope_mismatch`)",
+      "A march can carry at most one hero attachment and hero detach occurs deterministically on return completion",
+      "No hero-specific combat/scout branches are introduced in resolvers"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T18:14:14.106079+00:00",
+    "updated_at": "2026-02-26T18:50:17.756044+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "How would you like me to proceed: continue and ignore those unrelated edits, or pause until the tree is stabilized?",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-HUMAN-0001-F03",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "05493470e2ebf5a5f69cf8f1d91f7695b594d5bd",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 407.56,
+    "started_at": "2026-02-26T18:43:28.150956+00:00",
+    "finished_at": "2026-02-26T18:50:15.706273+00:00"
   }
 ]

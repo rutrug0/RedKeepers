@@ -1,43 +1,5 @@
 [
   {
-    "id": "RK-HUMAN-0001-F03-F01",
-    "title": "Implement M2 dispatch validation and hero attachment lifecycle for marches",
-    "description": "Add post-slice dispatch validation for optional `hero_id`, enforce one-hero-per-march and single-active-assignment constraints, and persist deterministic attach/detach transitions across march start and return.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-HUMAN-0001-F03"
-    ],
-    "inputs": [
-      "docs/design/world-map-v1-phasing.md",
-      "docs/design/m2-hero-units-prototype-concept.md",
-      "docs/design/m2-hero-runtime-schema-and-resolver-hook-plan.md",
-      "backend/src/modules/world_map",
-      "backend/src/modules/heroes"
-    ],
-    "acceptance_criteria": [
-      "Dispatch rejects invalid hero attachment with stable error codes (`feature_not_in_slice`, `hero_unavailable`, `hero_already_assigned`, `hero_target_scope_mismatch`)",
-      "A march can carry at most one hero attachment and hero detach occurs deterministically on return completion",
-      "No hero-specific combat/scout branches are introduced in resolvers"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T18:14:14.106079+00:00",
-    "updated_at": "2026-02-26T18:50:15.733760+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-HUMAN-0001-F03",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-HUMAN-0001-F03-F02",
     "title": "Integrate optional post-onboarding hero attach UX in dispatch flow",
     "description": "Expose an optional hero attach control and cooldown/readiness preview in dispatch UI after unlock while preserving a fully functional no-hero dispatch path.",
@@ -91,17 +53,18 @@
       "No additional post-slice mechanics are introduced beyond open/lock/archive/reset scheduling and rollover state reset."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T18:21:09.093683+00:00",
-    "updated_at": "2026-02-26T18:21:09.093683+00:00",
+    "updated_at": "2026-02-26T18:54:39.769060+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-HUMAN-0001-F01"
+    "generated_from_item_id": "RK-HUMAN-0001-F01",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-HUMAN-0001-F04-F01",

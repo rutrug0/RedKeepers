@@ -11,7 +11,9 @@ import {
   POST_SETTLEMENT_UNIT_TRAIN_ROUTE,
 } from "../../modules/units";
 import {
+  InMemoryWorldMapLifecycleStateRepository,
   InMemoryWorldMapMarchStateRepository,
+  POST_WORLD_MAP_LIFECYCLE_ADVANCE_ROUTE,
   POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE,
   POST_WORLD_MAP_TILE_INTERACT_ROUTE,
 } from "../../modules/world_map";
@@ -28,6 +30,7 @@ test("local first-slice transport exposes all settlement loop routes and serves 
       POST_SETTLEMENT_TICK_ROUTE,
       POST_SETTLEMENT_BUILDING_UPGRADE_ROUTE,
       POST_SETTLEMENT_UNIT_TRAIN_ROUTE,
+      POST_WORLD_MAP_LIFECYCLE_ADVANCE_ROUTE,
       POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE,
       POST_WORLD_MAP_TILE_INTERACT_ROUTE,
     ].sort(),
@@ -49,6 +52,55 @@ test("local first-slice transport exposes all settlement loop routes and serves 
   }
   assert.equal(response.body.flow, "settlement.tick_v1");
   assert.equal(response.body.status, "accepted");
+});
+
+test("local first-slice transport serves deterministic world-map lifecycle transitions and archive summary", () => {
+  const transport = createDeterministicFirstSliceSettlementLoopLocalRpcTransport({
+    world_map_lifecycle_state_repository: new InMemoryWorldMapLifecycleStateRepository([
+      {
+        world_id: "world_alpha",
+        world_revision: 7,
+        lifecycle_state: "world_lifecycle_open",
+        season_number: 5,
+        season_length_days: 1,
+        season_started_at: new Date("2026-02-25T00:00:00.000Z"),
+        state_changed_at: new Date("2026-02-25T00:00:00.000Z"),
+        joinable_world_state: {
+          joinable_player_ids: ["player_01", "player_02"],
+          active_settlement_ids: ["settlement_01", "settlement_02"],
+          active_march_ids: ["march_01"],
+        },
+      },
+    ]),
+  });
+
+  const response = transport.invoke(POST_WORLD_MAP_LIFECYCLE_ADVANCE_ROUTE, {
+    path: {
+      worldId: "world_alpha",
+    },
+    body: {
+      world_id: "world_alpha",
+      flow_version: "v1",
+      observed_at: "2026-02-26T00:06:30.000Z",
+    },
+  });
+
+  assert.equal(response.status_code, 200);
+  if (response.status_code !== 200) {
+    return;
+  }
+  assert.equal(response.body.status, "accepted");
+  assert.equal(response.body.flow, "world_map.lifecycle_v1");
+  assert.deepStrictEqual(
+    response.body.events.map((event) => event.content_key),
+    [
+      "event.world.lifecycle_locked",
+      "event.world.lifecycle_archived",
+      "event.world.lifecycle_reset",
+      "event.world.lifecycle_opened",
+    ],
+  );
+  assert.equal(response.body.latest_archive?.archive_id, "world_alpha:season:5");
 });
 
 test("local first-slice transport keeps insufficient_resources error_code for building upgrade failures", () => {
