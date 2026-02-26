@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import os
 import re
 import sys
@@ -33,6 +35,7 @@ LOCK_FILE = RUNTIME_DIR / "daemon.lock"
 EVENTS_LOG_PATH = RUNTIME_DIR / "daemon-events.jsonl"
 RUN_HISTORY_PATH = RUNTIME_DIR / "run-history.jsonl"
 LOW_QUEUE_WATERMARK = 2
+MODEL_POLICY_DRIFT_BLOCKER_CATEGORY = "model_policy_drift"
 
 
 def ensure_python_runtime_configuration() -> tuple[str, str | None]:
@@ -335,6 +338,36 @@ def set_daemon_state(**patch: Any) -> dict[str, Any]:
     return state
 
 
+def _is_definitive_model_access_error(text: str | None) -> bool:
+    if not text:
+        return False
+    lowered = text.lower()
+    markers = (
+        "not supported",
+        "unsupported",
+        "unsupported model",
+        "does not have access",
+        "not authorized",
+        "not enabled",
+        "permission denied",
+        "invalid model",
+        "unknown model",
+    )
+    return any(marker in lowered for marker in markers)
+
+
+def model_policy_fingerprint(model_policy: Any) -> str:
+    payload = model_policy if isinstance(model_policy, dict) else {}
+    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+def load_model_policy_fingerprint() -> str | None:
+    daemon_state = load_json(DAEMON_STATE_PATH, default_daemon_state())
+    value = str(daemon_state.get("model_policy_fingerprint", "")).strip()
+    return value or None
+
+
 def milestone_progress(queue: QueueManager) -> dict[str, dict[str, int]]:
     progress: dict[str, dict[str, int]] = {}
     for collection, label in [
@@ -595,6 +628,166 @@ def format_non_actionable_blocked_warning_lines(rows: list[dict[str, Any]], *, m
     if remainder > 0:
         rendered.append(f"- ... and {remainder} more non-actionable blocked items.")
     return rendered
+
+
+def _display_model_name(model: str | None) -> str:
+    text = str(model or "").strip()
+    return text if text else "<default>"
+
+
+def format_model_policy_drift_warning_lines(rows: list[dict[str, Any]], *, max_lines: int = 8) -> list[str]:
+    if not rows:
+        return []
+    rendered: list[str] = []
+    for row in rows[:max_lines]:
+        item_id = str(row.get("item_id", "<unknown>"))
+        agent_id = str(row.get("agent_id", "<unknown>"))
+        model = _display_model_name(row.get("model"))
+        fallback_model = _display_model_name(row.get("fallback_model"))
+        model_error = str(row.get("model_error", "")).strip() or "unknown model access error"
+        fallback_error = str(row.get("fallback_error", "")).strip() or "unknown fallback access error"
+        rendered.append(
+            (
+                f"- {item_id}: agent={agent_id}, model={model!r} failed ({model_error}); "
+                f"fallback={fallback_model!r} failed ({fallback_error}). "
+                "Action: update coordination/policies/model-policy.yaml so at least one model is accessible, then requeue."
+            )
+        )
+    remainder = len(rows) - len(rendered)
+    if remainder > 0:
+        rendered.append(f"- ... and {remainder} more model-policy drift warnings.")
+    return rendered
+
+
+def audit_queued_model_policy_drift(
+    *,
+    queue: QueueManager,
+    agents: dict[str, dict[str, Any]],
+    routing_rules: dict[str, Any],
+    model_policy: dict[str, Any],
+    policy_fingerprint: str,
+    dry_run: bool,
+) -> dict[str, Any]:
+    flagged: list[dict[str, Any]] = []
+    remediated_ids: list[str] = []
+
+    for item in list(queue.active):
+        if item.get("status") != "queued":
+            continue
+        item_id = str(item.get("id", "")).strip()
+        if not item_id:
+            continue
+
+        agent_id, agent_cfg = select_agent_for_item(item, agents, routing_rules)
+        profile = resolve_execution_profile(
+            agent_id=agent_id,
+            agent_cfg=agent_cfg,
+            model_policy=model_policy,
+            item=item,
+        )
+
+        model = str(profile.get("model") or "").strip() or None
+        model_error = codex_model_access_preflight_error(model or "")
+        if not _is_definitive_model_access_error(model_error):
+            continue
+
+        fallback_model = str(profile.get("fallback_model") or "").strip() or None
+        if not fallback_model:
+            continue
+        fallback_error = codex_model_access_preflight_error(fallback_model)
+        fallback_inaccessible = _is_definitive_model_access_error(fallback_error)
+        if not fallback_inaccessible:
+            continue
+
+        model_display = _display_model_name(model)
+        fallback_display = _display_model_name(fallback_model)
+        blocker_reason = (
+            "Model-policy drift audit blocked queued item: "
+            f"resolved model '{model_display}' is inaccessible ({model_error}); "
+            f"fallback '{fallback_display}' is unavailable ({fallback_error}). "
+            "Remediation: update coordination/policies/model-policy.yaml so at least one accessible model path exists, then requeue this item."
+        )
+        flagged.append(
+            {
+                "item_id": item_id,
+                "agent_id": agent_id,
+                "model": model,
+                "model_error": model_error,
+                "fallback_model": fallback_model,
+                "fallback_error": fallback_error,
+                "blocker_reason": blocker_reason,
+            }
+        )
+
+    if not dry_run and flagged:
+        for row in flagged:
+            item_id = str(row.get("item_id", "")).strip()
+            if not item_id:
+                continue
+            queue.mark_blocked(item_id, str(row["blocker_reason"]))
+            blocked_item = next((entry for entry in queue.blocked if str(entry.get("id", "")).strip() == item_id), None)
+            if isinstance(blocked_item, dict):
+                blocked_item["blocker_category"] = MODEL_POLICY_DRIFT_BLOCKER_CATEGORY
+                blocked_item["model_policy_fingerprint"] = policy_fingerprint
+                blocked_item["model_policy_drift"] = {
+                    "agent_id": row.get("agent_id"),
+                    "model": row.get("model"),
+                    "model_error": row.get("model_error"),
+                    "fallback_model": row.get("fallback_model"),
+                    "fallback_error": row.get("fallback_error"),
+                    "audited_at": utc_now_iso(),
+                }
+            remediated_ids.append(item_id)
+        queue.save()
+
+    return {
+        "flagged": flagged,
+        "remediated_ids": remediated_ids,
+        "changed": bool(remediated_ids),
+        "policy_fingerprint": policy_fingerprint,
+    }
+
+
+def run_queued_model_policy_drift_audit(
+    *,
+    queue: QueueManager,
+    agents: dict[str, dict[str, Any]],
+    routing_rules: dict[str, Any],
+    model_policy: dict[str, Any],
+    dry_run: bool,
+    require_policy_change: bool,
+    persist_fingerprint: bool,
+) -> dict[str, Any]:
+    current_fingerprint = model_policy_fingerprint(model_policy)
+    previous_fingerprint = load_model_policy_fingerprint()
+    policy_changed = previous_fingerprint != current_fingerprint
+
+    result: dict[str, Any] = {
+        "policy_changed": policy_changed,
+        "previous_fingerprint": previous_fingerprint,
+        "current_fingerprint": current_fingerprint,
+        "flagged": [],
+        "remediated_ids": [],
+        "changed": False,
+    }
+    if require_policy_change and not policy_changed:
+        return result
+
+    audit = audit_queued_model_policy_drift(
+        queue=queue,
+        agents=agents,
+        routing_rules=routing_rules,
+        model_policy=model_policy,
+        policy_fingerprint=current_fingerprint,
+        dry_run=dry_run,
+    )
+    result["flagged"] = audit["flagged"]
+    result["remediated_ids"] = audit["remediated_ids"]
+    result["changed"] = bool(audit["changed"])
+
+    if persist_fingerprint and policy_changed:
+        set_daemon_state(model_policy_fingerprint=current_fingerprint)
+    return result
 
 
 def _next_auto_blocker_triage_item_id(queue: QueueManager) -> str:
@@ -1142,7 +1335,12 @@ def _matches_any_pattern(text: str, patterns: list[str]) -> bool:
     return any(pattern and pattern in lowered for pattern in patterns)
 
 
-def revisit_recoverable_blocked_items(queue: QueueManager, retry_policy: dict[str, Any]) -> list[str]:
+def revisit_recoverable_blocked_items(
+    queue: QueueManager,
+    retry_policy: dict[str, Any],
+    *,
+    model_policy_fingerprint: str | None = None,
+) -> list[str]:
     cfg = retry_policy.get("blocked_revisit", {}) if isinstance(retry_policy, dict) else {}
     if not isinstance(cfg, dict):
         return []
@@ -1178,6 +1376,12 @@ def revisit_recoverable_blocked_items(queue: QueueManager, retry_policy: dict[st
         item_id = str(item.get("id", "")).strip()
         if not item_id:
             continue
+
+        blocker_category = str(item.get("blocker_category", "")).strip().lower()
+        if blocker_category == MODEL_POLICY_DRIFT_BLOCKER_CATEGORY:
+            blocked_fingerprint = str(item.get("model_policy_fingerprint", "")).strip()
+            if blocked_fingerprint and model_policy_fingerprint and blocked_fingerprint == model_policy_fingerprint:
+                continue
 
         attempts = int(item.get("blocked_revisit_count", 0))
         if attempts >= max_attempts_per_item:
@@ -1684,9 +1888,12 @@ def resolve_execution_profile(
     policy_agent_models = model_policy.get("agent_models", {})
     policy_cfg = policy_agent_models.get(agent_id, {}) if isinstance(policy_agent_models, dict) else {}
 
+    global_fallback_model = _clean(model_policy.get("fallback_model"))
     model = _clean(policy_cfg.get("model")) or _clean(agent_cfg.get("model"))
+    fallback_model = _clean(policy_cfg.get("fallback_model")) or _clean(agent_cfg.get("fallback_model")) or global_fallback_model
     reasoning = _clean(policy_cfg.get("reasoning")) or _clean(agent_cfg.get("reasoning"))
     selection_reason = "agent_policy"
+    fallback_selection_reason = "agent_policy"
 
     def _effort_rank(value: Any) -> int | None:
         if value is None:
@@ -1743,10 +1950,14 @@ def resolve_execution_profile(
             token_ok = max_tokens is None or item_tokens is None or item_tokens <= max_tokens
 
             light_model = _clean(light_cfg.get("model"))
+            light_fallback_model = _clean(light_cfg.get("fallback_model"))
             light_reasoning = _clean(light_cfg.get("reasoning"))
             if role_ok and priority_ok and effort_ok and token_ok and light_model:
                 model = light_model
                 selection_reason = "lightweight_task_override"
+            if role_ok and priority_ok and effort_ok and token_ok and light_fallback_model:
+                fallback_model = light_fallback_model
+                fallback_selection_reason = "lightweight_task_override"
             if role_ok and priority_ok and effort_ok and token_ok and light_reasoning:
                 reasoning = light_reasoning
 
@@ -1754,17 +1965,23 @@ def resolve_execution_profile(
         escalation_cfg = (model_policy.get("escalation_upgrade", {}) or {}).get("critical_or_repeated_failure", {})
         if should_upgrade and isinstance(escalation_cfg, dict):
             upgraded_model = _clean(escalation_cfg.get("model"))
+            upgraded_fallback_model = _clean(escalation_cfg.get("fallback_model"))
             upgraded_reasoning = _clean(escalation_cfg.get("reasoning"))
             if upgraded_model:
                 model = upgraded_model
                 selection_reason = "escalation_upgrade"
+            if upgraded_fallback_model:
+                fallback_model = upgraded_fallback_model
+                fallback_selection_reason = "escalation_upgrade"
             if upgraded_reasoning:
                 reasoning = upgraded_reasoning
 
     return {
         "model": model,
+        "fallback_model": fallback_model,
         "reasoning": reasoning,
         "selection_reason": selection_reason,
+        "fallback_selection_reason": fallback_selection_reason,
     }
 
 
@@ -2142,6 +2359,7 @@ def process_one(
 
     agents = load_agent_catalog(ROOT)
     policies = load_policies(ROOT)
+    current_model_policy_fingerprint = model_policy_fingerprint(policies.get("model", {}))
     queue = QueueManager(ROOT)
     queue.load()
     if not dry_run:
@@ -2189,7 +2407,11 @@ def process_one(
     stats_tracker.save(stats)
 
     if not dry_run:
-        reopened_blocked = revisit_recoverable_blocked_items(queue, policies.get("retry", {}))
+        reopened_blocked = revisit_recoverable_blocked_items(
+            queue,
+            policies.get("retry", {}),
+            model_policy_fingerprint=current_model_policy_fingerprint,
+        )
         if reopened_blocked:
             emit_event(
                 "blocked_revisit",
@@ -2246,6 +2468,39 @@ def process_one(
             warning_count=len(dependency_warnings),
             warnings=format_dependency_warning_lines(dependency_warnings, max_lines=5),
         )
+
+    model_policy_drift_audit = run_queued_model_policy_drift_audit(
+        queue=queue,
+        agents=agents,
+        routing_rules=policies["routing"],
+        model_policy=policies.get("model", {}),
+        dry_run=dry_run,
+        require_policy_change=True,
+        persist_fingerprint=not dry_run,
+    )
+    if model_policy_drift_audit["flagged"]:
+        emit_event(
+            "queue_health",
+            "Detected queued items blocked by model-policy drift",
+            count=len(model_policy_drift_audit["flagged"]),
+            item_ids=[str(row.get("item_id", "")) for row in model_policy_drift_audit["flagged"]],
+            warnings=format_model_policy_drift_warning_lines(model_policy_drift_audit["flagged"], max_lines=5),
+        )
+    if model_policy_drift_audit["remediated_ids"]:
+        emit_event(
+            "blocked",
+            "Blocked queued items after model-policy drift audit",
+            count=len(model_policy_drift_audit["remediated_ids"]),
+            item_ids=model_policy_drift_audit["remediated_ids"],
+        )
+        queue.load()
+        stats_tracker.refresh_queue_totals(
+            stats,
+            queued_count=sum(1 for queued_item in queue.active if queued_item.get("status") == "queued"),
+            blocked_count=len(queue.blocked),
+            completed_count=len(queue.completed),
+        )
+        stats_tracker.save(stats)
 
     item = queue.select_next(policies["routing"], stats)
     if item is None:
@@ -2985,6 +3240,15 @@ def cmd_status() -> int:
     queue.load()
     dependency_warnings = normalize_queued_item_dependencies(queue, archived_ids=load_blocked_archived_ids())
     non_actionable_blocked = find_non_actionable_blocked_items(queue)
+    model_policy_drift = run_queued_model_policy_drift_audit(
+        queue=queue,
+        agents=agents,
+        routing_rules=policies["routing"],
+        model_policy=policies.get("model", {}),
+        dry_run=True,
+        require_policy_change=True,
+        persist_fingerprint=False,
+    )
     stats = StatsTracker(ROOT, agents).load()
     daemon_state = load_json(DAEMON_STATE_PATH, default_daemon_state())
     print(
@@ -3005,6 +3269,10 @@ def cmd_status() -> int:
     if non_actionable_blocked:
         print("Backlog health warnings:")
         for line in format_non_actionable_blocked_warning_lines(non_actionable_blocked):
+            print(line)
+    if model_policy_drift["flagged"]:
+        print("Model-policy drift warnings:")
+        for line in format_model_policy_drift_warning_lines(model_policy_drift["flagged"]):
             print(line)
     return 0
 

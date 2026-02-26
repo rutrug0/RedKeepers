@@ -559,5 +559,22 @@
       "coordination/backlog/completed-items.json",
       "agents/tomas-grell/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-26T14:54:37.482138Z",
+    "item_id": "RK-M1-0005-F02-F01-ESC-F01",
+    "status": "completed",
+    "summary": "Added a queued-item model-policy drift audit that runs when model policy fingerprint changes, blocks queued items whose resolved primary and fallback models are both inaccessible with explicit remediation hints, and prevents blocked-revisit requeue loops for those drift-blocked items until policy changes again.",
+    "checks": [
+      "python -m unittest tests.test_model_policy_drift_audit -v (pass)",
+      "python -m unittest tests.test_model_preflight_paths -v (pass)",
+      "python -m unittest tests.test_blocked_revisit -v (pass)",
+      "python tools/orchestrator.py status (pass)"
+    ],
+    "changed_files": [
+      "tools/orchestrator.py",
+      "tests/test_model_policy_drift_audit.py",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]
