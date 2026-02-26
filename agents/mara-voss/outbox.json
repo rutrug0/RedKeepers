@@ -210,8 +210,52 @@
                                                                     "QA check coverage includes a sanity check for the starter data tables artifact presence and basic schema/section expectations",
                                                                     "Manual verification notes cover responsive layout checks and placeholder-art policy compliance for the client shell"
                                                                 ]
-                                    }
-                                ]
+    },
+    {
+        "ts":  "2026-02-26T08:45:28.169713+00:00",
+        "item_id":  "RK-AUTO-STALL-0003-F01",
+        "status":  "completed",
+        "summary":  "Retired blocked parent `RK-M1-0005-F02-F01-ESC-F03` (frontend visual `STATUS: BLOCKED` behavior remains environment-dependent) and removed deferred child `RK-M1-0005-F02-F01-ESC-F03-ESC-F01` from active queue.",
+        "dependency_disposition":  {
+                                     "dependency_id":  "RK-M1-0005-F02-F01-ESC-F03",
+                                     "decision":  "retired",
+                                     "rationale":  "Deferred to avoid retry-threshold churn while frontend visual QA requires unavailable environment prerequisites."
+                                 },
+        "queue_recovery":  {
+                               "explicitly_closed_item_ids":  [
+                                                                  "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
+                                                              ],
+                               "consolidated_blocked_removed_ids":  [
+                                                                        "RK-M1-0005-F02-F01-ESC-F03"
+                                                                    ],
+                               "blocked_dependency_disposition":  [
+                                                                     "RK-M1-0005-F02-F01-ESC-F03: retired"
+                                                                 ]
+                           },
+        "proposed_work_items":  [
+                                 {
+                                     "title":  "Re-run frontend visual blocked-state follow-up when runtime is available",
+                                     "owner_role":  "qa",
+                                     "milestone":  "M1",
+                                     "priority":  "high",
+                                     "description":  "After deterministic `python tools/frontend_visual_smoke.py` execution is available, recreate or reopen `RK-M1-0005-F02-F01-ESC-F03` as a narrow validation fix and validate retry-count behavior for `STATUS: BLOCKED` outputs.",
+                                     "acceptance_criteria":  [
+                                                                "Frontend visual smoke runs produce consistent `STATUS: BLOCKED` summaries in env-missing conditions.",
+                                                                "Retry-threshold logic no longer escalates `RK-M1-0005-F02-F01-ESC-F03` on environmental block cases.",
+                                                                "Related follow-up work item is created in backlog with explicit dependency outcomes."
+                                                            ],
+                                     "validation_commands":  [
+                                                              "python tools/orchestrator.py status"
+                                                          ],
+                                     "inputs":  [
+                                                    "tools/orchestrator.py",
+                                                    "tools/frontend_visual_smoke.py"
+                                                ],
+                                     "dependencies":  [
+                                                          "RK-M1-0005-F02-F01-ESC-F03"
+                                                      ]
+                                 }
+                              ]
     },
     {
         "ts":  "2026-02-25T17:58:19.810976Z",

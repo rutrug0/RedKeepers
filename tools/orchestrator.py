@@ -72,6 +72,7 @@ KIND_STYLE = {
     "select": "1;34",
     "agent_start": "1;34",
     "agent_end": "1;32",
+    "resolution": "1;36",
     "agent_heartbeat": "2;37",
     "completed": "1;32",
     "blocked": "1;33",
@@ -148,9 +149,7 @@ def _render_event_lines(ts: str, kind: str, message: str, fields: dict[str, Any]
     message_text = _normalize_log_text(message, max_chars=220, max_sentences=2) or kind.replace("_", " ")
 
     if kind == "select":
-        summary = title or message_text
-        head = f"{prefix} {role_label}, {agent_id or 'unassigned'}: {_with_period(summary)}"
-        return [head, description] if description else [head]
+        return []
 
     if kind == "agent_start":
         summary = title or fields.get("item_id") or "work item"
@@ -174,6 +173,14 @@ def _render_event_lines(ts: str, kind: str, message: str, fields: dict[str, Any]
             elapsed_text = _normalize_log_text(elapsed, max_chars=32) or "unknown"
         result = _normalize_log_text(fields.get("result"), max_chars=24) or "unknown"
         return [f"{prefix} Agent {agent_id or 'unknown'} finished ({result}), elapsed seconds: {elapsed_text}."]
+
+    if kind == "resolution":
+        summary = title or fields.get("item_id") or "work item"
+        summary_text = _normalize_log_text(summary, max_chars=180, max_sentences=1)
+        result = _normalize_log_text(fields.get("result"), max_chars=24).upper() or "UNKNOWN"
+        detail = _normalize_log_text(fields.get("resolution"), max_chars=420, max_sentences=3)
+        head = f"{prefix} {role_label}, {agent_id or 'unassigned'}: {_with_period(summary_text)} ({result})."
+        return [head, detail] if detail else [head]
 
     if kind in {"blocked", "failed", "validation_failed", "error", "infrastructure_error"}:
         reason = _normalize_log_text(fields.get("reason") or fields.get("error"), max_chars=260, max_sentences=2)
@@ -288,7 +295,9 @@ def migrate_legacy_runtime_files() -> None:
 
 def emit_event(kind: str, message: str, **fields: Any) -> None:
     ts = utc_now_iso()
-    print("\n".join(_render_event_lines(ts, kind, message, fields)), flush=True)
+    lines = _render_event_lines(ts, kind, message, fields)
+    if lines:
+        print("\n".join(lines), flush=True)
     append_jsonl(
         EVENTS_LOG_PATH,
         {
@@ -1689,6 +1698,16 @@ def process_one(
             )
         )
         emit_event("blocked", "Model preflight blocked execution", item_id=item["id"], agent_id=agent_id, reason=blocker_reason)
+        emit_event(
+            "resolution",
+            "Task blocked before execution",
+            item_id=item["id"],
+            title=item["title"],
+            agent_id=agent_id,
+            role=agent_cfg.get("role"),
+            result="blocked",
+            resolution=blocker_reason,
+        )
         queue.mark_blocked(item["id"], blocker_reason)
         queue.save()
         if model_stats_tracker is not None and model_stats_data is not None:
@@ -1856,6 +1875,16 @@ def process_one(
 
     if worker.status == "blocked":
         emit_event("blocked", "Work item blocked by agent", item_id=item["id"], agent_id=agent_id, reason=worker.summary)
+        emit_event(
+            "resolution",
+            "Task blocked",
+            item_id=item["id"],
+            title=item["title"],
+            agent_id=agent_id,
+            role=agent_cfg.get("role"),
+            result="blocked",
+            resolution=worker.summary,
+        )
         queue.mark_blocked(item["id"], worker.blocker_reason or worker.summary)
         queue.save()
         record_run_stats(
@@ -1953,6 +1982,16 @@ def process_one(
 
         if validations_ok:
             emit_event("completed", "Work item completed", item_id=item["id"], agent_id=agent_id, commit_sha=commit_sha)
+            emit_event(
+                "resolution",
+                "Task completed",
+                item_id=item["id"],
+                title=item["title"],
+                agent_id=agent_id,
+                role=agent_cfg.get("role"),
+                result="completed",
+                resolution=worker.summary,
+            )
             queue.mark_completed(item["id"], worker.summary, commit_sha=commit_sha)
             queue.save()
             generated_ids, rejected_followups = ingest_agent_follow_up_tasks(
@@ -2033,6 +2072,16 @@ def process_one(
                     agent_id=agent_id,
                     reason=blocker_reason,
                 )
+                emit_event(
+                    "resolution",
+                    "Task blocked during validation",
+                    item_id=item["id"],
+                    title=item["title"],
+                    agent_id=agent_id,
+                    role=agent_cfg.get("role"),
+                    result="blocked",
+                    resolution=blocker_reason,
+                )
                 queue.mark_blocked(item["id"], blocker_reason)
                 queue.save()
                 record_run_stats(
@@ -2066,6 +2115,7 @@ def process_one(
                 emit_event("validation_failed", "Validation or commit failed", item_id=item["id"], agent_id=agent_id)
                 max_retries = int(policies.get("retry", {}).get("max_retries_per_item_per_agent", 2))
                 retry_count = queue.increment_retry(item["id"], "validation failed or commit failed")
+                validation_resolution = "Validation or commit failed; task requeued for retry."
                 if retry_count > max_retries:
                     source_item = queue.get_active_item(item["id"])
                     if source_item:
@@ -2075,6 +2125,17 @@ def process_one(
                             reason="retry threshold exceeded",
                         )
                         queue.mark_blocked(item["id"], "retry threshold exceeded; escalated")
+                    validation_resolution = "Validation repeatedly failed; task blocked and escalated."
+                emit_event(
+                    "resolution",
+                    "Task failed validation",
+                    item_id=item["id"],
+                    title=item["title"],
+                    agent_id=agent_id,
+                    role=agent_cfg.get("role"),
+                    result="failed",
+                    resolution=validation_resolution,
+                )
                 queue.save()
                 record_run_stats(
                     "failed",
@@ -2106,6 +2167,16 @@ def process_one(
     else:
         if is_systemic_worker_bootstrap_error(worker.summary, worker.exit_code):
             emit_event("infrastructure_error", "Worker bootstrap error; stopping daemon loop", item_id=item["id"], agent_id=agent_id, error=worker.summary)
+            emit_event(
+                "resolution",
+                "Task failed",
+                item_id=item["id"],
+                title=item["title"],
+                agent_id=agent_id,
+                role=agent_cfg.get("role"),
+                result="failed",
+                resolution=worker.summary,
+            )
             # Infrastructure misconfiguration (e.g. missing Codex CLI) should not burn retries
             # or spawn escalation chains. Leave the item queued and stop the daemon loop.
             queue.update_item_status(item["id"], "queued", last_failure_reason=worker.summary)
@@ -2160,6 +2231,7 @@ def process_one(
         emit_event("failed", "Agent run failed; item will be retried or escalated", item_id=item["id"], agent_id=agent_id, reason=worker.summary)
         max_retries = int(policies.get("retry", {}).get("max_retries_per_item_per_agent", 2))
         retry_count = queue.increment_retry(item["id"], worker.summary)
+        runtime_resolution = "Agent execution failed; task requeued for retry."
         if retry_count > max_retries:
             source_item = queue.get_active_item(item["id"])
             if source_item:
@@ -2173,6 +2245,17 @@ def process_one(
                     )
                 emit_event("blocked", "Item blocked after retry threshold", item_id=item["id"], agent_id=agent_id)
                 queue.mark_blocked(item["id"], f"Repeated failure: {worker.summary}")
+            runtime_resolution = "Agent execution repeatedly failed; task blocked and escalated."
+        emit_event(
+            "resolution",
+            "Task failed",
+            item_id=item["id"],
+            title=item["title"],
+            agent_id=agent_id,
+            role=agent_cfg.get("role"),
+            result="failed",
+            resolution=runtime_resolution,
+        )
         queue.save()
         record_run_stats(
             "failed",

@@ -16,7 +16,7 @@ import orchestrator  # noqa: E402
 
 
 class EventFormatTests(unittest.TestCase):
-    def test_select_event_is_human_readable_with_description_line(self) -> None:
+    def test_select_event_is_suppressed_from_console_output(self) -> None:
         out = io.StringIO()
         with (
             mock.patch.object(orchestrator, "utc_now_iso", return_value="2026-02-26T08:28:43.239364+00:00"),
@@ -38,19 +38,7 @@ class EventFormatTests(unittest.TestCase):
                 ),
             )
 
-        lines = out.getvalue().strip().splitlines()
-        self.assertEqual(
-            lines[0],
-            "[2026-02-26T08:28:43] [select] LEAD, mara-voss: Resolve queue dependency stall.",
-        )
-        self.assertEqual(
-            lines[1],
-            (
-                "Resolve stalled dependencies so queued work becomes runnable. "
-                "Unblock delivery and reduce idle cycles. "
-                "Coordinate blocked item triage with Mara."
-            ),
-        )
+        self.assertEqual(out.getvalue(), "")
 
     def test_heartbeat_event_uses_simplified_line(self) -> None:
         out = io.StringIO()
@@ -71,6 +59,34 @@ class EventFormatTests(unittest.TestCase):
         self.assertEqual(
             out.getvalue().strip(),
             "[2026-02-26T08:34:10] [agent_heartbeat] Agent tomas-grell still running, elapsed seconds: 60.3.",
+        )
+
+    def test_resolution_event_shows_result_and_summary(self) -> None:
+        out = io.StringIO()
+        with (
+            mock.patch.object(orchestrator, "utc_now_iso", return_value="2026-02-26T08:35:22.900000+00:00"),
+            mock.patch.object(orchestrator, "append_jsonl"),
+            mock.patch.object(orchestrator, "COLOR_ENABLED", False),
+            redirect_stdout(out),
+        ):
+            orchestrator.emit_event(
+                "resolution",
+                "Task completed",
+                agent_id="mara-voss",
+                role="lead",
+                title="Resolve queue dependency stall",
+                result="completed",
+                resolution="Requeued stale items, triaged blocked dependencies, and restored runnable work.",
+            )
+
+        lines = out.getvalue().strip().splitlines()
+        self.assertEqual(
+            lines[0],
+            "[2026-02-26T08:35:22] [resolution] LEAD, mara-voss: Resolve queue dependency stall. (COMPLETED).",
+        )
+        self.assertEqual(
+            lines[1],
+            "Requeued stale items, triaged blocked dependencies, and restored runnable work.",
         )
 
 

@@ -290,14 +290,14 @@
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
-    "blocker_reason": "Closed during RK-AUTO-STALL-0001: dependency RK-M1-0005-F02-F01-ESC-F03 is blocked; regenerate child follow-up after parent resolution.",
+    "blocker_reason": "Closed during RK-AUTO-STALL-0003-F01: parent `RK-M1-0005-F02-F01-ESC-F03` is retired (deferred) due to environment-blocked frontend visual validation.",
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
     "last_blocker_reason": null,
     "archived_at": "2026-02-26T08:21:21.324124+00:00",
     "archive_reason": "dependency_stall_consolidated",
-    "closed_by_item": "RK-AUTO-STALL-0001"
+    "closed_by_item": "RK-AUTO-STALL-0003-F01"
   },
   {
     "id": "RK-AUTO-BACKLOG-0003-F01",
