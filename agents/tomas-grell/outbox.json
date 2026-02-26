@@ -1,5 +1,22 @@
 [
   {
+    "ts": "2026-02-26T17:16:30Z",
+    "item_id": "RK-M1-0005-F02-F01-ESC-F03",
+    "status": "completed",
+    "summary": "Normalized frontend visual blocker command matching to treat Windows-path `tools\\frontend_visual_smoke.py` STATUS: BLOCKED outcomes as environment blockers, preserving no-retry/no-escalation behavior while keeping true visual-regression retries unchanged.",
+    "checks": [
+      "python tools/orchestrator.py status (pass)",
+      "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_frontend_visual_status_blocked_detection (pass)",
+      "python -m unittest discover -s tests (fails: pre-existing failures in tests/test_m1_scaffold_smoke.py)"
+    ],
+    "changed_files": [
+      "tools/orchestrator.py",
+      "tests/test_frontend_visual_blocked_outcome.py",
+      "tests/test_frontend_visual_status_blocked_detection.py",
+      "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
     "ts": "2026-02-26T13:42:29.923849Z",
     "item_id": "RK-AUTO-STALL-0008-F01",
     "status": "completed",
@@ -591,6 +608,47 @@
       "tools/rk_m0_0011_first_slice_loop_smoke.py",
       "tests/test_rk_m0_0011_first_slice_loop_smoke.py",
       "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
+    "ts": "2026-02-26T17:11:01.3740257Z",
+    "item_id": "RK-M0-0016",
+    "status": "blocked",
+    "summary": "Extended frontend visual smoke automation with deterministic first-slice build/train/scout action-feedback coverage (success + failure paths) and report summary fields, but strict browser execution remains blocked in this runtime because Playwright is not installed/importable.",
+    "checks": [
+      "python -m unittest tests.test_frontend_visual_smoke (pass)",
+      "python -m py_compile tools/frontend_visual_smoke.py (pass)",
+      "python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5 (blocked: playwright import failed: No module named 'playwright')",
+      "python tools/orchestrator.py status (pass)"
+    ],
+    "changed_files": [
+      "tools/frontend_visual_smoke.py",
+      "tests/test_frontend_visual_smoke.py",
+      "docs/operations/frontend-visual-qa.md",
+      "agents/tomas-grell/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Provision Playwright runtime and execute RK-M0-0016 strict visual smoke baselines",
+        "owner_role": "platform",
+        "milestone": "M0",
+        "priority": "high",
+        "description": "Install Playwright and Chromium in the daemon Python interpreter, then run strict first-slice visual smoke to produce desktop/tablet/mobile screenshots, baseline diffs, and action-feedback coverage report output.",
+        "acceptance_criteria": [
+          "python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5 runs without import/launch blockers",
+          "coordination/runtime/frontend-visual/current contains desktop/tablet/mobile screenshots from the strict run",
+          "coordination/runtime/frontend-visual/report.json includes non-zero action_feedback_paths_total and records pass/fail counts for build/train/scout success and failure paths"
+        ],
+        "inputs": [
+          "tools/frontend_visual_smoke.py",
+          "coordination/runtime/frontend-visual/baseline/",
+          "docs/operations/frontend-visual-qa.md"
+        ],
+        "validation_commands": [
+          "python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5",
+          "python tools/orchestrator.py status"
+        ]
+      }
     ]
   }
 ]

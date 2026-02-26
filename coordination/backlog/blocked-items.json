@@ -547,5 +547,116 @@
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-M0-0008-ESC",
     "assigned_agent": "sera-kest"
+  },
+  {
+    "id": "RK-M0-0016",
+    "title": "Automate first-slice visual smoke baselines across desktop/tablet/mobile",
+    "description": "Run and integrate `tools/frontend_visual_smoke.py` for first-slice UI checks so multi-device screenshots and baseline diffs cover core settlement/map/feed interactions.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0011",
+      "RK-M0-0013"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Automated smoke run captures desktop, tablet, and mobile screenshots with baseline comparison output",
+      "Coverage includes at least one success path and one failure path for build/train/scout action feedback",
+      "Run output provides deterministic pass/fail summary and artifact paths for review"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 1,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-26T17:12:06.577143+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "Repeated failure: Worker timed out after 1500s",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
+    "assigned_agent": "tomas-grell",
+    "last_failure_reason": "Worker timed out after 1500s"
+  },
+  {
+    "id": "RK-M1-0005-F02-F01-ESC-F03",
+    "title": "Treat frontend visual `STATUS: BLOCKED` validation results as block-state outcomes",
+    "description": "Adjust validation result handling so environment blockers reported by `tools/frontend_visual_smoke.py` (`STATUS: BLOCKED`) mark work items blocked with actionable reason instead of repeatedly retrying/escalating as generic validation failures.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0005-F02-F01-ESC"
+    ],
+    "inputs": [
+      "tools/orchestrator.py",
+      "tools/frontend_visual_smoke.py",
+      "coordination/runtime/run-history.jsonl",
+      "tests/"
+    ],
+    "acceptance_criteria": [
+      "Frontend validation runs that return `STATUS: BLOCKED` are recorded as blocked with blocker reason containing the visual smoke error summary",
+      "Retry count is not incremented for environmental blockers and no new retry-threshold escalation is created from that condition",
+      "Regression coverage demonstrates this behavior while preserving existing failure semantics for real visual regressions"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status",
+      "python -m unittest discover -s tests"
+    ],
+    "status": "blocked",
+    "retry_count": 4,
+    "created_at": "2026-02-25T18:52:07.843340+00:00",
+    "updated_at": "2026-02-26T17:15:18.655959+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "retry threshold exceeded; escalated",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M1-0005-F02-F01-ESC",
+    "assigned_agent": "tomas-grell",
+    "last_failure_reason": "validation failed",
+    "last_unblocked_reason": "automatic blocked revisit (1/2)",
+    "last_blocker_reason": "retry threshold exceeded; escalated",
+    "blocked_revisit_count": 1
+  },
+  {
+    "id": "RK-M0-0016-ESC",
+    "title": "Escalation: Automate first-slice visual smoke baselines across desktop/tablet/mobile",
+    "description": "Investigate repeated failure for item RK-M0-0016. Reason: Worker timed out after 1500s",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-26T17:12:06.523475+00:00",
+    "updated_at": "2026-02-26T17:18:55.714311+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": null,
+    "blocker_reason": "- `python -m json.tool agents/mara-voss/outbox.json` (pass)",
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M0-0016",
+    "assigned_agent": "mara-voss"
   }
 ]

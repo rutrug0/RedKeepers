@@ -2292,7 +2292,7 @@ def frontend_visual_environment_blocker_reason(validation_results: list[dict[str
             continue
         command = str(result.get("command", ""))
         effective_command = str(result.get("effective_command", ""))
-        command_text = f"{command}\n{effective_command}".lower()
+        command_text = f"{command}\n{effective_command}".replace("\\", "/").lower()
 
         stdout_tail = str(result.get("stdout_tail", ""))
         stderr_tail = str(result.get("stderr_tail", ""))

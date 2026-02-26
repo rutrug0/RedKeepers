@@ -93,6 +93,44 @@ class FrontendVisualBlockedOutcomeTests(unittest.TestCase):
             self.assertEqual(run_history[-1]["result"], "blocked")
             self.assertIn("browser launch/run failed: no usable sandbox", run_history[-1]["summary"])
 
+    def test_frontend_visual_environment_blocker_with_windows_command_path_still_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            item = self._base_item(item_id="RK-TEST-BLOCKED-WINPATH", retry_count=0)
+            self._write_queue_files(root, [item], [], [])
+
+            report_path = root / "coordination" / "runtime" / "frontend-visual" / "report.json"
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            report_path.write_text(
+                json.dumps({"status": "blocked", "error": "browser launch/run failed: sandbox denied"}) + "\n",
+                encoding="utf-8",
+            )
+
+            validation_results = [
+                {
+                    "command": "python tools\\frontend_visual_smoke.py --strict",
+                    "effective_command": "\"C:\\\\Python\\\\python.exe\" tools\\frontend_visual_smoke.py --strict",
+                    "exit_code": 1,
+                    "stdout_tail": (
+                        "STATUS: BLOCKED\n"
+                        f"browser launch/run failed: sandbox denied report={report_path}"
+                    ),
+                    "stderr_tail": "",
+                }
+            ]
+
+            rc, run_history = self._run_process_one(root, validation_results=validation_results)
+
+            self.assertEqual(rc, 0)
+            queue = QueueManager(root)
+            queue.load()
+            self.assertEqual(len(queue.active), 0)
+            self.assertEqual(len(queue.blocked), 1)
+            self.assertEqual(queue.blocked[0]["id"], "RK-TEST-BLOCKED-WINPATH")
+            self.assertEqual(queue.blocked[0]["retry_count"], 0)
+            self.assertIn("browser launch/run failed: sandbox denied", str(queue.blocked[0].get("blocker_reason")))
+            self.assertEqual(run_history[-1]["result"], "blocked")
+
     def test_frontend_visual_environment_blocker_does_not_create_retry_escalation(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -175,6 +213,52 @@ class FrontendVisualBlockedOutcomeTests(unittest.TestCase):
             self.assertEqual(len(queue.blocked), 0)
             self.assertEqual(len(queue.active), 1)
             self.assertEqual(queue.active[0]["id"], "RK-TEST-FAILED")
+            self.assertEqual(queue.active[0]["status"], "queued")
+            self.assertEqual(queue.active[0]["retry_count"], 1)
+            self.assertEqual(queue.active[0]["last_failure_reason"], "validation failed")
+            self.assertEqual(run_history[-1]["result"], "failed_validation")
+
+    def test_frontend_visual_regression_with_windows_command_path_keeps_retry_semantics(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            item = self._base_item(item_id="RK-TEST-FAILED-WINPATH", retry_count=0)
+            self._write_queue_files(root, [item], [], [])
+
+            report_path = root / "coordination" / "runtime" / "frontend-visual" / "report.json"
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            report_path.write_text(
+                json.dumps(
+                    {
+                        "status": "failed",
+                        "summary": {"devices_failed": 1, "devices_total": 4},
+                        "error": "visual diff 1.900% > threshold 0.500%",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            validation_results = [
+                {
+                    "command": "python tools\\frontend_visual_smoke.py --strict",
+                    "effective_command": "\"C:\\\\Python\\\\python.exe\" tools\\frontend_visual_smoke.py --strict",
+                    "exit_code": 1,
+                    "stdout_tail": (
+                        "STATUS: BLOCKED\n"
+                        f"Frontend visual smoke encountered issues report={report_path}"
+                    ),
+                    "stderr_tail": "",
+                }
+            ]
+
+            rc, run_history = self._run_process_one(root, validation_results=validation_results)
+
+            self.assertEqual(rc, 0)
+            queue = QueueManager(root)
+            queue.load()
+            self.assertEqual(len(queue.blocked), 0)
+            self.assertEqual(len(queue.active), 1)
+            self.assertEqual(queue.active[0]["id"], "RK-TEST-FAILED-WINPATH")
             self.assertEqual(queue.active[0]["status"], "queued")
             self.assertEqual(queue.active[0]["retry_count"], 1)
             self.assertEqual(queue.active[0]["last_failure_reason"], "validation failed")

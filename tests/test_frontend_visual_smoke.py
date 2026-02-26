@@ -60,6 +60,25 @@ class FrontendVisualSmokeHelperTests(unittest.TestCase):
         )
         self.assertEqual(path, baseline_dir / "hero-wireframes--desktop-1440.png")
 
+    def test_first_slice_action_feedback_paths_cover_build_train_scout_success_and_failure(self) -> None:
+        paths = smoke._required_action_feedback_paths("first-slice-shell")
+        self.assertEqual(len(paths), 6)
+        path_ids = {path["path_id"] for path in paths}
+        self.assertEqual(
+            path_ids,
+            {
+                "build_success_feedback",
+                "build_failure_feedback",
+                "train_success_feedback",
+                "train_failure_feedback",
+                "scout_success_feedback",
+                "scout_failure_feedback",
+            },
+        )
+
+    def test_non_shell_surface_has_no_action_feedback_paths(self) -> None:
+        self.assertEqual(smoke._required_action_feedback_paths("hero-wireframes"), [])
+
 
 if __name__ == "__main__":
     unittest.main()

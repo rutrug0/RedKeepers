@@ -12,6 +12,10 @@ This project can run browser-based frontend visual smoke checks using Playwright
 - Keyboard smoke checks for region navigation activation (`ArrowRight` + `Enter`)
 - Focus-visible assertions on representative controls (`.region-tab`, `.ghost-btn`/`.mock-state-btn`)
 - Reduced-motion assertion that region navigation does not request `smooth` scrolling
+- First-slice action feedback checks with deterministic transport stubs:
+  - `build` success + failure (`event.build.success`, `event.build.failure_insufficient_resources`)
+  - `train` success + failure (`event.train.success`, `event.train.failure_cooldown`)
+  - `scout` success + failure (`event.scout.dispatched_success`, `event.scout.unavailable_tile`)
 
 ## Script
 

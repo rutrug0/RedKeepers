@@ -44,6 +44,43 @@ DEVICE_PROFILES: dict[str, dict[str, Any]] = {
     },
 }
 
+FIRST_SLICE_ACTION_FEEDBACK_PATHS: tuple[dict[str, str], ...] = (
+    {
+        "path_id": "build_success_feedback",
+        "pre_click_selector": '[data-settlement-outcome-mode="success"]',
+        "trigger_selector": '[data-settlement-adapter-action="build"]',
+        "expected_content_key": "event.build.success",
+    },
+    {
+        "path_id": "build_failure_feedback",
+        "pre_click_selector": '[data-settlement-outcome-mode="failure"]',
+        "trigger_selector": '[data-settlement-adapter-action="build"]',
+        "expected_content_key": "event.build.failure_insufficient_resources",
+    },
+    {
+        "path_id": "train_success_feedback",
+        "pre_click_selector": '[data-settlement-outcome-mode="success"]',
+        "trigger_selector": '[data-settlement-adapter-action="train"]',
+        "expected_content_key": "event.train.success",
+    },
+    {
+        "path_id": "train_failure_feedback",
+        "pre_click_selector": '[data-settlement-outcome-mode="failure"]',
+        "trigger_selector": '[data-settlement-adapter-action="train"]',
+        "expected_content_key": "event.train.failure_cooldown",
+    },
+    {
+        "path_id": "scout_success_feedback",
+        "trigger_selector": '[data-worldmap-adapter-action="scout"]',
+        "expected_content_key": "event.scout.dispatched_success",
+    },
+    {
+        "path_id": "scout_failure_feedback",
+        "trigger_selector": '[data-worldmap-adapter-action="scout"]',
+        "expected_content_key": "event.scout.unavailable_tile",
+    },
+)
+
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -51,6 +88,12 @@ def utc_now_iso() -> str:
 
 def _bool_env(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _required_action_feedback_paths(surface_id: str) -> list[dict[str, str]]:
+    if surface_id != "first-slice-shell":
+        return []
+    return [dict(path) for path in FIRST_SLICE_ACTION_FEEDBACK_PATHS]
 
 
 def _compare_png_images_percent(left: Path, right: Path) -> float:
@@ -368,6 +411,389 @@ def _collect_basic_accessibility_issues(page: Any) -> list[str]:
     return issues
 
 
+def _set_mock_panel_mode(page: Any, panel_key: str, mode: str) -> str | None:
+    selector = f'[data-mock-panel="{panel_key}"][data-mock-mode="{mode}"]'
+    control = page.locator(selector)
+    if control.count() == 0:
+        return f"missing mock panel mode control {selector}"
+    try:
+        control.first.click()
+    except Exception as exc:
+        return f"failed to activate mock panel mode {selector}: {exc}"
+    return None
+
+
+def _click_selector(page: Any, selector: str) -> str | None:
+    target = page.locator(selector)
+    if target.count() == 0:
+        return f"missing action selector {selector}"
+    button = target.first
+    if not button.is_enabled():
+        return f"action selector disabled {selector}"
+    try:
+        button.click()
+    except Exception as exc:
+        return f"click failed for selector {selector}: {exc}"
+    return None
+
+
+def _install_first_slice_transport_bridge(page: Any) -> None:
+    page.evaluate(
+        """() => {
+            const resourceIds = ["food", "wood", "stone", "iron"];
+            const cloneResources = (values) => {
+                const out = {};
+                for (const resourceId of resourceIds) {
+                    out[resourceId] = Number(values && values[resourceId]) || 0;
+                }
+                return out;
+            };
+            const hasResources = (stock, required) => {
+                return resourceIds.every((resourceId) => {
+                    const available = Number(stock[resourceId]) || 0;
+                    const needed = Number(required[resourceId]) || 0;
+                    return available >= needed;
+                });
+            };
+            const spendResources = (stock, required) => {
+                const after = cloneResources(stock);
+                for (const resourceId of resourceIds) {
+                    const needed = Number(required[resourceId]) || 0;
+                    after[resourceId] = Math.max(0, (Number(after[resourceId]) || 0) - needed);
+                }
+                return after;
+            };
+            const formatMissingResources = (required, stock) => {
+                const rows = [];
+                for (const resourceId of resourceIds) {
+                    const needed = Number(required[resourceId]) || 0;
+                    if (needed <= 0) {
+                        continue;
+                    }
+                    const available = Number(stock[resourceId]) || 0;
+                    if (available >= needed) {
+                        continue;
+                    }
+                    rows.push(`${resourceId}: ${needed - available}`);
+                }
+                return rows.join(", ");
+            };
+            const nowIso = () => new Date().toISOString();
+
+            const bridgeState = {
+                build_cost_by_id: { food: 0, wood: 120, stone: 80, iron: 20 },
+                train_cost_by_id: { food: 90, wood: 30, stone: 15, iron: 0 },
+                scout_calls: 0,
+                canonical_stock_by_id: { food: 1860, wood: 1240, stone: 980, iron: 715 },
+            };
+
+            window.__RK_FIRST_SLICE_SETTLEMENT_LOOP_TRANSPORT__ = {
+                invoke: async (routeTemplate, request) => {
+                    const path = String(routeTemplate || "");
+                    const body = request && typeof request === "object" ? request.body || {} : {};
+
+                    if (path === "/settlements/{settlementId}/tick") {
+                        const base = cloneResources(body.resource_stock_by_id || bridgeState.canonical_stock_by_id);
+                        const gainById = { food: 6, wood: 4, stone: 3, iron: 2 };
+                        const next = cloneResources(base);
+                        for (const resourceId of resourceIds) {
+                            next[resourceId] = (Number(next[resourceId]) || 0) + (Number(gainById[resourceId]) || 0);
+                        }
+                        return {
+                            status_code: 200,
+                            body: {
+                                status: "accepted",
+                                settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                duration_ms: 60000,
+                                resource_stock_by_id: next,
+                                placeholder_events: [
+                                    {
+                                        payload: {
+                                            event_key: "event.tick.passive_gain_success",
+                                            settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                            duration_ms: 60000,
+                                        },
+                                    },
+                                ],
+                            },
+                        };
+                    }
+
+                    if (path === "/settlements/{settlementId}/buildings/{buildingId}/upgrade") {
+                        const stock = cloneResources(body.resource_stock_by_id || bridgeState.canonical_stock_by_id);
+                        const cost = cloneResources(bridgeState.build_cost_by_id);
+                        if (!hasResources(stock, cost)) {
+                            return {
+                                status_code: 200,
+                                body: {
+                                    status: "failed",
+                                    error_code: "insufficient_resources",
+                                    settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                    building_id: body.building_id || "grain_plot",
+                                    required_cost_by_id: cost,
+                                    available_stock_by_id: cloneResources(bridgeState.canonical_stock_by_id),
+                                    missing_resources_by_id: formatMissingResources(cost, stock),
+                                },
+                            };
+                        }
+
+                        const fromLevel = Math.max(0, Number(body.current_level) || 0);
+                        const toLevel = fromLevel + 1;
+                        const after = spendResources(stock, cost);
+                        bridgeState.canonical_stock_by_id = cloneResources(after);
+                        return {
+                            status_code: 200,
+                            body: {
+                                status: "accepted",
+                                settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                building_id: body.building_id || "grain_plot",
+                                building_label: "Grain Plot",
+                                from_level: fromLevel,
+                                to_level: toLevel,
+                                upgrade_duration_s: 300,
+                                resource_cost_by_id: cost,
+                                resource_stock_after_by_id: after,
+                                placeholder_events: [
+                                    {
+                                        payload: {
+                                            event_key: "event.build.success",
+                                            settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                            building_label: "Grain Plot",
+                                            from_level: fromLevel,
+                                            to_level: toLevel,
+                                        },
+                                    },
+                                ],
+                            },
+                        };
+                    }
+
+                    if (path === "/settlements/{settlementId}/units/{unitId}/train") {
+                        const stock = cloneResources(body.resource_stock_by_id || bridgeState.canonical_stock_by_id);
+                        const cost = cloneResources(bridgeState.train_cost_by_id);
+                        if (typeof body.queue_available_at === "string" && body.queue_available_at.trim().length > 0) {
+                            return {
+                                status_code: 200,
+                                body: {
+                                    status: "failed",
+                                    error_code: "cooldown",
+                                    settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                    unit_id: body.unit_id || "watch_levy",
+                                    queue_available_at: body.queue_available_at,
+                                    cooldown_remaining_ms: 90000,
+                                },
+                            };
+                        }
+                        if (!hasResources(stock, cost)) {
+                            return {
+                                status_code: 200,
+                                body: {
+                                    status: "failed",
+                                    error_code: "insufficient_resources",
+                                    settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                    unit_id: body.unit_id || "watch_levy",
+                                    required_cost_by_id: cost,
+                                    available_stock_by_id: cloneResources(bridgeState.canonical_stock_by_id),
+                                    missing_resources_by_id: formatMissingResources(cost, stock),
+                                },
+                            };
+                        }
+                        const after = spendResources(stock, cost);
+                        bridgeState.canonical_stock_by_id = cloneResources(after);
+                        return {
+                            status_code: 200,
+                            body: {
+                                status: "accepted",
+                                settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                unit_id: body.unit_id || "watch_levy",
+                                unit_label: "Watch Levy",
+                                quantity: Math.max(1, Number(body.quantity) || 1),
+                                resource_cost_by_id: cost,
+                                resource_stock_after_by_id: after,
+                                placeholder_events: [
+                                    {
+                                        payload: {
+                                            event_key: "event.train.success",
+                                            settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                            quantity: Math.max(1, Number(body.quantity) || 1),
+                                            unit_label: "Watch Levy",
+                                        },
+                                    },
+                                ],
+                            },
+                        };
+                    }
+
+                    if (path === "/world-map/tiles/{tileId}/interact") {
+                        const tileId = typeof body.tile_id === "string" && body.tile_id.trim().length > 0
+                            ? body.tile_id.trim()
+                            : "tile_0412_0198";
+                        const tileLabel = tileId === "tile_0412_0198" ? "Black Reed March" : tileId;
+                        bridgeState.scout_calls += 1;
+                        if (bridgeState.scout_calls === 1) {
+                            return {
+                                status_code: 200,
+                                body: {
+                                    status: "accepted",
+                                    tile_id: tileId,
+                                    event: {
+                                        content_key: "event.scout.dispatched_success",
+                                        tokens: {
+                                            settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                            target_tile_label: tileLabel,
+                                        },
+                                    },
+                                },
+                            };
+                        }
+                        return {
+                            status_code: 200,
+                            body: {
+                                status: "failed",
+                                error_code: "unavailable_tile",
+                                tile_id: tileId,
+                                event: {
+                                    content_key: "event.scout.unavailable_tile",
+                                    tokens: {
+                                        settlement_name: body.settlement_name || "Cinderwatch Hold",
+                                        target_tile_label: tileLabel,
+                                    },
+                                },
+                                queue_available_at: nowIso(),
+                            },
+                        };
+                    }
+
+                    return {
+                        status_code: 500,
+                        body: {
+                            code: "transport_handler_error",
+                            message: `Unhandled route template '${path}'.`,
+                        },
+                    };
+                },
+            };
+        }"""
+    )
+
+
+def _run_action_feedback_path(
+    page: Any,
+    *,
+    path_id: str,
+    trigger_selector: str,
+    expected_content_key: str,
+    timeout_ms: int = 7000,
+) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "path_id": path_id,
+        "trigger_selector": trigger_selector,
+        "expected_content_key": expected_content_key,
+        "status": "ok",
+        "before_count": None,
+        "after_count": None,
+        "issue": None,
+    }
+
+    trigger = page.locator(trigger_selector)
+    if trigger.count() == 0:
+        result["status"] = "failed"
+        result["issue"] = f"missing action selector {trigger_selector}"
+        return result
+
+    button = trigger.first
+    if not button.is_enabled():
+        result["status"] = "failed"
+        result["issue"] = f"action selector disabled {trigger_selector}"
+        return result
+
+    event_selector = f'.event-item[data-content-key="{expected_content_key}"]'
+    before_count = page.locator(event_selector).count()
+    result["before_count"] = before_count
+
+    try:
+        button.click()
+        page.wait_for_function(
+            """([contentKey, baselineCount]) => {
+                const selector = `.event-item[data-content-key="${contentKey}"]`;
+                return document.querySelectorAll(selector).length > baselineCount;
+            }""",
+            [expected_content_key, before_count],
+            timeout=timeout_ms,
+        )
+    except Exception as exc:
+        result["status"] = "failed"
+        result["issue"] = f"no new feedback entry for {expected_content_key}: {exc}"
+    result["after_count"] = page.locator(event_selector).count()
+    return result
+
+
+def _collect_first_slice_action_feedback_issues(page: Any) -> tuple[list[str], list[dict[str, Any]]]:
+    paths = _required_action_feedback_paths("first-slice-shell")
+    if not paths:
+        return [], []
+
+    issues: list[str] = []
+    setup_issues = [
+        issue
+        for issue in [
+            _set_mock_panel_mode(page, "settlement", "populated"),
+            _set_mock_panel_mode(page, "worldMap", "populated"),
+            _set_mock_panel_mode(page, "eventFeed", "populated"),
+        ]
+        if issue
+    ]
+    if setup_issues:
+        failed_checks = [
+            {
+                "path_id": path["path_id"],
+                "trigger_selector": path["trigger_selector"],
+                "expected_content_key": path["expected_content_key"],
+                "status": "failed",
+                "before_count": None,
+                "after_count": None,
+                "issue": setup_issues[0],
+            }
+            for path in paths
+        ]
+        return setup_issues, failed_checks
+
+    _install_first_slice_transport_bridge(page)
+    checks: list[dict[str, Any]] = []
+
+    for path in paths:
+        pre_click_selector = path.get("pre_click_selector")
+        if pre_click_selector:
+            pre_click_issue = _click_selector(page, pre_click_selector)
+            if pre_click_issue:
+                check = {
+                    "path_id": path["path_id"],
+                    "trigger_selector": path["trigger_selector"],
+                    "expected_content_key": path["expected_content_key"],
+                    "status": "failed",
+                    "before_count": None,
+                    "after_count": None,
+                    "issue": pre_click_issue,
+                }
+                checks.append(check)
+                issues.append(f"action feedback path `{path['path_id']}` failed: {pre_click_issue}")
+                continue
+
+        result = _run_action_feedback_path(
+            page,
+            path_id=path["path_id"],
+            trigger_selector=path["trigger_selector"],
+            expected_content_key=path["expected_content_key"],
+        )
+        checks.append(result)
+        if result.get("status") != "ok":
+            issues.append(
+                f"action feedback path `{path['path_id']}` failed: {result.get('issue') or 'unknown error'}"
+            )
+
+    return issues, checks
+
+
 def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     requested_devices = [name.strip() for name in args.devices.split(",") if name.strip()]
     unknown = [name for name in requested_devices if name not in DEVICE_PROFILES]
@@ -404,6 +830,9 @@ def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
             "devices_failed": 0,
             "devices_diff_exceeded": 0,
             "max_diff_seen": 0.0,
+            "action_feedback_paths_total": 0,
+            "action_feedback_paths_ok": 0,
+            "action_feedback_paths_failed": 0,
         },
     }
 
@@ -422,6 +851,10 @@ def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
                     "diff_percent": None,
                     "document_overflow_px": None,
                     "shell_overflow_px": None,
+                    "action_feedback_checks": [],
+                    "action_feedback_paths_total": 0,
+                    "action_feedback_paths_ok": 0,
+                    "action_feedback_paths_failed": 0,
                 }
                 context = browser.new_context(
                     viewport=profile.get("viewport"),
@@ -474,6 +907,24 @@ def run_visual_smoke(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
 
                     if surface_id == "first-slice-shell":
                         device_result["issues"].extend(_collect_accessibility_issues(page))
+                        action_paths = _required_action_feedback_paths(surface_id)
+                        action_issues, action_checks = _collect_first_slice_action_feedback_issues(page)
+                        action_ok = sum(1 for check in action_checks if check.get("status") == "ok")
+                        action_failed = len(action_checks) - action_ok
+                        device_result["action_feedback_checks"] = action_checks
+                        device_result["action_feedback_paths_total"] = len(action_paths)
+                        device_result["action_feedback_paths_ok"] = action_ok
+                        device_result["action_feedback_paths_failed"] = action_failed
+                        report["summary"]["action_feedback_paths_total"] = int(
+                            report["summary"]["action_feedback_paths_total"]
+                        ) + len(action_paths)
+                        report["summary"]["action_feedback_paths_ok"] = int(
+                            report["summary"]["action_feedback_paths_ok"]
+                        ) + action_ok
+                        report["summary"]["action_feedback_paths_failed"] = int(
+                            report["summary"]["action_feedback_paths_failed"]
+                        ) + action_failed
+                        device_result["issues"].extend(action_issues)
                     else:
                         device_result["issues"].extend(_collect_basic_accessibility_issues(page))
                 finally:
@@ -540,7 +991,9 @@ def main() -> int:
         print(
             "STATUS: COMPLETED\n"
             f"Frontend visual smoke passed: ok={summary.get('devices_ok', 0)}/{summary.get('devices_total', 0)} "
-            f"max_diff={summary.get('max_diff_seen', 0)}% report={args.report}"
+            f"max_diff={summary.get('max_diff_seen', 0)}% "
+            f"action_paths={summary.get('action_feedback_paths_ok', 0)}/"
+            f"{summary.get('action_feedback_paths_total', 0)} report={args.report}"
         )
     else:
         print(f"STATUS: BLOCKED\n{report.get('error', 'Frontend visual smoke encountered issues')} report={args.report}")
