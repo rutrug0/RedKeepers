@@ -1680,4 +1680,37 @@
 
                                 ]
     }
+,
+    {
+        "timestamp_utc":  "2026-02-26T19:25:00.0000000Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-HUMAN-0001-F04-F01",
+        "status":  "done",
+        "summary":  "Exposed deterministic neutral gather start and poll contracts through world-map transport wiring, including seeded neutral-node bootstrap and stable contract error codes for unknown/depleted nodes and duplicate march IDs.",
+        "changed_files":  [
+                              "backend/src/modules/world_map/api/world-map-gather-march-start-endpoint.ts",
+                              "backend/src/modules/world_map/api/world-map-gather-march-start-endpoint.test.ts",
+                              "backend/src/modules/world_map/api/world-map-gather-march-poll-endpoint.ts",
+                              "backend/src/modules/world_map/api/world-map-gather-march-poll-endpoint.test.ts",
+                              "backend/src/modules/world_map/api/index.ts",
+                              "backend/src/modules/world_map/api/README.md",
+                              "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
+                              "backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                              "backend/src/app/transport/README.md",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --experimental-strip-types --check backend/src/modules/world_map/api/world-map-gather-march-start-endpoint.ts backend/src/modules/world_map/api/world-map-gather-march-start-endpoint.test.ts backend/src/modules/world_map/api/world-map-gather-march-poll-endpoint.ts backend/src/modules/world_map/api/world-map-gather-march-poll-endpoint.test.ts backend/src/modules/world_map/api/index.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                                    "node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/api/world-map-gather-march-start-endpoint.test.ts backend/src/modules/world_map/api/world-map-gather-march-poll-endpoint.test.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "TypeScript strip-types checks passed for touched files. Node test execution remains blocked in this environment by repository-wide ESM directory imports (ERR_UNSUPPORTED_DIR_IMPORT)."
+                    },
+        "proposed_work_items":  [
+
+                                ]
+    }
 ]

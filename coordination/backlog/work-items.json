@@ -35,38 +35,6 @@
     "generated_from_item_id": "RK-HUMAN-0001-F03"
   },
   {
-    "id": "RK-HUMAN-0001-F01-F01",
-    "title": "Wire world lifecycle scheduler into backend runtime hook and transport surface",
-    "description": "Integrate the new world lifecycle scheduler with an app lifecycle hook or transport route so operators/UI can advance world lifecycle ticks and consume emitted lifecycle events/archive summaries without direct module invocation.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-HUMAN-0001-F01"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "A backend runtime path invokes the lifecycle scheduler for a target world using deterministic observed-at timestamps.",
-      "Lifecycle transition events and latest archive summary are exposed through a stable contract response for UI/ops use.",
-      "No additional post-slice mechanics are introduced beyond open/lock/archive/reset scheduling and rollover state reset."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T18:21:09.093683+00:00",
-    "updated_at": "2026-02-26T18:54:39.769060+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-HUMAN-0001-F01",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-HUMAN-0001-F04-F01",
     "title": "Expose neutral gathering and ambush resolution through backend transport route",
     "description": "Wire `DeterministicWorldMapNeutralGatheringService` into a transport-facing world-map route so clients can dispatch gather marches and poll deterministic resolution payloads/events without direct module invocation.",
@@ -85,17 +53,18 @@
       "Failures for unknown/depleted nodes and duplicate march IDs return stable error codes."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T18:34:09.314474+00:00",
-    "updated_at": "2026-02-26T18:34:09.314474+00:00",
+    "updated_at": "2026-02-26T19:02:38.793177+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-HUMAN-0001-F04"
+    "generated_from_item_id": "RK-HUMAN-0001-F04",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-HUMAN-0001-F04-F02",

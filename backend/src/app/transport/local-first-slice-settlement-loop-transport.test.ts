@@ -13,6 +13,8 @@ import {
 import {
   InMemoryWorldMapLifecycleStateRepository,
   InMemoryWorldMapMarchStateRepository,
+  POST_WORLD_MAP_GATHER_MARCH_POLL_ROUTE,
+  POST_WORLD_MAP_GATHER_MARCH_START_ROUTE,
   POST_WORLD_MAP_LIFECYCLE_ADVANCE_ROUTE,
   POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE,
   POST_WORLD_MAP_TILE_INTERACT_ROUTE,
@@ -33,6 +35,8 @@ test("local first-slice transport exposes all settlement loop routes and serves 
       POST_WORLD_MAP_LIFECYCLE_ADVANCE_ROUTE,
       POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE,
       POST_WORLD_MAP_TILE_INTERACT_ROUTE,
+      POST_WORLD_MAP_GATHER_MARCH_START_ROUTE,
+      POST_WORLD_MAP_GATHER_MARCH_POLL_ROUTE,
     ].sort(),
   );
 
@@ -237,4 +241,185 @@ test("local first-slice transport keeps unavailable_tile error_code for world-ma
     return;
   }
   assert.equal(response.body.error_code, "unavailable_tile");
+});
+
+test("local first-slice transport serves deterministic gather start and poll contracts", () => {
+  const transport = createDeterministicFirstSliceSettlementLoopLocalRpcTransport();
+
+  const startResponse = transport.invoke(POST_WORLD_MAP_GATHER_MARCH_START_ROUTE, {
+    path: {
+      marchId: "march_gather_alpha",
+    },
+    body: {
+      world_id: "world_alpha",
+      world_seed: "seed_world_alpha",
+      march_id: "march_gather_alpha",
+      settlement_id: "settlement_alpha",
+      node_id: "neutral_node_forage_1",
+      flow_version: "v1",
+      departed_at: "2026-02-26T19:00:00.000Z",
+      travel_seconds_per_leg: 30,
+      escort_strength: 0,
+    },
+  });
+
+  assert.equal(startResponse.status_code, 200);
+  if (startResponse.status_code !== 200) {
+    return;
+  }
+  assert.equal(startResponse.body.status, "accepted");
+  if (startResponse.body.status !== "accepted") {
+    return;
+  }
+  assert.equal(startResponse.body.flow, "world_map.neutral_gathering_v1");
+  assert.deepStrictEqual(
+    startResponse.body.events.map((event) => event.content_key),
+    ["event.world.gather_started"],
+  );
+
+  const pollResponse = transport.invoke(POST_WORLD_MAP_GATHER_MARCH_POLL_ROUTE, {
+    path: {
+      marchId: "march_gather_alpha",
+    },
+    body: {
+      march_id: "march_gather_alpha",
+      flow_version: "v1",
+      observed_at: "2026-02-26T19:02:00.000Z",
+    },
+  });
+
+  assert.equal(pollResponse.status_code, 200);
+  if (pollResponse.status_code !== 200) {
+    return;
+  }
+  assert.equal(pollResponse.body.status, "accepted");
+  if (pollResponse.body.status !== "accepted") {
+    return;
+  }
+  assert.equal(pollResponse.body.march_state, "gather_march_resolved");
+  assert.equal(
+    pollResponse.body.events.some((event) => event.content_key === "event.world.gather_completed"),
+    true,
+  );
+});
+
+test("local first-slice transport keeps gather failure error_code contract for unknown, duplicate, and depleted nodes", () => {
+  const transport = createDeterministicFirstSliceSettlementLoopLocalRpcTransport({
+    world_map_neutral_node_spawn_input: {
+      world_id: "world_alpha",
+      world_seed: "seed_world_alpha",
+      map_size: 16,
+      spawn_table: [
+        {
+          node_type: "neutral_node_forage",
+          node_label: "Forager's Grove",
+          spawn_count: 1,
+          yield_ranges: [{ resource_id: "food", min_amount: 120, max_amount: 120 }],
+          gather_duration_seconds: 30,
+          ambush_risk_pct: 100,
+          ambush_base_strength: 20,
+          depletion_cycles: 1,
+        },
+      ],
+    },
+  });
+
+  const unknownNodeResponse = transport.invoke(POST_WORLD_MAP_GATHER_MARCH_START_ROUTE, {
+    path: {
+      marchId: "march_gather_unknown_node",
+    },
+    body: {
+      world_id: "world_alpha",
+      world_seed: "seed_world_alpha",
+      march_id: "march_gather_unknown_node",
+      settlement_id: "settlement_alpha",
+      node_id: "neutral_node_missing",
+      flow_version: "v1",
+      escort_strength: 5,
+    },
+  });
+  assert.equal(unknownNodeResponse.status_code, 200);
+  if (unknownNodeResponse.status_code === 200) {
+    assert.equal(unknownNodeResponse.body.status, "failed");
+    if (unknownNodeResponse.body.status === "failed") {
+      assert.equal(unknownNodeResponse.body.error_code, "neutral_node_not_found");
+    }
+  }
+
+  const accepted = transport.invoke(POST_WORLD_MAP_GATHER_MARCH_START_ROUTE, {
+    path: {
+      marchId: "march_gather_dupe",
+    },
+    body: {
+      world_id: "world_alpha",
+      world_seed: "seed_world_alpha",
+      march_id: "march_gather_dupe",
+      settlement_id: "settlement_alpha",
+      node_id: "neutral_node_forage_1",
+      flow_version: "v1",
+      escort_strength: 0,
+      departed_at: "2026-02-26T19:00:00.000Z",
+      travel_seconds_per_leg: 30,
+    },
+  });
+  assert.equal(accepted.status_code, 200);
+  if (accepted.status_code === 200) {
+    assert.equal(accepted.body.status, "accepted");
+  }
+
+  const duplicate = transport.invoke(POST_WORLD_MAP_GATHER_MARCH_START_ROUTE, {
+    path: {
+      marchId: "march_gather_dupe",
+    },
+    body: {
+      world_id: "world_alpha",
+      world_seed: "seed_world_alpha",
+      march_id: "march_gather_dupe",
+      settlement_id: "settlement_alpha",
+      node_id: "neutral_node_forage_1",
+      flow_version: "v1",
+      escort_strength: 0,
+    },
+  });
+  assert.equal(duplicate.status_code, 200);
+  if (duplicate.status_code === 200) {
+    assert.equal(duplicate.body.status, "failed");
+    if (duplicate.body.status === "failed") {
+      assert.equal(duplicate.body.error_code, "gather_march_already_exists");
+    }
+  }
+
+  const resolveToDeplete = transport.invoke(POST_WORLD_MAP_GATHER_MARCH_POLL_ROUTE, {
+    path: {
+      marchId: "march_gather_dupe",
+    },
+    body: {
+      march_id: "march_gather_dupe",
+      flow_version: "v1",
+      observed_at: "2026-02-26T19:02:00.000Z",
+    },
+  });
+  assert.equal(resolveToDeplete.status_code, 200);
+
+  const depleted = transport.invoke(POST_WORLD_MAP_GATHER_MARCH_START_ROUTE, {
+    path: {
+      marchId: "march_after_depletion",
+    },
+    body: {
+      world_id: "world_alpha",
+      world_seed: "seed_world_alpha",
+      march_id: "march_after_depletion",
+      settlement_id: "settlement_alpha",
+      node_id: "neutral_node_forage_1",
+      flow_version: "v1",
+      escort_strength: 5,
+    },
+  });
+  assert.equal(depleted.status_code, 200);
+  if (depleted.status_code === 200) {
+    assert.equal(depleted.body.status, "failed");
+    if (depleted.body.status === "failed") {
+      assert.equal(depleted.body.error_code, "neutral_node_depleted");
+    }
+  }
 });
