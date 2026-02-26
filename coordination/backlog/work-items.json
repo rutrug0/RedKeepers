@@ -48,8 +48,7 @@
     "owner_role": "qa",
     "preferred_agent": null,
     "dependencies": [
-      "RK-M1-0004-F01-F01-F01-ESC-F01",
-      "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+      "RK-M1-0004-F01-F01-F01-ESC-F01"
     ],
     "inputs": [
       "tools/orchestrator.py",
@@ -68,7 +67,7 @@
     "status": "queued",
     "retry_count": 0,
     "created_at": "2026-02-25T18:23:43.800840+00:00",
-    "updated_at": "2026-02-25T18:23:43.800840+00:00",
+    "updated_at": "2026-02-26T14:35:01.867524+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -76,41 +75,6 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC"
-  },
-  {
-    "id": "RK-M0-0012",
-    "title": "Expose first-slice settlement loop contract endpoints",
-    "description": "Implement backend-facing contract adapters for settlement tick, building upgrade, unit train, and scout actions so the client loop can call stable first-slice request/response shapes.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0006",
-      "RK-M0-0009"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Contract adapters expose deterministic request/response payloads for tick, upgrade, train, and scout actions",
-      "Responses include stable placeholder event keys and state deltas suitable for client binding",
-      "Failure paths map `insufficient_resources`, `cooldown`, and `unavailable_tile` to consistent error codes without adding PvP/diplomacy logic"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:32:27.509162+00:00",
-    "updated_at": "2026-02-26T14:30:06.313001+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
-    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M0-0013",
@@ -380,10 +344,10 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T14:00:58.227785+00:00",
-    "updated_at": "2026-02-26T14:09:20.855496+00:00",
+    "updated_at": "2026-02-26T14:35:01.408902+00:00",
     "estimated_effort": "S",
     "token_budget": 10000,
     "result_summary": null,
@@ -523,5 +487,36 @@
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "source_item_id": "RK-M0-0008"
+  },
+  {
+    "id": "RK-M0-0012-F01",
+    "title": "Wire first-slice settlement loop contract adapters into a concrete backend transport",
+    "description": "Bind the new tick/upgrade/train/scout endpoint handlers to the chosen runtime transport (HTTP or local RPC) and expose route wiring so client integration can call the backend contract shapes directly instead of local stub adapters.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0012"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Transport wiring exposes routes for settlement tick, building upgrade, unit train, and world-map scout interaction using the new endpoint handlers.",
+      "Error-code responses for insufficient_resources, cooldown, and unavailable_tile propagate through transport without key renames.",
+      "A smoke path demonstrates client-facing invocation against at least one wired runtime route."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T14:30:10.563290+00:00",
+    "updated_at": "2026-02-26T14:30:10.563290+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-M0-0012"
   }
 ]

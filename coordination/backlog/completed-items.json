@@ -4144,5 +4144,41 @@
     "generated_from_item_id": "RK-AUTO-STALL-0009",
     "assigned_agent": "mara-voss",
     "commit_sha": "62f282eafc8c19359803477765dc1285cc673f78"
+  },
+  {
+    "id": "RK-M0-0012",
+    "title": "Expose first-slice settlement loop contract endpoints",
+    "description": "Implement backend-facing contract adapters for settlement tick, building upgrade, unit train, and scout actions so the client loop can call stable first-slice request/response shapes.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M0-0006",
+      "RK-M0-0009"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Contract adapters expose deterministic request/response payloads for tick, upgrade, train, and scout actions",
+      "Responses include stable placeholder event keys and state deltas suitable for client binding",
+      "Failure paths map `insufficient_resources`, `cooldown`, and `unavailable_tile` to consistent error codes without adding PvP/diplomacy logic"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-26T14:30:10.368487+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [outbox.json](D:/RedKeepers/agents/ilya-fen/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "3844fa482bcb3cddec2245976085cf34d4dfac61"
   }
 ]

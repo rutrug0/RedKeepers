@@ -1573,5 +1573,61 @@
             "coordination/backlog/blocked-archived-items.json",
             "agents/mara-voss/outbox.json"
         ]
+    },
+    {
+        "ts": "2026-02-26T14:33:15.599178+00:00",
+        "item_id": "RK-AUTO-STALL-0010",
+        "status": "completed",
+        "summary": "Unblocked queued dependency chain by remapping `RK-M1-0005-F02-F01-ESC-F01` to its completed scoped-requeue prerequisite and consolidating obsolete blocked parent `RK-M1-0004-F01-F01-F01-ESC-F01-F01` into archived blocked records.",
+        "queue_recovery": {
+            "made_dependency_ready": [
+                "RK-M1-0005-F02-F01-ESC-F01"
+            ],
+            "dependency_updates": {
+                "RK-M1-0005-F02-F01-ESC-F01": {
+                    "from": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+                    "to": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01"
+                }
+            },
+            "archived_item_ids": [
+                "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+            ]
+        },
+        "validation": {
+            "command": "python tools/orchestrator.py status",
+            "result": "pass"
+        },
+        "files": [
+            "coordination/backlog/work-items.json",
+            "coordination/backlog/blocked-items.json",
+            "coordination/backlog/blocked-archived-items.json",
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": [
+            {
+                "title": "Resolve RK-M0-0008 blocked dependency chain after escalation outcome",
+                "owner_role": "lead",
+                "milestone": "M0",
+                "priority": "high",
+                "description": "Decide disposition for blocked `RK-M0-0008` now that escalation item `RK-M0-0008-ESC` is queued, then update dependent first-slice items (`RK-M0-0011`, `RK-M0-0013`) to a valid runnable or explicitly deferred state.",
+                "dependencies": [
+                    "RK-M0-0008-ESC"
+                ],
+                "inputs": [
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-items.json",
+                    "coordination/runtime/run-history.jsonl",
+                    "coordination/runtime/frontend-visual/report.json"
+                ],
+                "acceptance_criteria": [
+                    "A documented disposition exists for `RK-M0-0008` (requeued with scoped validation, archived with rationale, or explicitly replaced).",
+                    "At least one of `RK-M0-0011` or `RK-M0-0013` is no longer stalled on blocked dependency `RK-M0-0008`.",
+                    "python tools/orchestrator.py status confirms dependency-ready queued work remains available for next run."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]

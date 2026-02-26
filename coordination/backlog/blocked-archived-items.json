@@ -372,5 +372,47 @@
     "disposition_owner": "Mara Voss",
     "archived_at": "2026-02-26T13:58:50.067685+00:00",
     "archive_reason": "deferred_out_of_scope"
+  },
+  {
+    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+    "title": "Add regression tests for codex model access preflight paths",
+    "description": "Create focused tests that cover startup status preflight failures, fallback selection preflight behavior, and blocked run_history/model_stats fields for unsupported model profiles.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "tools/codex_worker.py",
+      "tools/health_checks.py",
+      "tools/orchestrator.py",
+      "tests"
+    ],
+    "acceptance_criteria": [
+      "status validation fails fast with exact unsupported-model reason when policy model is inaccessible and no usable fallback exists",
+      "execution selects configured fallback when primary model preflight fails and proceeds to run",
+      "blocked run_history and model-stats entries include model_requested/model_used/fallback fields"
+    ],
+    "validation_commands": [
+      "python -m unittest discover -s tests"
+    ],
+    "status": "blocked",
+    "retry_count": 3,
+    "created_at": "2026-02-25T18:01:08.893118+00:00",
+    "updated_at": "2026-02-26T09:21:18.947180+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "Superseded by scoped requeue RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01 and archived during dependency-stall consolidation.",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "tomas-grell",
+    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01",
+    "assigned_agent": "tomas-grell",
+    "last_failure_reason": "validation failed or commit failed",
+    "superseded_by": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01",
+    "archived_at": "2026-02-26T14:33:15.599178+00:00",
+    "archive_reason": "dependency_stall_consolidated",
+    "closed_by_item": "RK-AUTO-STALL-0010"
   }
 ]
