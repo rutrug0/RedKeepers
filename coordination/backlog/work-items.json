@@ -296,117 +296,42 @@
     "generated_from_item_id": "RK-AUTO-STALL-0006-F01"
   },
   {
-    "id": "RK-AUTO-STALL-0007",
-    "title": "Resolve queue dependency stall",
-    "description": "The daemon detected queued work items that are not dependency-ready because one or more dependencies are currently blocked. Review blocked items, requeue/close obsolete items, and restore runnable work.",
+    "id": "RK-AUTO-STALL-0007-F01",
+    "title": "Resolve blocked parent dependency for queued model-policy drift audit item",
+    "description": "Decide disposition for blocked `RK-M1-0004-F01-F01-F01-ESC-F01-F01` (requeue with narrowed validation scope or defer/retire) so queued child `RK-M1-0005-F02-F01-ESC-F01` is either made runnable or explicitly closed.",
     "milestone": "M0",
-    "type": "qa",
-    "priority": "high",
+    "type": "feature",
+    "priority": "normal",
     "owner_role": "lead",
-    "preferred_agent": "mara-voss",
-    "dependencies": [],
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0007"
+    ],
     "inputs": [
       "coordination/backlog/work-items.json",
       "coordination/backlog/blocked-items.json",
+      "coordination/backlog/completed-items.json",
       "coordination/runtime/run-history.jsonl"
     ],
     "acceptance_criteria": [
-      "At least one dependency-stalled queued item is made runnable or explicitly closed",
-      "Blocked/obsolete queue artifacts are documented or consolidated",
-      "Backlog no longer stalls immediately on next daemon run"
+      "A documented disposition exists for blocked parent `RK-M1-0004-F01-F01-F01-ESC-F01-F01`.",
+      "Queued child `RK-M1-0005-F02-F01-ESC-F01` is updated to a valid dependency state (dependency-ready or explicitly closed/deferred).",
+      "python tools/orchestrator.py status does not report this queued child as stalled on a blocked parent."
     ],
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-26T13:20:34.433670+00:00",
-    "updated_at": "2026-02-26T13:24:26.177753+00:00",
+    "created_at": "2026-02-26T13:24:27.776130+00:00",
+    "updated_at": "2026-02-26T13:28:17.670971+00:00",
     "estimated_effort": "S",
-    "token_budget": 10000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "queue_stall_recovery",
-    "stall_snapshot": [
-      {
-        "item_id": "RK-M0-0008",
-        "title": "Wire client shell actions to first-slice backend contracts",
-        "unmet_dependencies": [
-          "RK-M0-0007"
-        ],
-        "blocked_dependencies": [
-          "RK-M0-0007"
-        ]
-      },
-      {
-        "item_id": "RK-M0-0011",
-        "title": "Add first-slice loop smoke checks across backend contracts and client actions",
-        "unmet_dependencies": [
-          "RK-M0-0007",
-          "RK-M0-0008"
-        ],
-        "blocked_dependencies": [
-          "RK-M0-0007"
-        ]
-      },
-      {
-        "item_id": "RK-M1-0005-F02-F01-ESC-F01",
-        "title": "Add queued-item model-policy drift audit after policy updates",
-        "unmet_dependencies": [
-          "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
-        ],
-        "blocked_dependencies": [
-          "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
-        ]
-      },
-      {
-        "item_id": "RK-M0-0012",
-        "title": "Expose first-slice settlement loop contract endpoints",
-        "unmet_dependencies": [
-          "RK-M0-0007"
-        ],
-        "blocked_dependencies": [
-          "RK-M0-0007"
-        ]
-      },
-      {
-        "item_id": "RK-M0-0013",
-        "title": "Add action availability gating and cooldown feedback in client shell",
-        "unmet_dependencies": [
-          "RK-M0-0008",
-          "RK-M0-0012"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-M0-0016",
-        "title": "Automate first-slice visual smoke baselines across desktop/tablet/mobile",
-        "unmet_dependencies": [
-          "RK-M0-0011",
-          "RK-M0-0013"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
-        "title": "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
-        "unmet_dependencies": [
-          "RK-M1-0005-F02-F01-ESC-F03"
-        ],
-        "blocked_dependencies": [
-          "RK-M1-0005-F02-F01-ESC-F03"
-        ]
-      },
-      {
-        "item_id": "RK-AUTO-STALL-0006-F01-F01",
-        "title": "Finalize RK-M0-0007 disposition after RK-M0-0012 delivery",
-        "unmet_dependencies": [
-          "RK-M0-0012"
-        ],
-        "blocked_dependencies": []
-      }
-    ],
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0007",
     "assigned_agent": "mara-voss"
   }
 ]

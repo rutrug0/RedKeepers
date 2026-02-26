@@ -1221,5 +1221,32 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T13:26:43.969204+00:00",
+        "item_id": "RK-AUTO-STALL-0007-F01",
+        "status": "completed",
+        "summary": "Documented blocked-parent disposition for `RK-M1-0004-F01-F01-F01-ESC-F01-F01` as retired/superseded and remapped child `RK-M1-0005-F02-F01-ESC-F01` to a valid non-blocked dependency.",
+        "dependency_recovery": {
+            "documented_blocked_disposition": {
+                "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+                "disposition": "retired_superseded_validation_scope_mismatch",
+                "superseded_by": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01"
+            },
+            "remapped_dependency_items": {
+                "RK-M1-0005-F02-F01-ESC-F01": {
+                    "removed": [
+                        "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+                    ],
+                    "remaining_dependencies": [
+                        "RK-M1-0004-F01-F01-F01-ESC-F01"
+                    ]
+                }
+            }
+        },
+        "validation": {
+            "command": "python tools/orchestrator.py status",
+            "result": "pass"
+        }
     }
 ]
