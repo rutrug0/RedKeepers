@@ -1629,5 +1629,52 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T14:49:00.000000+00:00",
+        "item_id": "RK-M0-0008-ESC",
+        "status": "completed",
+        "summary": "Escalation triage confirmed RK-M0-0008 failed on strict visual smoke validation (100% baseline diffs across all target devices) after frontend adapter changes, not on the contract-wiring implementation itself.",
+        "root_cause": "Validation gate mismatch: frontend visual smoke strict diff ran against stale first-slice shell baselines, and retry policy (`max_retries_per_item_per_agent: 0`) escalated immediately after the first failed validation.",
+        "evidence": {
+            "run_history_entry": "coordination/runtime/run-history.jsonl:166",
+            "validation_failure": "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict exited 1",
+            "device_diff_summary": "desktop-1440/tablet-1024/mobile-390/mobile-360 all reported visual diff 100.000% > 0.500%",
+            "source_report_at_failure_time": "coordination/runtime/frontend-visual/report.json (2026-02-26T14:17:18Z)",
+            "retry_policy": "coordination/policies/retry-policy.yaml (`max_retries_per_item_per_agent`: 0)"
+        },
+        "follow_up_item_ids": [
+            "RK-AUTO-STALL-0010-F01"
+        ],
+        "proposed_work_items": [
+            {
+                "title": "Requeue RK-M0-0008 with refreshed first-slice shell visual baseline",
+                "owner_role": "frontend",
+                "milestone": "M0",
+                "priority": "high",
+                "description": "Refresh default index-shell visual baselines after the tick/build/train adapter wiring changes, rerun strict visual smoke, and then complete RK-M0-0008 with unchanged first-slice scope.",
+                "dependencies": [
+                    "RK-AUTO-STALL-0010-F01"
+                ],
+                "inputs": [
+                    "client-web/app.js",
+                    "client-web/styles.css",
+                    "coordination/runtime/frontend-visual/baseline/",
+                    "tools/frontend_visual_smoke.py"
+                ],
+                "acceptance_criteria": [
+                    "Baseline artifacts for desktop-1440, tablet-1024, mobile-390, and mobile-360 are refreshed from current first-slice shell output.",
+                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict passes on index.html with no overflow violations.",
+                    "RK-M0-0008 disposition is updated so RK-M0-0011 and RK-M0-0013 are no longer stalled on this blocker."
+                ],
+                "validation_commands": [
+                    "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ],
+        "files": [
+            "agents/mara-voss/outbox.json"
+        ]
     }
 ]
