@@ -1589,5 +1589,66 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "timestamp_utc":  "2026-02-26T18:33:02.6185694Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-HUMAN-0001-F04",
+        "status":  "done",
+        "summary":  "Added deterministic neutral-node spawning and ambush-enabled gathering loop contracts/services with in-memory persistence, plus narrative event-feed keys for gather start/complete and ambush triggered/resolved outcomes.",
+        "changed_files":  [
+                              "backend/src/modules/combat/application/deterministic-ambush-resolution-service.ts",
+                              "backend/src/modules/combat/application/deterministic-ambush-resolution-service.test.ts",
+                              "backend/src/modules/combat/application/index.ts",
+                              "backend/src/modules/world_map/domain/world-map-neutral-gathering-contract.ts",
+                              "backend/src/modules/world_map/domain/index.ts",
+                              "backend/src/modules/world_map/ports/world-map-neutral-node-state-repository.ts",
+                              "backend/src/modules/world_map/ports/world-map-gather-march-state-repository.ts",
+                              "backend/src/modules/world_map/ports/index.ts",
+                              "backend/src/modules/world_map/infra/in-memory-world-map-neutral-node-state-repository.ts",
+                              "backend/src/modules/world_map/infra/in-memory-world-map-gather-march-state-repository.ts",
+                              "backend/src/modules/world_map/infra/index.ts",
+                              "backend/src/modules/world_map/application/world-map-neutral-gathering-service.ts",
+                              "backend/src/modules/world_map/application/world-map-neutral-gathering-service.test.ts",
+                              "backend/src/modules/world_map/application/index.ts",
+                              "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --experimental-strip-types --check backend/src/modules/combat/application/deterministic-ambush-resolution-service.ts backend/src/modules/combat/application/deterministic-ambush-resolution-service.test.ts backend/src/modules/combat/application/index.ts backend/src/modules/world_map/domain/world-map-neutral-gathering-contract.ts backend/src/modules/world_map/domain/index.ts backend/src/modules/world_map/ports/world-map-neutral-node-state-repository.ts backend/src/modules/world_map/ports/world-map-gather-march-state-repository.ts backend/src/modules/world_map/ports/index.ts backend/src/modules/world_map/infra/in-memory-world-map-neutral-node-state-repository.ts backend/src/modules/world_map/infra/in-memory-world-map-gather-march-state-repository.ts backend/src/modules/world_map/infra/index.ts backend/src/modules/world_map/application/world-map-neutral-gathering-service.ts backend/src/modules/world_map/application/world-map-neutral-gathering-service.test.ts backend/src/modules/world_map/application/index.ts",
+                                    "node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/modules/combat/application/deterministic-ambush-resolution-service.test.ts backend/src/modules/world_map/application/world-map-neutral-gathering-service.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "TypeScript strip-types checks passed for touched files. Node test execution remains blocked in this environment by repository TypeScript ESM import resolution constraints (`ERR_MODULE_NOT_FOUND`, `ERR_UNSUPPORTED_DIR_IMPORT`)."
+                    },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Expose neutral gathering and ambush resolution through backend transport route",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M2",
+                                        "priority":  "medium",
+                                        "description":  "Wire `DeterministicWorldMapNeutralGatheringService` into a transport-facing world-map route so clients can dispatch gather marches and poll deterministic resolution payloads/events without direct module invocation.",
+                                        "acceptance_criteria":  [
+                                                                    "Transport exposes a stable gather command contract that starts gather marches against seeded neutral nodes.",
+                                                                    "Transport exposes a deterministic gather resolution/poll contract returning gather and ambush event payloads.",
+                                                                    "Failures for unknown/depleted nodes and duplicate march IDs return stable error codes."
+                                                                ]
+                                    },
+                                    {
+                                        "title":  "Apply resolved gather haul outputs to settlement resource projection",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M2",
+                                        "priority":  "medium",
+                                        "description":  "Integrate resolved `gathered_yield` outputs with economy resource ledgers so successful gather marches materialize into settlement stock changes and intercepted marches respect reduced haul totals.",
+                                        "acceptance_criteria":  [
+                                                                    "Gather resolution writes resource deltas into the same settlement stock model used by tick/build/train flows.",
+                                                                    "Ambush-intercepted outcomes apply deterministic reduced or zeroed haul based on service config.",
+                                                                    "Event payloads and resulting resource ledger deltas remain deterministic for identical seeds and inputs."
+                                                                ]
+                                    }
+                                ]
     }
 ]

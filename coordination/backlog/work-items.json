@@ -1,38 +1,5 @@
 [
   {
-    "id": "RK-HUMAN-0001-F01",
-    "title": "Add seasonal world lifecycle scheduler and rollover state model",
-    "description": "Implement semi-persistent world lifecycle controls (open/lock/archive/reset) using `season_length_days` metadata while preserving deterministic archive snapshots.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "backend/src/modules/world_map/",
-      "docs/design/world-map-v1-phasing.md"
-    ],
-    "acceptance_criteria": [
-      "World lifecycle states and transitions are defined with deterministic timestamps.",
-      "Rollover process archives world summary and resets joinable world state.",
-      "Lifecycle events emit stable placeholder keys for UI/ops visibility."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T13:42:24.193702+00:00",
-    "updated_at": "2026-02-26T18:21:06.800431+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-HUMAN-0001",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-HUMAN-0001-F04",
     "title": "Add neutral resource nodes and deterministic ambush-enabled gathering loop",
     "description": "Introduce gatherable neutral nodes and march interception rules to unlock ambush gameplay after v1 hostile settlement loop is stable.",
@@ -55,17 +22,18 @@
       "Event feed keys cover gather start, gather complete, ambush triggered, and ambush resolved outcomes."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T13:42:24.193702+00:00",
-    "updated_at": "2026-02-26T13:42:24.193702+00:00",
+    "updated_at": "2026-02-26T18:34:06.403498+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-HUMAN-0001"
+    "generated_from_item_id": "RK-HUMAN-0001",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F03",
@@ -211,5 +179,36 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-HUMAN-0001-F03"
+  },
+  {
+    "id": "RK-HUMAN-0001-F01-F01",
+    "title": "Wire world lifecycle scheduler into backend runtime hook and transport surface",
+    "description": "Integrate the new world lifecycle scheduler with an app lifecycle hook or transport route so operators/UI can advance world lifecycle ticks and consume emitted lifecycle events/archive summaries without direct module invocation.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "A backend runtime path invokes the lifecycle scheduler for a target world using deterministic observed-at timestamps.",
+      "Lifecycle transition events and latest archive summary are exposed through a stable contract response for UI/ops use.",
+      "No additional post-slice mechanics are introduced beyond open/lock/archive/reset scheduling and rollover state reset."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T18:21:09.093683+00:00",
+    "updated_at": "2026-02-26T18:21:09.093683+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-HUMAN-0001-F01"
   }
 ]

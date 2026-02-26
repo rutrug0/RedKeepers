@@ -782,6 +782,82 @@
       ]
     },
     {
+      "key": "event.world.gather_started",
+      "slice_status_scope": "data_stub_post_slice",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "node_id:*",
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "{army_name} begins gathering at {node_label}.",
+      "tokens": [
+        "army_name",
+        "node_label"
+      ]
+    },
+    {
+      "key": "event.world.gather_completed",
+      "slice_status_scope": "data_stub_post_slice",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "node_id:*",
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "{army_name} completes gathering at {node_label} and secures {haul_summary}.",
+      "tokens": [
+        "army_name",
+        "node_label",
+        "haul_summary"
+      ]
+    },
+    {
+      "key": "event.world.ambush_triggered",
+      "slice_status_scope": "data_stub_post_slice",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "node_id:*",
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "Ambush triggered at {node_label}: {army_name} is engaged by raiders of strength {ambush_strength}.",
+      "tokens": [
+        "node_label",
+        "army_name",
+        "ambush_strength"
+      ]
+    },
+    {
+      "key": "event.world.ambush_resolved",
+      "slice_status_scope": "data_stub_post_slice",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "node_id:*",
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "Ambush resolved at {node_label}: {army_name} records {ambush_outcome} with haul {haul_summary}.",
+      "tokens": [
+        "node_label",
+        "army_name",
+        "ambush_outcome",
+        "haul_summary"
+      ]
+    },
+    {
       "key": "event.world.march_started",
       "slice_status_scope": "playable_now",
       "categories": [
