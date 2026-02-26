@@ -62,6 +62,10 @@ def _int_env(name: str, default: int, *, min_value: int = 0) -> int:
 
 AGENT_HEARTBEAT_SECONDS = _int_env("REDKEEPERS_AGENT_HEARTBEAT_SECONDS", 60, min_value=5)
 BACKLOG_ID_PATTERN = re.compile(r"^RK-[A-Z0-9]+(?:-[A-Z0-9]+)*$")
+NON_ACTIONABLE_BLOCKER_REASON_PATTERN = re.compile(
+    r"^(?:[-*]\s*)?(?:none|n/?a|na|null|nil|unknown|tbd|not provided|not specified|unspecified|no blocker(?: reason)?)(?:[.!])?$",
+    re.IGNORECASE,
+)
 
 
 def _supports_color_output() -> bool:
@@ -508,6 +512,230 @@ def _queued_items_with_unmet_dependencies(queue: QueueManager) -> list[dict[str,
                 }
             )
     return rows
+
+
+def is_non_actionable_blocker_reason(reason: Any) -> bool:
+    text = str(reason or "").strip()
+    if not text:
+        return True
+    compact = re.sub(r"\s+", " ", text)
+    return bool(NON_ACTIONABLE_BLOCKER_REASON_PATTERN.match(compact))
+
+
+def find_non_actionable_blocked_items(queue: QueueManager) -> list[dict[str, Any]]:
+    completed_ids = {str(item.get("id", "")).strip() for item in queue.completed}
+    blocked_ids = {str(item.get("id", "")).strip() for item in queue.blocked if str(item.get("id", "")).strip()}
+
+    dependents_by_blocked: dict[str, set[str]] = {item_id: set() for item_id in blocked_ids}
+    for queued in queue.active:
+        if queued.get("status") != "queued":
+            continue
+        queued_id = str(queued.get("id", "")).strip()
+        if not queued_id:
+            continue
+        deps_raw = queued.get("dependencies", [])
+        if not isinstance(deps_raw, list):
+            continue
+        deps = {str(dep).strip() for dep in deps_raw if str(dep).strip()}
+        for dep_id in deps.intersection(blocked_ids):
+            dependents_by_blocked.setdefault(dep_id, set()).add(queued_id)
+
+    rows: list[dict[str, Any]] = []
+    for blocked in queue.blocked:
+        item_id = str(blocked.get("id", "")).strip()
+        if not item_id:
+            continue
+        reason = blocked.get("blocker_reason")
+        if not is_non_actionable_blocker_reason(reason):
+            continue
+
+        deps_raw = blocked.get("dependencies", [])
+        dependencies_ready = False
+        if isinstance(deps_raw, list):
+            deps = [str(dep).strip() for dep in deps_raw if str(dep).strip()]
+            dependencies_ready = all(dep in completed_ids for dep in deps)
+
+        dependents = sorted(dependents_by_blocked.get(item_id, set()))
+        rows.append(
+            {
+                "item_id": item_id,
+                "blocker_reason": str(reason or ""),
+                "dependencies_ready": dependencies_ready,
+                "dependent_items": dependents,
+                "blocking_dependents": len(dependents),
+            }
+        )
+    return rows
+
+
+def format_non_actionable_blocked_warning_lines(rows: list[dict[str, Any]], *, max_lines: int = 8) -> list[str]:
+    if not rows:
+        return []
+    rendered: list[str] = []
+    for row in rows[:max_lines]:
+        item_id = str(row.get("item_id", "<unknown>"))
+        reason = str(row.get("blocker_reason", "")).strip() or "<empty>"
+        dependencies_ready = bool(row.get("dependencies_ready"))
+        dependents = list(row.get("dependent_items", []))
+        blocking_dependents = int(row.get("blocking_dependents", len(dependents)))
+        action = "auto-requeue on run" if dependencies_ready else "lead triage required"
+        if blocking_dependents > 0:
+            action += " before queued dependents remain stalled"
+        dependents_preview = ", ".join(dependents[:3])
+        if len(dependents) > 3:
+            dependents_preview += f", +{len(dependents) - 3} more"
+        dependents_suffix = f"; dependents=[{dependents_preview}]" if dependents_preview else ""
+        rendered.append(
+            f"- {item_id}: non-actionable blocker_reason={reason!r}; dependency_ready={str(dependencies_ready).lower()}; "
+            f"blocking_dependents={blocking_dependents}{dependents_suffix}. Action: {action}."
+        )
+    remainder = len(rows) - len(rendered)
+    if remainder > 0:
+        rendered.append(f"- ... and {remainder} more non-actionable blocked items.")
+    return rendered
+
+
+def _next_auto_blocker_triage_item_id(queue: QueueManager) -> str:
+    existing_ids = {item["id"] for item in queue.active} | {item["id"] for item in queue.completed} | {item["id"] for item in queue.blocked}
+    i = 1
+    while True:
+        candidate = f"RK-AUTO-BLOCKER-{i:04d}"
+        if candidate not in existing_ids:
+            return candidate
+        i += 1
+
+
+def ensure_non_actionable_blocker_triage_item(queue: QueueManager, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    if not rows:
+        return None
+    for existing in queue.active:
+        if existing.get("auto_generated") != "non_actionable_blocker_triage":
+            continue
+        if existing.get("status") in {"queued", "assigned", "running", "validating"}:
+            return None
+
+    item = {
+        "id": _next_auto_blocker_triage_item_id(queue),
+        "title": "Triage non-actionable blocked reasons",
+        "description": (
+            "The daemon detected blocked items with placeholder or empty blocker reasons (for example '- None.'). "
+            "Triage each item with an actionable remediation or unblock decision before they stall queued dependents."
+        ),
+        "milestone": "M0",
+        "type": "qa",
+        "priority": "high",
+        "owner_role": "lead",
+        "preferred_agent": "mara-voss",
+        "dependencies": [],
+        "inputs": [
+            "coordination/backlog/work-items.json",
+            "coordination/backlog/blocked-items.json",
+            "coordination/runtime/run-history.jsonl",
+        ],
+        "acceptance_criteria": [
+            "Each flagged blocked item has an actionable blocker_reason or is explicitly requeued/closed",
+            "Blocked items with complete dependencies are no longer left blocked due to placeholder blocker reasons",
+            "Queued dependents no longer wait on blocked parents with non-actionable blocker reasons",
+        ],
+        "validation_commands": ["python tools/orchestrator.py status"],
+        "status": "queued",
+        "retry_count": 0,
+        "created_at": utc_now_iso(),
+        "updated_at": utc_now_iso(),
+        "estimated_effort": "S",
+        "token_budget": 10000,
+        "result_summary": None,
+        "blocker_reason": None,
+        "escalation_target": "Mara Voss",
+        "auto_generated": "non_actionable_blocker_triage",
+        "non_actionable_blocked_snapshot": rows,
+    }
+    queue.append_item(item)
+    queue.save()
+    return item
+
+
+def guard_non_actionable_blocked_items(
+    queue: QueueManager,
+    retry_policy: dict[str, Any],
+    *,
+    dry_run: bool,
+) -> dict[str, Any]:
+    cfg = retry_policy.get("non_actionable_blocker_guard", {}) if isinstance(retry_policy, dict) else {}
+    if not isinstance(cfg, dict):
+        cfg = {}
+
+    enabled_raw = cfg.get("enabled", True)
+    enabled = bool(enabled_raw) if isinstance(enabled_raw, bool) else str(enabled_raw).strip().lower() in {"1", "true", "yes", "on"}
+    rows = find_non_actionable_blocked_items(queue)
+    result: dict[str, Any] = {
+        "enabled": enabled,
+        "flagged": rows,
+        "auto_requeued": [],
+        "triage_item_id": None,
+        "changed": False,
+    }
+    if not enabled or not rows:
+        return result
+
+    auto_requeue_raw = cfg.get("auto_requeue_dependency_ready", True)
+    auto_requeue = bool(auto_requeue_raw) if isinstance(auto_requeue_raw, bool) else str(auto_requeue_raw).strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    route_lead_triage_raw = cfg.get("route_lead_triage", True)
+    route_lead_triage = (
+        bool(route_lead_triage_raw)
+        if isinstance(route_lead_triage_raw, bool)
+        else str(route_lead_triage_raw).strip().lower() in {"1", "true", "yes", "on"}
+    )
+    triage_only_when_blocking_raw = cfg.get("triage_only_when_blocking_dependents", True)
+    triage_only_when_blocking = (
+        bool(triage_only_when_blocking_raw)
+        if isinstance(triage_only_when_blocking_raw, bool)
+        else str(triage_only_when_blocking_raw).strip().lower() in {"1", "true", "yes", "on"}
+    )
+    try:
+        max_auto_requeue = max(0, int(cfg.get("max_auto_requeue_per_cycle", 5)))
+    except (TypeError, ValueError):
+        max_auto_requeue = 5
+
+    auto_requeued: list[str] = []
+    if auto_requeue and not dry_run and max_auto_requeue > 0:
+        for row in rows:
+            if len(auto_requeued) >= max_auto_requeue:
+                break
+            if not bool(row.get("dependencies_ready")):
+                continue
+            item_id = str(row.get("item_id", "")).strip()
+            if not item_id:
+                continue
+            did_requeue = queue.requeue_blocked(
+                item_id,
+                reason="automatic non-actionable blocker recovery (dependency-ready)",
+            )
+            if did_requeue:
+                auto_requeued.append(item_id)
+
+    if auto_requeued:
+        queue.save()
+        result["changed"] = True
+    result["auto_requeued"] = auto_requeued
+
+    remaining_rows = [row for row in rows if str(row.get("item_id", "")).strip() not in set(auto_requeued)]
+    triage_rows = remaining_rows
+    if triage_only_when_blocking:
+        triage_rows = [row for row in remaining_rows if int(row.get("blocking_dependents", 0)) > 0]
+
+    if route_lead_triage and triage_rows and not dry_run:
+        triage_item = ensure_non_actionable_blocker_triage_item(queue, triage_rows)
+        if triage_item is not None:
+            result["triage_item_id"] = triage_item.get("id")
+            result["changed"] = True
+
+    return result
 
 
 def _next_auto_stall_item_id(queue: QueueManager) -> str:
@@ -1856,6 +2084,38 @@ def process_one(
             )
             stats_tracker.save(stats)
 
+    non_actionable_guard = guard_non_actionable_blocked_items(queue, policies.get("retry", {}), dry_run=dry_run)
+    if non_actionable_guard["flagged"]:
+        emit_event(
+            "queue_health",
+            "Detected blocked items with non-actionable blocker reasons",
+            count=len(non_actionable_guard["flagged"]),
+            item_ids=[str(row.get("item_id", "")) for row in non_actionable_guard["flagged"]],
+            warnings=format_non_actionable_blocked_warning_lines(non_actionable_guard["flagged"], max_lines=5),
+        )
+    if non_actionable_guard["auto_requeued"]:
+        emit_event(
+            "blocked_requeue_non_actionable",
+            "Requeued dependency-ready blocked items with non-actionable blocker reasons",
+            count=len(non_actionable_guard["auto_requeued"]),
+            item_ids=non_actionable_guard["auto_requeued"],
+        )
+        queue.load()
+        stats_tracker.refresh_queue_totals(
+            stats,
+            queued_count=sum(1 for queued_item in queue.active if queued_item.get("status") == "queued"),
+            blocked_count=len(queue.blocked),
+            completed_count=len(queue.completed),
+        )
+        stats_tracker.save(stats)
+    if non_actionable_guard["triage_item_id"]:
+        emit_event(
+            "blocked_reason_triage",
+            "Created lead triage item for non-actionable blocked reasons",
+            item_id=non_actionable_guard["triage_item_id"],
+        )
+        queue.load()
+
     dependency_warnings = normalize_queued_item_dependencies(queue, archived_ids=load_blocked_archived_ids())
     if dependency_warnings:
         emit_event(
@@ -2595,6 +2855,7 @@ def cmd_status() -> int:
     queue = QueueManager(ROOT)
     queue.load()
     dependency_warnings = normalize_queued_item_dependencies(queue, archived_ids=load_blocked_archived_ids())
+    non_actionable_blocked = find_non_actionable_blocked_items(queue)
     stats = StatsTracker(ROOT, agents).load()
     daemon_state = load_json(DAEMON_STATE_PATH, default_daemon_state())
     print(
@@ -2611,6 +2872,10 @@ def cmd_status() -> int:
     if dependency_warnings:
         print("Dependency normalization warnings:")
         for line in format_dependency_warning_lines(dependency_warnings):
+            print(line)
+    if non_actionable_blocked:
+        print("Backlog health warnings:")
+        for line in format_non_actionable_blocked_warning_lines(non_actionable_blocked):
             print(line)
     return 0
 

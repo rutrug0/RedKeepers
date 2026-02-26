@@ -3850,5 +3850,44 @@
     ],
     "assigned_agent": "mara-voss",
     "commit_sha": "808d29332c91dbaff569d3cdffa2ea3324a7b5da"
+  },
+  {
+    "id": "RK-HUMAN-0001",
+    "title": "Human instruction intake: 2026-02-26-world-map-feature-brief.md",
+    "description": "Parse the human instruction file, convert it into concrete backlog tasks with owners/dependencies/acceptance criteria, and route work across agents while preserving first-slice scope.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "critical",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "Human/2026-02-26-world-map-feature-brief.md",
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-items.json",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "Human instruction is decomposed into concrete implementation tasks with explicit owner_role assignments",
+      "New tasks include dependencies, acceptance criteria, and stay within first vertical slice scope",
+      "Lead outbox records a concise triage summary and generated follow-up tasks"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T13:38:03.362561+00:00",
+    "updated_at": "2026-02-26T13:42:24.006607+00:00",
+    "estimated_effort": "S",
+    "token_budget": 12000,
+    "result_summary": "- [outbox.json](D:\\RedKeepers\\agents\\mara-voss\\outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "auto_generated": "human_instruction_intake",
+    "human_instruction_file": "Human/2026-02-26-world-map-feature-brief.md",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "22999d061ef5b5c5b1632586714fb793fddb1ecb"
   }
 ]

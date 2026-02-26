@@ -1,5 +1,21 @@
 [
   {
+    "ts": "2026-02-26T13:42:29.923849Z",
+    "item_id": "RK-AUTO-STALL-0008-F01",
+    "status": "completed",
+    "summary": "Added a non-actionable blocker-reason queue health guard that detects placeholder blocked reasons during status/run, auto-requeues dependency-ready blocked items, and creates deterministic lead triage tasks when queued dependents are stalled.",
+    "checks": [
+      "python -m unittest tests.test_non_actionable_blocker_guard tests.test_blocked_revisit tests.test_queue_integrity (pass)",
+      "python tools/orchestrator.py status (pass; emits Backlog health warnings for non-actionable blocker reasons)"
+    ],
+    "changed_files": [
+      "tools/orchestrator.py",
+      "coordination/policies/retry-policy.yaml",
+      "tests/test_non_actionable_blocker_guard.py",
+      "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
     "ts": "2026-02-25T13:57:40.668562Z",
     "item_id": "RK-M0-0002",
     "status": "completed",

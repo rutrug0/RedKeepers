@@ -40,5 +40,12 @@
       "timeout",
       "bootstrap"
     ]
+  },
+  "non_actionable_blocker_guard": {
+    "enabled": true,
+    "auto_requeue_dependency_ready": true,
+    "max_auto_requeue_per_cycle": 5,
+    "route_lead_triage": true,
+    "triage_only_when_blocking_dependents": true
   }
 }

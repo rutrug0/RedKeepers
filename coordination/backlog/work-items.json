@@ -283,10 +283,10 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T13:33:54.772238+00:00",
-    "updated_at": "2026-02-26T13:38:03.055904+00:00",
+    "updated_at": "2026-02-26T13:48:32.014211+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -298,41 +298,141 @@
     "recovered_from_stale_in_progress": true
   },
   {
-    "id": "RK-HUMAN-0001",
-    "title": "Human instruction intake: 2026-02-26-world-map-feature-brief.md",
-    "description": "Parse the human instruction file, convert it into concrete backlog tasks with owners/dependencies/acceptance criteria, and route work across agents while preserving first-slice scope.",
-    "milestone": "M0",
-    "type": "qa",
-    "priority": "critical",
-    "owner_role": "lead",
-    "preferred_agent": "mara-voss",
-    "dependencies": [],
+    "id": "RK-HUMAN-0001-F01",
+    "title": "Add seasonal world lifecycle scheduler and rollover state model",
+    "description": "Implement semi-persistent world lifecycle controls (open/lock/archive/reset) using `season_length_days` metadata while preserving deterministic archive snapshots.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F01"
+    ],
     "inputs": [
-      "Human/2026-02-26-world-map-feature-brief.md",
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/completed-items.json",
-      "coordination/backlog/blocked-items.json",
-      "docs/design/first-vertical-slice.md"
+      "backend/src/modules/world_map/",
+      "docs/design/world-map-v1-phasing.md"
     ],
     "acceptance_criteria": [
-      "Human instruction is decomposed into concrete implementation tasks with explicit owner_role assignments",
-      "New tasks include dependencies, acceptance criteria, and stay within first vertical slice scope",
-      "Lead outbox records a concise triage summary and generated follow-up tasks"
+      "World lifecycle states and transitions are defined with deterministic timestamps.",
+      "Rollover process archives world summary and resets joinable world state.",
+      "Lifecycle events emit stable placeholder keys for UI/ops visibility."
     ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
+    "validation_commands": [],
+    "status": "queued",
     "retry_count": 0,
-    "created_at": "2026-02-26T13:38:03.362561+00:00",
-    "updated_at": "2026-02-26T13:42:22.204339+00:00",
+    "created_at": "2026-02-26T13:42:24.193702+00:00",
+    "updated_at": "2026-02-26T13:42:24.193702+00:00",
     "estimated_effort": "S",
-    "token_budget": 12000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "human_instruction_intake",
-    "human_instruction_file": "Human/2026-02-26-world-map-feature-brief.md",
-    "assigned_agent": "mara-voss"
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-HUMAN-0001"
+  },
+  {
+    "id": "RK-HUMAN-0001-F02",
+    "title": "Evolve timer marches to near-realtime authoritative movement updates",
+    "description": "Introduce server-authoritative short-interval march updates and interpolation-ready payloads while preserving deterministic resolution semantics.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F02"
+    ],
+    "inputs": [
+      "backend/src/modules/world_map/",
+      "client-web/app.js",
+      "docs/design/world-map-v1-phasing.md"
+    ],
+    "acceptance_criteria": [
+      "March state snapshots are emitted at near-realtime intervals with stable IDs and timestamps.",
+      "Arrival and combat resolution remain server-authoritative and deterministic.",
+      "Client can render interpolated movement without altering authoritative outcomes."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T13:42:24.193702+00:00",
+    "updated_at": "2026-02-26T13:42:24.193702+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-HUMAN-0001"
+  },
+  {
+    "id": "RK-HUMAN-0001-F03",
+    "title": "Add hero attachment path for marches using shared modifier model",
+    "description": "Define and stage hero-to-march assignment rules and cooldown/modifier hooks as a post-slice extension of the shared stat-driven system.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F02"
+    ],
+    "inputs": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "docs/design/world-map-v1-phasing.md"
+    ],
+    "acceptance_criteria": [
+      "Hero assignment lifecycle for marches is defined without bespoke combat branches.",
+      "Hero impact is represented through existing shared modifier tables.",
+      "Tutorial/onboarding impact remains optional and outside first-session critical path."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T13:42:24.193702+00:00",
+    "updated_at": "2026-02-26T13:42:24.193702+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-HUMAN-0001"
+  },
+  {
+    "id": "RK-HUMAN-0001-F04",
+    "title": "Add neutral resource nodes and deterministic ambush-enabled gathering loop",
+    "description": "Introduce gatherable neutral nodes and march interception rules to unlock ambush gameplay after v1 hostile settlement loop is stable.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F02"
+    ],
+    "inputs": [
+      "backend/src/modules/world_map/",
+      "backend/src/modules/combat/",
+      "docs/design/world-map-v1-phasing.md"
+    ],
+    "acceptance_criteria": [
+      "Neutral nodes have deterministic spawn tables and yield outputs.",
+      "Gather marches can be intercepted with deterministic ambush resolution rules.",
+      "Event feed keys cover gather start, gather complete, ambush triggered, and ambush resolved outcomes."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T13:42:24.193702+00:00",
+    "updated_at": "2026-02-26T13:42:24.193702+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-HUMAN-0001"
   }
 ]
