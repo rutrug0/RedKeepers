@@ -2623,5 +2623,46 @@
     "assigned_agent": "mara-voss",
     "recovered_from_stale_in_progress": true,
     "commit_sha": "58311a05844bcbd3b045969cfa160e95ad196a0e"
+  },
+  {
+    "id": "RK-AUTO-STALL-0003-F01",
+    "title": "Resolve remaining blocked-parent dependency stall in QA escalation chain",
+    "description": "Decide disposition for `RK-M1-0005-F02-F01-ESC-F03` (requeue with narrowed validation scope or retire) and align child `RK-M1-0005-F02-F01-ESC-F03-ESC-F01` so no queued item remains stalled behind a retry-threshold blocked parent.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0003"
+    ],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/runtime/run-history.jsonl",
+      "tests/test_daemon_smoke_env.py",
+      "tests/test_m1_scaffold_smoke.py"
+    ],
+    "acceptance_criteria": [
+      "A documented disposition exists for `RK-M1-0005-F02-F01-ESC-F03` with rationale tied to current validation behavior",
+      "`RK-M1-0005-F02-F01-ESC-F03-ESC-F01` is either dependency-ready with valid parent linkage or explicitly closed/deferred",
+      "`python tools/orchestrator.py status` no longer shows queued items stalled on blocked dependency `RK-M1-0005-F02-F01-ESC-F03`"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T08:45:23.114005+00:00",
+    "updated_at": "2026-02-26T08:49:01.432979+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "1. Run `python tools/orchestrator.py status` to confirm the stall condition is cleared.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0003",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "81bed40d95767e7aeb17b92ff892d73baf7013d5"
   }
 ]

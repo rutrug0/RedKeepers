@@ -1,862 +1,904 @@
 ﻿[
     {
-        "ts":  "2026-02-25T13:37:46.7968877Z",
-        "item_id":  "RK-M1-0001-ESC-ESC-ESC-ESC",
-        "status":  "completed",
-        "summary":  "Root cause verified locally: Windows Python subprocess cannot launch npm shim `codex` (PowerShell resolves to `codex.ps1`), while `codex.cmd` runs. Follow-up hardening/recovery items are already queued.",
-        "root_cause":  "Windows command resolution mismatch for npm shim (`codex` vs `codex.cmd`) when launched via Python subprocess",
-        "evidence":  {
-                         "get_command_codex":  "codex.ps1 (PowerShell ExternalScript)",
-                         "python_shutil_which_codex":  "C:\\Users\\Patrik\\AppData\\Roaming\\npm\\codex.CMD",
-                         "python_subprocess_codex":  "FileNotFoundError [WinError 2]",
-                         "python_subprocess_codex_cmd":  "exit_code=0 (codex-cli 0.104.0)"
-                     },
-        "follow_up_item_ids":  [
-                                   "RK-M0-0003",
-                                   "RK-M0-0004"
-                               ]
+        "ts": "2026-02-25T13:37:46.7968877Z",
+        "item_id": "RK-M1-0001-ESC-ESC-ESC-ESC",
+        "status": "completed",
+        "summary": "Root cause verified locally: Windows Python subprocess cannot launch npm shim `codex` (PowerShell resolves to `codex.ps1`), while `codex.cmd` runs. Follow-up hardening/recovery items are already queued.",
+        "root_cause": "Windows command resolution mismatch for npm shim (`codex` vs `codex.cmd`) when launched via Python subprocess",
+        "evidence": {
+            "get_command_codex": "codex.ps1 (PowerShell ExternalScript)",
+            "python_shutil_which_codex": "C:\\Users\\Patrik\\AppData\\Roaming\\npm\\codex.CMD",
+            "python_subprocess_codex": "FileNotFoundError [WinError 2]",
+            "python_subprocess_codex_cmd": "exit_code=0 (codex-cli 0.104.0)"
+        },
+        "follow_up_item_ids": [
+            "RK-M0-0003",
+            "RK-M0-0004"
+        ]
     },
     {
-        "ts":  "2026-02-25T14:06:13.937212+00:00",
-        "item_id":  "RK-M0-0004",
-        "status":  "completed",
-        "summary":  "Recovered backlog after Codex bootstrap incident by removing stale RK-M1-0001 escalation-chain artifacts, requeueing four eligible blocked items, and recording the Windows subprocess npm shim root cause in Mara coordination notes.",
-        "root_cause":  "Windows subprocess npm shim resolution behavior on Windows (`codex` vs `codex.cmd`) caused bootstrap false negatives.",
-        "queue_recovery":  {
-                               "requeued_item_ids":  [
-                                                         "RK-M0-0003",
-                                                         "RK-M1-0002",
-                                                         "RK-M1-0001",
-                                                         "RK-M0-0002"
-                                                     ],
-                               "removed_escalation_chain_ids":  [
-                                                                    "RK-M1-0001-ESC",
-                                                                    "RK-M1-0001-ESC-ESC",
-                                                                    "RK-M1-0001-ESC-ESC-ESC",
-                                                                    "RK-M1-0001-ESC-ESC-ESC-ESC"
-                                                                ],
-                               "blocked_items_remaining":  0
-                           },
-        "files":  [
-                      "coordination/backlog/work-items.json",
-                      "coordination/backlog/blocked-items.json",
-                      "agents/mara-voss/working-notes.md",
-                      "agents/mara-voss/outbox.json"
-                  ]
+        "ts": "2026-02-25T14:06:13.937212+00:00",
+        "item_id": "RK-M0-0004",
+        "status": "completed",
+        "summary": "Recovered backlog after Codex bootstrap incident by removing stale RK-M1-0001 escalation-chain artifacts, requeueing four eligible blocked items, and recording the Windows subprocess npm shim root cause in Mara coordination notes.",
+        "root_cause": "Windows subprocess npm shim resolution behavior on Windows (`codex` vs `codex.cmd`) caused bootstrap false negatives.",
+        "queue_recovery": {
+            "requeued_item_ids": [
+                "RK-M0-0003",
+                "RK-M1-0002",
+                "RK-M1-0001",
+                "RK-M0-0002"
+            ],
+            "removed_escalation_chain_ids": [
+                "RK-M1-0001-ESC",
+                "RK-M1-0001-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC-ESC"
+            ],
+            "blocked_items_remaining": 0
+        },
+        "files": [
+            "coordination/backlog/work-items.json",
+            "coordination/backlog/blocked-items.json",
+            "agents/mara-voss/working-notes.md",
+            "agents/mara-voss/outbox.json"
+        ]
     },
     {
-        "ts":  "2026-02-25T14:19:31Z",
-        "item_id":  "RK-AUTO-BACKLOG-0001",
-        "status":  "completed",
-        "summary":  "Generated a six-item backlog tranche covering QA unblock/reconciliation plus backend, frontend, design, content, and QA follow-on work aligned to current architecture and faction docs.",
-        "files":  [
-                      "coordination/backlog/work-items.json",
-                      "agents/mara-voss/outbox.json"
-                  ],
-        "proposed_work_items":  [
-                                    {
-                                        "id":  "RK-M0-0005",
-                                        "title":  "Reconcile blocked items that already produced deliverables",
-                                        "owner_role":  "qa",
-                                        "description":  "Audit the bootstrap-incident requeued/blocked items against existing docs/tests/outbox evidence and normalize backlog state so completed work is marked completed and only real residual deltas remain queued/blocked.",
-                                        "milestone":  "M0",
-                                        "priority":  "high",
-                                        "dependencies":  [
-
-                                                         ],
-                                        "inputs":  [
-                                                       "coordination/backlog/work-items.json",
-                                                       "coordination/backlog/completed-items.json",
-                                                       "coordination/backlog/blocked-items.json",
-                                                       "agents/ilya-fen/outbox.json",
-                                                       "agents/sera-kest/outbox.json",
-                                                       "agents/tomas-grell/outbox.json",
-                                                       "docs/architecture/backend-modular-monolith.md",
-                                                       "docs/architecture/client-cross-platform-strategy.md",
-                                                       "tests/test_codex_preflight.py",
-                                                       "tests/test_daemon_smoke_env.py"
-                                                   ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ],
-                                        "acceptance_criteria":  [
-                                                                    "Disposition is recorded for RK-M1-0001, RK-M1-0002, RK-M0-0002, and RK-M0-0003 (completed if acceptance is met, otherwise requeued as scoped delta work)",
-                                                                    "Backlog files reflect an audit trail explaining each disposition without recreating escalation-chain churn",
-                                                                    "python tools/orchestrator.py status runs successfully after backlog normalization"
-                                                                ]
-                                    },
-                                    {
-                                        "id":  "RK-M1-0004",
-                                        "title":  "Bootstrap backend source tree from modular monolith spec",
-                                        "owner_role":  "backend",
-                                        "description":  "Create the initial framework-agnostic backend scaffold under backend/ matching the documented modular monolith package layout, including module template structure and placeholder files that make the intended boundaries explicit.",
-                                        "milestone":  "M1",
-                                        "priority":  "high",
-                                        "dependencies":  [
-                                                             "RK-M0-0005"
-                                                         ],
-                                        "inputs":  [
-                                                       "backend/",
-                                                       "docs/architecture/backend-modular-monolith.md",
-                                                       "docs/architecture/system-overview.md"
-                                                   ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ],
-                                        "acceptance_criteria":  [
-                                                                    "backend scaffold includes src/app, src/shared, and src/modules directories aligned with the architecture spec",
-                                                                    "Planned modules (auth/player/settlement/world_map/economy/buildings/units/combat/events/telemetry) each have placeholder api/application/domain/ports/infra structure",
-                                                                    "A brief backend scaffold note maps the created structure back to the architecture spec and deferred framework choice"
-                                                                ]
-                                    },
-                                    {
-                                        "id":  "RK-M1-0005",
-                                        "title":  "Build responsive client shell wireframe for settlement and world map",
-                                        "owner_role":  "frontend",
-                                        "description":  "Implement an initial web-first client shell in client-web/ with placeholder panels for settlement management, world-map viewport, and event feed, designed for desktop-first play with responsive mobile support and no final art dependencies.",
-                                        "milestone":  "M1",
-                                        "priority":  "high",
-                                        "dependencies":  [
-                                                             "RK-M0-0005",
-                                                             "RK-M1-0003"
-                                                         ],
-                                        "inputs":  [
-                                                       "client-web/",
-                                                       "docs/architecture/client-cross-platform-strategy.md",
-                                                       "docs/design/game-vision.md",
-                                                       "docs/design/factions-and-civilizations.md"
-                                                   ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ],
-                                        "acceptance_criteria":  [
-                                                                    "Client shell includes navigable placeholder layout regions for settlement UI, world map view, and player event feed",
-                                                                    "Layout works on desktop and mobile breakpoints with basic keyboard/focus handling and touch-safe spacing",
-                                                                    "Placeholder art only (wireframes/neutral silhouettes/labeled mock blocks) with no final art assumptions baked into components"
-                                                                ]
-                                    },
-                                    {
-                                        "id":  "RK-M1-0006",
-                                        "title":  "Define v1 starter economy, building, and unit data tables",
-                                        "owner_role":  "design",
-                                        "description":  "Translate the factions v1 concept into implementation-ready starter data tables for core resources, building families, unit lines, and civilization modifiers using the stat-driven asymmetry approach.",
-                                        "milestone":  "M1",
-                                        "priority":  "high",
-                                        "dependencies":  [
-                                                             "RK-M1-0003"
-                                                         ],
-                                        "inputs":  [
-                                                       "docs/design/core-loops.md",
-                                                       "docs/design/factions-and-civilizations.md",
-                                                       "docs/architecture/backend-modular-monolith.md"
-                                                   ],
-                                        "validation_commands":  [
-
-                                                                ],
-                                        "acceptance_criteria":  [
-                                                                    "Document defines starter resource set, core building families, and baseline unit roster tables with costs/timings/stats (numeric or clearly normalized values)",
-                                                                    "Civilization differentiation is expressed as v1-safe stat/timing modifiers compatible with the existing complexity guardrails",
-                                                                    "Table fields are annotated for backend module ownership (economy/buildings/units) and frontend display needs"
-                                                                ]
-                                    },
-                                    {
-                                        "id":  "RK-M1-0007",
-                                        "title":  "Create naming bible and placeholder narrative seed pack",
-                                        "owner_role":  "content",
-                                        "description":  "Produce original dark-fantasy naming rules and reusable placeholder text for civilization intros, starter settlements, unit/building labels, and early event feed messages tied to the v1 design outputs.",
-                                        "milestone":  "M1",
-                                        "priority":  "normal",
-                                        "dependencies":  [
-                                                             "RK-M1-0006"
-                                                         ],
-                                        "inputs":  [
-                                                       "docs/design/game-vision.md",
-                                                       "docs/design/factions-and-civilizations.md",
-                                                       "docs/design/v1-starter-data-tables.md"
-                                                   ],
-                                        "validation_commands":  [
-
-                                                                ],
-                                        "acceptance_criteria":  [
-                                                                    "Naming/style guide defines tone, naming patterns, and anti-derivative guardrails for factions, places, and military labels",
-                                                                    "Placeholder text pack includes at least 3 civilization intros, 12 starter settlement names, and 20 event feed message strings",
-                                                                    "Entries are clearly marked replaceable placeholders and reference stable identifiers or categories from the design tables where applicable"
-                                                                ]
-                                    },
-                                    {
-                                        "id":  "RK-M1-0008",
-                                        "title":  "Add M1 scaffold smoke checks across backend, client, and design data",
-                                        "owner_role":  "qa",
-                                        "description":  "Add lightweight QA checks and/or scripts that validate the presence and basic structure of the backend scaffold, client shell wireframe, and starter design data artifacts to reduce regressions during early implementation.",
-                                        "milestone":  "M1",
-                                        "priority":  "normal",
-                                        "dependencies":  [
-                                                             "RK-M1-0004",
-                                                             "RK-M1-0005",
-                                                             "RK-M1-0006"
-                                                         ],
-                                        "inputs":  [
-                                                       "tests/",
-                                                       "backend/",
-                                                       "client-web/",
-                                                       "docs/design/v1-starter-data-tables.md",
-                                                       "docs/architecture/client-cross-platform-strategy.md"
-                                                   ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ],
-                                        "acceptance_criteria":  [
-                                                                    "At least one automated check validates expected backend scaffold and client shell artifact paths/structure",
-                                                                    "QA check coverage includes a sanity check for the starter data tables artifact presence and basic schema/section expectations",
-                                                                    "Manual verification notes cover responsive layout checks and placeholder-art policy compliance for the client shell"
-                                                                ]
+        "ts": "2026-02-25T14:19:31Z",
+        "item_id": "RK-AUTO-BACKLOG-0001",
+        "status": "completed",
+        "summary": "Generated a six-item backlog tranche covering QA unblock/reconciliation plus backend, frontend, design, content, and QA follow-on work aligned to current architecture and faction docs.",
+        "files": [
+            "coordination/backlog/work-items.json",
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": [
+            {
+                "id": "RK-M0-0005",
+                "title": "Reconcile blocked items that already produced deliverables",
+                "owner_role": "qa",
+                "description": "Audit the bootstrap-incident requeued/blocked items against existing docs/tests/outbox evidence and normalize backlog state so completed work is marked completed and only real residual deltas remain queued/blocked.",
+                "milestone": "M0",
+                "priority": "high",
+                "dependencies": [],
+                "inputs": [
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/completed-items.json",
+                    "coordination/backlog/blocked-items.json",
+                    "agents/ilya-fen/outbox.json",
+                    "agents/sera-kest/outbox.json",
+                    "agents/tomas-grell/outbox.json",
+                    "docs/architecture/backend-modular-monolith.md",
+                    "docs/architecture/client-cross-platform-strategy.md",
+                    "tests/test_codex_preflight.py",
+                    "tests/test_daemon_smoke_env.py"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ],
+                "acceptance_criteria": [
+                    "Disposition is recorded for RK-M1-0001, RK-M1-0002, RK-M0-0002, and RK-M0-0003 (completed if acceptance is met, otherwise requeued as scoped delta work)",
+                    "Backlog files reflect an audit trail explaining each disposition without recreating escalation-chain churn",
+                    "python tools/orchestrator.py status runs successfully after backlog normalization"
+                ]
+            },
+            {
+                "id": "RK-M1-0004",
+                "title": "Bootstrap backend source tree from modular monolith spec",
+                "owner_role": "backend",
+                "description": "Create the initial framework-agnostic backend scaffold under backend/ matching the documented modular monolith package layout, including module template structure and placeholder files that make the intended boundaries explicit.",
+                "milestone": "M1",
+                "priority": "high",
+                "dependencies": [
+                    "RK-M0-0005"
+                ],
+                "inputs": [
+                    "backend/",
+                    "docs/architecture/backend-modular-monolith.md",
+                    "docs/architecture/system-overview.md"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ],
+                "acceptance_criteria": [
+                    "backend scaffold includes src/app, src/shared, and src/modules directories aligned with the architecture spec",
+                    "Planned modules (auth/player/settlement/world_map/economy/buildings/units/combat/events/telemetry) each have placeholder api/application/domain/ports/infra structure",
+                    "A brief backend scaffold note maps the created structure back to the architecture spec and deferred framework choice"
+                ]
+            },
+            {
+                "id": "RK-M1-0005",
+                "title": "Build responsive client shell wireframe for settlement and world map",
+                "owner_role": "frontend",
+                "description": "Implement an initial web-first client shell in client-web/ with placeholder panels for settlement management, world-map viewport, and event feed, designed for desktop-first play with responsive mobile support and no final art dependencies.",
+                "milestone": "M1",
+                "priority": "high",
+                "dependencies": [
+                    "RK-M0-0005",
+                    "RK-M1-0003"
+                ],
+                "inputs": [
+                    "client-web/",
+                    "docs/architecture/client-cross-platform-strategy.md",
+                    "docs/design/game-vision.md",
+                    "docs/design/factions-and-civilizations.md"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ],
+                "acceptance_criteria": [
+                    "Client shell includes navigable placeholder layout regions for settlement UI, world map view, and player event feed",
+                    "Layout works on desktop and mobile breakpoints with basic keyboard/focus handling and touch-safe spacing",
+                    "Placeholder art only (wireframes/neutral silhouettes/labeled mock blocks) with no final art assumptions baked into components"
+                ]
+            },
+            {
+                "id": "RK-M1-0006",
+                "title": "Define v1 starter economy, building, and unit data tables",
+                "owner_role": "design",
+                "description": "Translate the factions v1 concept into implementation-ready starter data tables for core resources, building families, unit lines, and civilization modifiers using the stat-driven asymmetry approach.",
+                "milestone": "M1",
+                "priority": "high",
+                "dependencies": [
+                    "RK-M1-0003"
+                ],
+                "inputs": [
+                    "docs/design/core-loops.md",
+                    "docs/design/factions-and-civilizations.md",
+                    "docs/architecture/backend-modular-monolith.md"
+                ],
+                "validation_commands": [],
+                "acceptance_criteria": [
+                    "Document defines starter resource set, core building families, and baseline unit roster tables with costs/timings/stats (numeric or clearly normalized values)",
+                    "Civilization differentiation is expressed as v1-safe stat/timing modifiers compatible with the existing complexity guardrails",
+                    "Table fields are annotated for backend module ownership (economy/buildings/units) and frontend display needs"
+                ]
+            },
+            {
+                "id": "RK-M1-0007",
+                "title": "Create naming bible and placeholder narrative seed pack",
+                "owner_role": "content",
+                "description": "Produce original dark-fantasy naming rules and reusable placeholder text for civilization intros, starter settlements, unit/building labels, and early event feed messages tied to the v1 design outputs.",
+                "milestone": "M1",
+                "priority": "normal",
+                "dependencies": [
+                    "RK-M1-0006"
+                ],
+                "inputs": [
+                    "docs/design/game-vision.md",
+                    "docs/design/factions-and-civilizations.md",
+                    "docs/design/v1-starter-data-tables.md"
+                ],
+                "validation_commands": [],
+                "acceptance_criteria": [
+                    "Naming/style guide defines tone, naming patterns, and anti-derivative guardrails for factions, places, and military labels",
+                    "Placeholder text pack includes at least 3 civilization intros, 12 starter settlement names, and 20 event feed message strings",
+                    "Entries are clearly marked replaceable placeholders and reference stable identifiers or categories from the design tables where applicable"
+                ]
+            },
+            {
+                "id": "RK-M1-0008",
+                "title": "Add M1 scaffold smoke checks across backend, client, and design data",
+                "owner_role": "qa",
+                "description": "Add lightweight QA checks and/or scripts that validate the presence and basic structure of the backend scaffold, client shell wireframe, and starter design data artifacts to reduce regressions during early implementation.",
+                "milestone": "M1",
+                "priority": "normal",
+                "dependencies": [
+                    "RK-M1-0004",
+                    "RK-M1-0005",
+                    "RK-M1-0006"
+                ],
+                "inputs": [
+                    "tests/",
+                    "backend/",
+                    "client-web/",
+                    "docs/design/v1-starter-data-tables.md",
+                    "docs/architecture/client-cross-platform-strategy.md"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ],
+                "acceptance_criteria": [
+                    "At least one automated check validates expected backend scaffold and client shell artifact paths/structure",
+                    "QA check coverage includes a sanity check for the starter data tables artifact presence and basic schema/section expectations",
+                    "Manual verification notes cover responsive layout checks and placeholder-art policy compliance for the client shell"
+                ]
+            }
+        ]
     },
     {
-        "ts":  "2026-02-26T08:45:28.169713+00:00",
-        "item_id":  "RK-AUTO-STALL-0003-F01",
-        "status":  "completed",
-        "summary":  "Retired blocked parent `RK-M1-0005-F02-F01-ESC-F03` (frontend visual `STATUS: BLOCKED` behavior remains environment-dependent) and removed deferred child `RK-M1-0005-F02-F01-ESC-F03-ESC-F01` from active queue.",
-        "dependency_disposition":  {
-                                     "dependency_id":  "RK-M1-0005-F02-F01-ESC-F03",
-                                     "decision":  "retired",
-                                     "rationale":  "Deferred to avoid retry-threshold churn while frontend visual QA requires unavailable environment prerequisites."
-                                 },
-        "queue_recovery":  {
-                               "explicitly_closed_item_ids":  [
-                                                                  "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
-                                                              ],
-                               "consolidated_blocked_removed_ids":  [
-                                                                        "RK-M1-0005-F02-F01-ESC-F03"
-                                                                    ],
-                               "blocked_dependency_disposition":  [
-                                                                     "RK-M1-0005-F02-F01-ESC-F03: retired"
-                                                                 ]
-                           },
-        "proposed_work_items":  [
-                                 {
-                                     "title":  "Re-run frontend visual blocked-state follow-up when runtime is available",
-                                     "owner_role":  "qa",
-                                     "milestone":  "M1",
-                                     "priority":  "high",
-                                     "description":  "After deterministic `python tools/frontend_visual_smoke.py` execution is available, recreate or reopen `RK-M1-0005-F02-F01-ESC-F03` as a narrow validation fix and validate retry-count behavior for `STATUS: BLOCKED` outputs.",
-                                     "acceptance_criteria":  [
-                                                                "Frontend visual smoke runs produce consistent `STATUS: BLOCKED` summaries in env-missing conditions.",
-                                                                "Retry-threshold logic no longer escalates `RK-M1-0005-F02-F01-ESC-F03` on environmental block cases.",
-                                                                "Related follow-up work item is created in backlog with explicit dependency outcomes."
-                                                            ],
-                                     "validation_commands":  [
-                                                              "python tools/orchestrator.py status"
-                                                          ],
-                                     "inputs":  [
-                                                    "tools/orchestrator.py",
-                                                    "tools/frontend_visual_smoke.py"
-                                                ],
-                                     "dependencies":  [
-                                                          "RK-M1-0005-F02-F01-ESC-F03"
-                                                      ]
-                                 }
-                              ]
+        "ts": "2026-02-26T08:45:28.169713+00:00",
+        "item_id": "RK-AUTO-STALL-0003-F01",
+        "status": "completed",
+        "summary": "Retired blocked parent `RK-M1-0005-F02-F01-ESC-F03` (frontend visual `STATUS: BLOCKED` behavior remains environment-dependent) and removed deferred child `RK-M1-0005-F02-F01-ESC-F03-ESC-F01` from active queue.",
+        "dependency_disposition": {
+            "dependency_id": "RK-M1-0005-F02-F01-ESC-F03",
+            "decision": "retired",
+            "rationale": "Deferred to avoid retry-threshold churn while frontend visual QA requires unavailable environment prerequisites."
+        },
+        "queue_recovery": {
+            "explicitly_closed_item_ids": [
+                "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
+            ],
+            "consolidated_blocked_removed_ids": [
+                "RK-M1-0005-F02-F01-ESC-F03"
+            ],
+            "blocked_dependency_disposition": [
+                "RK-M1-0005-F02-F01-ESC-F03: retired"
+            ]
+        },
+        "proposed_work_items": [
+            {
+                "title": "Re-run frontend visual blocked-state follow-up when runtime is available",
+                "owner_role": "qa",
+                "milestone": "M1",
+                "priority": "high",
+                "description": "After deterministic `python tools/frontend_visual_smoke.py` execution is available, recreate or reopen `RK-M1-0005-F02-F01-ESC-F03` as a narrow validation fix and validate retry-count behavior for `STATUS: BLOCKED` outputs.",
+                "acceptance_criteria": [
+                    "Frontend visual smoke runs produce consistent `STATUS: BLOCKED` summaries in env-missing conditions.",
+                    "Retry-threshold logic no longer escalates `RK-M1-0005-F02-F01-ESC-F03` on environmental block cases.",
+                    "Related follow-up work item is created in backlog with explicit dependency outcomes."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ],
+                "inputs": [
+                    "tools/orchestrator.py",
+                    "tools/frontend_visual_smoke.py"
+                ],
+                "dependencies": [
+                    "RK-M1-0005-F02-F01-ESC-F03"
+                ]
+            }
+        ]
     },
     {
-        "ts":  "2026-02-25T17:58:19.810976Z",
-        "item_id":  "RK-M1-0004-F01-F01-F01-ESC",
-        "status":  "completed",
-        "summary":  "Root cause confirmed for RK-M1-0004-F01-F01-F01: model selection is failing before any content changes because Codex rejects `GPT-5.3-Codex-Spark` on this ChatGPT account.",
-        "root_cause":  "The active model policy resolves agent and escalation runs to `gpt-5.3-codex-spark`, which is rejected by Codex with explicit ChatGPT-account unsupported-model errors before work execution can begin.",
-        "evidence":  {
-                         "run_history_900_entry":  "coordination/runtime/run-history.jsonl:72",
-                         "run_history_901_entry":  "coordination/runtime/run-history.jsonl:77",
-                         "selection_source":  "coordination/policies/model-policy.yaml.agent_models / escalation_upgrade.critical_or_repeated_failure.model",
-                         "failure_signature":  "ERROR: \"The \u0027GPT-5.3-Codex-Spark\u0027 model is not supported when using Codex with a ChatGPT account.\"",
-                         "runtime_context":  "tools/codex_worker.py passes selected model directly via --model; no viable fallback was available for this run."
-                     },
-        "proposed_work_items":  [
-                                    {
-                                        "title":  "Add startup/model-policy compatibility preflight for Codex model access",
-                                        "owner_role":  "qa",
-                                        "priority":  "high",
-                                        "milestone":  "M1",
-                                        "description":  "Add an environment preflight that validates the configured model for the selected agent/escalation path against what the current ChatGPT account can access via Codex before queue execution begins.",
-                                        "inputs":  [
-                                                       "tools/health_checks.py",
-                                                       "tools/orchestrator.py",
-                                                       "tools/codex_worker.py",
-                                                       "coordination/policies/model-policy.yaml"
-                                                   ],
-                                        "acceptance_criteria":  [
-                                                                    "Startup/validation fails fast when a configured model is unsupported in the current account and emits the exact unsupported-model reason",
-                                                                    "Preflight suggests remediation (policy update or explicitly configured fallback) instead of retrying repeatedly",
-                                                                    "run-history and model-stats record model-requested/model-used/fallback fields for blocked runs"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ]
-                                    },
-                                    {
-                                        "title":  "Add regression test that guards model-policy and runtime selection against unsupported models",
-                                        "owner_role":  "qa",
-                                        "priority":  "normal",
-                                        "milestone":  "M1",
-                                        "description":  "Add tests for `resolve_execution_profile` + model-policy contract so unsupported IDs are surfaced as a non-production-ready state, with explicit checks for escalation model path.",
-                                        "inputs":  [
-                                                       "tools/orchestrator.py",
-                                                       "tools/codex_worker.py",
-                                                       "coordination/policies/model-policy.yaml",
-                                                       "tests/test_model_routing.py",
-                                                       "tests/test_codex_preflight.py"
-                                                   ],
-                                        "acceptance_criteria":  [
-                                                                    "Escalation path to `gpt-5.3-codex-spark` is asserted when policy currently specifies it and can be flagged by contract smoke test",
-                                                                    "At least one test asserts that unsupported `model_requested` produces a deterministic block/fail summary before execution",
-                                                                    "Tests cover both standard and `escalation_upgrade` model selection paths"
-                                                                ]
-                                    }
-                                ]
+        "ts": "2026-02-25T17:58:19.810976Z",
+        "item_id": "RK-M1-0004-F01-F01-F01-ESC",
+        "status": "completed",
+        "summary": "Root cause confirmed for RK-M1-0004-F01-F01-F01: model selection is failing before any content changes because Codex rejects `GPT-5.3-Codex-Spark` on this ChatGPT account.",
+        "root_cause": "The active model policy resolves agent and escalation runs to `gpt-5.3-codex-spark`, which is rejected by Codex with explicit ChatGPT-account unsupported-model errors before work execution can begin.",
+        "evidence": {
+            "run_history_900_entry": "coordination/runtime/run-history.jsonl:72",
+            "run_history_901_entry": "coordination/runtime/run-history.jsonl:77",
+            "selection_source": "coordination/policies/model-policy.yaml.agent_models / escalation_upgrade.critical_or_repeated_failure.model",
+            "failure_signature": "ERROR: \"The 'GPT-5.3-Codex-Spark' model is not supported when using Codex with a ChatGPT account.\"",
+            "runtime_context": "tools/codex_worker.py passes selected model directly via --model; no viable fallback was available for this run."
+        },
+        "proposed_work_items": [
+            {
+                "title": "Add startup/model-policy compatibility preflight for Codex model access",
+                "owner_role": "qa",
+                "priority": "high",
+                "milestone": "M1",
+                "description": "Add an environment preflight that validates the configured model for the selected agent/escalation path against what the current ChatGPT account can access via Codex before queue execution begins.",
+                "inputs": [
+                    "tools/health_checks.py",
+                    "tools/orchestrator.py",
+                    "tools/codex_worker.py",
+                    "coordination/policies/model-policy.yaml"
+                ],
+                "acceptance_criteria": [
+                    "Startup/validation fails fast when a configured model is unsupported in the current account and emits the exact unsupported-model reason",
+                    "Preflight suggests remediation (policy update or explicitly configured fallback) instead of retrying repeatedly",
+                    "run-history and model-stats record model-requested/model-used/fallback fields for blocked runs"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "title": "Add regression test that guards model-policy and runtime selection against unsupported models",
+                "owner_role": "qa",
+                "priority": "normal",
+                "milestone": "M1",
+                "description": "Add tests for `resolve_execution_profile` + model-policy contract so unsupported IDs are surfaced as a non-production-ready state, with explicit checks for escalation model path.",
+                "inputs": [
+                    "tools/orchestrator.py",
+                    "tools/codex_worker.py",
+                    "coordination/policies/model-policy.yaml",
+                    "tests/test_model_routing.py",
+                    "tests/test_codex_preflight.py"
+                ],
+                "acceptance_criteria": [
+                    "Escalation path to `gpt-5.3-codex-spark` is asserted when policy currently specifies it and can be flagged by contract smoke test",
+                    "At least one test asserts that unsupported `model_requested` produces a deterministic block/fail summary before execution",
+                    "Tests cover both standard and `escalation_upgrade` model selection paths"
+                ]
+            }
+        ]
     },
     {
-        "item_id":  "RK-AUTO-BACKLOG-0002",
-        "status":  "completed",
-        "generated_at":  "2026-02-25T18:05:02.7269811Z",
-        "result_summary":  "Generated six new M0 tasks for first-vertical-slice loop completion, preserving in-scope caps and adding clear owner/acceptance criteria.",
-        "proposed_work_items":  [
-                                    {
-                                        "title":  "Add first-slice settlement tick simulation and resource delta service",
-                                        "owner_role":  "backend",
-                                        "description":  "Implement a backend service that applies deterministic settlement resource tick deltas from starter economy data for the first vertical slice loop.",
-                                        "acceptance_criteria":  [
-                                                                    "Implement a deterministic tick function that computes per-resource delta and resulting stock levels for one settlement in one testable call.",
-                                                                    "Tick output includes resource deltas and reason codes so UI and event-feed wiring can consume state changes without special-case logic.",
-                                                                    "Values used are constrained to first-slice caps (3-4 resources, 4-6 buildings, 3-5 units) and no new mechanics are introduced."
-                                                                ]
-                                    },
-                                    {
-                                        "title":  "Add first-slice build/upgrade and train command handlers",
-                                        "owner_role":  "backend",
-                                        "description":  "Add backend command handlers for the small in-scope building upgrade and unit training subset, using starter tables and placeholder validation semantics.",
-                                        "acceptance_criteria":  [
-                                                                    "Handlers exist for at least one building upgrade action and one unit training action in the v1 starter subset.",
-                                                                    "Each handler returns structured success/error objects including `insufficient_resources`, `cooldown`, and `invalid_state` signals.",
-                                                                    "Handler output emits placeholder event IDs aligned with existing feed/key contract and does not depend on PvP/combat modules."
-                                                                ]
-                                    },
-                                    {
-                                        "title":  "Wire client shell actions to first-slice backend mock contracts",
-                                        "owner_role":  "frontend",
-                                        "description":  "Hook settlement UI actions (tick/build/train/scout) to lightweight backend command stubs so the first slice loop is interactive in-browser.",
-                                        "acceptance_criteria":  [
-                                                                    "Settlement and map buttons invoke mock-adapter calls for at least one build and one unit train action.",
-                                                                    "UI updates resource and status indicators from command responses in a placeholder state model.",
-                                                                    "Feed events appear for successful and failed actions with replaceable placeholder copy keys and no final-art dependency."
-                                                                ]
-                                    },
-                                    {
-                                        "title":  "Publish first-slice map interaction and scout outcome spec",
-                                        "owner_role":  "design",
-                                        "description":  "Create a concise design spec for the single map interaction flow (inspect/scout) and how scout outcomes map to settlement actions and events.",
-                                        "acceptance_criteria":  [
-                                                                    "Spec defines one map interaction flow with at least 3 tile states and one blocked/empty/found outcome.",
-                                                                    "The spec maps each outcome to a stable placeholder event key for client consumption.",
-                                                                    "All interactions are one-click lightweight and constrained to the first-slice interaction count of 1."
-                                                                ]
-                                    },
-                                    {
-                                        "title":  "Add first-slice content keys for map, build, and train events",
-                                        "owner_role":  "content",
-                                        "description":  "Create placeholder-but-replaceable content keys for settlement resources, build/train actions, and scout/map outcomes used by the frontend event feed and panels.",
-                                        "acceptance_criteria":  [
-                                                                    "Content pack includes placeholders for at least 6 build/train/map outcomes with stable keys and token fields.",
-                                                                    "Entries are explicitly marked placeholder/replacable and tied to v1 IDs rather than hard-coded UI strings.",
-                                                                    "No additional civilizations or new mechanics are introduced in the event narrative data."
-                                                                ]
-                                    },
-                                    {
-                                        "title":  "Add automated smoke checks for first-slice loop readiness",
-                                        "owner_role":  "qa",
-                                        "description":  "Add lightweight checks that assert core first-slice backend/UX artifacts for settlement tick, command handlers, and client-feed wiring are present and connected.",
-                                        "acceptance_criteria":  [
-                                                                    "Automated checks validate placeholder contract points for tick/upgrade/train/scout flows are exercised by at least one smoke test.",
-                                                                    "Smoke checks include one negative-path assertion for insufficient resources or unavailable action state.",
-                                                                    "Check output documents pass/fail in a deterministic artifact suitable for CI or manual run."
-                                                                ]
-                                    }
-                                ]
+        "item_id": "RK-AUTO-BACKLOG-0002",
+        "status": "completed",
+        "generated_at": "2026-02-25T18:05:02.7269811Z",
+        "result_summary": "Generated six new M0 tasks for first-vertical-slice loop completion, preserving in-scope caps and adding clear owner/acceptance criteria.",
+        "proposed_work_items": [
+            {
+                "title": "Add first-slice settlement tick simulation and resource delta service",
+                "owner_role": "backend",
+                "description": "Implement a backend service that applies deterministic settlement resource tick deltas from starter economy data for the first vertical slice loop.",
+                "acceptance_criteria": [
+                    "Implement a deterministic tick function that computes per-resource delta and resulting stock levels for one settlement in one testable call.",
+                    "Tick output includes resource deltas and reason codes so UI and event-feed wiring can consume state changes without special-case logic.",
+                    "Values used are constrained to first-slice caps (3-4 resources, 4-6 buildings, 3-5 units) and no new mechanics are introduced."
+                ]
+            },
+            {
+                "title": "Add first-slice build/upgrade and train command handlers",
+                "owner_role": "backend",
+                "description": "Add backend command handlers for the small in-scope building upgrade and unit training subset, using starter tables and placeholder validation semantics.",
+                "acceptance_criteria": [
+                    "Handlers exist for at least one building upgrade action and one unit training action in the v1 starter subset.",
+                    "Each handler returns structured success/error objects including `insufficient_resources`, `cooldown`, and `invalid_state` signals.",
+                    "Handler output emits placeholder event IDs aligned with existing feed/key contract and does not depend on PvP/combat modules."
+                ]
+            },
+            {
+                "title": "Wire client shell actions to first-slice backend mock contracts",
+                "owner_role": "frontend",
+                "description": "Hook settlement UI actions (tick/build/train/scout) to lightweight backend command stubs so the first slice loop is interactive in-browser.",
+                "acceptance_criteria": [
+                    "Settlement and map buttons invoke mock-adapter calls for at least one build and one unit train action.",
+                    "UI updates resource and status indicators from command responses in a placeholder state model.",
+                    "Feed events appear for successful and failed actions with replaceable placeholder copy keys and no final-art dependency."
+                ]
+            },
+            {
+                "title": "Publish first-slice map interaction and scout outcome spec",
+                "owner_role": "design",
+                "description": "Create a concise design spec for the single map interaction flow (inspect/scout) and how scout outcomes map to settlement actions and events.",
+                "acceptance_criteria": [
+                    "Spec defines one map interaction flow with at least 3 tile states and one blocked/empty/found outcome.",
+                    "The spec maps each outcome to a stable placeholder event key for client consumption.",
+                    "All interactions are one-click lightweight and constrained to the first-slice interaction count of 1."
+                ]
+            },
+            {
+                "title": "Add first-slice content keys for map, build, and train events",
+                "owner_role": "content",
+                "description": "Create placeholder-but-replaceable content keys for settlement resources, build/train actions, and scout/map outcomes used by the frontend event feed and panels.",
+                "acceptance_criteria": [
+                    "Content pack includes placeholders for at least 6 build/train/map outcomes with stable keys and token fields.",
+                    "Entries are explicitly marked placeholder/replacable and tied to v1 IDs rather than hard-coded UI strings.",
+                    "No additional civilizations or new mechanics are introduced in the event narrative data."
+                ]
+            },
+            {
+                "title": "Add automated smoke checks for first-slice loop readiness",
+                "owner_role": "qa",
+                "description": "Add lightweight checks that assert core first-slice backend/UX artifacts for settlement tick, command handlers, and client-feed wiring are present and connected.",
+                "acceptance_criteria": [
+                    "Automated checks validate placeholder contract points for tick/upgrade/train/scout flows are exercised by at least one smoke test.",
+                    "Smoke checks include one negative-path assertion for insufficient resources or unavailable action state.",
+                    "Check output documents pass/fail in a deterministic artifact suitable for CI or manual run."
+                ]
+            }
+        ]
     },
     {
-        "ts":  "2026-02-25T18:22:55.3924437Z",
-        "item_id":  "RK-M1-0005-F02-F01-ESC",
-        "status":  "completed",
-        "summary":  "Root cause confirmed as unsupported model-policy routing (`codex-5.3` on source run and `gpt-5-mini` fallback on escalation), not a frontend test implementation defect. Source item is requeued/unblocked for retry under current policy.",
-        "root_cause":  "Execution profile selected models that this ChatGPT-backed Codex account cannot access, causing immediate unsupported-model failures before work could execute.",
-        "evidence":  {
-                         "run_history_source_failures":  "coordination/runtime/run-history.jsonl:51-53",
-                         "run_history_escalation_failures":  "coordination/runtime/run-history.jsonl:54-56",
-                         "frontend_selection_snapshot":  "coordination/runtime/daemon-events.jsonl:770-783 (model `codex-5.3`, no accessible fallback)",
-                         "escalation_selection_snapshot":  "coordination/runtime/daemon-events.jsonl:794-808 (fallback `gpt-5-mini`, also unsupported)",
-                         "unblock_signal":  "coordination/runtime/daemon-events.jsonl:1011-1013 (blocked revisit requeued source/escalation; escalation now selects `default`)"
-                     },
-        "proposed_work_items":  [
-                                    {
-                                        "title":  "Add queued-item model-policy drift audit after policy updates",
-                                        "owner_role":  "qa",
-                                        "priority":  "high",
-                                        "milestone":  "M1",
-                                        "description":  "Add a lightweight daemon audit pass that scans queued items after model-policy changes and flags/remediates any item that would still resolve to unsupported model/fallback combinations.",
-                                        "dependencies":  [
-                                                             "RK-M1-0004-F01-F01-F01-ESC-F01",
-                                                             "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
-                                                         ],
-                                        "inputs":  [
-                                                       "tools/orchestrator.py",
-                                                       "tools/codex_worker.py",
-                                                       "coordination/policies/model-policy.yaml",
-                                                       "coordination/runtime/run-history.jsonl"
-                                                   ],
-                                        "acceptance_criteria":  [
-                                                                    "Audit identifies queued items whose resolved model and fallback are both inaccessible in current account context",
-                                                                    "Daemon emits a clear remediation hint and avoids repeated retry loops for those items",
-                                                                    "At least one regression test covers a stale queued item created before a policy change"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ]
-                                    }
-                                ]
+        "ts": "2026-02-25T18:22:55.3924437Z",
+        "item_id": "RK-M1-0005-F02-F01-ESC",
+        "status": "completed",
+        "summary": "Root cause confirmed as unsupported model-policy routing (`codex-5.3` on source run and `gpt-5-mini` fallback on escalation), not a frontend test implementation defect. Source item is requeued/unblocked for retry under current policy.",
+        "root_cause": "Execution profile selected models that this ChatGPT-backed Codex account cannot access, causing immediate unsupported-model failures before work could execute.",
+        "evidence": {
+            "run_history_source_failures": "coordination/runtime/run-history.jsonl:51-53",
+            "run_history_escalation_failures": "coordination/runtime/run-history.jsonl:54-56",
+            "frontend_selection_snapshot": "coordination/runtime/daemon-events.jsonl:770-783 (model `codex-5.3`, no accessible fallback)",
+            "escalation_selection_snapshot": "coordination/runtime/daemon-events.jsonl:794-808 (fallback `gpt-5-mini`, also unsupported)",
+            "unblock_signal": "coordination/runtime/daemon-events.jsonl:1011-1013 (blocked revisit requeued source/escalation; escalation now selects `default`)"
+        },
+        "proposed_work_items": [
+            {
+                "title": "Add queued-item model-policy drift audit after policy updates",
+                "owner_role": "qa",
+                "priority": "high",
+                "milestone": "M1",
+                "description": "Add a lightweight daemon audit pass that scans queued items after model-policy changes and flags/remediates any item that would still resolve to unsupported model/fallback combinations.",
+                "dependencies": [
+                    "RK-M1-0004-F01-F01-F01-ESC-F01",
+                    "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+                ],
+                "inputs": [
+                    "tools/orchestrator.py",
+                    "tools/codex_worker.py",
+                    "coordination/policies/model-policy.yaml",
+                    "coordination/runtime/run-history.jsonl"
+                ],
+                "acceptance_criteria": [
+                    "Audit identifies queued items whose resolved model and fallback are both inaccessible in current account context",
+                    "Daemon emits a clear remediation hint and avoids repeated retry loops for those items",
+                    "At least one regression test covers a stale queued item created before a policy change"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     },
     {
-        "ts":  "2026-02-25T18:25:11.3976940Z",
-        "item_id":  "RK-M1-0006-F02-F01-ESC",
-        "status":  "completed",
-        "summary":  "Root cause confirmed as stale unsupported-model routing (`GPT-5.3-Codex-Spark` primary with `gpt-5-mini` fallback) during earlier retries; item is now unblocked and running under `default` model selection.",
-        "root_cause":  "Earlier execution-profile policy state selected a primary/fallback model pair inaccessible to this ChatGPT-backed Codex account, causing immediate pre-execution failures; subsequent policy correction switched this escalation path to `default`.",
-        "evidence":  {
-                         "run_history_failures":  "coordination/runtime/run-history.jsonl:57-62",
-                         "daemon_failure_snapshot":  "coordination/runtime/daemon-events.jsonl:810-841",
-                         "unblock_requeue_signal":  "coordination/runtime/daemon-events.jsonl:1033",
-                         "current_selection":  "coordination/runtime/daemon-events.jsonl:1034-1036 (model `default`, fallback `null`)",
-                         "backlog_state":  "coordination/backlog/work-items.json (`RK-M1-0006-F02-F01` queued, `RK-M1-0006-F02-F01-ESC` running); coordination/backlog/blocked-items.json (not present)"
-                     }
+        "ts": "2026-02-25T18:25:11.3976940Z",
+        "item_id": "RK-M1-0006-F02-F01-ESC",
+        "status": "completed",
+        "summary": "Root cause confirmed as stale unsupported-model routing (`GPT-5.3-Codex-Spark` primary with `gpt-5-mini` fallback) during earlier retries; item is now unblocked and running under `default` model selection.",
+        "root_cause": "Earlier execution-profile policy state selected a primary/fallback model pair inaccessible to this ChatGPT-backed Codex account, causing immediate pre-execution failures; subsequent policy correction switched this escalation path to `default`.",
+        "evidence": {
+            "run_history_failures": "coordination/runtime/run-history.jsonl:57-62",
+            "daemon_failure_snapshot": "coordination/runtime/daemon-events.jsonl:810-841",
+            "unblock_requeue_signal": "coordination/runtime/daemon-events.jsonl:1033",
+            "current_selection": "coordination/runtime/daemon-events.jsonl:1034-1036 (model `default`, fallback `null`)",
+            "backlog_state": "coordination/backlog/work-items.json (`RK-M1-0006-F02-F01` queued, `RK-M1-0006-F02-F01-ESC` running); coordination/backlog/blocked-items.json (not present)"
+        }
     },
     {
-        "ts":  "2026-02-25T18:27:02.4178925Z",
-        "item_id":  "RK-M1-0006-F03-F01-ESC",
-        "status":  "completed",
-        "summary":  "Root cause confirmed as stale unsupported-model routing (`GPT-5.3-Codex-Spark` primary with `gpt-5-mini` fallback) during earlier retries; source and escalation items were requeued and escalation now resolves to `default`.",
-        "root_cause":  "Earlier retry/escalation attempts ran under an inaccessible model pair for this ChatGPT-backed Codex account, causing immediate unsupported-model failures before backend work execution.",
-        "evidence":  {
-                         "run_history_failures":  "coordination/runtime/run-history.jsonl:63-68",
-                         "daemon_failure_snapshot":  "coordination/runtime/daemon-events.jsonl:843-874",
-                         "unblock_requeue_signal":  "coordination/runtime/daemon-events.jsonl:1048",
-                         "current_selection":  "coordination/runtime/daemon-events.jsonl:1049-1050 (model `default`, fallback `null`)",
-                         "backlog_state":  "coordination/backlog/work-items.json (`RK-M1-0006-F03-F01` queued, `RK-M1-0006-F03-F01-ESC` running); coordination/backlog/blocked-items.json (not present)"
-                     }
+        "ts": "2026-02-25T18:27:02.4178925Z",
+        "item_id": "RK-M1-0006-F03-F01-ESC",
+        "status": "completed",
+        "summary": "Root cause confirmed as stale unsupported-model routing (`GPT-5.3-Codex-Spark` primary with `gpt-5-mini` fallback) during earlier retries; source and escalation items were requeued and escalation now resolves to `default`.",
+        "root_cause": "Earlier retry/escalation attempts ran under an inaccessible model pair for this ChatGPT-backed Codex account, causing immediate unsupported-model failures before backend work execution.",
+        "evidence": {
+            "run_history_failures": "coordination/runtime/run-history.jsonl:63-68",
+            "daemon_failure_snapshot": "coordination/runtime/daemon-events.jsonl:843-874",
+            "unblock_requeue_signal": "coordination/runtime/daemon-events.jsonl:1048",
+            "current_selection": "coordination/runtime/daemon-events.jsonl:1049-1050 (model `default`, fallback `null`)",
+            "backlog_state": "coordination/backlog/work-items.json (`RK-M1-0006-F03-F01` queued, `RK-M1-0006-F03-F01-ESC` running); coordination/backlog/blocked-items.json (not present)"
+        }
     },
     {
-        "item_id":  "RK-AUTO-BACKLOG-0003",
-        "status":  "completed",
-        "generated_at":  "2026-02-25T18:29:12.4921649Z",
-        "result_summary":  "Generated five new queued M0 first-slice tasks across backend, frontend, design, content, and QA; deferred one useful post-slice item into follow-up proposals.",
-        "files":  [
-                      "coordination/backlog/work-items.json",
-                      "agents/mara-voss/outbox.json"
-                  ],
-        "proposed_work_items":  [
-                                    {
-                                        "id":  "RK-M0-0012",
-                                        "title":  "Expose first-slice settlement loop contract endpoints",
-                                        "owner_role":  "backend",
-                                        "milestone":  "M0",
-                                        "priority":  "high",
-                                        "dependencies":  [
-                                                             "RK-M0-0006",
-                                                             "RK-M0-0007",
-                                                             "RK-M0-0009"
-                                                         ],
-                                        "description":  "Implement backend-facing contract adapters for settlement tick, building upgrade, unit train, and scout actions so the client loop can call stable first-slice request/response shapes.",
-                                        "acceptance_criteria":  [
-                                                                    "Contract adapters expose deterministic request/response payloads for tick, upgrade, train, and scout actions",
-                                                                    "Responses include stable placeholder event keys and state deltas suitable for client binding",
-                                                                    "Failure paths map `insufficient_resources`, `cooldown`, and `unavailable_tile` to consistent error codes without adding PvP/diplomacy logic"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ]
-                                    },
-                                    {
-                                        "id":  "RK-M0-0013",
-                                        "title":  "Add action availability gating and cooldown feedback in client shell",
-                                        "owner_role":  "frontend",
-                                        "milestone":  "M0",
-                                        "priority":  "high",
-                                        "dependencies":  [
-                                                             "RK-M0-0008",
-                                                             "RK-M0-0012",
-                                                             "RK-M0-0010"
-                                                         ],
-                                        "description":  "Update settlement and map controls to react to backend contract state so build/train/scout actions show deterministic disabled states and placeholder reason feedback.",
-                                        "acceptance_criteria":  [
-                                                                    "Build/train/scout controls disable when contract responses indicate insufficient resources, cooldown, or unavailable tile outcomes",
-                                                                    "Placeholder reason text is rendered from stable event/content keys rather than hard-coded strings",
-                                                                    "Control state and feedback behavior works at existing desktop and mobile breakpoints without adding new mechanics"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ]
-                                    },
-                                    {
-                                        "id":  "RK-M0-0014",
-                                        "title":  "Publish first-slice progression target matrix for 15m/30m/60m loop",
-                                        "owner_role":  "design",
-                                        "milestone":  "M0",
-                                        "priority":  "normal",
-                                        "dependencies":  [
-                                                             "RK-M1-0006",
-                                                             "RK-M0-0009"
-                                                         ],
-                                        "description":  "Define clear timing and resource targets for first upgrade, first unit training, and first scout interaction so implementation and QA share the same first-slice pacing expectations.",
-                                        "acceptance_criteria":  [
-                                                                    "Matrix defines target windows for resource stabilization, first building upgrade, first unit training, and one scout interaction",
-                                                                    "Each target includes measurable pass/fail bounds that QA can assert in smoke checks",
-                                                                    "Document explicitly confirms first-slice caps (1 settlement, 3-4 resources, 4-6 buildings, 3-5 units) and marks anything else as deferred"
-                                                                ]
-                                    },
-                                    {
-                                        "id":  "RK-M0-0015",
-                                        "title":  "Expand placeholder event templates for first-slice success and failure outcomes",
-                                        "owner_role":  "content",
-                                        "milestone":  "M0",
-                                        "priority":  "normal",
-                                        "dependencies":  [
-                                                             "RK-M0-0010",
-                                                             "RK-M0-0014"
-                                                         ],
-                                        "description":  "Add tokenized placeholder text templates for settlement loop positive/negative outcomes so UI and backend can display consistent feedback without introducing new narrative scope.",
-                                        "acceptance_criteria":  [
-                                                                    "At least 12 placeholder templates are added across tick/build/train/scout flows, including success and failure variants",
-                                                                    "Templates use stable token names aligned with backend contract payload fields",
-                                                                    "Entries remain replaceable placeholders and avoid adding lore systems or mechanics outside first-slice scope"
-                                                                ]
-                                    },
-                                    {
-                                        "id":  "RK-M0-0016",
-                                        "title":  "Automate first-slice visual smoke baselines across desktop/tablet/mobile",
-                                        "owner_role":  "qa",
-                                        "milestone":  "M0",
-                                        "priority":  "high",
-                                        "dependencies":  [
-                                                             "RK-M0-0011",
-                                                             "RK-M0-0013"
-                                                         ],
-                                        "description":  "Run and integrate `tools/frontend_visual_smoke.py` for first-slice UI checks so multi-device screenshots and baseline diffs cover core settlement/map/feed interactions.",
-                                        "acceptance_criteria":  [
-                                                                    "Automated smoke run captures desktop, tablet, and mobile screenshots with baseline comparison output",
-                                                                    "Coverage includes at least one success path and one failure path for build/train/scout action feedback",
-                                                                    "Run output provides deterministic pass/fail summary and artifact paths for review"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ]
-                                    },
-                                    {
-                                        "title":  "Prototype hero unit system for multiple civilizations",
-                                        "owner_role":  "design",
-                                        "milestone":  "M2",
-                                        "priority":  "low",
-                                        "dependencies":  [
-                                                             "first vertical slice sign-off"
-                                                         ],
-                                        "description":  "Deferred post-slice concept for hero units and civilization-specific active abilities, explicitly excluded from first vertical slice scope.",
-                                        "acceptance_criteria":  [
-                                                                    "Concept scope remains unqueued until first vertical slice is signed off",
-                                                                    "Design proposal identifies minimum onboarding/tutorial impact and associated UI changes",
-                                                                    "No implementation work starts during M0/M1 first-slice delivery"
-                                                                ]
-                                    }
-                                ]
+        "item_id": "RK-AUTO-BACKLOG-0003",
+        "status": "completed",
+        "generated_at": "2026-02-25T18:29:12.4921649Z",
+        "result_summary": "Generated five new queued M0 first-slice tasks across backend, frontend, design, content, and QA; deferred one useful post-slice item into follow-up proposals.",
+        "files": [
+            "coordination/backlog/work-items.json",
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": [
+            {
+                "id": "RK-M0-0012",
+                "title": "Expose first-slice settlement loop contract endpoints",
+                "owner_role": "backend",
+                "milestone": "M0",
+                "priority": "high",
+                "dependencies": [
+                    "RK-M0-0006",
+                    "RK-M0-0007",
+                    "RK-M0-0009"
+                ],
+                "description": "Implement backend-facing contract adapters for settlement tick, building upgrade, unit train, and scout actions so the client loop can call stable first-slice request/response shapes.",
+                "acceptance_criteria": [
+                    "Contract adapters expose deterministic request/response payloads for tick, upgrade, train, and scout actions",
+                    "Responses include stable placeholder event keys and state deltas suitable for client binding",
+                    "Failure paths map `insufficient_resources`, `cooldown`, and `unavailable_tile` to consistent error codes without adding PvP/diplomacy logic"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "id": "RK-M0-0013",
+                "title": "Add action availability gating and cooldown feedback in client shell",
+                "owner_role": "frontend",
+                "milestone": "M0",
+                "priority": "high",
+                "dependencies": [
+                    "RK-M0-0008",
+                    "RK-M0-0012",
+                    "RK-M0-0010"
+                ],
+                "description": "Update settlement and map controls to react to backend contract state so build/train/scout actions show deterministic disabled states and placeholder reason feedback.",
+                "acceptance_criteria": [
+                    "Build/train/scout controls disable when contract responses indicate insufficient resources, cooldown, or unavailable tile outcomes",
+                    "Placeholder reason text is rendered from stable event/content keys rather than hard-coded strings",
+                    "Control state and feedback behavior works at existing desktop and mobile breakpoints without adding new mechanics"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "id": "RK-M0-0014",
+                "title": "Publish first-slice progression target matrix for 15m/30m/60m loop",
+                "owner_role": "design",
+                "milestone": "M0",
+                "priority": "normal",
+                "dependencies": [
+                    "RK-M1-0006",
+                    "RK-M0-0009"
+                ],
+                "description": "Define clear timing and resource targets for first upgrade, first unit training, and first scout interaction so implementation and QA share the same first-slice pacing expectations.",
+                "acceptance_criteria": [
+                    "Matrix defines target windows for resource stabilization, first building upgrade, first unit training, and one scout interaction",
+                    "Each target includes measurable pass/fail bounds that QA can assert in smoke checks",
+                    "Document explicitly confirms first-slice caps (1 settlement, 3-4 resources, 4-6 buildings, 3-5 units) and marks anything else as deferred"
+                ]
+            },
+            {
+                "id": "RK-M0-0015",
+                "title": "Expand placeholder event templates for first-slice success and failure outcomes",
+                "owner_role": "content",
+                "milestone": "M0",
+                "priority": "normal",
+                "dependencies": [
+                    "RK-M0-0010",
+                    "RK-M0-0014"
+                ],
+                "description": "Add tokenized placeholder text templates for settlement loop positive/negative outcomes so UI and backend can display consistent feedback without introducing new narrative scope.",
+                "acceptance_criteria": [
+                    "At least 12 placeholder templates are added across tick/build/train/scout flows, including success and failure variants",
+                    "Templates use stable token names aligned with backend contract payload fields",
+                    "Entries remain replaceable placeholders and avoid adding lore systems or mechanics outside first-slice scope"
+                ]
+            },
+            {
+                "id": "RK-M0-0016",
+                "title": "Automate first-slice visual smoke baselines across desktop/tablet/mobile",
+                "owner_role": "qa",
+                "milestone": "M0",
+                "priority": "high",
+                "dependencies": [
+                    "RK-M0-0011",
+                    "RK-M0-0013"
+                ],
+                "description": "Run and integrate `tools/frontend_visual_smoke.py` for first-slice UI checks so multi-device screenshots and baseline diffs cover core settlement/map/feed interactions.",
+                "acceptance_criteria": [
+                    "Automated smoke run captures desktop, tablet, and mobile screenshots with baseline comparison output",
+                    "Coverage includes at least one success path and one failure path for build/train/scout action feedback",
+                    "Run output provides deterministic pass/fail summary and artifact paths for review"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "title": "Prototype hero unit system for multiple civilizations",
+                "owner_role": "design",
+                "milestone": "M2",
+                "priority": "low",
+                "dependencies": [
+                    "first vertical slice sign-off"
+                ],
+                "description": "Deferred post-slice concept for hero units and civilization-specific active abilities, explicitly excluded from first vertical slice scope.",
+                "acceptance_criteria": [
+                    "Concept scope remains unqueued until first vertical slice is signed off",
+                    "Design proposal identifies minimum onboarding/tutorial impact and associated UI changes",
+                    "No implementation work starts during M0/M1 first-slice delivery"
+                ]
+            }
+        ]
     },
     {
-        "ts":  "2026-02-25T18:51:11.8512057Z",
-        "item_id":  "RK-M1-0005-F02-F01-ESC",
-        "status":  "completed",
-        "summary":  "Root cause updated: source item now runs under `default` and implements the smoke checks, but strict frontend validation fails in daemon commit-guard because `playwright` is unavailable in the active Python runtime; this keeps the item in retry/escalation churn.",
-        "root_cause":  "Validation environment mismatch: `tools/orchestrator.py` auto-appends strict `tools/frontend_visual_smoke.py` for frontend items, and that script exits non-zero with `STATUS: BLOCKED` when `playwright` import fails (`No module named 'playwright'`).",
-        "evidence":  {
-                         "source_execution_completed":  "coordination/runtime/daemon-events.jsonl:1170",
-                         "validation_failed_event":  "coordination/runtime/daemon-events.jsonl:1172",
-                         "run_history_validation_error":  "coordination/runtime/run-history.jsonl:84",
-                         "blocked_signature":  "playwright import failed: No module named 'playwright'",
-                         "validation_injection":  "tools/orchestrator.py:796-808 (frontend_visual_qa command auto-append)",
-                         "smoke_block_behavior":  "tools/frontend_visual_smoke.py:304-309 and 461-462 (`STATUS: BLOCKED`, non-zero in strict mode)",
-                         "source_backlog_state":  "coordination/backlog/blocked-items.json:350-385 (`RK-M1-0005-F02-F01`, retry_count=4, last_failure_reason=validation failed or commit failed)"
-                     },
-        "proposed_work_items":  [
-                                    {
-                                        "title":  "Add frontend visual QA dependency preflight to daemon environment checks",
-                                        "owner_role":  "qa",
-                                        "priority":  "high",
-                                        "milestone":  "M1",
-                                        "description":  "Extend daemon environment validation so frontend-visual QA prerequisites are verified before scheduling frontend items, including Playwright importability in the exact Python interpreter used by orchestrator validation.",
-                                        "dependencies":  [
-                                                             "RK-M0-0002"
-                                                         ],
-                                        "inputs":  [
-                                                       "tools/health_checks.py",
-                                                       "tools/orchestrator.py",
-                                                       "coordination/policies/commit-guard-rules.yaml",
-                                                       "docs/operations/frontend-visual-qa.md"
-                                                   ],
-                                        "acceptance_criteria":  [
-                                                                    "Environment/status preflight emits a clear actionable error when frontend visual QA is enabled and `playwright` is missing for the active Python interpreter",
-                                                                    "Preflight guidance includes explicit install/remediation commands for Playwright and Chromium runtime",
-                                                                    "When prerequisites are present, `python tools/orchestrator.py status` passes without false frontend-visual dependency errors"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ]
-                                    },
-                                    {
-                                        "title":  "Treat frontend visual `STATUS: BLOCKED` validation results as block-state outcomes",
-                                        "owner_role":  "qa",
-                                        "priority":  "high",
-                                        "milestone":  "M1",
-                                        "description":  "Adjust validation result handling so environment blockers reported by `tools/frontend_visual_smoke.py` (`STATUS: BLOCKED`) mark work items blocked with actionable reason instead of repeatedly retrying/escalating as generic validation failures.",
-                                        "inputs":  [
-                                                       "tools/orchestrator.py",
-                                                       "tools/frontend_visual_smoke.py",
-                                                       "coordination/runtime/run-history.jsonl",
-                                                       "tests/"
-                                                   ],
-                                        "acceptance_criteria":  [
-                                                                    "Frontend validation runs that return `STATUS: BLOCKED` are recorded as blocked with blocker reason containing the visual smoke error summary",
-                                                                    "Retry count is not incremented for environmental blockers and no new retry-threshold escalation is created from that condition",
-                                                                    "Regression coverage demonstrates this behavior while preserving existing failure semantics for real visual regressions"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status",
-                                                                    "python -m unittest discover -s tests"
-                                                                ]
-                                    }
-                                ]
+        "ts": "2026-02-25T18:51:11.8512057Z",
+        "item_id": "RK-M1-0005-F02-F01-ESC",
+        "status": "completed",
+        "summary": "Root cause updated: source item now runs under `default` and implements the smoke checks, but strict frontend validation fails in daemon commit-guard because `playwright` is unavailable in the active Python runtime; this keeps the item in retry/escalation churn.",
+        "root_cause": "Validation environment mismatch: `tools/orchestrator.py` auto-appends strict `tools/frontend_visual_smoke.py` for frontend items, and that script exits non-zero with `STATUS: BLOCKED` when `playwright` import fails (`No module named 'playwright'`).",
+        "evidence": {
+            "source_execution_completed": "coordination/runtime/daemon-events.jsonl:1170",
+            "validation_failed_event": "coordination/runtime/daemon-events.jsonl:1172",
+            "run_history_validation_error": "coordination/runtime/run-history.jsonl:84",
+            "blocked_signature": "playwright import failed: No module named 'playwright'",
+            "validation_injection": "tools/orchestrator.py:796-808 (frontend_visual_qa command auto-append)",
+            "smoke_block_behavior": "tools/frontend_visual_smoke.py:304-309 and 461-462 (`STATUS: BLOCKED`, non-zero in strict mode)",
+            "source_backlog_state": "coordination/backlog/blocked-items.json:350-385 (`RK-M1-0005-F02-F01`, retry_count=4, last_failure_reason=validation failed or commit failed)"
+        },
+        "proposed_work_items": [
+            {
+                "title": "Add frontend visual QA dependency preflight to daemon environment checks",
+                "owner_role": "qa",
+                "priority": "high",
+                "milestone": "M1",
+                "description": "Extend daemon environment validation so frontend-visual QA prerequisites are verified before scheduling frontend items, including Playwright importability in the exact Python interpreter used by orchestrator validation.",
+                "dependencies": [
+                    "RK-M0-0002"
+                ],
+                "inputs": [
+                    "tools/health_checks.py",
+                    "tools/orchestrator.py",
+                    "coordination/policies/commit-guard-rules.yaml",
+                    "docs/operations/frontend-visual-qa.md"
+                ],
+                "acceptance_criteria": [
+                    "Environment/status preflight emits a clear actionable error when frontend visual QA is enabled and `playwright` is missing for the active Python interpreter",
+                    "Preflight guidance includes explicit install/remediation commands for Playwright and Chromium runtime",
+                    "When prerequisites are present, `python tools/orchestrator.py status` passes without false frontend-visual dependency errors"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "title": "Treat frontend visual `STATUS: BLOCKED` validation results as block-state outcomes",
+                "owner_role": "qa",
+                "priority": "high",
+                "milestone": "M1",
+                "description": "Adjust validation result handling so environment blockers reported by `tools/frontend_visual_smoke.py` (`STATUS: BLOCKED`) mark work items blocked with actionable reason instead of repeatedly retrying/escalating as generic validation failures.",
+                "inputs": [
+                    "tools/orchestrator.py",
+                    "tools/frontend_visual_smoke.py",
+                    "coordination/runtime/run-history.jsonl",
+                    "tests/"
+                ],
+                "acceptance_criteria": [
+                    "Frontend validation runs that return `STATUS: BLOCKED` are recorded as blocked with blocker reason containing the visual smoke error summary",
+                    "Retry count is not incremented for environmental blockers and no new retry-threshold escalation is created from that condition",
+                    "Regression coverage demonstrates this behavior while preserving existing failure semantics for real visual regressions"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status",
+                    "python -m unittest discover -s tests"
+                ]
+            }
+        ]
     },
     {
-        "ts":  "2026-02-25T19:21:44.8438011Z",
-        "item_id":  "RK-M1-0005-F02-F01-ESC-F03-ESC",
-        "status":  "completed",
-        "summary":  "Root cause confirmed: the source item implementation already covers frontend visual `STATUS: BLOCKED` handling, but the item kept failing daemon validation because full-suite unittest discovery currently has unrelated baseline failures; retries then escalated on generic validation failure.",
-        "root_cause":  "Validation command scope mismatch. `RK-M1-0005-F02-F01-ESC-F03` runs `python -m unittest discover -s tests`, which fails on pre-existing tests unrelated to frontend visual blocker-state logic (`tests/test_daemon_smoke_env.py` and `tests/test_m1_scaffold_smoke.py`).",
-        "evidence":  {
-                         "source_retry_failures":  "coordination/runtime/run-history.jsonl:86-88 (`RK-M1-0005-F02-F01-ESC-F03` failed validation 3x on unittest discover)",
-                         "validation_failure_signal":  "coordination/runtime/daemon-events.jsonl:1239,1254,1282 (`validation_failed` events for source item)",
-                         "test_failure_1":  "tests/test_daemon_smoke_env.py:68 expects missing `daemon-state.json` required-file error, while current `tools/health_checks.py` required_paths omits that file",
-                         "test_failure_2":  "tests/test_m1_scaffold_smoke.py:67-69 expects legacy static markers (`resource-grid`, `map-stage`, `event-list`) absent from current client shell markup",
-                         "feature_path_verification":  "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_queue_integrity => pass"
-                     },
-        "proposed_work_items":  [
-                                    {
-                                        "title":  "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
-                                        "owner_role":  "qa",
-                                        "milestone":  "M1",
-                                        "priority":  "high",
-                                        "description":  "Resolve existing unrelated failures in `tests/test_daemon_smoke_env.py` and `tests/test_m1_scaffold_smoke.py` so full regression validation is green and does not re-escalate completed feature work.",
-                                        "dependencies":  [
-                                                             "RK-M1-0005-F02-F01-ESC-F03"
-                                                         ],
-                                        "inputs":  [
-                                                       "tests/test_daemon_smoke_env.py",
-                                                       "tests/test_m1_scaffold_smoke.py",
-                                                       "tools/health_checks.py",
-                                                       "client-web/index.html"
-                                                   ],
-                                        "acceptance_criteria":  [
-                                                                    "`python -m unittest discover -s tests` passes without failures in `tests/test_daemon_smoke_env.py`",
-                                                                    "`python -m unittest discover -s tests` passes without failures in `tests/test_m1_scaffold_smoke.py`",
-                                                                    "Updated assertions reflect current first-slice contract (runtime vs state required-file semantics, current placeholder shell markup) without expanding product scope"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python -m unittest discover -s tests"
-                                                                ]
-                                    }
-                                ]
+        "ts": "2026-02-25T19:21:44.8438011Z",
+        "item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
+        "status": "completed",
+        "summary": "Root cause confirmed: the source item implementation already covers frontend visual `STATUS: BLOCKED` handling, but the item kept failing daemon validation because full-suite unittest discovery currently has unrelated baseline failures; retries then escalated on generic validation failure.",
+        "root_cause": "Validation command scope mismatch. `RK-M1-0005-F02-F01-ESC-F03` runs `python -m unittest discover -s tests`, which fails on pre-existing tests unrelated to frontend visual blocker-state logic (`tests/test_daemon_smoke_env.py` and `tests/test_m1_scaffold_smoke.py`).",
+        "evidence": {
+            "source_retry_failures": "coordination/runtime/run-history.jsonl:86-88 (`RK-M1-0005-F02-F01-ESC-F03` failed validation 3x on unittest discover)",
+            "validation_failure_signal": "coordination/runtime/daemon-events.jsonl:1239,1254,1282 (`validation_failed` events for source item)",
+            "test_failure_1": "tests/test_daemon_smoke_env.py:68 expects missing `daemon-state.json` required-file error, while current `tools/health_checks.py` required_paths omits that file",
+            "test_failure_2": "tests/test_m1_scaffold_smoke.py:67-69 expects legacy static markers (`resource-grid`, `map-stage`, `event-list`) absent from current client shell markup",
+            "feature_path_verification": "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_queue_integrity => pass"
+        },
+        "proposed_work_items": [
+            {
+                "title": "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
+                "owner_role": "qa",
+                "milestone": "M1",
+                "priority": "high",
+                "description": "Resolve existing unrelated failures in `tests/test_daemon_smoke_env.py` and `tests/test_m1_scaffold_smoke.py` so full regression validation is green and does not re-escalate completed feature work.",
+                "dependencies": [
+                    "RK-M1-0005-F02-F01-ESC-F03"
+                ],
+                "inputs": [
+                    "tests/test_daemon_smoke_env.py",
+                    "tests/test_m1_scaffold_smoke.py",
+                    "tools/health_checks.py",
+                    "client-web/index.html"
+                ],
+                "acceptance_criteria": [
+                    "`python -m unittest discover -s tests` passes without failures in `tests/test_daemon_smoke_env.py`",
+                    "`python -m unittest discover -s tests` passes without failures in `tests/test_m1_scaffold_smoke.py`",
+                    "Updated assertions reflect current first-slice contract (runtime vs state required-file semantics, current placeholder shell markup) without expanding product scope"
+                ],
+                "validation_commands": [
+                    "python -m unittest discover -s tests"
+                ]
+            }
+        ]
     },
     {
-        "ts":  "2026-02-26T08:21:40.811635+00:00",
-        "item_id":  "RK-AUTO-STALL-0001",
-        "status":  "completed",
-        "summary":  "Resolved dependency stall by requeueing dependency-ready RK-M0-0007, archiving superseded escalation artifacts, and explicitly closing one dependency-stalled child queue artifact so at least one runnable queued item is available.",
-        "queue_recovery":  {
-                               "requeued_item_ids":  [
-                                                         "RK-M0-0007"
-                                                     ],
-                               "archived_superseded_blocked_ids":  [
-                                                                      "RK-M1-0001-ESC",
-                                                                      "RK-M1-0001-ESC-ESC",
-                                                                      "RK-M1-0001-ESC-ESC-ESC",
-                                                                      "RK-M1-0001-ESC-ESC-ESC-ESC"
-                                                                  ],
-                               "closed_dependency_stalled_item_ids":  [
-                                                                         "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
-                                                                     ],
-                               "closed_out_of_scope_item_ids":  [
-                                                                   "RK-AUTO-BACKLOG-0003-F01"
-                                                               ],
-                               "runnable_queued_after_recovery":  [
-                                                                     "RK-M0-0007"
-                                                                 ]
-                           },
-        "proposed_work_items":  [
-                                    {
-                                        "title":  "Normalize queued backlog dependency references to valid item IDs",
-                                        "owner_role":  "qa",
-                                        "priority":  "high",
-                                        "milestone":  "M0",
-                                        "description":  "Audit queued work items for dependency strings that are not real backlog IDs (for example `tests package`) or references to archived items, then replace with valid IDs or explicitly defer those tasks.",
-                                        "inputs":  [
-                                                       "coordination/backlog/work-items.json",
-                                                       "coordination/backlog/completed-items.json",
-                                                       "coordination/backlog/blocked-archived-items.json"
-                                                   ],
-                                        "acceptance_criteria":  [
-                                                                    "Every queued item dependency points to an existing backlog item ID in work/completed/blocked lists",
-                                                                    "Queued items with unresolved non-item dependencies are either corrected or explicitly closed/deferred",
-                                                                    "`python tools/orchestrator.py status` reports at least one dependency-ready queued item after cleanup"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ]
-                                    }
-                                ]
+        "ts": "2026-02-26T08:21:40.811635+00:00",
+        "item_id": "RK-AUTO-STALL-0001",
+        "status": "completed",
+        "summary": "Resolved dependency stall by requeueing dependency-ready RK-M0-0007, archiving superseded escalation artifacts, and explicitly closing one dependency-stalled child queue artifact so at least one runnable queued item is available.",
+        "queue_recovery": {
+            "requeued_item_ids": [
+                "RK-M0-0007"
+            ],
+            "archived_superseded_blocked_ids": [
+                "RK-M1-0001-ESC",
+                "RK-M1-0001-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC-ESC"
+            ],
+            "closed_dependency_stalled_item_ids": [
+                "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
+            ],
+            "closed_out_of_scope_item_ids": [
+                "RK-AUTO-BACKLOG-0003-F01"
+            ],
+            "runnable_queued_after_recovery": [
+                "RK-M0-0007"
+            ]
+        },
+        "proposed_work_items": [
+            {
+                "title": "Normalize queued backlog dependency references to valid item IDs",
+                "owner_role": "qa",
+                "priority": "high",
+                "milestone": "M0",
+                "description": "Audit queued work items for dependency strings that are not real backlog IDs (for example `tests package`) or references to archived items, then replace with valid IDs or explicitly defer those tasks.",
+                "inputs": [
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/completed-items.json",
+                    "coordination/backlog/blocked-archived-items.json"
+                ],
+                "acceptance_criteria": [
+                    "Every queued item dependency points to an existing backlog item ID in work/completed/blocked lists",
+                    "Queued items with unresolved non-item dependencies are either corrected or explicitly closed/deferred",
+                    "`python tools/orchestrator.py status` reports at least one dependency-ready queued item after cleanup"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     },
     {
-        "ts":  "2026-02-26T08:31:47+00:00",
-        "item_id":  "RK-AUTO-STALL-0002",
-        "status":  "completed",
-        "summary":  "Resolved dependency stall by requeueing dependency-root RK-M0-0007 and moving deferred RK-AUTO-BACKLOG-0003-F01 out of active queue; queue now has a dependency-ready item.",
-        "queue_recovery":  {
-                               "requeued_item_ids":  [
-                                                         "RK-M0-0007"
-                                                     ],
-                               "closed_out_of_scope_item_ids":  [
-                                                                   "RK-AUTO-BACKLOG-0003-F01"
-                                                               ],
-                               "runnable_queued_after_recovery":  [
-                                                                     "RK-M0-0007"
-                                                                 ],
-                               "remaining_stalled_queued_item_ids":  [
-                                                                        "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
-                                                                        "RK-M0-0008",
-                                                                        "RK-M0-0011",
-                                                                        "RK-M1-0005-F02-F01-ESC-F01",
-                                                                        "RK-M0-0012",
-                                                                        "RK-M0-0013",
-                                                                        "RK-M0-0016",
-                                                                        "RK-M1-0005-F02-F01-ESC-F02",
-                                                                        "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
-                                                                    ]
-                           },
-        "proposed_work_items":  [
-                                    {
-                                        "title":  "Normalize queued dependency references to real backlog IDs",
-                                        "owner_role":  "qa",
-                                        "milestone":  "M0",
-                                        "priority":  "high",
-                                        "description":  "Audit queued items and replace non-item dependency strings (for example `tests package`) with valid backlog IDs or explicit blocked/deferred state transitions.",
-                                        "inputs":  [
-                                                       "coordination/backlog/work-items.json",
-                                                       "coordination/backlog/blocked-items.json",
-                                                       "coordination/backlog/completed-items.json"
-                                                   ],
-                                        "acceptance_criteria":  [
-                                                                    "All queued item dependencies resolve to existing IDs in work/blocked/completed backlog files",
-                                                                    "Items with intentionally external prerequisites are moved out of active queued state with explicit blocker reasons",
-                                                                    "`python tools/orchestrator.py status` still reports at least one dependency-ready queued item after cleanup"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ]
-                                    },
-                                    {
-                                        "title":  "Resolve missing dependency lineage for RK-M1-0005-F02-F01-ESC-F02",
-                                        "owner_role":  "lead",
-                                        "milestone":  "M0",
-                                        "priority":  "normal",
-                                        "description":  "Determine whether dependency `RK-M0-0002` should be restored, remapped, or removed for RK-M1-0005-F02-F01-ESC-F02 and update backlog links to eliminate phantom dependency stalls.",
-                                        "inputs":  [
-                                                       "coordination/backlog/work-items.json",
-                                                       "coordination/backlog/blocked-items.json",
-                                                       "coordination/backlog/completed-items.json",
-                                                       "coordination/runtime/run-history.jsonl"
-                                                   ],
-                                        "acceptance_criteria":  [
-                                                                    "A concrete disposition is recorded for `RK-M0-0002` (restored/remapped/retired) with rationale",
-                                                                    "RK-M1-0005-F02-F01-ESC-F02 dependencies point only to valid, trackable backlog IDs",
-                                                                    "No queued item remains stalled solely due to missing `RK-M0-0002` reference"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ]
-                                    }
-                                ]
+        "ts": "2026-02-26T08:31:47+00:00",
+        "item_id": "RK-AUTO-STALL-0002",
+        "status": "completed",
+        "summary": "Resolved dependency stall by requeueing dependency-root RK-M0-0007 and moving deferred RK-AUTO-BACKLOG-0003-F01 out of active queue; queue now has a dependency-ready item.",
+        "queue_recovery": {
+            "requeued_item_ids": [
+                "RK-M0-0007"
+            ],
+            "closed_out_of_scope_item_ids": [
+                "RK-AUTO-BACKLOG-0003-F01"
+            ],
+            "runnable_queued_after_recovery": [
+                "RK-M0-0007"
+            ],
+            "remaining_stalled_queued_item_ids": [
+                "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+                "RK-M0-0008",
+                "RK-M0-0011",
+                "RK-M1-0005-F02-F01-ESC-F01",
+                "RK-M0-0012",
+                "RK-M0-0013",
+                "RK-M0-0016",
+                "RK-M1-0005-F02-F01-ESC-F02",
+                "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
+            ]
+        },
+        "proposed_work_items": [
+            {
+                "title": "Normalize queued dependency references to real backlog IDs",
+                "owner_role": "qa",
+                "milestone": "M0",
+                "priority": "high",
+                "description": "Audit queued items and replace non-item dependency strings (for example `tests package`) with valid backlog IDs or explicit blocked/deferred state transitions.",
+                "inputs": [
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-items.json",
+                    "coordination/backlog/completed-items.json"
+                ],
+                "acceptance_criteria": [
+                    "All queued item dependencies resolve to existing IDs in work/blocked/completed backlog files",
+                    "Items with intentionally external prerequisites are moved out of active queued state with explicit blocker reasons",
+                    "`python tools/orchestrator.py status` still reports at least one dependency-ready queued item after cleanup"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            },
+            {
+                "title": "Resolve missing dependency lineage for RK-M1-0005-F02-F01-ESC-F02",
+                "owner_role": "lead",
+                "milestone": "M0",
+                "priority": "normal",
+                "description": "Determine whether dependency `RK-M0-0002` should be restored, remapped, or removed for RK-M1-0005-F02-F01-ESC-F02 and update backlog links to eliminate phantom dependency stalls.",
+                "inputs": [
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-items.json",
+                    "coordination/backlog/completed-items.json",
+                    "coordination/runtime/run-history.jsonl"
+                ],
+                "acceptance_criteria": [
+                    "A concrete disposition is recorded for `RK-M0-0002` (restored/remapped/retired) with rationale",
+                    "RK-M1-0005-F02-F01-ESC-F02 dependencies point only to valid, trackable backlog IDs",
+                    "No queued item remains stalled solely due to missing `RK-M0-0002` reference"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     },
     {
-        "ts":  "2026-02-26T08:40:00+00:00",
-        "item_id":  "RK-AUTO-STALL-0002-F02",
-        "status":  "completed",
-        "summary":  "Removed phantom dependency for `RK-M1-0005-F02-F01-ESC-F02` and recorded disposition for `RK-M0-0002` as retired.",
-        "dependency_disposition":  {
-                                     "dependency_id":  "RK-M0-0002",
-                                     "decision":  "retired",
-                                     "rationale":  "Archived as non-actionable blocked work with no completed replacement scope; no active queued item has a required dependency relationship to it."
-                                 },
-        "result":  "Updated RK-M1-0005-F02-F01-ESC-F02.dependencies to [] and confirmed no queued items are stalled solely on `RK-M0-0002`."
+        "ts": "2026-02-26T08:40:00+00:00",
+        "item_id": "RK-AUTO-STALL-0002-F02",
+        "status": "completed",
+        "summary": "Removed phantom dependency for `RK-M1-0005-F02-F01-ESC-F02` and recorded disposition for `RK-M0-0002` as retired.",
+        "dependency_disposition": {
+            "dependency_id": "RK-M0-0002",
+            "decision": "retired",
+            "rationale": "Archived as non-actionable blocked work with no completed replacement scope; no active queued item has a required dependency relationship to it."
+        },
+        "result": "Updated RK-M1-0005-F02-F01-ESC-F02.dependencies to [] and confirmed no queued items are stalled solely on `RK-M0-0002`."
     },
     {
-        "ts":  "2026-02-26T08:40:05.661087+00:00",
-        "item_id":  "RK-AUTO-STALL-0003",
-        "status":  "completed",
-        "summary":  "Resolved queue dependency stall by making one stalled queued item dependency-ready, requeueing blocked dependency root RK-M0-0007, closing deferred out-of-scope RK-AUTO-BACKLOG-0003-F01, and consolidating superseded escalation artifacts already archived.",
-        "queue_recovery":  {
-                               "made_runnable_item_ids":  [
-                                                              "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
-                                                          ],
-                               "requeued_item_ids":  [
-                                                         "RK-M0-0007"
-                                                     ],
-                               "explicitly_closed_item_ids":  [
-                                                                   "RK-AUTO-BACKLOG-0003-F01"
-                                                               ],
-                               "consolidated_blocked_removed_ids":  [
-                                                                       "RK-M1-0001-ESC",
-                                                                       "RK-M1-0001-ESC-ESC",
-                                                                       "RK-M1-0001-ESC-ESC-ESC",
-                                                                       "RK-M1-0001-ESC-ESC-ESC-ESC"
-                                                                   ],
-                               "dependency_ready_queued_after_recovery":  [
-                                                                             "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
-                                                                             "RK-M0-0007"
-                                                                         ]
-                           },
-        "proposed_work_items":  [
-                                    {
-                                        "title":  "Resolve remaining blocked-parent dependency stall in QA escalation chain",
-                                        "owner_role":  "lead",
-                                        "milestone":  "M0",
-                                        "priority":  "normal",
-                                        "description":  "Decide disposition for `RK-M1-0005-F02-F01-ESC-F03` (requeue with narrowed validation scope or retire) and align child `RK-M1-0005-F02-F01-ESC-F03-ESC-F01` so no queued item remains stalled behind a retry-threshold blocked parent.",
-                                        "inputs":  [
-                                                       "coordination/backlog/work-items.json",
-                                                       "coordination/backlog/blocked-items.json",
-                                                       "coordination/runtime/run-history.jsonl",
-                                                       "tests/test_daemon_smoke_env.py",
-                                                       "tests/test_m1_scaffold_smoke.py"
-                                                   ],
-                                        "acceptance_criteria":  [
-                                                                    "A documented disposition exists for `RK-M1-0005-F02-F01-ESC-F03` with rationale tied to current validation behavior",
-                                                                    "`RK-M1-0005-F02-F01-ESC-F03-ESC-F01` is either dependency-ready with valid parent linkage or explicitly closed/deferred",
-                                                                    "`python tools/orchestrator.py status` no longer shows queued items stalled on blocked dependency `RK-M1-0005-F02-F01-ESC-F03`"
-                                                                ],
-                                        "validation_commands":  [
-                                                                    "python tools/orchestrator.py status"
-                                                                ]
-                                    }
-                                ]
+        "ts": "2026-02-26T08:40:05.661087+00:00",
+        "item_id": "RK-AUTO-STALL-0003",
+        "status": "completed",
+        "summary": "Resolved queue dependency stall by making one stalled queued item dependency-ready, requeueing blocked dependency root RK-M0-0007, closing deferred out-of-scope RK-AUTO-BACKLOG-0003-F01, and consolidating superseded escalation artifacts already archived.",
+        "queue_recovery": {
+            "made_runnable_item_ids": [
+                "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+            ],
+            "requeued_item_ids": [
+                "RK-M0-0007"
+            ],
+            "explicitly_closed_item_ids": [
+                "RK-AUTO-BACKLOG-0003-F01"
+            ],
+            "consolidated_blocked_removed_ids": [
+                "RK-M1-0001-ESC",
+                "RK-M1-0001-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC-ESC"
+            ],
+            "dependency_ready_queued_after_recovery": [
+                "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+                "RK-M0-0007"
+            ]
+        },
+        "proposed_work_items": [
+            {
+                "title": "Resolve remaining blocked-parent dependency stall in QA escalation chain",
+                "owner_role": "lead",
+                "milestone": "M0",
+                "priority": "normal",
+                "description": "Decide disposition for `RK-M1-0005-F02-F01-ESC-F03` (requeue with narrowed validation scope or retire) and align child `RK-M1-0005-F02-F01-ESC-F03-ESC-F01` so no queued item remains stalled behind a retry-threshold blocked parent.",
+                "inputs": [
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-items.json",
+                    "coordination/runtime/run-history.jsonl",
+                    "tests/test_daemon_smoke_env.py",
+                    "tests/test_m1_scaffold_smoke.py"
+                ],
+                "acceptance_criteria": [
+                    "A documented disposition exists for `RK-M1-0005-F02-F01-ESC-F03` with rationale tied to current validation behavior",
+                    "`RK-M1-0005-F02-F01-ESC-F03-ESC-F01` is either dependency-ready with valid parent linkage or explicitly closed/deferred",
+                    "`python tools/orchestrator.py status` no longer shows queued items stalled on blocked dependency `RK-M1-0005-F02-F01-ESC-F03`"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
+    },
+    {
+        "ts": "2026-02-26T08:56:03.991039+00:00",
+        "item_id": "RK-AUTO-STALL-0004",
+        "status": "completed",
+        "summary": "Resolved dependency stall by requeueing dependency-root RK-M0-0007, removing two reintroduced archived queue artifacts, and normalizing stale dependency references so queued runnable work exists.",
+        "queue_recovery": {
+            "requeued_item_ids": [
+                "RK-M0-0007"
+            ],
+            "explicitly_closed_item_ids": [
+                "RK-AUTO-BACKLOG-0003-F01",
+                "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
+            ],
+            "made_runnable_item_ids": [
+                "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+                "RK-M0-0007",
+                "RK-M1-0005-F02-F01-ESC-F02"
+            ],
+            "normalized_dependency_items": {
+                "RK-M1-0004-F01-F01-F01-ESC-F01-F01": "Removed non-trackable dependency `tests package`",
+                "RK-M1-0005-F02-F01-ESC-F02": "Removed stale dependency on archived RK-M0-0002"
+            }
+        },
+        "proposed_work_items": [
+            {
+                "title": "Harden stale-run recovery against archived-item resurrection",
+                "owner_role": "qa",
+                "milestone": "M0",
+                "priority": "high",
+                "description": "Add a backlog-state guard in orchestrator recovery paths so IDs present in `blocked-archived-items.json` cannot be reintroduced into `work-items.json` during stale in-progress recovery, and normalize dependencies to valid backlog IDs only.",
+                "inputs": [
+                    "tools/orchestrator.py",
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-archived-items.json"
+                ],
+                "acceptance_criteria": [
+                    "Recovery flow skips archived IDs and logs the disposition instead of requeueing them",
+                    "Queued item dependencies are validated against known backlog IDs with actionable warnings for non-ID strings",
+                    "python tools/orchestrator.py status reports at least one dependency-ready queued item in the provided recovery fixture"
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]
