@@ -1892,5 +1892,48 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T17:37:54.7601623Z",
+        "item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC",
+        "status": "completed",
+        "summary": "Confirmed this escalation path is still driven by broad validation scope on the source item, not by missing frontend visual `STATUS: BLOCKED` handling.",
+        "root_cause": "Validation scope drift: source item `RK-M1-0005-F02-F01-ESC-F03` still validates with `python -m unittest discover -s tests`, which fails unrelated scaffold-smoke assertions before frontend blocked-outcome behavior can determine item disposition.",
+        "evidence": {
+            "targeted_blocked_outcome_tests": "2026-02-26T17:37Z `python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_frontend_visual_status_blocked_detection tests.test_platform_web_packaging_blocked_outcome` passed (9 tests).",
+            "full_suite_failure_repro": "2026-02-26T17:37Z `python -m unittest discover -s tests` failed (122 tests, 3 failures) in `tests/test_m1_scaffold_smoke.py` for legacy HTML marker checks (`resource-grid`, `map-stage`, `event-list`).",
+            "current_source_backlog_state": "`coordination/backlog/blocked-items.json` still lists `RK-M1-0005-F02-F01-ESC-F03` as blocked with reason `retry threshold exceeded; escalated`."
+        },
+        "files": [
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": [
+            {
+                "title": "Unblock RK-M1-0005-F02-F01-ESC-F03 by scoping validation commands and requeueing",
+                "owner_role": "lead",
+                "milestone": "M1",
+                "priority": "high",
+                "description": "Update source-item backlog metadata so `RK-M1-0005-F02-F01-ESC-F03` validates only frontend visual blocked-outcome checks, then clear blocked retry/escalation state and requeue it for a deterministic rerun.",
+                "dependencies": [
+                    "RK-M1-0005-F02-F01-ESC"
+                ],
+                "inputs": [
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-items.json",
+                    "tools/orchestrator.py",
+                    "tests/test_frontend_visual_blocked_outcome.py",
+                    "tests/test_frontend_visual_status_blocked_detection.py"
+                ],
+                "acceptance_criteria": [
+                    "`RK-M1-0005-F02-F01-ESC-F03` validation excludes `python -m unittest discover -s tests` and uses only targeted frontend-visual blocker tests plus status check.",
+                    "Source item is requeued with cleared blocker metadata so retry-threshold escalation from unrelated suite failures does not recur.",
+                    "A rerun records environment `STATUS: BLOCKED` outcomes as blocked with actionable blocker reason and no escalation."
+                ],
+                "validation_commands": [
+                    "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_frontend_visual_status_blocked_detection",
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]

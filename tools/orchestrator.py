@@ -2708,6 +2708,7 @@ def process_one(
         reasoning=execution_profile.get("reasoning"),
         model_selection=execution_profile.get("selection_reason"),
     )
+    worker_started_at = utc_now_iso()
     worker_started = time.monotonic()
     worker_timeout = int(policies.get("retry", {}).get("worker_timeout_seconds", 900))
     worker_box: dict[str, Any] = {}
@@ -2747,6 +2748,13 @@ def process_one(
         raise RuntimeError(f"Worker wrapper crashed for {agent_id}: {exc}") from exc
     worker = worker_box["result"]
     elapsed_seconds = time.monotonic() - worker_started
+    worker_finished_at = utc_now_iso()
+    runtime_seconds = round(elapsed_seconds, 2)
+    timing_fields = {
+        "runtime_seconds": runtime_seconds,
+        "started_at": worker_started_at,
+        "finished_at": worker_finished_at,
+    }
     run_requested_model = requested_model
     run_used_model = worker.used_model
     if run_used_model is None:
@@ -2760,7 +2768,7 @@ def process_one(
         role=agent_cfg.get("role"),
         result=worker.status,
         exit_code=worker.exit_code,
-        elapsed_seconds=round(elapsed_seconds, 2),
+        elapsed_seconds=runtime_seconds,
         model_requested=run_requested_model,
         model_used=run_used_model,
         fallback_used=run_fallback_used,
@@ -2841,6 +2849,7 @@ def process_one(
                 "model_requested": run_requested_model,
                 "model_used": run_used_model,
                 "fallback_used": run_fallback_used,
+                **timing_fields,
             },
         )
     elif worker.status == "completed":
@@ -2922,7 +2931,14 @@ def process_one(
                 result="completed",
                 resolution=worker.summary,
             )
-            queue.mark_completed(item["id"], worker.summary, commit_sha=commit_sha)
+            queue.mark_completed(
+                item["id"],
+                worker.summary,
+                commit_sha=commit_sha,
+                resolved_by_agent=agent_id,
+                resolved_by_role=agent_cfg.get("role"),
+                **timing_fields,
+            )
             queue.save()
             generated_ids, rejected_followups = ingest_agent_follow_up_tasks(
                 queue,
@@ -2988,6 +3004,7 @@ def process_one(
                     "model_requested": run_requested_model,
                     "model_used": run_used_model,
                     "fallback_used": run_fallback_used,
+                    **timing_fields,
                 },
             )
         else:
@@ -3039,6 +3056,7 @@ def process_one(
                         "model_requested": run_requested_model,
                         "model_used": run_used_model,
                         "fallback_used": run_fallback_used,
+                        **timing_fields,
                     },
                 )
             else:
@@ -3099,6 +3117,7 @@ def process_one(
                         "model_requested": run_requested_model,
                         "model_used": run_used_model,
                         "fallback_used": run_fallback_used,
+                        **timing_fields,
                     },
                 )
     else:
@@ -3143,6 +3162,7 @@ def process_one(
                     "model_requested": run_requested_model,
                     "model_used": run_used_model,
                     "fallback_used": run_fallback_used,
+                    **timing_fields,
                 },
             )
             queue.load()
@@ -3229,6 +3249,7 @@ def process_one(
                 "model_requested": run_requested_model,
                 "model_used": run_used_model,
                 "fallback_used": run_fallback_used,
+                **timing_fields,
             },
         )
 

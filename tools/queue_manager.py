@@ -242,7 +242,13 @@ class QueueManager:
     def mark_validating(self, item_id: str) -> None:
         self.update_item_status(item_id, "validating")
 
-    def mark_completed(self, item_id: str, result_summary: str, commit_sha: str | None = None) -> None:
+    def mark_completed(
+        self,
+        item_id: str,
+        result_summary: str,
+        commit_sha: str | None = None,
+        **extra: Any,
+    ) -> None:
         item = self.get_active_item(item_id)
         if item is None:
             raise KeyError(f"unknown item id: {item_id}")
@@ -251,6 +257,8 @@ class QueueManager:
         item["result_summary"] = result_summary
         if commit_sha:
             item["commit_sha"] = commit_sha
+        for key, value in extra.items():
+            item[key] = value
         self.completed = [existing for existing in self.completed if existing.get("id") != item_id]
         self.blocked = [existing for existing in self.blocked if existing.get("id") != item_id]
         self.completed.append(item)

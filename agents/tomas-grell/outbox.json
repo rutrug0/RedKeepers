@@ -1,5 +1,42 @@
 [
   {
+    "ts": "2026-02-26T17:35:24.966839Z",
+    "item_id": "RK-M1-0005-F02-F01-ESC-F03",
+    "status": "completed",
+    "summary": "Validated that frontend visual smoke `STATUS: BLOCKED` validation outcomes are already handled as blocked environment results with actionable blocker reasons, while preserving retry/escalation behavior for real visual regressions.",
+    "checks": [
+      "python tools/orchestrator.py status (pass)",
+      "python -m unittest tests.test_frontend_visual_blocked_outcome tests.test_frontend_visual_status_blocked_detection (pass)",
+      "python -m unittest discover -s tests (fails: pre-existing failures in tests/test_m1_scaffold_smoke.py missing legacy client-shell markers)"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Align M1 scaffold smoke markers with current client shell structure",
+        "owner_role": "qa",
+        "milestone": "M1",
+        "priority": "normal",
+        "description": "Update `tests/test_m1_scaffold_smoke.py` marker expectations to match the current first-slice client shell placeholders without reintroducing deprecated layout classes.",
+        "acceptance_criteria": [
+          "python -m unittest tests.test_m1_scaffold_smoke passes against current client-web/index.html",
+          "Smoke assertions still enforce first-slice regions and placeholder-art policy markers",
+          "python -m unittest discover -s tests no longer fails on missing `resource-grid`, `map-stage`, or `event-list` markers"
+        ],
+        "inputs": [
+          "tests/test_m1_scaffold_smoke.py",
+          "client-web/index.html",
+          "docs/design/first-vertical-slice.md"
+        ],
+        "validation_commands": [
+          "python -m unittest tests.test_m1_scaffold_smoke",
+          "python -m unittest discover -s tests"
+        ]
+      }
+    ],
+    "changed_files": [
+      "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
     "ts": "2026-02-26T17:16:30Z",
     "item_id": "RK-M1-0005-F02-F01-ESC-F03",
     "status": "completed",
@@ -662,6 +699,47 @@
     ],
     "changed_files": [
       "agents/tomas-grell/outbox.json"
+    ]
+  },
+  {
+    "ts": "2026-02-26T17:32:55.2516329Z",
+    "item_id": "RK-M0-0016",
+    "status": "blocked",
+    "summary": "Re-ran strict first-slice frontend visual smoke validation for desktop/tablet/mobile coverage; automation remains blocked because the active Python runtime cannot import Playwright, and local pip install attempts timed out in this environment.",
+    "checks": [
+      "python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5 (blocked: playwright import failed: No module named 'playwright')",
+      "python -m unittest tests.test_frontend_visual_smoke (pass)",
+      "python -m py_compile tools/frontend_visual_smoke.py (pass)",
+      "python tools/orchestrator.py status (pass)",
+      "python -m pip show playwright (fails: Package(s) not found: playwright)",
+      "python -m pip install playwright --disable-pip-version-check --timeout 15 --retries 1 (blocked: command timed out in this runtime)"
+    ],
+    "changed_files": [
+      "agents/tomas-grell/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Provision Playwright runtime and execute RK-M0-0016 strict visual smoke baselines",
+        "owner_role": "platform",
+        "milestone": "M0",
+        "priority": "high",
+        "description": "Install Playwright plus browser binaries in the same Python interpreter used by daemon validation, then run strict first-slice visual smoke so deterministic desktop/tablet/mobile screenshots and baseline diffs are generated from this environment.",
+        "acceptance_criteria": [
+          "python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5 runs without import or browser-launch blockers",
+          "coordination/runtime/frontend-visual/current contains refreshed desktop-1440, tablet-1024, and mobile-390 or mobile-360 screenshots from the strict run",
+          "coordination/runtime/frontend-visual/report.json contains deterministic per-device pass/fail statuses, diff metrics, and action feedback success/failure counts for build/train/scout paths"
+        ],
+        "inputs": [
+          "tools/frontend_visual_smoke.py",
+          "coordination/runtime/frontend-visual/baseline/",
+          "coordination/runtime/frontend-visual/current/",
+          "docs/operations/frontend-visual-qa.md"
+        ],
+        "validation_commands": [
+          "python tools/frontend_visual_smoke.py --strict --max-overflow-px 0 --max-diff-percent 0.5",
+          "python tools/orchestrator.py status"
+        ]
+      }
     ]
   }
 ]
