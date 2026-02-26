@@ -1509,5 +1509,39 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T13:55:23.0264342Z",
+        "item_id": "RK-AUTO-STALL-0009-F01",
+        "status": "completed",
+        "summary": "Normalized self-referential dependencies for queued world-map follow-ups so `RK-HUMAN-0001-F01` is independent and `RK-HUMAN-0001-F02` correctly depends on `RK-HUMAN-0001-F01`.",
+        "dependency_recovery": {
+            "RK-HUMAN-0001-F01": {
+                "removed": [
+                    "RK-HUMAN-0001-F01"
+                ],
+                "dependencies": []
+            },
+            "RK-HUMAN-0001-F02": {
+                "from": "RK-HUMAN-0001-F02",
+                "to": "RK-HUMAN-0001-F01"
+            }
+        },
+        "validation": {
+            "queued_self_dependencies": [],
+            "command": "python tools/orchestrator.py status",
+            "result": "pass",
+            "queue_snapshot": {
+                "queued": 12,
+                "dependency_ready": 2,
+                "running": 1,
+                "blocked": 21,
+                "completed": 88
+            }
+        },
+        "files": [
+            "coordination/backlog/work-items.json",
+            "agents/mara-voss/outbox.json"
+        ]
     }
 ]
