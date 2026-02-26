@@ -2246,5 +2246,44 @@
     ],
     "assigned_agent": "mara-voss",
     "commit_sha": "c89c32f290162639f37e809bdadbbf875fda160a"
+  },
+  {
+    "id": "RK-AUTO-STALL-0001-F01",
+    "title": "Normalize queued backlog dependency references to valid item IDs",
+    "description": "Audit queued work items for dependency strings that are not real backlog IDs (for example `tests package`) or references to archived items, then replace with valid IDs or explicitly defer those tasks.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0001"
+    ],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-archived-items.json"
+    ],
+    "acceptance_criteria": [
+      "Every queued item dependency points to an existing backlog item ID in work/completed/blocked lists",
+      "Queued items with unresolved non-item dependencies are either corrected or explicitly closed/deferred",
+      "`python tools/orchestrator.py status` reports at least one dependency-ready queued item after cleanup"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T08:23:31.270195+00:00",
+    "updated_at": "2026-02-26T08:28:43.191555+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/tomas-grell/outbox.json](/D:/RedKeepers/agents/tomas-grell/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0001",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "fa44804f4c4e5651d03252c16e2d73eaefeb10e9"
   }
 ]

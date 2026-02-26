@@ -680,5 +680,76 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "ts":  "2026-02-26T08:31:47+00:00",
+        "item_id":  "RK-AUTO-STALL-0002",
+        "status":  "completed",
+        "summary":  "Resolved dependency stall by requeueing dependency-root RK-M0-0007 and moving deferred RK-AUTO-BACKLOG-0003-F01 out of active queue; queue now has a dependency-ready item.",
+        "queue_recovery":  {
+                               "requeued_item_ids":  [
+                                                         "RK-M0-0007"
+                                                     ],
+                               "closed_out_of_scope_item_ids":  [
+                                                                   "RK-AUTO-BACKLOG-0003-F01"
+                                                               ],
+                               "runnable_queued_after_recovery":  [
+                                                                     "RK-M0-0007"
+                                                                 ],
+                               "remaining_stalled_queued_item_ids":  [
+                                                                        "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
+                                                                        "RK-M0-0008",
+                                                                        "RK-M0-0011",
+                                                                        "RK-M1-0005-F02-F01-ESC-F01",
+                                                                        "RK-M0-0012",
+                                                                        "RK-M0-0013",
+                                                                        "RK-M0-0016",
+                                                                        "RK-M1-0005-F02-F01-ESC-F02",
+                                                                        "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
+                                                                    ]
+                           },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Normalize queued dependency references to real backlog IDs",
+                                        "owner_role":  "qa",
+                                        "milestone":  "M0",
+                                        "priority":  "high",
+                                        "description":  "Audit queued items and replace non-item dependency strings (for example `tests package`) with valid backlog IDs or explicit blocked/deferred state transitions.",
+                                        "inputs":  [
+                                                       "coordination/backlog/work-items.json",
+                                                       "coordination/backlog/blocked-items.json",
+                                                       "coordination/backlog/completed-items.json"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "All queued item dependencies resolve to existing IDs in work/blocked/completed backlog files",
+                                                                    "Items with intentionally external prerequisites are moved out of active queued state with explicit blocker reasons",
+                                                                    "`python tools/orchestrator.py status` still reports at least one dependency-ready queued item after cleanup"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    },
+                                    {
+                                        "title":  "Resolve missing dependency lineage for RK-M1-0005-F02-F01-ESC-F02",
+                                        "owner_role":  "lead",
+                                        "milestone":  "M0",
+                                        "priority":  "normal",
+                                        "description":  "Determine whether dependency `RK-M0-0002` should be restored, remapped, or removed for RK-M1-0005-F02-F01-ESC-F02 and update backlog links to eliminate phantom dependency stalls.",
+                                        "inputs":  [
+                                                       "coordination/backlog/work-items.json",
+                                                       "coordination/backlog/blocked-items.json",
+                                                       "coordination/backlog/completed-items.json",
+                                                       "coordination/runtime/run-history.jsonl"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "A concrete disposition is recorded for `RK-M0-0002` (restored/remapped/retired) with rationale",
+                                                                    "RK-M1-0005-F02-F01-ESC-F02 dependencies point only to valid, trackable backlog IDs",
+                                                                    "No queued item remains stalled solely due to missing `RK-M0-0002` reference"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
     }
 ]
