@@ -310,6 +310,21 @@ select {
   cursor: not-allowed;
 }
 
+.assign-controls {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.assign-btn {
+  min-height: 36px;
+}
+
+.assign-btn.is-active {
+  border-color: var(--accent-2);
+  background: rgba(227, 162, 59, 0.14);
+}
+
 .modal-wireframe {
   border: 1px dashed var(--line);
   border-radius: var(--radius-md);
@@ -382,6 +397,55 @@ select {
 .ability-slot p {
   color: var(--text-1);
   font-size: var(--text-sm);
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-1);
+}
+
+.toggle-row input {
+  inline-size: 16px;
+  block-size: 16px;
+  accent-color: var(--accent);
+}
+
+.effect-preview {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 1px dashed var(--line-soft);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cooldown-forecast {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.cooldown-forecast__rail {
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.cooldown-forecast__rail span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+.cooldown-forecast__labels {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  color: var(--text-1);
+  font-size: var(--text-xs);
 }
 
 .wire-state-strip {

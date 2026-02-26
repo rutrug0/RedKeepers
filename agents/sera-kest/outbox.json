@@ -385,5 +385,34 @@
                                     "python -m unittest tests.test_frontend_visual_smoke",
                                     "python tools/orchestrator.py status"
                                 ]
+    },
+    {
+        "ts":  "2026-02-26T18:10:10.5594404Z",
+        "item_id":  "RK-AUTO-BACKLOG-0003-F01-F02",
+        "status":  "completed",
+        "summary":  "Refined the deferred standalone hero wireframes to make assignment controls, ability arming, pre-commit effect deltas, and cooldown timeline readability explicit across settlement card, dispatch modal, and event/combat feedback states while keeping all visuals placeholder-only and outside first-slice runtime integration.",
+        "files":  [
+                      "client-web/hero-wireframes.html",
+                      "client-web/hero-wireframes.css",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Run dedicated hero wireframe visual smoke after environment unblocks browser execution",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M2",
+                                        "priority":  "medium",
+                                        "description":  "Execute strict multi-device visual smoke for hero-wireframes.html in a Playwright-capable runtime to confirm cooldown readability and pre-commit effect clarity remain stable as deferred M2 design artifacts evolve.",
+                                        "acceptance_criteria":  [
+                                                                    "Strict visual smoke passes for hero-wireframes desktop/tablet/mobile captures at configured thresholds",
+                                                                    "No layout overflow or clipped cooldown/effect text appears at 1440, 1024, 390, and 360 widths",
+                                                                    "Baseline artifacts for hero-wireframes are regenerated only from live page captures in the validated runtime"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
     }
 ]

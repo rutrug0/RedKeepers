@@ -120,10 +120,10 @@
       "All visuals remain placeholder/wireframe quality and avoid final art dependencies"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 1,
     "created_at": "2026-02-26T11:43:39.057865+00:00",
-    "updated_at": "2026-02-26T15:59:17.419756+00:00",
+    "updated_at": "2026-02-26T18:10:56.416581+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -136,45 +136,6 @@
     "last_unblocked_reason": "automatic blocked revisit (1/2)",
     "last_blocker_reason": "retry threshold exceeded; escalated",
     "blocked_revisit_count": 1
-  },
-  {
-    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F02",
-    "title": "Retire superseded codex preflight source item and preserve replacement audit trail",
-    "description": "Archive blocked source item `RK-M1-0004-F01-F01-F01-ESC-F01-F01` as superseded by completed replacement `RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01` so it cannot be requeued by blocked revisit again.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "lead",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC"
-    ],
-    "inputs": [
-      "coordination/backlog/blocked-items.json",
-      "coordination/backlog/blocked-archived-items.json",
-      "coordination/backlog/completed-items.json",
-      "coordination/runtime/daemon-events.jsonl"
-    ],
-    "acceptance_criteria": [
-      "`RK-M1-0004-F01-F01-F01-ESC-F01-F01` is removed from active blocked backlog and recorded as superseded/archived with linkage to `RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01`.",
-      "No queued or blocked items depend on the retired source ID.",
-      "Queue status no longer requeues this superseded source ID during blocked revisit cycles."
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T18:04:15.217579+00:00",
-    "updated_at": "2026-02-26T18:07:26.837116+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
-    "assigned_agent": "mara-voss"
   },
   {
     "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F03",
@@ -214,46 +175,5 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC"
-  },
-  {
-    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01",
-    "title": "Add regression tests for codex model access preflight paths",
-    "description": "Create focused tests that cover startup status preflight failures, fallback selection preflight behavior, and blocked run_history/model_stats fields for unsupported model profiles.",
-    "milestone": "M1",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "tools/codex_worker.py",
-      "tools/health_checks.py",
-      "tools/orchestrator.py",
-      "tests"
-    ],
-    "acceptance_criteria": [
-      "status validation fails fast with exact unsupported-model reason when policy model is inaccessible and no usable fallback exists",
-      "execution selects configured fallback when primary model preflight fails and proceeds to run",
-      "blocked run_history and model-stats entries include model_requested/model_used/fallback fields"
-    ],
-    "validation_commands": [
-      "python -m unittest discover -s tests"
-    ],
-    "status": "queued",
-    "retry_count": 4,
-    "created_at": "2026-02-25T18:01:08.893118+00:00",
-    "updated_at": "2026-02-26T18:04:20.520666+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "tomas-grell",
-    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01",
-    "assigned_agent": "tomas-grell",
-    "last_failure_reason": "validation failed",
-    "last_unblocked_reason": "automatic blocked revisit (2/2)",
-    "last_blocker_reason": "retry threshold exceeded; escalated",
-    "blocked_revisit_count": 2
   }
 ]

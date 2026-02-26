@@ -41,6 +41,10 @@
             <strong>Iron Mandate</strong>
           </div>
           <div class="wire-row">
+            <span>Preview delta</span>
+            <strong>Atk +12%, morale loss -15%</strong>
+          </div>
+          <div class="wire-row">
             <span>Cooldown</span>
             <strong>Available now</strong>
           </div>
@@ -62,6 +66,10 @@
           <div class="wire-row">
             <span>Cooldown</span>
             <strong>03:42:15 remaining</strong>
+          </div>
+          <div class="wire-row">
+            <span>Ready at</span>
+            <strong>18:40 UTC</strong>
           </div>
           <div class="cooldown-track" aria-hidden="true">
             <span style="width: 39%;"></span>
@@ -111,6 +119,10 @@
               <option>Fen Oracle (Cooldown)</option>
               <option>Ashen Smith (Unassigned)</option>
             </select>
+            <div class="assign-controls" role="group" aria-label="Assignment controls">
+              <button type="button" class="ghost-btn assign-btn is-active">Assign Hero</button>
+              <button type="button" class="ghost-btn assign-btn">Unassign Hero</button>
+            </div>
             <div class="wire-row">
               <span>Current state</span>
               <strong>Assigned to 2nd Vanguard</strong>
@@ -129,9 +141,33 @@
                 <strong>Iron Mandate</strong>
               </header>
               <p>Army attack +12% and morale loss reduction +15% for first 90s of battle.</p>
+              <label class="toggle-row" for="ability-arm-toggle">
+                <input id="ability-arm-toggle" type="checkbox" checked />
+                <span>Arm ability for this dispatch (placeholder toggle)</span>
+              </label>
+              <div class="effect-preview" aria-label="Pre-commit effect preview">
+                <div class="wire-row">
+                  <span>Projected attack</span>
+                  <strong>128 -> 143 (+12%)</strong>
+                </div>
+                <div class="wire-row">
+                  <span>Projected morale loss</span>
+                  <strong>20 -> 17 (-15%)</strong>
+                </div>
+              </div>
               <div class="wire-row">
                 <span>Cooldown on use</span>
                 <strong>6h</strong>
+              </div>
+              <div class="cooldown-forecast" aria-label="Cooldown forecast placeholder">
+                <div class="cooldown-forecast__rail" aria-hidden="true">
+                  <span style="width: 32%;"></span>
+                </div>
+                <div class="cooldown-forecast__labels">
+                  <span>Now</span>
+                  <span>Commit dispatch</span>
+                  <span>Ready +6h</span>
+                </div>
               </div>
               <div class="wire-row">
                 <span>Tutorial cue</span>
@@ -152,6 +188,7 @@
           <ul>
             <li>Projected effect: +12% attack, -15% morale loss (first 90s only)</li>
             <li>Activation timing: Triggers at combat start if enabled</li>
+            <li>Cooldown timeline: starts on activation, expires at 18:40 UTC</li>
             <li>Cooldown result: Ability enters 6h cooldown immediately after activation</li>
           </ul>
           <div class="modal-actions">
@@ -186,6 +223,11 @@
               <span>Iron Mandate cooldown complete. Ability ready again.</span>
             </li>
           </ol>
+          <div class="wire-state-strip" aria-label="Event progression states">
+            <span class="chip chip-tight">State: Assigned</span>
+            <span class="chip chip-tight">State: Ability Active</span>
+            <span class="chip chip-tight">State: Cooldown Complete</span>
+          </div>
         </section>
 
         <section class="wire-panel">

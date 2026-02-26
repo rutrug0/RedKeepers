@@ -4876,5 +4876,50 @@
     "runtime_seconds": 147.16,
     "started_at": "2026-02-26T18:01:46.137128+00:00",
     "finished_at": "2026-02-26T18:04:13.283195+00:00"
+  },
+  {
+    "id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F02",
+    "title": "Retire superseded codex preflight source item and preserve replacement audit trail",
+    "description": "Archive blocked source item `RK-M1-0004-F01-F01-F01-ESC-F01-F01` as superseded by completed replacement `RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01` so it cannot be requeued by blocked revisit again.",
+    "milestone": "M1",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC"
+    ],
+    "inputs": [
+      "coordination/backlog/blocked-items.json",
+      "coordination/backlog/blocked-archived-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/runtime/daemon-events.jsonl"
+    ],
+    "acceptance_criteria": [
+      "`RK-M1-0004-F01-F01-F01-ESC-F01-F01` is removed from active blocked backlog and recorded as superseded/archived with linkage to `RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC-F01`.",
+      "No queued or blocked items depend on the retired source ID.",
+      "Queue status no longer requeues this superseded source ID during blocked revisit cycles."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T18:04:15.217579+00:00",
+    "updated_at": "2026-02-26T18:07:28.799648+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/mara-voss/outbox.json](D:/RedKeepers/agents/mara-voss/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "3a6d356fe2e2dfa317e5ece43269b4cf8b64b703",
+    "resolved_by_agent": "mara-voss",
+    "resolved_by_role": "lead",
+    "runtime_seconds": 186.19,
+    "started_at": "2026-02-26T18:04:20.574873+00:00",
+    "finished_at": "2026-02-26T18:07:26.765528+00:00"
   }
 ]
