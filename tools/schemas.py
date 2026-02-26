@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -40,6 +41,7 @@ WORK_ITEM_STATUSES = {
 }
 
 WORK_ITEM_PRIORITIES = {"critical", "high", "normal", "low"}
+PLACEHOLDER_TOKEN_PATTERN = re.compile(r"<[^>\r\n]+>")
 
 
 def utc_now_iso() -> str:
@@ -105,8 +107,18 @@ def validate_work_item(item: dict[str, Any]) -> list[str]:
         errors.append("inputs must be a list")
     if not isinstance(item.get("acceptance_criteria"), list):
         errors.append("acceptance_criteria must be a list")
-    if not isinstance(item.get("validation_commands"), list):
+    validation_commands = item.get("validation_commands")
+    if not isinstance(validation_commands, list):
         errors.append("validation_commands must be a list")
+    else:
+        for idx, command in enumerate(validation_commands):
+            if not isinstance(command, str):
+                errors.append(f"validation_commands[{idx}] must be a string")
+                continue
+            if PLACEHOLDER_TOKEN_PATTERN.search(command):
+                errors.append(
+                    f"validation_commands[{idx}] contains unresolved placeholder token"
+                )
     if not isinstance(item.get("retry_count"), int):
         errors.append("retry_count must be an int")
     if not isinstance(item.get("token_budget"), int):

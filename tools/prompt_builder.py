@@ -24,8 +24,19 @@ def build_prompt(
 ) -> str:
     agent_dir = project_root / "agents" / agent_id
     agent_md = _safe_read(agent_dir / "AGENT.md", max_chars=5000)
+    agent_skill = _safe_read(agent_dir / "SKILL.md", max_chars=5000)
     agent_context = _safe_read(agent_dir / "context.md", max_chars=5000)
     working_notes = _safe_read(agent_dir / "working-notes.md", max_chars=2500)
+
+    role = str(agent_cfg.get("role", "")).strip().lower()
+    shared_ui_style = ""
+    frontend_scope_rule = ""
+    if role == "frontend":
+        shared_ui_style = _safe_read(project_root / "docs" / "design" / "ui-style-guide.md", max_chars=5000)
+        frontend_scope_rule = (
+            "- Keep UI implementation aligned with `docs/design/ui-style-guide.md`; "
+            "consistency of shared tokens/components is mandatory.\n"
+        )
 
     input_sections: list[str] = []
     for ref in work_item.get("inputs", [])[:8]:
@@ -47,6 +58,9 @@ Agent ID: {agent_id}
 
 ## Role Boundaries
 {agent_md}
+
+## Agent Skill
+{agent_skill or "[No agent-specific skill file]"}
 
 ## Current Context
 {agent_context}
@@ -73,10 +87,14 @@ Validation Commands:
 ## Relevant Inputs
 {chr(10).join(input_sections) if input_sections else '[No input files listed]'}
 
+## Shared UI Style Guide
+{shared_ui_style or '[Not applicable for this role]'}
+
 ## Output Requirements
 - Start your final response with one explicit status line: `STATUS: COMPLETED` or `STATUS: BLOCKED`.
 - Respect the first vertical slice scope (`docs/design/first-vertical-slice.md`). If you identify useful but out-of-scope work, defer it into `proposed_work_items` rather than implementing it now.
-- Make only the changes needed for this work item.
+- Keep outputs concise and implementation-focused.
+{frontend_scope_rule}- Make only the changes needed for this work item.
 - If blocked, explain the blocker clearly and propose follow-up tasks.
 - If you identify follow-up work, append/update your `agents/{agent_id}/outbox.json` entry for this item with a `proposed_work_items` array (structured tasks for daemon ingestion).
 - `proposed_work_items` entries should include at minimum: `title`, `owner_role`, `description`, `acceptance_criteria` (array). Optional: `priority`, `dependencies`, `inputs`, `validation_commands`, `milestone`.
