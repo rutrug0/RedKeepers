@@ -35,35 +35,42 @@
     "generated_from_item_id": "RK-HUMAN-0001-F03"
   },
   {
-    "id": "RK-HUMAN-0001-F04-F02",
-    "title": "Apply resolved gather haul outputs to settlement resource projection",
-    "description": "Integrate resolved `gathered_yield` outputs with economy resource ledgers so successful gather marches materialize into settlement stock changes and intercepted marches respect reduced haul totals.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-HUMAN-0001-F04"
+    "id": "RK-AUTO-BACKLOG-0004",
+    "title": "Generate next backlog tranche",
+    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas. Prioritize fast cycle throughput: bias toward implementation tasks (backend/frontend/design/content/platform) and add dedicated QA/regression tasks only when risk is critical or release-blocking.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-items.json",
+      "docs/design/first-vertical-slice.md",
+      "coordination/runtime/run-history.jsonl"
     ],
-    "inputs": [],
     "acceptance_criteria": [
-      "Gather resolution writes resource deltas into the same settlement stock model used by tick/build/train flows.",
-      "Ambush-intercepted outcomes apply deterministic reduced or zeroed haul based on service config.",
-      "Event payloads and resulting resource ledger deltas remain deterministic for identical seeds and inputs."
+      "At least 3 new queued tasks are created or requeued",
+      "Each task has owner_role, dependencies, and acceptance criteria",
+      "Tasks reflect current project priorities and unblock progress",
+      "Generated tranche is implementation-heavy; non-critical QA/lead coordination tasks are minimized",
+      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
     ],
-    "validation_commands": [],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-26T18:34:09.314474+00:00",
-    "updated_at": "2026-02-26T19:11:39.645020+00:00",
+    "created_at": "2026-02-26T19:11:42.131672+00:00",
+    "updated_at": "2026-02-26T19:16:21.135835+00:00",
     "estimated_effort": "S",
-    "token_budget": 8000,
+    "token_budget": 12000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-HUMAN-0001-F04",
-    "assigned_agent": "ilya-fen"
+    "auto_generated": "backlog_refill",
+    "assigned_agent": "mara-voss"
   }
 ]

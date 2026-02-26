@@ -5252,5 +5252,43 @@
     "runtime_seconds": 472.17,
     "started_at": "2026-02-26T18:54:46.589869+00:00",
     "finished_at": "2026-02-26T19:02:38.751150+00:00"
+  },
+  {
+    "id": "RK-HUMAN-0001-F04-F02",
+    "title": "Apply resolved gather haul outputs to settlement resource projection",
+    "description": "Integrate resolved `gathered_yield` outputs with economy resource ledgers so successful gather marches materialize into settlement stock changes and intercepted marches respect reduced haul totals.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F04"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Gather resolution writes resource deltas into the same settlement stock model used by tick/build/train flows.",
+      "Ambush-intercepted outcomes apply deterministic reduced or zeroed haul based on service config.",
+      "Event payloads and resulting resource ledger deltas remain deterministic for identical seeds and inputs."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T18:34:09.314474+00:00",
+    "updated_at": "2026-02-26T19:11:41.911435+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `node --experimental-strip-types --test ...` is still blocked in this environment by repository-wide ESM directory import constraints (`ERR_UNSUPPORTED_DIR_IMPORT`).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-HUMAN-0001-F04",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "1645ffd3163d743f07af69bfaf2e53da18b6bcc8",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 533.74,
+    "started_at": "2026-02-26T19:02:45.861164+00:00",
+    "finished_at": "2026-02-26T19:11:39.604574+00:00"
   }
 ]

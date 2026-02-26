@@ -2076,5 +2076,242 @@
             "agents/mara-voss/outbox.json"
         ],
         "proposed_work_items": []
+    },
+    {
+        "ts": "2026-02-26T19:14:20.0221847Z",
+        "item_id": "RK-AUTO-BACKLOG-0004",
+        "status": "completed",
+        "summary": "Generated a six-item implementation-heavy backlog tranche for first-slice completion across backend, frontend, design, content, platform, plus one critical release-path smoke task.",
+        "files": [
+            "coordination/backlog/work-items.json",
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": [
+            {
+                "id": "RK-AUTO-BACKLOG-0004-F01",
+                "title": "Implement deterministic hostile attack + resolve backend transport flow",
+                "description": "Implement the first-slice hostile map interaction path in backend transport: accept an attack command against a foreign settlement, run deterministic placeholder combat resolution, and emit stable event payload keys for client consumption.",
+                "milestone": "M0",
+                "type": "feature",
+                "priority": "high",
+                "owner_role": "backend",
+                "preferred_agent": null,
+                "dependencies": [
+                    "RK-M0-0008"
+                ],
+                "inputs": [
+                    "backend/",
+                    "docs/design/world-map-v1-phasing.md",
+                    "docs/design/first-vertical-slice.md",
+                    "docs/design/v1-starter-data-tables.md"
+                ],
+                "acceptance_criteria": [
+                    "Backend transport exposes one first-slice attack command route using source settlement, foreign target, and dispatched unit payload.",
+                    "Resolver applies deterministic v1 outcome/loss constants (no randomness, no hero branches) and persists/returns outcome state for event feed usage.",
+                    "Outcome payloads emit stable keys for dispatch_sent, march_arrived, and combat_resolved flows compatible with existing client event rendering."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ],
+                "status": "queued",
+                "retry_count": 0,
+                "created_at": "2026-02-26T19:14:20.0221847Z",
+                "updated_at": "2026-02-26T19:14:20.0221847Z",
+                "estimated_effort": "S",
+                "token_budget": 10000,
+                "result_summary": null,
+                "blocker_reason": null,
+                "escalation_target": "Mara Voss",
+                "generated_by_agent": "mara-voss",
+                "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
+            },
+            {
+                "id": "RK-AUTO-BACKLOG-0004-F02",
+                "title": "Wire client world-map hostile dispatch and combat outcome panels",
+                "description": "Implement the client-shell hostile dispatch path on world map: select a foreign settlement tile, send one deterministic attack, and render lifecycle + combat outcome feedback in the event feed using backend payload keys.",
+                "milestone": "M0",
+                "type": "feature",
+                "priority": "high",
+                "owner_role": "frontend",
+                "preferred_agent": null,
+                "dependencies": [
+                    "RK-AUTO-BACKLOG-0004-F01",
+                    "RK-M0-0013"
+                ],
+                "inputs": [
+                    "client-web/",
+                    "docs/design/world-map-v1-phasing.md",
+                    "docs/design/first-vertical-slice.md"
+                ],
+                "acceptance_criteria": [
+                    "World map inspect/selection flow allows dispatching one hostile march to at least one foreign settlement placeholder.",
+                    "Client renders dispatch, travel, and combat resolution outcomes from backend event keys without local combat simulation fallback logic.",
+                    "UI preserves in-slice constraints (placeholder art, no hero requirement, no alliance/diplomacy expansion)."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ],
+                "status": "queued",
+                "retry_count": 0,
+                "created_at": "2026-02-26T19:14:20.0221847Z",
+                "updated_at": "2026-02-26T19:14:20.0221847Z",
+                "estimated_effort": "S",
+                "token_budget": 9000,
+                "result_summary": null,
+                "blocker_reason": null,
+                "escalation_target": "Mara Voss",
+                "generated_by_agent": "mara-voss",
+                "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
+            },
+            {
+                "id": "RK-AUTO-BACKLOG-0004-F03",
+                "title": "Finalize deterministic combat/loss fixture table for first-slice attack loop",
+                "description": "Produce implementation-ready fixture constants for first-slice hostile settlement combat (outcome comparison and loss ratios) plus one foreign settlement profile definition so backend/frontend behavior remains deterministic and testable.",
+                "milestone": "M0",
+                "type": "design",
+                "priority": "high",
+                "owner_role": "design",
+                "preferred_agent": null,
+                "dependencies": [
+                    "RK-M1-0006"
+                ],
+                "inputs": [
+                    "docs/design/world-map-v1-phasing.md",
+                    "docs/design/v1-starter-data-tables.md",
+                    "docs/design/first-vertical-slice.md"
+                ],
+                "acceptance_criteria": [
+                    "Fixture doc defines deterministic attacker_vs_defender outcome rule and explicit loss ratios for win/loss/tie in first-slice scope.",
+                    "At least one foreign settlement profile is documented with stats needed for deterministic attack resolution.",
+                    "Spec stays within first-slice constraints and explicitly defers rich combat mechanics to post-slice follow-up."
+                ],
+                "validation_commands": [],
+                "status": "queued",
+                "retry_count": 0,
+                "created_at": "2026-02-26T19:14:20.0221847Z",
+                "updated_at": "2026-02-26T19:14:20.0221847Z",
+                "estimated_effort": "S",
+                "token_budget": 7000,
+                "result_summary": null,
+                "blocker_reason": null,
+                "escalation_target": "Mara Voss",
+                "generated_by_agent": "mara-voss",
+                "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
+            },
+            {
+                "id": "RK-AUTO-BACKLOG-0004-F04",
+                "title": "Author placeholder hostile-loop copy pack for map dispatch and combat events",
+                "description": "Create a placeholder-only content pack for hostile world-map flow: foreign settlement labels plus event-feed text templates covering dispatch, travel, resolve, and failure states using stable key identifiers.",
+                "milestone": "M0",
+                "type": "feature",
+                "priority": "normal",
+                "owner_role": "content",
+                "preferred_agent": null,
+                "dependencies": [
+                    "RK-AUTO-BACKLOG-0004-F03"
+                ],
+                "inputs": [
+                    "docs/design/world-map-v1-phasing.md",
+                    "docs/design/game-vision.md",
+                    "docs/design/first-vertical-slice.md"
+                ],
+                "acceptance_criteria": [
+                    "Content artifact includes at least 20 placeholder strings spanning hostile dispatch success/failure, march arrival, combat resolve, and retreat/defeat outcomes.",
+                    "String keys align with stable event-key naming conventions consumed by frontend event feed rendering.",
+                    "Copy remains original dark-fantasy tone and explicitly marked replaceable placeholder content."
+                ],
+                "validation_commands": [],
+                "status": "queued",
+                "retry_count": 0,
+                "created_at": "2026-02-26T19:14:20.0221847Z",
+                "updated_at": "2026-02-26T19:14:20.0221847Z",
+                "estimated_effort": "S",
+                "token_budget": 6000,
+                "result_summary": null,
+                "blocker_reason": null,
+                "escalation_target": "Mara Voss",
+                "generated_by_agent": "mara-voss",
+                "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
+            },
+            {
+                "id": "RK-AUTO-BACKLOG-0004-F05",
+                "title": "Standardize Steam/Android wrapper run-build scripts for slice candidate artifact",
+                "description": "Harden platform/release lane by adding deterministic script entry points that package the current web slice artifact into existing Tauri (Steam lane scaffold) and Capacitor (Android lane scaffold) wrappers with placeholder metadata and reproducible local commands.",
+                "milestone": "M0",
+                "type": "infra",
+                "priority": "high",
+                "owner_role": "platform",
+                "preferred_agent": null,
+                "dependencies": [
+                    "RK-AUTO-PLATFORM-0001"
+                ],
+                "inputs": [
+                    "client-steam-tauri/",
+                    "client-android-capacitor/",
+                    "scripts/",
+                    "docs/design/vertical-slice-done-v1.md",
+                    "docs/design/first-vertical-slice.md"
+                ],
+                "acceptance_criteria": [
+                    "Platform scripts provide one reproducible command path for web->Steam wrapper and web->Android wrapper packaging in local/dev environment.",
+                    "Wrapper metadata/assets remain explicitly placeholder-only with no final-art dependency.",
+                    "Run/build docs are updated with prerequisites and expected output artifact locations for both wrapper lanes."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ],
+                "status": "queued",
+                "retry_count": 0,
+                "created_at": "2026-02-26T19:14:20.0221847Z",
+                "updated_at": "2026-02-26T19:14:20.0221847Z",
+                "estimated_effort": "S",
+                "token_budget": 9000,
+                "result_summary": null,
+                "blocker_reason": null,
+                "escalation_target": "Mara Voss",
+                "generated_by_agent": "mara-voss",
+                "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
+            },
+            {
+                "id": "RK-AUTO-BACKLOG-0004-F06",
+                "title": "Add critical golden-path smoke for full first-slice loop including attack resolve",
+                "description": "Add a release-blocking smoke path that verifies the full first-slice loop (tick, build, train, map interaction, hostile dispatch, deterministic combat resolve, event feed output) using scoped checks only.",
+                "milestone": "M0",
+                "type": "feature",
+                "priority": "high",
+                "owner_role": "qa",
+                "preferred_agent": null,
+                "dependencies": [
+                    "RK-AUTO-BACKLOG-0004-F01",
+                    "RK-AUTO-BACKLOG-0004-F02",
+                    "RK-AUTO-BACKLOG-0004-F05"
+                ],
+                "inputs": [
+                    "tests/",
+                    "tools/",
+                    "docs/design/vertical-slice-done-v1.md",
+                    "docs/design/first-vertical-slice.md"
+                ],
+                "acceptance_criteria": [
+                    "A single scoped smoke command validates first-slice loop prerequisites through hostile attack resolve and fails when required loop stages are missing.",
+                    "Smoke output records deterministic pass/fail evidence for each mandatory loop stage defined in vertical-slice done gate.",
+                    "Validation remains scoped to critical release path and avoids broad unrelated full-suite execution."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ],
+                "status": "queued",
+                "retry_count": 0,
+                "created_at": "2026-02-26T19:14:20.0221847Z",
+                "updated_at": "2026-02-26T19:14:20.0221847Z",
+                "estimated_effort": "M",
+                "token_budget": 11000,
+                "result_summary": null,
+                "blocker_reason": null,
+                "escalation_target": "Mara Voss",
+                "generated_by_agent": "mara-voss",
+                "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
+            }
+        ]
     }
 ]
