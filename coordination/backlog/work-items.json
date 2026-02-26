@@ -220,36 +220,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0003-F01",
-    "title": "Prototype hero unit system for multiple civilizations",
-    "description": "Deferred post-slice concept for hero units and civilization-specific active abilities, explicitly excluded from first vertical slice scope.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "low",
-    "owner_role": "design",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Concept scope remains unqueued until first vertical slice is signed off",
-      "Design proposal identifies minimum onboarding/tutorial impact and associated UI changes",
-      "No implementation work starts during M0/M1 first-slice delivery"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-25T18:32:27.509162+00:00",
-    "updated_at": "2026-02-26T11:43:37.481185+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
-    "assigned_agent": "rowan-hale"
-  },
-  {
     "id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
     "title": "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
     "description": "Resolve existing unrelated failures in `tests/test_daemon_smoke_env.py` and `tests/test_m1_scaffold_smoke.py` so full regression validation is green and does not re-escalate completed feature work.",
@@ -286,5 +256,232 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F01",
+    "title": "Finalize M2 hero definitions and shared ability modifier table",
+    "description": "Convert the deferred hero concept into data-table ready definitions (hero IDs, unlock gate, active ability effects, cooldown targets) without introducing bespoke mechanics.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "docs/design/v1-starter-data-tables.md",
+      "docs/design/vertical-slice-done-v1.md"
+    ],
+    "acceptance_criteria": [
+      "Hero definitions are expressed as IDs and numeric modifiers compatible with existing stat-driven model",
+      "Exactly one active ability per civilization hero is defined for prototype scope",
+      "Unlock gate is post-onboarding and does not alter first-slice tutorial flow"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T11:43:39.057865+00:00",
+    "updated_at": "2026-02-26T11:43:39.683633+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F02",
+    "title": "Design hero UI wireframes for assignment, ability use, and cooldown feedback",
+    "description": "Create placeholder-first wireframes for hero roster card, army dispatch ability slot, and event/combat feedback surfaces defined in the concept doc.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "docs/design/ui-style-guide.md"
+    ],
+    "acceptance_criteria": [
+      "Wireframes cover settlement hero card, dispatch modal controls, and feedback/event states",
+      "Cooldown readability and effect clarity are visible before action commit",
+      "All visuals remain placeholder/wireframe quality and avoid final art dependencies"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T11:43:39.057865+00:00",
+    "updated_at": "2026-02-26T11:43:39.683633+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03",
+    "title": "Plan backend hero runtime schema and combat hook integration",
+    "description": "Prepare schema and resolver plan for hero assignment state, active ability cooldowns, and combat/scout modifier application using existing action-resolution flow.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "backend/src/modules"
+    ],
+    "acceptance_criteria": [
+      "Schema plan includes hero readiness/cooldown state and assignment linkage to army context",
+      "Ability effects apply through shared numeric modifier pipeline rather than bespoke combat paths",
+      "Event keys for assignment/activation/cooldown completion are defined for client consumption"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T11:43:39.057865+00:00",
+    "updated_at": "2026-02-26T11:43:39.683633+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01"
+  },
+  {
+    "id": "RK-AUTO-STALL-0006",
+    "title": "Resolve queue dependency stall",
+    "description": "The daemon detected queued work items that are not dependency-ready because one or more dependencies are currently blocked. Review blocked items, requeue/close obsolete items, and restore runnable work.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "At least one dependency-stalled queued item is made runnable or explicitly closed",
+      "Blocked/obsolete queue artifacts are documented or consolidated",
+      "Backlog no longer stalls immediately on next daemon run"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "validating",
+    "retry_count": 0,
+    "created_at": "2026-02-26T11:43:39.252657+00:00",
+    "updated_at": "2026-02-26T11:46:09.683070+00:00",
+    "estimated_effort": "S",
+    "token_budget": 10000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "auto_generated": "queue_stall_recovery",
+    "stall_snapshot": [
+      {
+        "item_id": "RK-M0-0008",
+        "title": "Wire client shell actions to first-slice backend contracts",
+        "unmet_dependencies": [
+          "RK-M0-0007"
+        ],
+        "blocked_dependencies": [
+          "RK-M0-0007"
+        ]
+      },
+      {
+        "item_id": "RK-M0-0011",
+        "title": "Add first-slice loop smoke checks across backend contracts and client actions",
+        "unmet_dependencies": [
+          "RK-M0-0007",
+          "RK-M0-0008"
+        ],
+        "blocked_dependencies": [
+          "RK-M0-0007"
+        ]
+      },
+      {
+        "item_id": "RK-M1-0005-F02-F01-ESC-F01",
+        "title": "Add queued-item model-policy drift audit after policy updates",
+        "unmet_dependencies": [
+          "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+        ],
+        "blocked_dependencies": [
+          "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
+        ]
+      },
+      {
+        "item_id": "RK-M0-0012",
+        "title": "Expose first-slice settlement loop contract endpoints",
+        "unmet_dependencies": [
+          "RK-M0-0007"
+        ],
+        "blocked_dependencies": [
+          "RK-M0-0007"
+        ]
+      },
+      {
+        "item_id": "RK-M0-0013",
+        "title": "Add action availability gating and cooldown feedback in client shell",
+        "unmet_dependencies": [
+          "RK-M0-0008",
+          "RK-M0-0012"
+        ],
+        "blocked_dependencies": []
+      },
+      {
+        "item_id": "RK-M0-0016",
+        "title": "Automate first-slice visual smoke baselines across desktop/tablet/mobile",
+        "unmet_dependencies": [
+          "RK-M0-0011",
+          "RK-M0-0013"
+        ],
+        "blocked_dependencies": []
+      },
+      {
+        "item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
+        "title": "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
+        "unmet_dependencies": [
+          "RK-M1-0005-F02-F01-ESC-F03"
+        ],
+        "blocked_dependencies": [
+          "RK-M1-0005-F02-F01-ESC-F03"
+        ]
+      },
+      {
+        "item_id": "RK-AUTO-BACKLOG-0003-F01-F01",
+        "title": "Finalize M2 hero definitions and shared ability modifier table",
+        "unmet_dependencies": [
+          "Vertical Slice Done v1 PASS"
+        ],
+        "blocked_dependencies": []
+      },
+      {
+        "item_id": "RK-AUTO-BACKLOG-0003-F01-F02",
+        "title": "Design hero UI wireframes for assignment, ability use, and cooldown feedback",
+        "unmet_dependencies": [
+          "Vertical Slice Done v1 PASS"
+        ],
+        "blocked_dependencies": []
+      },
+      {
+        "item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
+        "title": "Plan backend hero runtime schema and combat hook integration",
+        "unmet_dependencies": [
+          "Vertical Slice Done v1 PASS"
+        ],
+        "blocked_dependencies": []
+      }
+    ],
+    "assigned_agent": "mara-voss"
   }
 ]

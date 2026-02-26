@@ -984,5 +984,50 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T11:45:35.675631+00:00",
+        "item_id": "RK-AUTO-STALL-0006",
+        "status": "completed",
+        "summary": "Resolved dependency stall by explicitly closing one dependency-stalled queued artifact already archived and consolidating reintroduced stale blocked escalation artifacts from active backlog lists.",
+        "queue_recovery": {
+            "explicitly_closed_item_ids": [
+                "RK-M1-0005-F02-F01-ESC-F03-ESC-F01"
+            ],
+            "consolidated_blocked_removed_ids": [
+                "RK-M1-0001-ESC",
+                "RK-M1-0001-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC-ESC"
+            ],
+            "dependency_ready_queued_after_recovery": [
+                "RK-AUTO-BACKLOG-0003-F01-F01",
+                "RK-AUTO-BACKLOG-0003-F01-F02",
+                "RK-AUTO-BACKLOG-0003-F01-F03"
+            ]
+        },
+        "proposed_work_items": [
+            {
+                "title": "Normalize unresolved dependency roots in active queued first-slice chain",
+                "owner_role": "lead",
+                "milestone": "M0",
+                "priority": "high",
+                "description": "Audit queued items still blocked by missing dependency IDs and either restore/remap those dependency roots or explicitly defer affected items so dependency links only reference trackable backlog entries.",
+                "inputs": [
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-items.json",
+                    "coordination/backlog/completed-items.json",
+                    "coordination/backlog/blocked-archived-items.json"
+                ],
+                "acceptance_criteria": [
+                    "Each queued dependency reference resolves to an existing ID in active, blocked, completed, or archived backlog records with a documented disposition.",
+                    "At least one currently waiting first-slice queued item is made dependency-ready or explicitly deferred due to unresolved external prerequisites.",
+                    "python tools/orchestrator.py status shows dependency-ready queued work and no immediate stall on the next daemon pass."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]

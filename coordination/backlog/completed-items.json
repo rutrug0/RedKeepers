@@ -3114,5 +3114,36 @@
     "generated_from_item_id": "RK-M1-0004-F01-F01-F01-ESC-F01-F01-ESC",
     "assigned_agent": "tomas-grell",
     "commit_sha": "9bf87c15bca00bf48076ae65b8f4371ada0b54e8"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01",
+    "title": "Prototype hero unit system for multiple civilizations",
+    "description": "Deferred post-slice concept for hero units and civilization-specific active abilities, explicitly excluded from first vertical slice scope.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Concept scope remains unqueued until first vertical slice is signed off",
+      "Design proposal identifies minimum onboarding/tutorial impact and associated UI changes",
+      "No implementation work starts during M0/M1 first-slice delivery"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-25T18:32:27.509162+00:00",
+    "updated_at": "2026-02-26T11:43:38.871947+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `outbox.json` parses successfully via `ConvertFrom-Json`.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003",
+    "assigned_agent": "rowan-hale",
+    "commit_sha": "feac342b433c64e60996d69e8ebad566563bd980"
   }
 ]
