@@ -355,133 +355,42 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01"
   },
   {
-    "id": "RK-AUTO-STALL-0006",
-    "title": "Resolve queue dependency stall",
-    "description": "The daemon detected queued work items that are not dependency-ready because one or more dependencies are currently blocked. Review blocked items, requeue/close obsolete items, and restore runnable work.",
+    "id": "RK-AUTO-STALL-0006-F01",
+    "title": "Normalize unresolved dependency roots in active queued first-slice chain",
+    "description": "Audit queued items still blocked by missing dependency IDs and either restore/remap those dependency roots or explicitly defer affected items so dependency links only reference trackable backlog entries.",
     "milestone": "M0",
-    "type": "qa",
+    "type": "feature",
     "priority": "high",
     "owner_role": "lead",
-    "preferred_agent": "mara-voss",
-    "dependencies": [],
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0006"
+    ],
     "inputs": [
       "coordination/backlog/work-items.json",
       "coordination/backlog/blocked-items.json",
-      "coordination/runtime/run-history.jsonl"
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-archived-items.json"
     ],
     "acceptance_criteria": [
-      "At least one dependency-stalled queued item is made runnable or explicitly closed",
-      "Blocked/obsolete queue artifacts are documented or consolidated",
-      "Backlog no longer stalls immediately on next daemon run"
+      "Each queued dependency reference resolves to an existing ID in active, blocked, completed, or archived backlog records with a documented disposition.",
+      "At least one currently waiting first-slice queued item is made dependency-ready or explicitly deferred due to unresolved external prerequisites.",
+      "python tools/orchestrator.py status shows dependency-ready queued work and no immediate stall on the next daemon pass."
     ],
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-26T11:43:39.252657+00:00",
-    "updated_at": "2026-02-26T11:46:09.683070+00:00",
+    "created_at": "2026-02-26T11:46:11.634405+00:00",
+    "updated_at": "2026-02-26T11:52:10.246506+00:00",
     "estimated_effort": "S",
-    "token_budget": 10000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "queue_stall_recovery",
-    "stall_snapshot": [
-      {
-        "item_id": "RK-M0-0008",
-        "title": "Wire client shell actions to first-slice backend contracts",
-        "unmet_dependencies": [
-          "RK-M0-0007"
-        ],
-        "blocked_dependencies": [
-          "RK-M0-0007"
-        ]
-      },
-      {
-        "item_id": "RK-M0-0011",
-        "title": "Add first-slice loop smoke checks across backend contracts and client actions",
-        "unmet_dependencies": [
-          "RK-M0-0007",
-          "RK-M0-0008"
-        ],
-        "blocked_dependencies": [
-          "RK-M0-0007"
-        ]
-      },
-      {
-        "item_id": "RK-M1-0005-F02-F01-ESC-F01",
-        "title": "Add queued-item model-policy drift audit after policy updates",
-        "unmet_dependencies": [
-          "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
-        ],
-        "blocked_dependencies": [
-          "RK-M1-0004-F01-F01-F01-ESC-F01-F01"
-        ]
-      },
-      {
-        "item_id": "RK-M0-0012",
-        "title": "Expose first-slice settlement loop contract endpoints",
-        "unmet_dependencies": [
-          "RK-M0-0007"
-        ],
-        "blocked_dependencies": [
-          "RK-M0-0007"
-        ]
-      },
-      {
-        "item_id": "RK-M0-0013",
-        "title": "Add action availability gating and cooldown feedback in client shell",
-        "unmet_dependencies": [
-          "RK-M0-0008",
-          "RK-M0-0012"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-M0-0016",
-        "title": "Automate first-slice visual smoke baselines across desktop/tablet/mobile",
-        "unmet_dependencies": [
-          "RK-M0-0011",
-          "RK-M0-0013"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-M1-0005-F02-F01-ESC-F03-ESC-F01",
-        "title": "Stabilize baseline unittest discover failures in daemon smoke and client scaffold tests",
-        "unmet_dependencies": [
-          "RK-M1-0005-F02-F01-ESC-F03"
-        ],
-        "blocked_dependencies": [
-          "RK-M1-0005-F02-F01-ESC-F03"
-        ]
-      },
-      {
-        "item_id": "RK-AUTO-BACKLOG-0003-F01-F01",
-        "title": "Finalize M2 hero definitions and shared ability modifier table",
-        "unmet_dependencies": [
-          "Vertical Slice Done v1 PASS"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-AUTO-BACKLOG-0003-F01-F02",
-        "title": "Design hero UI wireframes for assignment, ability use, and cooldown feedback",
-        "unmet_dependencies": [
-          "Vertical Slice Done v1 PASS"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
-        "title": "Plan backend hero runtime schema and combat hook integration",
-        "unmet_dependencies": [
-          "Vertical Slice Done v1 PASS"
-        ],
-        "blocked_dependencies": []
-      }
-    ],
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0006",
     "assigned_agent": "mara-voss"
   }
 ]

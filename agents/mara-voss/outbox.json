@@ -1029,5 +1029,72 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T11:50:56.782133+00:00",
+        "item_id": "RK-AUTO-STALL-0006-F01",
+        "status": "completed",
+        "summary": "Normalized first-slice queued dependency roots by routing RK-M0-0008/RK-M0-0011 through RK-M0-0012 and making RK-M0-0012 dependency-ready; documented RK-M0-0007 as a deferred/non-root blocked item with explicit disposition.",
+        "dependency_recovery": {
+            "remapped_dependency_items": {
+                "RK-M0-0008": {
+                    "from": "RK-M0-0007",
+                    "to": "RK-M0-0012"
+                },
+                "RK-M0-0011": {
+                    "from": "RK-M0-0007",
+                    "to": "RK-M0-0012"
+                },
+                "RK-M0-0012": {
+                    "removed": [
+                        "RK-M0-0007"
+                    ]
+                }
+            },
+            "documented_blocked_disposition": {
+                "id": "RK-M0-0007",
+                "disposition": "deferred_pending_endpoint_gap_review"
+            },
+            "first_slice_made_dependency_ready": [
+                "RK-M0-0012"
+            ]
+        },
+        "validation": {
+            "command": "python tools/orchestrator.py status",
+            "result": "pass",
+            "queue_snapshot": {
+                "queued": 10,
+                "dependency_ready": 4,
+                "running": 1,
+                "blocked": 17,
+                "completed": 73
+            }
+        },
+        "proposed_work_items": [
+            {
+                "title": "Finalize RK-M0-0007 disposition after RK-M0-0012 delivery",
+                "owner_role": "lead",
+                "milestone": "M0",
+                "priority": "normal",
+                "description": "After RK-M0-0012 completes, decide whether RK-M0-0007 should be archived as superseded or reopened as a narrowed handler-internals delta, and document the final disposition in backlog records.",
+                "dependencies": [
+                    "RK-M0-0012"
+                ],
+                "inputs": [
+                    "coordination/backlog/work-items.json",
+                    "coordination/backlog/blocked-items.json",
+                    "coordination/backlog/blocked-archived-items.json",
+                    "coordination/runtime/run-history.jsonl"
+                ],
+                "acceptance_criteria": [
+                    "RK-M0-0007 has a final documented disposition (archived superseded or requeued narrowed scope).",
+                    "No queued first-slice item depends directly on a blocked RK-M0-0007 root.",
+                    "python tools/orchestrator.py status remains non-stalled after disposition update."
+                ],
+                "validation_commands": [
+                    "python tools/orchestrator.py status"
+                ]
+            }
+        ]
     }
 ]
