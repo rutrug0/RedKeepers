@@ -1238,5 +1238,52 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "timestamp_utc":  "2026-02-26T12:53:19.0364591Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0003-F01-F03-F02",
+        "status":  "done",
+        "summary":  "Implemented shared action modifier aggregation wiring for hero runtime instances across combat/scout resolution, including shared post-resolution lifecycle consumption for modifier charge and expiry updates.",
+        "changed_files":  [
+                              "backend/src/modules/heroes/index.ts",
+                              "backend/src/modules/heroes/application/index.ts",
+                              "backend/src/modules/heroes/application/shared-action-modifier-aggregation.ts",
+                              "backend/src/modules/heroes/application/shared-action-modifier-aggregation.test.ts",
+                              "backend/src/modules/heroes/ports/hero-runtime-persistence-repository.ts",
+                              "backend/src/modules/heroes/infra/in-memory-hero-runtime-persistence-repository.ts",
+                              "backend/src/modules/heroes/infra/in-memory-hero-runtime-persistence-repository.test.ts",
+                              "backend/src/modules/heroes/infra/file-backed-hero-runtime-persistence-repository.ts",
+                              "backend/src/modules/combat/index.ts",
+                              "backend/src/modules/combat/application/index.ts",
+                              "backend/src/modules/combat/application/deterministic-combat-action-resolver.ts",
+                              "backend/src/modules/combat/application/deterministic-combat-action-resolver.test.ts",
+                              "backend/src/modules/world_map/application/world-map-scout-select-service.ts",
+                              "backend/src/modules/world_map/application/world-map-scout-select-service.modifiers.test.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --test backend/src/modules/heroes/infra/in-memory-hero-runtime-persistence-repository.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "Sandbox denied Node test worker spawn (`spawn EPERM`), so automated TS test execution could not be completed in this run."
+                    },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Thread scout action context through API endpoint for modifier-backed resolution",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M2",
+                                        "priority":  "low",
+                                        "description":  "Propagate player and assignment context identity from world-map interaction endpoint inputs (or derived auth/session context) into scout action resolution so hero runtime modifiers can apply on the HTTP execution path without manual service-level inputs.",
+                                        "acceptance_criteria":  [
+                                                                    "Scout endpoint execution path passes `player_id`, `assignment_context_type`, and `assignment_context_id` into `DeterministicWorldMapScoutSelectService` action-resolution input.",
+                                                                    "When a matching active hero runtime scout modifier exists for `next_scout_action`, scout output reflects resolved numeric stats and shared lifecycle consumption updates modifier status/charges.",
+                                                                    "Endpoint contract tests cover both baseline behavior and modifier-backed behavior."
+                                                                ]
+                                    }
+                                ]
     }
 ]

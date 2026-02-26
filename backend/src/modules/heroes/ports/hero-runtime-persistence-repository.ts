@@ -92,6 +92,19 @@ export interface HeroModifierActivationInput {
   readonly exclusive_by_stat?: boolean;
 }
 
+export interface HeroModifierLifecycleMutationInput {
+  readonly modifier_instance_id: string;
+  readonly remaining_charges: number;
+  readonly status: HeroModifierStatus;
+  readonly consumed_at?: Instant;
+}
+
+export interface HeroModifierLifecycleWriteInput {
+  readonly player_id: string;
+  readonly now: Instant;
+  readonly mutations: readonly HeroModifierLifecycleMutationInput[];
+}
+
 export interface HeroAssignmentMutationInput {
   readonly player_id: string;
   readonly hero_id: string;
@@ -128,7 +141,10 @@ export type HeroRuntimeWriteConflictCode =
   | "readiness_conflict"
   | "cooldown_window_invalid"
   | "modifier_instance_conflict"
-  | "modifier_exclusive_stat_conflict";
+  | "modifier_exclusive_stat_conflict"
+  | "modifier_not_found"
+  | "modifier_not_active"
+  | "modifier_player_mismatch";
 
 export interface HeroRuntimeWriteApplied<TResult> {
   readonly status: "applied";
@@ -155,6 +171,10 @@ export interface HeroAssignmentMutationApplied {
 export interface HeroAbilityActivationApplied {
   readonly runtime_state: HeroRuntimeState;
   readonly created_modifier_instance_ids: readonly string[];
+}
+
+export interface HeroModifierLifecycleApplied {
+  readonly updated_modifier_instance_ids: readonly string[];
 }
 
 export interface HeroRuntimePersistenceSnapshot {
@@ -191,4 +211,8 @@ export interface HeroRuntimePersistenceRepository {
   applyAbilityActivation(
     input: HeroAbilityActivationWriteInput,
   ): HeroRuntimeWriteResult<HeroAbilityActivationApplied>;
+
+  applyModifierLifecycle(
+    input: HeroModifierLifecycleWriteInput,
+  ): HeroRuntimeWriteResult<HeroModifierLifecycleApplied>;
 }

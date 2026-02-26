@@ -8,6 +8,8 @@ import type {
   HeroAssignmentBoundContextType,
   HeroAssignmentMutationApplied,
   HeroAssignmentMutationInput,
+  HeroModifierLifecycleApplied,
+  HeroModifierLifecycleWriteInput,
   HeroModifierInstance,
   HeroModifierStatus,
   HeroRuntimePersistenceRepository,
@@ -142,6 +144,17 @@ export class FileBackedHeroRuntimePersistenceRepository
   ): HeroRuntimeWriteResult<HeroAbilityActivationApplied> {
     this.reloadFromStorage();
     const result = this.inMemory.applyAbilityActivation(input);
+    if (result.status === "applied") {
+      this.persistToStorage();
+    }
+    return result;
+  }
+
+  applyModifierLifecycle(
+    input: HeroModifierLifecycleWriteInput,
+  ): HeroRuntimeWriteResult<HeroModifierLifecycleApplied> {
+    this.reloadFromStorage();
+    const result = this.inMemory.applyModifierLifecycle(input);
     if (result.status === "applied") {
       this.persistToStorage();
     }

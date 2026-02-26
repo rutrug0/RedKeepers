@@ -3382,5 +3382,38 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01",
     "assigned_agent": "ilya-fen",
     "commit_sha": "9b1d3cd7038064fa435f4b6d4260c18c8268fda7"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F01",
+    "title": "Implement hero runtime persistence contracts and repositories",
+    "description": "Create schema migrations and repository interfaces/implementations for hero runtime states, assignment bindings, and hero modifier runtime instances exactly as defined in the M2 backend hero runtime schema plan.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F03"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Runtime persistence includes `heroes.hero_runtime_states_v1`, `heroes.hero_assignment_bindings_v1`, and `heroes.hero_modifier_instances_v1` tables with documented uniqueness/consistency constraints.",
+      "Repository contracts support atomic assignment updates and ability activation writes with optimistic concurrency.",
+      "No hero-specific combat/scout formulas are introduced in persistence layer."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:11:58.072993+00:00",
+    "updated_at": "2026-02-26T12:42:50.095973+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- No TypeScript compiler/test runner is installed in this environment (`tsc` not found), so compile-time execution checks were not run.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "dc60c4694a73d230022b014c62aa36b71217541c"
   }
 ]

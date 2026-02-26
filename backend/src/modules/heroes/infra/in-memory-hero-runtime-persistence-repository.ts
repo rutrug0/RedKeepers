@@ -7,6 +7,9 @@ import type {
   HeroAssignmentMutationApplied,
   HeroAssignmentMutationInput,
   HeroModifierActivationInput,
+  HeroModifierLifecycleApplied,
+  HeroModifierLifecycleMutationInput,
+  HeroModifierLifecycleWriteInput,
   HeroModifierInstance,
   HeroModifierStatus,
   HeroRuntimePersistenceRepository,
@@ -479,6 +482,66 @@ export class InMemoryHeroRuntimePersistenceRepository
     };
   }
 
+  applyModifierLifecycle(
+    input: HeroModifierLifecycleWriteInput,
+  ): HeroRuntimeWriteResult<HeroModifierLifecycleApplied> {
+    const playerId = normalizeRequiredText(input.player_id, "player_id");
+    const now = normalizeInstant(input.now, "now");
+    const normalizedMutations = input.mutations.map((mutation) =>
+      normalizeModifierLifecycleMutationInput(mutation),
+    );
+
+    for (const mutation of normalizedMutations) {
+      const existing = this.modifierInstanceById.get(mutation.modifier_instance_id);
+      if (existing === undefined) {
+        return createConflict(
+          "modifier_not_found",
+          `Modifier instance '${mutation.modifier_instance_id}' was not found.`,
+        );
+      }
+      if (existing.player_id !== playerId) {
+        return createConflict(
+          "modifier_player_mismatch",
+          `Modifier instance '${mutation.modifier_instance_id}' does not belong to player '${playerId}'.`,
+        );
+      }
+      if (existing.status !== "active") {
+        return createConflict(
+          "modifier_not_active",
+          `Modifier instance '${mutation.modifier_instance_id}' is not active.`,
+        );
+      }
+    }
+
+    const updatedModifierIds: string[] = [];
+    for (const mutation of normalizedMutations) {
+      const existing = this.modifierInstanceById.get(mutation.modifier_instance_id);
+      if (existing === undefined) {
+        continue;
+      }
+
+      const consumedAt = mutation.status === "consumed"
+        ? mutation.consumed_at ?? now
+        : undefined;
+      const updated = normalizeModifierInstance({
+        ...existing,
+        remaining_charges: mutation.remaining_charges,
+        status: mutation.status,
+        consumed_at: consumedAt,
+      });
+
+      this.modifierInstanceById.set(updated.modifier_instance_id, updated);
+      updatedModifierIds.push(updated.modifier_instance_id);
+    }
+
+    return {
+      status: "applied",
+      result: {
+        updated_modifier_instance_ids: updatedModifierIds,
+      },
+    };
+  }
+
   private deactivateActiveBindingsForHero(input: {
     readonly player_id: string;
     readonly hero_id: string;
@@ -740,6 +803,31 @@ function normalizeModifierActivationInput(
       : normalizeInstant(input.expires_at, "expires_at"),
     exclusive_by_stat: input.exclusive_by_stat ?? false,
   };
+}
+
+function normalizeModifierLifecycleMutationInput(
+  input: HeroModifierLifecycleMutationInput,
+): HeroModifierLifecycleMutationInput {
+  const normalized: HeroModifierLifecycleMutationInput = {
+    modifier_instance_id: normalizeRequiredText(
+      input.modifier_instance_id,
+      "modifier_instance_id",
+    ),
+    remaining_charges: normalizeNonNegativeInteger(
+      input.remaining_charges,
+      "remaining_charges",
+    ),
+    status: input.status,
+    consumed_at: input.consumed_at === undefined
+      ? undefined
+      : normalizeInstant(input.consumed_at, "consumed_at"),
+  };
+
+  if (normalized.status !== "consumed" && normalized.consumed_at !== undefined) {
+    throw new Error("consumed_at is only valid when lifecycle status is 'consumed'.");
+  }
+
+  return normalized;
 }
 
 function cloneRuntimeState(input: HeroRuntimeState): HeroRuntimeState {

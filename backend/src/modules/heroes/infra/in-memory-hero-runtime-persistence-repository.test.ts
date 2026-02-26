@@ -313,3 +313,97 @@ test("applyAbilityActivation rejects exclusive stat collisions", () => {
     1,
   );
 });
+
+test("applyModifierLifecycle updates charge- and expiry-based runtime modifier states", () => {
+  const repository = new InMemoryHeroRuntimePersistenceRepository({
+    initial_snapshot: {
+      runtime_states: [],
+      assignment_bindings: [],
+      modifier_instances: [
+        {
+          modifier_instance_id: "mod_charge_once",
+          player_id: "player_e",
+          hero_id: "hero_rime",
+          ability_id: "ability_cold_mark",
+          modifier_id: "mod_charge_once",
+          domain: "scout",
+          stat_key: "scout_report_detail_mult",
+          op: "mul",
+          value: "1.2",
+          trigger_window: "next_scout_action",
+          remaining_charges: 1,
+          assignment_context_type: "scout_detachment",
+          assignment_context_id: "scout_7",
+          activated_at: new Date("2026-02-26T13:00:00.000Z"),
+          status: "active",
+        },
+        {
+          modifier_instance_id: "mod_timed",
+          player_id: "player_e",
+          hero_id: "hero_rime",
+          ability_id: "ability_cold_mark",
+          modifier_id: "mod_timed",
+          domain: "scout",
+          stat_key: "scout_report_detail_mult",
+          op: "mul",
+          value: "1.05",
+          trigger_window: "next_scout_action",
+          remaining_charges: 0,
+          assignment_context_type: "scout_detachment",
+          assignment_context_id: "scout_7",
+          activated_at: new Date("2026-02-26T13:00:00.000Z"),
+          expires_at: new Date("2026-02-26T13:01:00.000Z"),
+          status: "active",
+        },
+      ],
+    },
+  });
+
+  const lifecycleResult = repository.applyModifierLifecycle({
+    player_id: "player_e",
+    now: new Date("2026-02-26T13:02:00.000Z"),
+    mutations: [
+      {
+        modifier_instance_id: "mod_charge_once",
+        remaining_charges: 0,
+        status: "consumed",
+      },
+      {
+        modifier_instance_id: "mod_timed",
+        remaining_charges: 0,
+        status: "expired",
+      },
+    ],
+  });
+
+  assert.equal(lifecycleResult.status, "applied");
+  if (lifecycleResult.status !== "applied") {
+    return;
+  }
+  assert.deepStrictEqual(lifecycleResult.result.updated_modifier_instance_ids, [
+    "mod_charge_once",
+    "mod_timed",
+  ]);
+
+  const consumedRows = repository.listModifierInstances({
+    player_id: "player_e",
+    status: "consumed",
+  });
+  const expiredRows = repository.listModifierInstances({
+    player_id: "player_e",
+    status: "expired",
+  });
+
+  assert.equal(consumedRows.length, 1);
+  assert.equal(consumedRows[0].modifier_instance_id, "mod_charge_once");
+  assert.equal(consumedRows[0].remaining_charges, 0);
+  assert.equal(
+    consumedRows[0].consumed_at?.toISOString(),
+    "2026-02-26T13:02:00.000Z",
+  );
+
+  assert.equal(expiredRows.length, 1);
+  assert.equal(expiredRows[0].modifier_instance_id, "mod_timed");
+  assert.equal(expiredRows[0].remaining_charges, 0);
+  assert.equal(expiredRows[0].consumed_at, undefined);
+});

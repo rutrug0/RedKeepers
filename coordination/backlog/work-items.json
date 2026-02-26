@@ -296,38 +296,6 @@
     "generated_from_item_id": "RK-AUTO-STALL-0006-F01"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F01",
-    "title": "Implement hero runtime persistence contracts and repositories",
-    "description": "Create schema migrations and repository interfaces/implementations for hero runtime states, assignment bindings, and hero modifier runtime instances exactly as defined in the M2 backend hero runtime schema plan.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0003-F01-F03"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Runtime persistence includes `heroes.hero_runtime_states_v1`, `heroes.hero_assignment_bindings_v1`, and `heroes.hero_modifier_instances_v1` tables with documented uniqueness/consistency constraints.",
-      "Repository contracts support atomic assignment updates and ability activation writes with optimistic concurrency.",
-      "No hero-specific combat/scout formulas are introduced in persistence layer."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T12:11:58.072993+00:00",
-    "updated_at": "2026-02-26T12:42:46.696550+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0003-F01-F03-F02",
     "title": "Wire hero modifier instances into shared action modifier aggregation",
     "description": "Extend the shared numeric modifier aggregation path used by action resolution so combat/scout calculators consume hero ability effects from runtime modifier instances by domain/trigger window/context.",
@@ -346,17 +314,18 @@
       "Charge and expiry consumption for hero modifier instances executes in the shared post-resolution modifier lifecycle path."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T12:11:58.072993+00:00",
-    "updated_at": "2026-02-26T12:11:58.072993+00:00",
+    "updated_at": "2026-02-26T12:54:29.584491+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-AUTO-BACKLOG-0003-F01-F03-F03",
@@ -388,5 +357,67 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F01-F01",
+    "title": "Add hero runtime migration execution tests against the selected DB runtime",
+    "description": "Add migration-runner validation that applies the hero runtime migration and proves uniqueness/consistency constraints for runtime rows, assignment bindings, and modifier instances in a real database environment.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F03-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Automated test setup can apply `20260226_000001_create_hero_runtime_tables_v1.sql` end-to-end.",
+      "Tests verify active assignment uniqueness constraints and readiness/cooldown consistency checks fail invalid writes.",
+      "Tests verify rollback/reset path leaves the schema clean for repeatable CI runs."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:42:50.305580+00:00",
+    "updated_at": "2026-02-26T12:42:50.305580+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03-F01"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0003-F01-F03-F01-F02",
+    "title": "Wire assignment context ownership validation to context-owning repositories",
+    "description": "Integrate hero assignment writes with owning module read ports (army/scout/siege) so assignment context ownership by `player_id` is validated transactionally before binding activation.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0003-F01-F03-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Assignment mutation rejects contexts not owned by the requesting player.",
+      "Validation runs inside the same write boundary as assignment/runtime updates.",
+      "Contract tests cover allowed and rejected ownership cases for all supported context types."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-26T12:42:50.305580+00:00",
+    "updated_at": "2026-02-26T12:42:50.305580+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0003-F01-F03-F01"
   }
 ]
