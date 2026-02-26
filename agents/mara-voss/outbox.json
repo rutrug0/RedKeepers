@@ -1676,5 +1676,42 @@
         "files": [
             "agents/mara-voss/outbox.json"
         ]
+    },
+    {
+        "ts": "2026-02-26T14:43:39.5412190Z",
+        "item_id": "RK-AUTO-STALL-0010-F01",
+        "status": "completed",
+        "summary": "Documented RK-M0-0008 as superseded by RK-M0-0008-ESC-F01 and remapped RK-M0-0011/RK-M0-0013 dependencies to the queued replacement so first-slice follow-up work no longer waits on the blocked root item.",
+        "queue_recovery": {
+            "dependency_updates": {
+                "RK-M0-0011": {
+                    "from": "RK-M0-0008",
+                    "to": "RK-M0-0008-ESC-F01"
+                },
+                "RK-M0-0013": {
+                    "from": "RK-M0-0008",
+                    "to": "RK-M0-0008-ESC-F01"
+                }
+            },
+            "blocked_artifact_updates": {
+                "RK-M0-0008": "marked superseded_by RK-M0-0008-ESC-F01 with explicit visual-baseline requeue rationale"
+            }
+        },
+        "validation": {
+            "command": "python tools/orchestrator.py status",
+            "result": "pass",
+            "queue_snapshot": {
+                "queued": 11,
+                "dependency_ready": 3,
+                "running": 1,
+                "blocked": 19,
+                "completed": 93
+            }
+        },
+        "files": [
+            "coordination/backlog/work-items.json",
+            "coordination/backlog/blocked-items.json",
+            "agents/mara-voss/outbox.json"
+        ]
     }
 ]

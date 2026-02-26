@@ -4318,5 +4318,37 @@
     "assigned_agent": "mara-voss",
     "recovered_from_stale_in_progress": true,
     "commit_sha": "59fe4a031660a6a1203af784ca3962decf78689a"
+  },
+  {
+    "id": "RK-M0-0008-ESC",
+    "title": "Escalation: Wire client shell actions to first-slice backend contracts",
+    "description": "Investigate repeated failure for item RK-M0-0008. Reason: retry threshold exceeded",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T14:17:25.231477+00:00",
+    "updated_at": "2026-02-26T14:39:43.537265+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": "- Pre-existing workspace changes in `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` were left untouched.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-M0-0008",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "e82207f7151a6a386a3af4060ac9c501322b91df"
   }
 ]
