@@ -1293,5 +1293,139 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-26T13:40:11.000000+00:00",
+        "item_id": "RK-HUMAN-0001",
+        "status": "completed",
+        "summary": "Parsed `2026-02-26-world-map-feature-brief.md` into a first-slice-safe world-map plan, queued four in-scope M0 implementation tasks, and deferred realtime/hero/neutral-gathering expansion into post-slice follow-ups.",
+        "v1_vertical_slice_now": {
+            "smallest_playable_loop": [
+                "Join world -> deterministic settlement spawn on valid tile",
+                "Inspect nearby coordinates and one foreign settlement placeholder",
+                "Dispatch one march -> resolve timer-based movement",
+                "Resolve deterministic hostile combat and return outcome in event feed"
+            ],
+            "scope_boundaries": [
+                "One settlement per player; settlement position fixed after spawn",
+                "Timer/tick based movement and combat only",
+                "Map cap config allows 2 marches but only one active dispatch flow is required for loop completion",
+                "No hero assignment, no neutral loops, no gathering in first slice"
+            ],
+            "deterministic_rules": {
+                "spawn": "valid tile = passable + unoccupied; seeded candidate ordering",
+                "movement": "Manhattan distance; eta_seconds = distance * 30",
+                "combat": "attacker_score > defender_score => attacker win; ties => defender win",
+                "gathering": "returns feature_not_in_slice"
+            }
+        },
+        "scope_conflicts": [
+            {
+                "request": "Hero attached to every march",
+                "guardrail_conflict": "No hero units in first vertical slice",
+                "phased_compromise": "Reserve nullable hero field but block assignment until post-slice"
+            },
+            {
+                "request": "Neutral combat/gathering + ambush",
+                "guardrail_conflict": "Exceeds one-map-interaction complexity target",
+                "phased_compromise": "Keep deterministic hostile settlement attack only in v1"
+            },
+            {
+                "request": "Near-realtime movement/combat",
+                "guardrail_conflict": "Reduces deterministic QA reliability in first slice",
+                "phased_compromise": "Lock v1 to timer/tick simulation and defer realtime interpolation"
+            }
+        ],
+        "generated_follow_up_item_ids": [
+            "RK-HUMAN-0001-F01",
+            "RK-HUMAN-0001-F02",
+            "RK-HUMAN-0001-F03",
+            "RK-HUMAN-0001-F04"
+        ],
+        "files": [
+            "docs/design/world-map-v1-phasing.md",
+            "coordination/backlog/work-items.json",
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": [
+            {
+                "title": "Add seasonal world lifecycle scheduler and rollover state model",
+                "owner_role": "backend",
+                "milestone": "M1",
+                "priority": "normal",
+                "description": "Implement semi-persistent world lifecycle controls (open/lock/archive/reset) using `season_length_days` metadata while preserving deterministic archive snapshots.",
+                "dependencies": [
+                    "RK-HUMAN-0001-F01"
+                ],
+                "inputs": [
+                    "backend/src/modules/world_map/",
+                    "docs/design/world-map-v1-phasing.md"
+                ],
+                "acceptance_criteria": [
+                    "World lifecycle states and transitions are defined with deterministic timestamps.",
+                    "Rollover process archives world summary and resets joinable world state.",
+                    "Lifecycle events emit stable placeholder keys for UI/ops visibility."
+                ]
+            },
+            {
+                "title": "Evolve timer marches to near-realtime authoritative movement updates",
+                "owner_role": "backend",
+                "milestone": "M1",
+                "priority": "normal",
+                "description": "Introduce server-authoritative short-interval march updates and interpolation-ready payloads while preserving deterministic resolution semantics.",
+                "dependencies": [
+                    "RK-HUMAN-0001-F02"
+                ],
+                "inputs": [
+                    "backend/src/modules/world_map/",
+                    "client-web/app.js",
+                    "docs/design/world-map-v1-phasing.md"
+                ],
+                "acceptance_criteria": [
+                    "March state snapshots are emitted at near-realtime intervals with stable IDs and timestamps.",
+                    "Arrival and combat resolution remain server-authoritative and deterministic.",
+                    "Client can render interpolated movement without altering authoritative outcomes."
+                ]
+            },
+            {
+                "title": "Add hero attachment path for marches using shared modifier model",
+                "owner_role": "design",
+                "milestone": "M2",
+                "priority": "normal",
+                "description": "Define and stage hero-to-march assignment rules and cooldown/modifier hooks as a post-slice extension of the shared stat-driven system.",
+                "dependencies": [
+                    "RK-HUMAN-0001-F02"
+                ],
+                "inputs": [
+                    "docs/design/m2-hero-units-prototype-concept.md",
+                    "docs/design/world-map-v1-phasing.md"
+                ],
+                "acceptance_criteria": [
+                    "Hero assignment lifecycle for marches is defined without bespoke combat branches.",
+                    "Hero impact is represented through existing shared modifier tables.",
+                    "Tutorial/onboarding impact remains optional and outside first-session critical path."
+                ]
+            },
+            {
+                "title": "Add neutral resource nodes and deterministic ambush-enabled gathering loop",
+                "owner_role": "backend",
+                "milestone": "M2",
+                "priority": "normal",
+                "description": "Introduce gatherable neutral nodes and march interception rules to unlock ambush gameplay after v1 hostile settlement loop is stable.",
+                "dependencies": [
+                    "RK-HUMAN-0001-F02"
+                ],
+                "inputs": [
+                    "backend/src/modules/world_map/",
+                    "backend/src/modules/combat/",
+                    "docs/design/world-map-v1-phasing.md"
+                ],
+                "acceptance_criteria": [
+                    "Neutral nodes have deterministic spawn tables and yield outputs.",
+                    "Gather marches can be intercepted with deterministic ambush resolution rules.",
+                    "Event feed keys cover gather start, gather complete, ambush triggered, and ambush resolved outcomes."
+                ]
+            }
+        ]
     }
 ]
