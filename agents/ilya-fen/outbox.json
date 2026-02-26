@@ -1850,4 +1850,29 @@
                                     }
                                 ]
     }
+,
+    {
+        "timestamp_utc":  "2026-02-26T20:12:00.0000000Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0004-F03-F01",
+        "status":  "done",
+        "summary":  "Added explicit fixture-driven tie combat coverage for hostile settlement attack resolution using the documented `attack_fixture_tie_40v40` scenario, asserting defender-win mapping and deterministic tie loss ratios with exact expected losses.",
+        "changed_files":  [
+                              "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --experimental-strip-types --check backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+                                    "node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "TypeScript strip-types check passed for the touched test file. Node test execution remains blocked in this environment by strip-types runtime limitations on TypeScript parameter properties (ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX)."
+                    },
+        "proposed_work_items":  [
+
+                                ]
+    }
 ]

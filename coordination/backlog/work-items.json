@@ -75,38 +75,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0004-F01-F02",
-    "title": "Add event template mappings for hostile attack flow keys in web placeholder feed",
-    "description": "Add placeholder narrative templates and adapter mappings for `event.world.march_started`, `event.world.march_returned`, and `event.combat.placeholder_skirmish_*` so hostile attack events render text labels instead of missing-template fallbacks in the web shell.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0004-F01"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Client event feed renders human-readable placeholder text for all hostile attack event content keys emitted by backend transport.",
-      "Template token substitution covers attack flow tokens (`army_name`, `origin_settlement_name`, `target_tile_label`, `settlement_name`, `haul_summary`).",
-      "No regressions in existing scout/build/train event rendering behavior."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T19:27:21.718445+00:00",
-    "updated_at": "2026-02-26T20:02:28.296514+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F01",
-    "assigned_agent": "sera-kest"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0004-F03-F01",
     "title": "Add explicit tie-fixture automation coverage for hostile settlement attack resolution",
     "description": "Add fixture-driven tests that assert tie classification (`attacker_strength == defender_strength`) maps to `combat_outcome=defender_win` and uses the documented tie loss ratios without variance.",
@@ -129,17 +97,18 @@
       "No new combat mechanics or random variance are introduced"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T19:30:15.095099+00:00",
-    "updated_at": "2026-02-26T19:30:15.095099+00:00",
+    "updated_at": "2026-02-26T20:04:52.774778+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F03"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F03",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-AUTO-BACKLOG-0004-F02-F01",

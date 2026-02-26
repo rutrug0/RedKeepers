@@ -13,6 +13,33 @@ import {
   DeterministicWorldMapMarchSnapshotService,
 } from "./world-map-march-snapshot-service.ts";
 
+const HOSTILE_ATTACK_TIE_FIXTURE_40V40 = {
+  fixture_id: "attack_fixture_tie_40v40",
+  defender_garrison_strength: 40,
+  dispatched_units: [
+    {
+      unit_id: "watch_levy",
+      unit_count: 8,
+      unit_attack: 5,
+    },
+  ],
+  expected: {
+    combat_outcome: "defender_win",
+    attacker_strength: 40,
+    defender_strength: 40,
+    attacker_loss_ratio: 1,
+    defender_loss_ratio: 0.2,
+    attacker_units_dispatched: 8,
+    attacker_units_lost: 8,
+    attacker_units_remaining: 0,
+    defender_garrison_lost: 8,
+    defender_garrison_remaining: 32,
+    attacker_unit_losses_by_id: {
+      watch_levy: 8,
+    },
+  },
+} as const;
+
 test("hostile attack service resolves deterministic attacker-win losses and persists resolved march state", () => {
   const repository = new InMemoryWorldMapMarchStateRepository();
   const service = new DeterministicWorldMapHostileAttackService(
@@ -83,7 +110,7 @@ test("hostile attack service resolves deterministic attacker-win losses and pers
   assert.equal(persisted?.resolution_outcome, "attacker_win");
 });
 
-test("hostile attack service resolves deterministic defender-win losses on tie", () => {
+test("hostile attack service resolves tie fixture attack_fixture_tie_40v40 as defender-win with documented fixed loss ratios", () => {
   const repository = new InMemoryWorldMapMarchStateRepository();
   const service = new DeterministicWorldMapHostileAttackService(
     new DeterministicWorldMapMarchDispatchService(repository),
@@ -91,29 +118,61 @@ test("hostile attack service resolves deterministic defender-win losses on tie",
   );
 
   const response = service.resolveHostileAttack({
-    march_id: "march_attack_beta",
+    march_id: "march_attack_tie_fixture",
     source_settlement_id: "settlement_alpha",
     target_settlement_id: "settlement_hostile",
     origin: { x: 0, y: 0 },
     target: { x: 0, y: 1 },
-    defender_garrison_strength: 50,
-    dispatched_units: [
-      {
-        unit_id: "watch_levy",
-        unit_count: 10,
-        unit_attack: 5,
-      },
-    ],
+    defender_garrison_strength:
+      HOSTILE_ATTACK_TIE_FIXTURE_40V40.defender_garrison_strength,
+    dispatched_units: HOSTILE_ATTACK_TIE_FIXTURE_40V40.dispatched_units,
     departed_at: new Date("2026-02-26T19:30:00.000Z"),
   });
 
-  assert.equal(response.combat_outcome, "defender_win");
-  assert.equal(response.losses.attacker_loss_ratio, 1);
-  assert.equal(response.losses.defender_loss_ratio, 0.2);
-  assert.equal(response.losses.attacker_units_lost, 10);
-  assert.equal(response.losses.attacker_units_remaining, 0);
-  assert.equal(response.losses.defender_garrison_lost, 10);
-  assert.equal(response.losses.defender_garrison_remaining, 40);
+  assert.equal(
+    response.combat_outcome,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.combat_outcome,
+  );
+  assert.equal(
+    response.attacker_strength,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.attacker_strength,
+  );
+  assert.equal(
+    response.defender_strength,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.defender_strength,
+  );
+  assert.equal(
+    response.losses.attacker_loss_ratio,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.attacker_loss_ratio,
+  );
+  assert.equal(
+    response.losses.defender_loss_ratio,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.defender_loss_ratio,
+  );
+  assert.equal(
+    response.losses.attacker_units_dispatched,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.attacker_units_dispatched,
+  );
+  assert.equal(
+    response.losses.attacker_units_lost,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.attacker_units_lost,
+  );
+  assert.equal(
+    response.losses.attacker_units_remaining,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.attacker_units_remaining,
+  );
+  assert.equal(
+    response.losses.defender_garrison_lost,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.defender_garrison_lost,
+  );
+  assert.equal(
+    response.losses.defender_garrison_remaining,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.defender_garrison_remaining,
+  );
+  assert.deepStrictEqual(
+    response.losses.attacker_unit_losses_by_id,
+    HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.attacker_unit_losses_by_id,
+  );
   assert.equal(
     response.event_payloads.combat_resolved.content_key,
     "event.combat.placeholder_skirmish_loss",
