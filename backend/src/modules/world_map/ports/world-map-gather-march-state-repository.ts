@@ -1,6 +1,7 @@
 import type {
   WorldMapAmbushOutcome,
   WorldMapGatherMarchState,
+  WorldMapFirstSliceResourceValueById,
   WorldMapGatherYieldOutput,
 } from "../domain";
 
@@ -21,6 +22,8 @@ export interface WorldMapGatherMarchRuntimeState {
   readonly ambush_triggered: boolean;
   readonly ambush_strength: number;
   readonly ambush_outcome: WorldMapAmbushOutcome;
+  readonly resource_delta_by_id: WorldMapFirstSliceResourceValueById;
+  readonly resource_stock_by_id: WorldMapFirstSliceResourceValueById;
   readonly resolved_at?: Date;
 }
 

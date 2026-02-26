@@ -48,6 +48,8 @@ function normalizeGatherMarchRuntimeState(
     completes_at: new Date(state.completes_at.getTime()),
     resolved_at: state.resolved_at === undefined ? undefined : new Date(state.resolved_at.getTime()),
     gathered_yield: state.gathered_yield.map((yieldOutput) => ({ ...yieldOutput })),
+    resource_delta_by_id: { ...state.resource_delta_by_id },
+    resource_stock_by_id: { ...state.resource_stock_by_id },
   };
 }
 
@@ -60,5 +62,7 @@ function cloneGatherMarchRuntimeState(
     completes_at: new Date(state.completes_at.getTime()),
     resolved_at: state.resolved_at === undefined ? undefined : new Date(state.resolved_at.getTime()),
     gathered_yield: state.gathered_yield.map((yieldOutput) => ({ ...yieldOutput })),
+    resource_delta_by_id: { ...state.resource_delta_by_id },
+    resource_stock_by_id: { ...state.resource_stock_by_id },
   };
 }

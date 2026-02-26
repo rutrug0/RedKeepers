@@ -3,7 +3,14 @@ import {
   type DeterministicAmbushResolutionResult,
 } from "../../combat/application";
 import {
+  DeterministicSettlementResourceLedgerService,
+  type SettlementResourceLedgerService,
+  InMemoryFirstSliceEconomyTickStateRepository,
+} from "../../economy";
+import {
+  WORLD_MAP_FIRST_SLICE_RESOURCE_IDS,
   WORLD_MAP_NEUTRAL_GATHERING_FLOW,
+  type WorldMapFirstSliceResourceValueById,
   type WorldMapGatherMarchState,
   type WorldMapGatherYieldOutput,
   type WorldMapNeutralGatherEvent,
@@ -101,6 +108,7 @@ export class DeterministicWorldMapNeutralGatheringService
   private readonly defaultTravelSecondsPerLeg: number;
   private readonly ambushInterceptYieldMultiplier: number;
   private readonly ambushResolutionService: DeterministicAmbushResolutionService;
+  private readonly settlementResourceLedgerService: SettlementResourceLedgerService;
 
   constructor(
     private readonly neutralNodeRepository: WorldMapNeutralNodeStateRepository,
@@ -109,6 +117,7 @@ export class DeterministicWorldMapNeutralGatheringService
       readonly default_travel_seconds_per_leg?: number;
       readonly ambush_intercept_yield_multiplier?: number;
       readonly ambush_resolution_service?: DeterministicAmbushResolutionService;
+      readonly settlement_resource_ledger_service?: SettlementResourceLedgerService;
     },
   ) {
     this.defaultTravelSecondsPerLeg = normalizeMinimumPositiveInteger(
@@ -121,6 +130,11 @@ export class DeterministicWorldMapNeutralGatheringService
     );
     this.ambushResolutionService =
       options?.ambush_resolution_service ?? new DeterministicAmbushResolutionService();
+    this.settlementResourceLedgerService =
+      options?.settlement_resource_ledger_service
+      ?? new DeterministicSettlementResourceLedgerService(
+        new InMemoryFirstSliceEconomyTickStateRepository(),
+      );
   }
 
   spawnNeutralNodes(input: WorldMapNeutralNodeSpawnInput): readonly WorldMapNeutralNodeRuntimeState[] {
@@ -246,6 +260,8 @@ export class DeterministicWorldMapNeutralGatheringService
       ambush_triggered: false,
       ambush_strength: 0,
       ambush_outcome: "ambush_not_triggered",
+      resource_delta_by_id: createZeroResourceValuesById(),
+      resource_stock_by_id: createZeroResourceValuesById(),
     });
 
     const startEvent: WorldMapNeutralGatherEvent = {
@@ -315,6 +331,11 @@ export class DeterministicWorldMapNeutralGatheringService
       ambushResolution,
       this.ambushInterceptYieldMultiplier,
     );
+    const ledgerSnapshot = this.settlementResourceLedgerService.applyResourceDelta({
+      settlement_id: currentMarch.settlement_id,
+      occurred_at: new Date(currentMarch.completes_at.getTime()),
+      resource_delta_by_id: toResourceValuesByIdFromYieldOutputs(resolvedYield),
+    });
     const haulSummary = toHaulSummary(resolvedYield);
 
     const updatedMarch = this.gatherMarchRepository.saveGatherMarchRuntimeState({
@@ -326,6 +347,8 @@ export class DeterministicWorldMapNeutralGatheringService
       ambush_triggered: ambushResolution.ambush_triggered,
       ambush_strength: ambushResolution.ambush_strength,
       ambush_outcome: ambushResolution.outcome,
+      resource_delta_by_id: { ...ledgerSnapshot.resource_delta_by_id },
+      resource_stock_by_id: { ...ledgerSnapshot.resource_stock_by_id },
       resolved_at: new Date(currentMarch.completes_at.getTime()),
     });
 
@@ -378,6 +401,10 @@ function createGatheringResponse(input: {
         ? undefined
         : new Date(input.march.resolved_at.getTime()),
     gathered_yield: input.march.gathered_yield.map((yieldOutput) => ({ ...yieldOutput })),
+    resource_ledger: {
+      resource_delta_by_id: { ...input.march.resource_delta_by_id },
+      resource_stock_by_id: { ...input.march.resource_stock_by_id },
+    },
     ambush: {
       ambush_triggered: input.march.ambush_triggered,
       ambush_roll: input.march.ambush_roll,
@@ -477,6 +504,36 @@ function applyAmbushYieldOutcome(
       amount: Math.max(0, Math.floor(yieldOutput.amount * interceptMultiplier)),
     }))
     .filter((yieldOutput) => yieldOutput.amount > 0);
+}
+
+function createZeroResourceValuesById(): WorldMapFirstSliceResourceValueById {
+  return {
+    food: 0,
+    wood: 0,
+    stone: 0,
+    iron: 0,
+  };
+}
+
+function toResourceValuesByIdFromYieldOutputs(
+  yieldOutputs: readonly WorldMapGatherYieldOutput[],
+): WorldMapFirstSliceResourceValueById {
+  const valuesById: Record<(typeof WORLD_MAP_FIRST_SLICE_RESOURCE_IDS)[number], number> = {
+    food: 0,
+    wood: 0,
+    stone: 0,
+    iron: 0,
+  };
+  for (const yieldOutput of yieldOutputs) {
+    if (!WORLD_MAP_FIRST_SLICE_RESOURCE_IDS.includes(
+      yieldOutput.resource_id as (typeof WORLD_MAP_FIRST_SLICE_RESOURCE_IDS)[number],
+    )) {
+      continue;
+    }
+    const resourceId = yieldOutput.resource_id as (typeof WORLD_MAP_FIRST_SLICE_RESOURCE_IDS)[number];
+    valuesById[resourceId] += normalizeNonNegativeInteger(yieldOutput.amount);
+  }
+  return valuesById;
 }
 
 function toHaulSummary(yieldOutputs: readonly WorldMapGatherYieldOutput[]): string {

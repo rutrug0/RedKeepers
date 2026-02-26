@@ -297,6 +297,13 @@ test("local first-slice transport serves deterministic gather start and poll con
     return;
   }
   assert.equal(pollResponse.body.march_state, "gather_march_resolved");
+  assert.deepStrictEqual(pollResponse.body.resource_ledger.resource_delta_by_id, {
+    food: 0,
+    wood: 0,
+    stone: 0,
+    iron: 0,
+  });
+  assert.equal(pollResponse.body.resource_ledger.resource_stock_by_id.food, 300);
   assert.equal(
     pollResponse.body.events.some((event) => event.content_key === "event.world.gather_completed"),
     true,

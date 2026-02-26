@@ -7,11 +7,15 @@ import {
   type PostSettlementBuildingUpgradeResponseDto,
 } from "../../modules/buildings";
 import {
+  DeterministicSettlementResourceLedgerService,
+  InMemoryFirstSliceEconomyTickStateRepository,
   DeterministicSettlementResourceProjectionService,
   POST_SETTLEMENT_TICK_ROUTE,
   SettlementTickEndpointHandler,
+  type FirstSliceEconomyTickStateRepository,
   type PostSettlementTickRequestDto,
   type PostSettlementTickResponseDto,
+  type SettlementResourceLedgerService,
   type SettlementResourceProjectionService,
 } from "../../modules/economy";
 import {
@@ -159,6 +163,8 @@ export interface FirstSliceSettlementLoopTransportHandlers {
 
 export interface DeterministicFirstSliceSettlementLoopLocalRpcTransportOptions {
   readonly projection_service?: SettlementResourceProjectionService;
+  readonly settlement_resource_ledger_service?: SettlementResourceLedgerService;
+  readonly economy_tick_state_repository?: FirstSliceEconomyTickStateRepository;
   readonly building_upgrade_command_handler?: FirstSliceBuildingUpgradeCommandHandler;
   readonly unit_train_command_handler?: FirstSliceUnitTrainCommandHandler;
   readonly world_map_lifecycle_scheduler_service?: WorldMapLifecycleSchedulerService;
@@ -237,6 +243,19 @@ export const createFirstSliceSettlementLoopLocalRpcTransport = (
 export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
   options?: DeterministicFirstSliceSettlementLoopLocalRpcTransportOptions,
 ): FirstSliceSettlementLoopLocalRpcTransport => {
+  const projectionService =
+    options?.projection_service ?? new DeterministicSettlementResourceProjectionService();
+  const economyTickStateRepository =
+    options?.economy_tick_state_repository
+    ?? new InMemoryFirstSliceEconomyTickStateRepository();
+  const settlementResourceLedgerService =
+    options?.settlement_resource_ledger_service
+    ?? new DeterministicSettlementResourceLedgerService(
+      economyTickStateRepository,
+      {
+        projection_service: projectionService,
+      },
+    );
   const worldMapLifecycleStateRepository =
     options?.world_map_lifecycle_state_repository
     ?? new InMemoryWorldMapLifecycleStateRepository([
@@ -281,6 +300,9 @@ export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
     ?? new DeterministicWorldMapNeutralGatheringService(
       worldMapNeutralNodeStateRepository,
       worldMapGatherMarchStateRepository,
+      {
+        settlement_resource_ledger_service: settlementResourceLedgerService,
+      },
     );
   if (
     options?.world_map_neutral_gathering_service === undefined
@@ -292,9 +314,7 @@ export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
   }
 
   return createFirstSliceSettlementLoopLocalRpcTransport({
-    tick: new SettlementTickEndpointHandler(
-      options?.projection_service ?? new DeterministicSettlementResourceProjectionService(),
-    ),
+    tick: new SettlementTickEndpointHandler(projectionService),
     building_upgrade: new SettlementBuildingUpgradeEndpointHandler(
       options?.building_upgrade_command_handler
       ?? new DeterministicFirstSliceBuildingUpgradeCommandHandler(),

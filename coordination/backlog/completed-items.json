@@ -5214,5 +5214,43 @@
     "runtime_seconds": 255.91,
     "started_at": "2026-02-26T18:50:23.834758+00:00",
     "finished_at": "2026-02-26T18:54:39.744583+00:00"
+  },
+  {
+    "id": "RK-HUMAN-0001-F04-F01",
+    "title": "Expose neutral gathering and ambush resolution through backend transport route",
+    "description": "Wire `DeterministicWorldMapNeutralGatheringService` into a transport-facing world-map route so clients can dispatch gather marches and poll deterministic resolution payloads/events without direct module invocation.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F04"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Transport exposes a stable gather command contract that starts gather marches against seeded neutral nodes.",
+      "Transport exposes a deterministic gather resolution/poll contract returning gather and ambush event payloads.",
+      "Failures for unknown/depleted nodes and duplicate march IDs return stable error codes."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T18:34:09.314474+00:00",
+    "updated_at": "2026-02-26T19:02:40.619119+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/ilya-fen/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-HUMAN-0001-F04",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "88ecbb58827edf2fef75591729f94071754f56b7",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 472.17,
+    "started_at": "2026-02-26T18:54:46.589869+00:00",
+    "finished_at": "2026-02-26T19:02:38.751150+00:00"
   }
 ]

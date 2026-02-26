@@ -74,6 +74,13 @@ test("POST /world-map/gather-marches/{marchId}/poll returns deterministic gather
   assert.equal(resolved.march_state, "gather_march_resolved");
   assert.equal(resolved.ambush.ambush_triggered, true);
   assert.equal(resolved.ambush.outcome, "ambush_intercepted");
+  assert.deepStrictEqual(resolved.resource_ledger.resource_delta_by_id, {
+    food: 0,
+    wood: 0,
+    stone: 0,
+    iron: 0,
+  });
+  assert.equal(resolved.resource_ledger.resource_stock_by_id.food, 300);
   assert.deepStrictEqual(
     resolved.events.map((event) => event.content_key),
     [

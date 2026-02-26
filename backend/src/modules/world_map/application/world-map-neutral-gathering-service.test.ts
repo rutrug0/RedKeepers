@@ -134,6 +134,18 @@ test("gather loop resolves deterministic ambush outcomes and emits required even
     ],
   );
   assert.deepEqual(resolvedLowEscort.gathered_yield, []);
+  assert.deepEqual(resolvedLowEscort.resource_ledger.resource_delta_by_id, {
+    food: 0,
+    wood: 0,
+    stone: 0,
+    iron: 0,
+  });
+  assert.deepEqual(resolvedLowEscort.resource_ledger.resource_stock_by_id, {
+    food: 300,
+    wood: 260,
+    stone: 220,
+    iron: 140,
+  });
 
   service.startGatherMarch({
     world_id: "world_gather",
@@ -156,6 +168,13 @@ test("gather loop resolves deterministic ambush outcomes and emits required even
   assert.deepEqual(resolvedHighEscort.gathered_yield, [
     { resource_id: "food", amount: 120 },
   ]);
+  assert.deepEqual(resolvedHighEscort.resource_ledger.resource_delta_by_id, {
+    food: 120,
+    wood: 0,
+    stone: 0,
+    iron: 0,
+  });
+  assert.equal(resolvedHighEscort.resource_ledger.resource_stock_by_id.food, 420);
   assert.ok(
     resolvedHighEscort.events.some(
       (event) => event.content_key === "event.world.gather_completed",
@@ -175,4 +194,116 @@ test("gather loop resolves deterministic ambush outcomes and emits required even
     },
     (error) => error instanceof WorldMapNeutralNodeDepletedError,
   );
+});
+
+test("intercepted gather applies deterministic reduced haul based on configured multiplier", () => {
+  const nodeRepository = new InMemoryWorldMapNeutralNodeStateRepository();
+  const marchRepository = new InMemoryWorldMapGatherMarchStateRepository();
+  const service = new DeterministicWorldMapNeutralGatheringService(
+    nodeRepository,
+    marchRepository,
+    {
+      ambush_intercept_yield_multiplier: 0.5,
+    },
+  );
+
+  service.spawnNeutralNodes({
+    world_id: "world_gather_half_haul",
+    world_seed: "seed_gather_half_haul",
+    map_size: 16,
+    spawn_table: [
+      {
+        node_type: "neutral_node_forage",
+        node_label: "Forager's Grove",
+        spawn_count: 1,
+        yield_ranges: [{ resource_id: "food", min_amount: 120, max_amount: 120 }],
+        gather_duration_seconds: 30,
+        ambush_risk_pct: 100,
+        ambush_base_strength: 20,
+        depletion_cycles: 2,
+      },
+    ],
+  });
+
+  service.startGatherMarch({
+    world_id: "world_gather_half_haul",
+    world_seed: "seed_gather_half_haul",
+    march_id: "march_half_haul",
+    settlement_id: "settlement_alpha",
+    node_id: "neutral_node_forage_1",
+    departed_at: new Date("2026-02-26T10:00:00.000Z"),
+    travel_seconds_per_leg: 30,
+    escort_strength: 0,
+  });
+
+  const resolved = service.advanceGatherMarch({
+    march_id: "march_half_haul",
+    observed_at: new Date("2026-02-26T10:02:00.000Z"),
+  });
+
+  assert.equal(resolved.ambush.outcome, "ambush_intercepted");
+  assert.deepEqual(resolved.gathered_yield, [{ resource_id: "food", amount: 60 }]);
+  assert.deepEqual(resolved.resource_ledger.resource_delta_by_id, {
+    food: 60,
+    wood: 0,
+    stone: 0,
+    iron: 0,
+  });
+  assert.equal(resolved.resource_ledger.resource_stock_by_id.food, 360);
+});
+
+test("gather resolution keeps event payloads and ledger deltas deterministic for identical inputs", () => {
+  const runScenario = () => {
+    const nodeRepository = new InMemoryWorldMapNeutralNodeStateRepository();
+    const marchRepository = new InMemoryWorldMapGatherMarchStateRepository();
+    const service = new DeterministicWorldMapNeutralGatheringService(
+      nodeRepository,
+      marchRepository,
+      {
+        ambush_intercept_yield_multiplier: 0.5,
+      },
+    );
+
+    service.spawnNeutralNodes({
+      world_id: "world_deterministic",
+      world_seed: "seed_deterministic",
+      map_size: 16,
+      spawn_table: [
+        {
+          node_type: "neutral_node_forage",
+          node_label: "Forager's Grove",
+          spawn_count: 1,
+          yield_ranges: [{ resource_id: "food", min_amount: 120, max_amount: 120 }],
+          gather_duration_seconds: 30,
+          ambush_risk_pct: 100,
+          ambush_base_strength: 20,
+          depletion_cycles: 2,
+        },
+      ],
+    });
+
+    service.startGatherMarch({
+      world_id: "world_deterministic",
+      world_seed: "seed_deterministic",
+      march_id: "march_deterministic",
+      settlement_id: "settlement_alpha",
+      army_name: "Foragers",
+      node_id: "neutral_node_forage_1",
+      departed_at: new Date("2026-02-26T10:00:00.000Z"),
+      travel_seconds_per_leg: 30,
+      escort_strength: 0,
+    });
+
+    return service.advanceGatherMarch({
+      march_id: "march_deterministic",
+      observed_at: new Date("2026-02-26T10:02:00.000Z"),
+    });
+  };
+
+  const first = runScenario();
+  const second = runScenario();
+
+  assert.deepEqual(first.events, second.events);
+  assert.deepEqual(first.gathered_yield, second.gathered_yield);
+  assert.deepEqual(first.resource_ledger, second.resource_ledger);
 });

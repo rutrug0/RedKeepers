@@ -43,6 +43,25 @@ export interface WorldMapGatherYieldRange {
   readonly max_amount: number;
 }
 
+export const WORLD_MAP_FIRST_SLICE_RESOURCE_IDS = [
+  "food",
+  "wood",
+  "stone",
+  "iron",
+] as const;
+
+export type WorldMapFirstSliceResourceId =
+  (typeof WORLD_MAP_FIRST_SLICE_RESOURCE_IDS)[number];
+
+export type WorldMapFirstSliceResourceValueById = Readonly<
+  Record<WorldMapFirstSliceResourceId, number>
+>;
+
+export interface WorldMapResourceLedgerSummary {
+  readonly resource_delta_by_id: WorldMapFirstSliceResourceValueById;
+  readonly resource_stock_by_id: WorldMapFirstSliceResourceValueById;
+}
+
 export interface WorldMapNeutralNodeSpawnTableRow {
   readonly node_type: string;
   readonly node_label: string;
@@ -115,6 +134,7 @@ export interface WorldMapNeutralGatheringResolutionResponseDto {
   readonly observed_at: Date;
   readonly resolved_at?: Date;
   readonly gathered_yield: readonly WorldMapGatherYieldOutput[];
+  readonly resource_ledger: WorldMapResourceLedgerSummary;
   readonly ambush: WorldMapAmbushSummary;
   readonly events: readonly WorldMapNeutralGatherEvent[];
 }
