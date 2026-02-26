@@ -545,6 +545,9 @@
     "march_arrived",
     "combat_resolved",
   ]);
+  const worldMapHostileHeroRuntimePayloadOrder = Object.freeze([
+    "hero_attached",
+  ]);
   const heroDispatchUnlockGateV1 = Object.freeze({
     min_settlement_level: 4,
     min_barracks_level: 2,
@@ -1928,6 +1931,64 @@
       });
     }
   };
+  const resolveHostileHeroRuntimePayloadRows = (response) => {
+    const runtimePayloads = Array.isArray(response?.hero_runtime_payloads)
+      ? response.hero_runtime_payloads
+      : [];
+    if (runtimePayloads.length < 1) {
+      return [];
+    }
+
+    const orderByPayloadKey = {};
+    worldMapHostileHeroRuntimePayloadOrder.forEach((payloadKey, index) => {
+      orderByPayloadKey[payloadKey] = index;
+    });
+
+    return runtimePayloads
+      .map((payload, index) => {
+        if (!payload || typeof payload.content_key !== "string") {
+          return null;
+        }
+        const payloadKeyValue = String(payload.payload_key || "").trim();
+        const payloadKey = payloadKeyValue.length > 0 ? payloadKeyValue : `runtime_${index + 1}`;
+        return {
+          payload_key: payloadKey,
+          content_key: payload.content_key,
+          tokens: payload.tokens || {},
+          occurred_at: payload.occurred_at,
+          order_index: index,
+        };
+      })
+      .filter(Boolean)
+      .sort((left, right) => {
+        const leftOrder = Object.prototype.hasOwnProperty.call(orderByPayloadKey, left.payload_key)
+          ? orderByPayloadKey[left.payload_key]
+          : Number.MAX_SAFE_INTEGER;
+        const rightOrder = Object.prototype.hasOwnProperty.call(orderByPayloadKey, right.payload_key)
+          ? orderByPayloadKey[right.payload_key]
+          : Number.MAX_SAFE_INTEGER;
+        if (leftOrder !== rightOrder) {
+          return leftOrder - rightOrder;
+        }
+        return left.order_index - right.order_index;
+      });
+  };
+  const appendHostileHeroRuntimePayloadEvents = (runtimePayloadRows) => {
+    if (!Array.isArray(runtimePayloadRows) || runtimePayloadRows.length < 1) {
+      return;
+    }
+
+    for (const payload of runtimePayloadRows) {
+      const contentKey = mapBackendEventKeyToClientKey(payload.content_key);
+      const tokens = mapPlaceholderEventTokens(contentKey, payload.tokens || {});
+      appendEventFeedEntry({
+        contentKey,
+        tokens,
+        meta: `${formatEventMetaTimestamp(payload.occurred_at)} | World | HERO ${String(payload.payload_key || "runtime").toUpperCase()}`,
+        priority: "normal",
+      });
+    }
+  };
   const resolveSelectedHeroDispatchAttachmentContext = (marchId) => {
     const selectedHero = resolveSelectedWorldMapDispatchHero();
     if (!resolveHeroDispatchUnlockState() || !selectedHero || selectedHero.readiness_state !== "ready") {
@@ -1946,65 +2007,30 @@
       cooldown_s: Number(selectedHero.cooldown_s) || 0,
     };
   };
-  const applyAcceptedHeroDispatchAttachment = (heroDispatchContext) => {
-    if (!heroDispatchContext) {
+  const resolveAcceptedHeroDispatchAttachment = (response) => {
+    const backendAttachment = response?.hero_attachment;
+    if (!backendAttachment || typeof backendAttachment !== "object") {
       return null;
     }
 
-    const roster = getWorldMapHeroDispatchRoster();
-    const hero = roster.find((candidate) => candidate.hero_id === heroDispatchContext.hero_id);
-    if (!hero || hero.readiness_state !== "ready") {
+    const heroId = String(backendAttachment.hero_id || "").trim();
+    if (heroId.length < 1) {
       return null;
     }
 
-    const cooldownEndsAt = new Date(
-      Date.now() + Math.max(1, Number(heroDispatchContext.cooldown_s) || 0) * 1000,
-    ).toISOString();
-    hero.readiness_state = "on_cooldown";
-    hero.cooldown_ends_at = cooldownEndsAt;
     worldMapActionRuntime.hero_dispatch.selected_hero_id = null;
+    const rosterHero = getWorldMapHeroDispatchRoster().find((candidate) => candidate.hero_id === heroId);
 
-    const sharedKeyRows = [
-      {
-        contentKey: "event.hero.assigned",
-        tokens: {
-          hero_id: heroDispatchContext.hero_id,
-          assignment_context_type: "army",
-          assignment_context_id: heroDispatchContext.assignment_context_id,
-        },
-      },
-      {
-        contentKey: "event.hero.ability_activated",
-        tokens: {
-          hero_id: heroDispatchContext.hero_id,
-          ability_id: heroDispatchContext.ability_id,
-          assignment_context_type: "army",
-          assignment_context_id: heroDispatchContext.assignment_context_id,
-          cooldown_ends_at: cooldownEndsAt,
-        },
-      },
-    ];
-    for (const row of sharedKeyRows) {
-      appendEventFeedEntry({
-        contentKey: row.contentKey,
-        tokens: row.tokens,
-        meta: "Just now | World | HERO runtime",
-        priority: "normal",
-      });
-    }
-    scheduleWorldMapHeroCooldownRefresh();
-
+    const assignmentContextTypeValue = String(backendAttachment.assignment_context_type || "army").trim();
     return {
-      hero_id: heroDispatchContext.hero_id,
-      hero_name: heroDispatchContext.hero_name,
-      ability_id: heroDispatchContext.ability_id,
-      ability_name: heroDispatchContext.ability_name,
-      assignment_context_type: "army",
-      assignment_context_id: heroDispatchContext.assignment_context_id,
-      cooldown_ends_at: cooldownEndsAt,
-      shared_event_keys: ["event.hero.assigned", "event.hero.ability_activated"],
-      modifier_deltas: [...heroDispatchContext.modifier_deltas],
-      modifier_delta_summary: heroDispatchContext.modifier_delta_summary,
+      player_id: String(backendAttachment.player_id || "").trim(),
+      hero_id: heroId,
+      hero_name: rosterHero?.display_name || heroId,
+      assignment_id: String(backendAttachment.assignment_id || "").trim(),
+      assignment_context_type: assignmentContextTypeValue.length > 0 ? assignmentContextTypeValue : "army",
+      assignment_context_id: String(backendAttachment.assignment_context_id || "").trim(),
+      attached_at: backendAttachment.attached_at || null,
+      detached_at: backendAttachment.detached_at || null,
     };
   };
 
@@ -2045,7 +2071,9 @@
     }
 
     worldMapActionRuntime.completed_attacks += 1;
-    const heroDispatchAttachment = applyAcceptedHeroDispatchAttachment(context?.hero_dispatch_context || null);
+    const heroRuntimePayloadRows = resolveHostileHeroRuntimePayloadRows(response);
+    const heroDispatchAttachment = resolveAcceptedHeroDispatchAttachment(response);
+    appendHostileHeroRuntimePayloadEvents(heroRuntimePayloadRows);
     appendHostileDispatchLifecycleEvents(response);
     const resolvedPayloads = response?.event_payloads || {};
     const primaryOutcomePayload =
@@ -2074,6 +2102,7 @@
       losses: response?.losses || null,
       snapshot: context?.snapshot || null,
       hero_dispatch_attachment: heroDispatchAttachment,
+      hero_runtime_payloads: heroRuntimePayloadRows,
       updated_at: new Date().toISOString(),
     };
     setLastActionOutcome("attack", response, outcomeContentKey, outcomeTokens);
@@ -2293,7 +2322,6 @@
         target_tile_label: targetTileLabel,
         target_settlement_id: targetSettlementId,
         snapshot: latestMarchSnapshot,
-        hero_dispatch_context: heroDispatchContext,
       });
     } catch (error) {
       if (actionType === "scout") {
@@ -2828,7 +2856,7 @@
         return `
           <section class="subpanel compact">
             <h3>Hostile Dispatch Outcome</h3>
-            <p class="subpanel-note">Dispatch path uses backend payload keys only: dispatch_sent -> march_arrived -> combat_resolved.</p>
+            <p class="subpanel-note">Dispatch path uses backend payload rows only: dispatch_sent -> march_arrived -> combat_resolved (+ ordered hero runtime rows when present).</p>
             <div class="wire-empty">Select the hostile settlement marker and dispatch one march to view lifecycle + combat results.</div>
           </section>
         `;
@@ -2887,29 +2915,45 @@
       const snapshotDistanceTiles = Number(snapshot?.authoritative_position?.distance_tiles) || 0;
       const snapshotTravelState = snapshot?.march_state || "march_state_unknown";
       const heroDispatchAttachment = hostileDispatchOutcome.hero_dispatch_attachment || null;
-      const heroModifierRows = heroDispatchAttachment
-        ? (heroDispatchAttachment.modifier_deltas || [])
-          .map((delta) => `<li>${escapeHtml(delta)}</li>`)
-          .join("")
-        : "";
-      const heroSharedKeyRows = heroDispatchAttachment
-        ? (heroDispatchAttachment.shared_event_keys || [])
-          .map((key) => `<li><code>${escapeHtml(key)}</code></li>`)
-          .join("")
-        : "";
-      const heroImpactSection = heroDispatchAttachment
+      const heroRuntimePayloadRows = Array.isArray(hostileDispatchOutcome.hero_runtime_payloads)
+        ? hostileDispatchOutcome.hero_runtime_payloads
+        : [];
+      const heroRuntimeRows = heroRuntimePayloadRows
+        .map((payload) => {
+          if (!payload || typeof payload.content_key !== "string") {
+            return "";
+          }
+          const contentKey = mapBackendEventKeyToClientKey(payload.content_key);
+          const narrative = getNarrativeText(
+            contentKey,
+            mapPlaceholderEventTokens(contentKey, payload.tokens || {}),
+          );
+          return `<li><code>${escapeHtml(payload.payload_key || "runtime")}</code> - ${escapeHtml(narrative)}</li>`;
+        })
+        .filter((row) => row.length > 0)
+        .join("");
+      const heroAttachmentMetaSection = heroDispatchAttachment
         ? `
-          <div class="hero-impact-block" data-content-key="event.hero.ability_activated">
-            <p class="hero-impact-title">Hero Modifier Delta</p>
-            <p class="subpanel-note">${escapeHtml(heroDispatchAttachment.modifier_delta_summary || "Shared modifier deltas applied.")}</p>
+          <div class="wire-fields">
+            <div><span>Hero</span><strong>${escapeHtml(heroDispatchAttachment.hero_name || heroDispatchAttachment.hero_id || "hero_unknown")}</strong></div>
+            <div><span>Player</span><strong>${escapeHtml(heroDispatchAttachment.player_id || "player_unknown")}</strong></div>
+            <div><span>Assignment</span><strong>${escapeHtml(heroDispatchAttachment.assignment_id || "assignment_unknown")}</strong></div>
+            <div><span>Context</span><strong>${escapeHtml(`${heroDispatchAttachment.assignment_context_type || "army"}:${heroDispatchAttachment.assignment_context_id || "context_unknown"}`)}</strong></div>
+            <div><span>Attached At</span><strong>${escapeHtml(formatEventMetaTimestamp(heroDispatchAttachment.attached_at))}</strong></div>
+          </div>
+        `
+        : `<p class="subpanel-note">No hero attachment metadata returned for this dispatch.</p>`;
+      const heroImpactSection = heroDispatchAttachment || heroRuntimeRows.length > 0
+        ? `
+          <div class="hero-impact-block" data-content-key="event.hero.assigned">
+            <p class="hero-impact-title">Hero Attachment Metadata</p>
+            ${heroAttachmentMetaSection}
+            <p class="hero-impact-title">Hero Runtime Payload Rows</p>
             <div class="wire-fields">
-              <div><span>Hero</span><strong>${escapeHtml(heroDispatchAttachment.hero_name || heroDispatchAttachment.hero_id)}</strong></div>
-              <div><span>Ability</span><strong>${escapeHtml(heroDispatchAttachment.ability_name || heroDispatchAttachment.ability_id)}</strong></div>
-              <div><span>Cooldown Ends</span><strong>${escapeHtml(formatEventMetaTimestamp(heroDispatchAttachment.cooldown_ends_at))}</strong></div>
+              <div><span>Expected Order</span><strong>${escapeHtml(worldMapHostileHeroRuntimePayloadOrder.join(" -> "))}</strong></div>
+              <div><span>Rows Returned</span><strong>${escapeHtml(String(heroRuntimePayloadRows.length))}</strong></div>
             </div>
-            <ul class="hero-preview-list">${heroModifierRows || "<li>No modifier rows available.</li>"}</ul>
-            <p class="hero-impact-title">Shared Event Keys</p>
-            <ul class="hero-shared-key-list">${heroSharedKeyRows || "<li><code>event.hero.ability_activated</code></li>"}</ul>
+            <ul class="hero-shared-key-list">${heroRuntimeRows || "<li>No hero runtime payload rows returned.</li>"}</ul>
           </div>
         `
         : "";

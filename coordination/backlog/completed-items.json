@@ -5791,5 +5791,45 @@
     "runtime_seconds": 586.97,
     "started_at": "2026-02-26T20:22:12.715658+00:00",
     "finished_at": "2026-02-26T20:31:59.673726+00:00"
+  },
+  {
+    "id": "RK-HUMAN-0001-F03-F02-F01",
+    "title": "Wire hero attachment payload + runtime keys through hostile attack transport",
+    "description": "Extend `POST /world-map/settlements/{targetSettlementId}/attack` contracts to accept optional hero attachment fields and return deterministic hero attachment metadata/event rows so frontend hero feedback can rely on backend-owned runtime payloads instead of local mock composition.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F03-F02"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "World-map hostile attack endpoint accepts optional `player_id`, `hero_id`, `hero_target_scope`, and `hero_assignment_context_id` without breaking no-hero dispatch behavior",
+      "Accepted hostile dispatch responses include stable hero attachment metadata (or explicit null) and preserve deterministic lifecycle payload ordering",
+      "Hero-related failure codes (`feature_not_in_slice`, `hero_unavailable`, `hero_already_assigned`, `hero_target_scope_mismatch`) are surfaced consistently through hostile dispatch contract responses"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T20:32:01.130977+00:00",
+    "updated_at": "2026-02-26T20:41:17.176616+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "`agents/ilya-fen/outbox.json` has been updated with this run summary and one follow-up `proposed_work_items` entry for frontend consumption of backend hero payloads.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-HUMAN-0001-F03-F02",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "11d1bad121a5d2279607f9345f88dd15e21dbfca",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 548.56,
+    "started_at": "2026-02-26T20:32:06.397483+00:00",
+    "finished_at": "2026-02-26T20:41:14.955638+00:00"
   }
 ]

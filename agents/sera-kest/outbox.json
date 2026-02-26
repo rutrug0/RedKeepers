@@ -576,8 +576,22 @@
                                                                 ],
                                         "validation_commands":  [
                                                                     "python tools/orchestrator.py status"
-                                                                ]
+                                        ]
                                     }
+                                ]
+    },
+    {
+        "ts":  "2026-02-26T20:46:38.4947325Z",
+        "item_id":  "RK-HUMAN-0001-F03-F02-F01-F01",
+        "status":  "completed",
+        "summary":  "Updated hostile dispatch accepted-path adaptation to consume backend-owned `hero_attachment` and `hero_runtime_payloads`, replacing local hero runtime composition in event feed/outcome rendering while preserving deterministic hostile lifecycle ordering and explicit no-hero (`hero_attachment: null`) handling.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "python -m unittest tests.test_rk_m0_0011_first_slice_loop_smoke tests.test_frontend_visual_smoke"
                                 ]
     }
 ]
