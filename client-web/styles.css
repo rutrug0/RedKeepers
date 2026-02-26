@@ -648,10 +648,26 @@ a {
   cursor: pointer;
 }
 
+.action-btn:disabled {
+  opacity: 0.66;
+  cursor: wait;
+}
+
+.settlement-action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .segment-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
+}
+
+.segment-row--dual {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .segment {
@@ -703,6 +719,24 @@ a {
   margin: 0;
   color: var(--muted);
   font-size: 0.78rem;
+}
+
+.action-outcome {
+  margin: 10px 0 0;
+  border: 1px solid var(--line-soft);
+  border-left: 4px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.015);
+  font-size: 0.85rem;
+}
+
+.action-outcome.is-success {
+  border-left-color: var(--ok);
+}
+
+.action-outcome.is-failed {
+  border-left-color: var(--danger);
 }
 
 .wire-tiles {
@@ -924,6 +958,10 @@ a:focus-visible {
 
   .segment-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .settlement-action-grid {
+    grid-template-columns: 1fr;
   }
 
   .map-side {

@@ -34,12 +34,39 @@ export interface PostWorldMapTileInteractRequestDto {
 
 export type PostWorldMapTileInteractResponseDto = WorldMapScoutSelectResponseDto;
 
+export interface PostWorldMapTileInteractAcceptedContractResponseDto
+  extends WorldMapScoutSelectResponseDto
+{
+  readonly status: "accepted";
+}
+
+export interface PostWorldMapTileInteractUnavailableTileContractResponseDto {
+  readonly status: "failed";
+  readonly flow: "world_map.scout_select_v1";
+  readonly error_code: "unavailable_tile";
+  readonly tile_id: string;
+  readonly tile_state: "tile_state_unknown";
+  readonly tile_revision: 0;
+  readonly event: {
+    readonly content_key: "event.world.scout_unavailable_tile";
+    readonly tokens: {
+      readonly target_tile_label: string;
+    };
+  };
+}
+
+export type PostWorldMapTileInteractContractResponseDto =
+  | PostWorldMapTileInteractAcceptedContractResponseDto
+  | PostWorldMapTileInteractUnavailableTileContractResponseDto;
+
 type WorldMapTileInteractValidationErrorCode =
   | "missing_settlement_id"
   | "missing_tile_id"
   | "tile_id_mismatch"
   | "interaction_type_not_supported"
   | "flow_version_not_supported";
+
+export type WorldMapTileInteractOperationErrorCode = "unavailable_tile";
 
 export class WorldMapTileInteractValidationError extends Error {
   readonly status_code = 400;
@@ -53,8 +80,35 @@ export class WorldMapTileInteractValidationError extends Error {
   }
 }
 
+export class WorldMapTileInteractOperationError extends Error {
+  readonly status_code = 409;
+
+  constructor(
+    readonly code: WorldMapTileInteractOperationErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = "WorldMapTileInteractOperationError";
+  }
+}
+
 export class WorldMapTileInteractEndpointHandler {
-  constructor(private readonly scoutSelectService: WorldMapScoutSelectService) {}
+  private readonly resolveTileAvailable: (input: {
+    readonly settlement_id: string;
+    readonly tile_id: string;
+  }) => boolean;
+
+  constructor(
+    private readonly scoutSelectService: WorldMapScoutSelectService,
+    options?: {
+      readonly resolve_tile_available?: (input: {
+        readonly settlement_id: string;
+        readonly tile_id: string;
+      }) => boolean;
+    },
+  ) {
+    this.resolveTileAvailable = options?.resolve_tile_available ?? (() => true);
+  }
 
   handlePostTileInteract(
     request: PostWorldMapTileInteractRequestDto,
@@ -110,6 +164,18 @@ export class WorldMapTileInteractEndpointHandler {
       normalizeOptionalId(request.body.assignment_context_id)
       ?? normalizeOptionalId(request.session?.assignment_context_id);
 
+    if (
+      !this.resolveTileAvailable({
+        settlement_id: settlementId,
+        tile_id: bodyTileId,
+      })
+    ) {
+      throw new WorldMapTileInteractOperationError(
+        "unavailable_tile",
+        "Requested tile is currently unavailable for scout interaction.",
+      );
+    }
+
     return this.scoutSelectService.handleScoutSelect({
       settlement_id: settlementId,
       settlement_name: request.body.settlement_name,
@@ -118,6 +184,40 @@ export class WorldMapTileInteractEndpointHandler {
       assignment_context_type: assignmentContextType,
       assignment_context_id: assignmentContextId,
     });
+  }
+
+  handlePostTileInteractContract(
+    request: PostWorldMapTileInteractRequestDto,
+  ): PostWorldMapTileInteractContractResponseDto {
+    try {
+      return {
+        status: "accepted",
+        ...this.handlePostTileInteract(request),
+      };
+    } catch (error: unknown) {
+      if (
+        error instanceof WorldMapTileInteractOperationError &&
+        error.code === "unavailable_tile"
+      ) {
+        const tileId = resolveTileIdForUnavailableTileResponse(request);
+        return {
+          status: "failed",
+          flow: "world_map.scout_select_v1",
+          error_code: "unavailable_tile",
+          tile_id: tileId,
+          tile_state: "tile_state_unknown",
+          tile_revision: 0,
+          event: {
+            content_key: "event.world.scout_unavailable_tile",
+            tokens: {
+              target_tile_label: `Frontier Tile ${tileId}`,
+            },
+          },
+        };
+      }
+
+      throw error;
+    }
   }
 }
 
@@ -152,4 +252,20 @@ function normalizeOptionalAssignmentContextType(
     return value;
   }
   return undefined;
+}
+
+function resolveTileIdForUnavailableTileResponse(
+  request: PostWorldMapTileInteractRequestDto,
+): string {
+  const bodyTileId = normalizeOptionalId(request.body.tile_id);
+  if (bodyTileId !== undefined) {
+    return bodyTileId;
+  }
+
+  const pathTileId = normalizeOptionalId(request.path.tileId);
+  if (pathTileId !== undefined) {
+    return pathTileId;
+  }
+
+  return "tile_unknown";
 }

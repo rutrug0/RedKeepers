@@ -177,7 +177,7 @@ class FrontendVisualBlockedOutcomeTests(unittest.TestCase):
             self.assertEqual(queue.active[0]["id"], "RK-TEST-FAILED")
             self.assertEqual(queue.active[0]["status"], "queued")
             self.assertEqual(queue.active[0]["retry_count"], 1)
-            self.assertEqual(queue.active[0]["last_failure_reason"], "validation failed or commit failed")
+            self.assertEqual(queue.active[0]["last_failure_reason"], "validation failed")
             self.assertEqual(run_history[-1]["result"], "failed_validation")
 
     @staticmethod

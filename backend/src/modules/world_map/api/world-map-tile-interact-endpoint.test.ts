@@ -20,6 +20,7 @@ import {
 } from "../../../app/config/seeds/v1/world-map-seed-loaders";
 import {
   WorldMapTileInteractEndpointHandler,
+  WorldMapTileInteractOperationError,
   WorldMapTileInteractValidationError,
 } from "./world-map-tile-interact-endpoint";
 
@@ -288,6 +289,81 @@ test("POST /world-map/tiles/{tileId}/interact rejects invalid route payload mism
       error instanceof WorldMapTileInteractValidationError &&
       error.code === "tile_id_mismatch",
   );
+});
+
+test("POST /world-map/tiles/{tileId}/interact maps unavailable tile to consistent error code", () => {
+  const repository = new InMemoryWorldMapTileStateRepository();
+  const service = new DeterministicWorldMapScoutSelectService(repository);
+  const endpoint = new WorldMapTileInteractEndpointHandler(service, {
+    resolve_tile_available: () => false,
+  });
+
+  assert.throws(
+    () =>
+      endpoint.handlePostTileInteract({
+        path: { tileId: "tile_0412_0198" },
+        body: {
+          settlement_id: "settlement_alpha",
+          tile_id: "tile_0412_0198",
+          interaction_type: "scout",
+          flow_version: "v1",
+        },
+      }),
+    (error: unknown) =>
+      error instanceof WorldMapTileInteractOperationError &&
+      error.code === "unavailable_tile",
+  );
+});
+
+test("POST /world-map/tiles/{tileId}/interact contract adapter returns unavailable_tile failure response", () => {
+  const repository = new InMemoryWorldMapTileStateRepository();
+  const service = new DeterministicWorldMapScoutSelectService(repository);
+  const endpoint = new WorldMapTileInteractEndpointHandler(service, {
+    resolve_tile_available: () => false,
+  });
+
+  const response = endpoint.handlePostTileInteractContract({
+    path: { tileId: "tile_0412_0198" },
+    body: {
+      settlement_id: "settlement_alpha",
+      tile_id: "tile_0412_0198",
+      interaction_type: "scout",
+      flow_version: "v1",
+    },
+  });
+
+  assert.equal(response.status, "failed");
+  if (response.status !== "failed") {
+    return;
+  }
+  assert.equal(response.error_code, "unavailable_tile");
+  assert.equal(response.flow, "world_map.scout_select_v1");
+  assert.equal(response.event.content_key, "event.world.scout_unavailable_tile");
+});
+
+test("POST /world-map/tiles/{tileId}/interact contract adapter returns accepted scout response for available tile", () => {
+  const repository = new InMemoryWorldMapTileStateRepository();
+  const service = new DeterministicWorldMapScoutSelectService(repository, {
+    resolve_unknown_tile_state: () => "tile_state_quiet",
+  });
+  const endpoint = new WorldMapTileInteractEndpointHandler(service);
+
+  const response = endpoint.handlePostTileInteractContract({
+    path: { tileId: "tile_0412_0199" },
+    body: {
+      settlement_id: "settlement_alpha",
+      tile_id: "tile_0412_0199",
+      interaction_type: "scout",
+      flow_version: "v1",
+    },
+  });
+
+  assert.equal(response.status, "accepted");
+  if (response.status !== "accepted") {
+    return;
+  }
+  assert.equal(response.interaction_outcome, "outcome_scout_dispatched");
+  assert.equal(response.event.content_key, "event.world.scout_dispatched");
 });
 
 test("fixture seed bundle can hydrate world-map repository and execute all three scout outcomes", async () => {

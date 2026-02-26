@@ -61,6 +61,7 @@ def _int_env(name: str, default: int, *, min_value: int = 0) -> int:
 
 
 AGENT_HEARTBEAT_SECONDS = _int_env("REDKEEPERS_AGENT_HEARTBEAT_SECONDS", 60, min_value=5)
+STALL_RECOVERY_COOLDOWN_SECONDS = _int_env("REDKEEPERS_STALL_RECOVERY_COOLDOWN_SECONDS", 900, min_value=0)
 BACKLOG_ID_PATTERN = re.compile(r"^RK-[A-Z0-9]+(?:-[A-Z0-9]+)*$")
 NON_ACTIONABLE_BLOCKER_REASON_PATTERN = re.compile(
     r"^(?:[-*]\s*)?(?:none|n/?a|na|null|nil|unknown|tbd|not provided|not specified|unspecified|no blocker(?: reason)?)(?:[.!])?$",
@@ -94,6 +95,7 @@ KIND_STYLE = {
     "blocked": "1;33",
     "failed": "1;31",
     "validation_failed": "1;31",
+    "commit_failed": "1;31",
     "error": "1;31",
     "commit": "1;32",
     "followups": "1;35",
@@ -198,7 +200,7 @@ def _render_event_lines(ts: str, kind: str, message: str, fields: dict[str, Any]
         head = f"{prefix} {role_label}, {agent_id or 'unassigned'}: {_with_period(summary_text)} ({result})."
         return [head, detail] if detail else [head]
 
-    if kind in {"blocked", "failed", "validation_failed", "error", "infrastructure_error"}:
+    if kind in {"blocked", "failed", "validation_failed", "commit_failed", "error", "infrastructure_error"}:
         reason = _normalize_log_text(fields.get("reason") or fields.get("error"), max_chars=260, max_sentences=2)
         if agent_id:
             line = f"{prefix} Agent {agent_id}: {_with_period(message_text)}"
@@ -748,6 +750,62 @@ def _next_auto_stall_item_id(queue: QueueManager) -> str:
         i += 1
 
 
+def _canonical_stall_snapshot(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for row in rows:
+        item_id = str(row.get("item_id", "")).strip()
+        deps_raw = row.get("blocked_dependencies", [])
+        if not item_id or not isinstance(deps_raw, list):
+            continue
+        deps = sorted({str(dep).strip() for dep in deps_raw if str(dep).strip()})
+        if not deps:
+            continue
+        normalized.append({"item_id": item_id, "blocked_dependencies": deps})
+    normalized.sort(key=lambda entry: (entry["item_id"], ",".join(entry["blocked_dependencies"])))
+    return normalized
+
+
+def _stall_snapshot_signature(snapshot: list[dict[str, Any]]) -> tuple[tuple[str, tuple[str, ...]], ...]:
+    signature: list[tuple[str, tuple[str, ...]]] = []
+    for entry in snapshot:
+        item_id = str(entry.get("item_id", "")).strip()
+        deps_raw = entry.get("blocked_dependencies", [])
+        if not item_id or not isinstance(deps_raw, list):
+            continue
+        deps = tuple(str(dep).strip() for dep in deps_raw if str(dep).strip())
+        if not deps:
+            continue
+        signature.append((item_id, deps))
+    return tuple(signature)
+
+
+def _stall_item_signature(item: dict[str, Any]) -> tuple[tuple[str, tuple[str, ...]], ...]:
+    snapshot_raw = item.get("stall_snapshot", [])
+    if not isinstance(snapshot_raw, list):
+        return ()
+    canonical = _canonical_stall_snapshot(snapshot_raw)
+    return _stall_snapshot_signature(canonical)
+
+
+def _latest_stall_recovery_timestamp(
+    queue: QueueManager,
+    *,
+    signature: tuple[tuple[str, tuple[str, ...]], ...],
+) -> datetime | None:
+    latest: datetime | None = None
+    for existing in [*queue.active, *queue.completed, *queue.blocked]:
+        if existing.get("auto_generated") != "queue_stall_recovery":
+            continue
+        if _stall_item_signature(existing) != signature:
+            continue
+        ts = _parse_iso_datetime(existing.get("updated_at")) or _parse_iso_datetime(existing.get("created_at"))
+        if ts is None:
+            continue
+        if latest is None or ts > latest:
+            latest = ts
+    return latest
+
+
 def _next_auto_refill_item_id(queue: QueueManager) -> str:
     existing_ids = {item["id"] for item in queue.active} | {item["id"] for item in queue.completed} | {item["id"] for item in queue.blocked}
     i = 1
@@ -783,14 +841,24 @@ def ensure_queue_stall_recovery_item(queue: QueueManager) -> dict[str, Any] | No
     if not stalled:
         return None
 
-    # Avoid generating duplicates if one is already open.
+    snapshot = _canonical_stall_snapshot(stalled)
+    if not snapshot:
+        return None
+    signature = _stall_snapshot_signature(snapshot)
+
+    # Avoid generating duplicates while one is already in-flight.
     for item in queue.active:
-        if item.get("status") == "queued" and item.get("auto_generated") == "queue_stall_recovery":
+        if item.get("auto_generated") != "queue_stall_recovery":
+            continue
+        if item.get("status") in {"queued", "assigned", "running", "validating"}:
             return None
 
-    blocked_dep_map = {row["item_id"]: row["blocked_dependencies"] for row in stalled if row["blocked_dependencies"]}
-    if not blocked_dep_map:
-        return None
+    if STALL_RECOVERY_COOLDOWN_SECONDS > 0:
+        latest_ts = _latest_stall_recovery_timestamp(queue, signature=signature)
+        if latest_ts is not None:
+            age_seconds = (datetime.now(timezone.utc) - latest_ts.astimezone(timezone.utc)).total_seconds()
+            if age_seconds < STALL_RECOVERY_COOLDOWN_SECONDS:
+                return None
 
     item = {
         "id": _next_auto_stall_item_id(queue),
@@ -826,7 +894,8 @@ def ensure_queue_stall_recovery_item(queue: QueueManager) -> dict[str, Any] | No
         "blocker_reason": None,
         "escalation_target": "Mara Voss",
         "auto_generated": "queue_stall_recovery",
-        "stall_snapshot": stalled,
+        "stall_snapshot": snapshot,
+        "stall_fingerprint": "|".join(f"{item_id}:{','.join(deps)}" for item_id, deps in signature),
     }
     queue.append_item(item)
     queue.save()
@@ -1754,6 +1823,59 @@ def _summarize_validation_results(validation_results: list[dict[str, Any]]) -> l
     return summaries
 
 
+def _classify_validation_or_commit_failure(validation_results: list[dict[str, Any]]) -> dict[str, str]:
+    commit_failure_commands = {"git commit", "branch check"}
+    phase = "validation"
+    detail = ""
+    for result in validation_results:
+        if not isinstance(result, dict):
+            continue
+        try:
+            exit_code = int(result.get("exit_code", 0))
+        except (TypeError, ValueError):
+            exit_code = -1
+        if exit_code == 0:
+            continue
+
+        command = str(result.get("command", "")).strip()
+        command_key = command.lower()
+        stderr_tail = _normalize_log_text(result.get("stderr_tail"), max_chars=180, max_sentences=1)
+        stdout_tail = _normalize_log_text(result.get("stdout_tail"), max_chars=180, max_sentences=1)
+        command_detail = stderr_tail or stdout_tail
+        if command:
+            detail = f"{command}: {command_detail}" if command_detail else command
+        elif command_detail:
+            detail = command_detail
+
+        if command_key in commit_failure_commands:
+            phase = "commit"
+            break
+
+    if phase == "commit":
+        return {
+            "event_kind": "commit_failed",
+            "event_message": "Commit failed",
+            "retry_reason": "commit failed",
+            "resolution_retry": "Commit failed; task requeued for retry.",
+            "resolution_escalated": "Commit repeatedly failed; task blocked and escalated.",
+            "resolution_event_message": "Task failed commit",
+            "state_error": "Commit failed",
+            "run_result": "failed_commit",
+            "reason_detail": detail,
+        }
+    return {
+        "event_kind": "validation_failed",
+        "event_message": "Validation failed",
+        "retry_reason": "validation failed",
+        "resolution_retry": "Validation failed; task requeued for retry.",
+        "resolution_escalated": "Validation repeatedly failed; task blocked and escalated.",
+        "resolution_event_message": "Task failed validation",
+        "state_error": "Validation failed",
+        "run_result": "failed_validation",
+        "reason_detail": detail,
+    }
+
+
 def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]) -> list[str]:
     commands: list[str] = []
     defaults = commit_rules.get("default_validation_commands", [])
@@ -2621,10 +2743,17 @@ def process_one(
                     },
                 )
             else:
-                emit_event("validation_failed", "Validation or commit failed", item_id=item["id"], agent_id=agent_id)
+                failure_info = _classify_validation_or_commit_failure(validation_results)
+                emit_event(
+                    failure_info["event_kind"],
+                    failure_info["event_message"],
+                    item_id=item["id"],
+                    agent_id=agent_id,
+                    reason=failure_info["reason_detail"] or None,
+                )
                 max_retries = int(policies.get("retry", {}).get("max_retries_per_item_per_agent", 2))
-                retry_count = queue.increment_retry(item["id"], "validation failed or commit failed")
-                validation_resolution = "Validation or commit failed; task requeued for retry."
+                retry_count = queue.increment_retry(item["id"], failure_info["retry_reason"])
+                validation_resolution = failure_info["resolution_retry"]
                 if retry_count > max_retries:
                     source_item = queue.get_active_item(item["id"])
                     if source_item:
@@ -2634,10 +2763,10 @@ def process_one(
                             reason="retry threshold exceeded",
                         )
                         queue.mark_blocked(item["id"], "retry threshold exceeded; escalated")
-                    validation_resolution = "Validation repeatedly failed; task blocked and escalated."
+                    validation_resolution = failure_info["resolution_escalated"]
                 emit_event(
                     "resolution",
-                    "Task failed validation",
+                    failure_info["resolution_event_message"],
                     item_id=item["id"],
                     title=item["title"],
                     agent_id=agent_id,
@@ -2655,8 +2784,8 @@ def process_one(
                 set_daemon_state(
                     state="error",
                     active_item=None,
-                    last_error=f"Validation/commit failed for {item['id']}",
-                    last_run_summary=f"{item['id']} failed validation and was requeued",
+                    last_error=f"{failure_info['state_error']} for {item['id']}",
+                    last_run_summary=f"{item['id']} failed {failure_info['retry_reason']} and was requeued",
                     lock_held=True,
                 )
                 append_jsonl(
@@ -2665,7 +2794,7 @@ def process_one(
                         "ts": utc_now_iso(),
                         "item_id": item["id"],
                         "agent_id": agent_id,
-                        "result": "failed_validation",
+                        "result": failure_info["run_result"],
                         "summary": worker.summary,
                         "validation_results": validation_results,
                         "model_requested": run_requested_model,

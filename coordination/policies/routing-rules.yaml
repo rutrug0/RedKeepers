@@ -11,7 +11,7 @@
   "dependency_unlock_priority": {
     "enabled": true,
     "critical_priority_protected": true,
-    "priority_boost_levels": 1,
+    "priority_boost_levels": 2,
     "prefer_immediate_unblocks": true
   },
   "fallback_agent": "mara-voss"

@@ -8,6 +8,7 @@ from schemas import load_json, save_json_atomic, utc_now_iso, validate_work_item
 
 
 PRIORITY_RANK = {"critical": 0, "high": 1, "normal": 2, "low": 3}
+PRIORITY_UNLOCK_WEIGHT = {"critical": 8, "high": 4, "normal": 2, "low": 1}
 
 
 class QueueManager:
@@ -57,8 +58,34 @@ class QueueManager:
         candidate_ids: set[str],
         completed_ids: set[str],
     ) -> dict[str, dict[str, int]]:
-        metrics: dict[str, dict[str, int]] = {item_id: {"total": 0, "immediate": 0} for item_id in candidate_ids}
+        metrics: dict[str, dict[str, int]] = {
+            item_id: {
+                "total": 0,
+                "immediate": 0,
+                "weighted_total": 0,
+                "weighted_immediate": 0,
+                "transitive_total": 0,
+                "weighted_transitive": 0,
+            }
+            for item_id in candidate_ids
+        }
         queued_items = [item for item in self.active if item.get("status") == "queued"]
+        by_id: dict[str, dict[str, Any]] = {}
+        dependent_index: dict[str, set[str]] = {}
+        for item in queued_items:
+            item_id = str(item.get("id", ""))
+            if not item_id:
+                continue
+            by_id[item_id] = item
+            deps_raw = item.get("dependencies", [])
+            if not isinstance(deps_raw, list):
+                continue
+            for dep in deps_raw:
+                dep_id = str(dep)
+                if not dep_id:
+                    continue
+                dependent_index.setdefault(dep_id, set()).add(item_id)
+
         for target in queued_items:
             target_id = str(target.get("id", ""))
             deps_raw = target.get("dependencies", [])
@@ -73,9 +100,33 @@ class QueueManager:
                 if dep == target_id:
                     continue
                 metrics[dep]["total"] += 1
+                priority = str(target.get("priority", "normal")).strip().lower()
+                weight = PRIORITY_UNLOCK_WEIGHT.get(priority, PRIORITY_UNLOCK_WEIGHT["normal"])
+                metrics[dep]["weighted_total"] += weight
                 other_deps = [other for other in deps if other != dep]
                 if all(other in completed_ids for other in other_deps):
                     metrics[dep]["immediate"] += 1
+                    metrics[dep]["weighted_immediate"] += weight
+
+        # Transitive fan-out: how many queued items are in the dependency chain
+        # beneath a candidate (direct + indirect descendants).
+        for candidate_id in candidate_ids:
+            visited: set[str] = set()
+            stack = list(dependent_index.get(candidate_id, set()))
+            while stack:
+                current = stack.pop()
+                if current in visited or current == candidate_id:
+                    continue
+                visited.add(current)
+                target = by_id.get(current)
+                if target:
+                    priority = str(target.get("priority", "normal")).strip().lower()
+                    weight = PRIORITY_UNLOCK_WEIGHT.get(priority, PRIORITY_UNLOCK_WEIGHT["normal"])
+                else:
+                    weight = PRIORITY_UNLOCK_WEIGHT["normal"]
+                metrics[candidate_id]["transitive_total"] += 1
+                metrics[candidate_id]["weighted_transitive"] += weight
+                stack.extend(dep for dep in dependent_index.get(current, set()) if dep not in visited)
         return metrics
 
     @staticmethod
@@ -131,7 +182,19 @@ class QueueManager:
             base_rank = PRIORITY_RANK.get(item["priority"], 99)
             unlock_total = int(unlock_metrics.get(item_id, {}).get("total", 0))
             unlock_immediate = int(unlock_metrics.get(item_id, {}).get("immediate", 0))
+            unlock_weighted_total = int(unlock_metrics.get(item_id, {}).get("weighted_total", 0))
+            unlock_weighted_immediate = int(unlock_metrics.get(item_id, {}).get("weighted_immediate", 0))
+            unlock_transitive = int(unlock_metrics.get(item_id, {}).get("transitive_total", 0))
+            unlock_weighted_transitive = int(unlock_metrics.get(item_id, {}).get("weighted_transitive", 0))
             unlock_signal = unlock_immediate if prefer_immediate else unlock_total
+            unblock_value = (
+                unlock_weighted_immediate * 12
+                + unlock_immediate * 8
+                + unlock_weighted_total * 4
+                + unlock_total * 2
+                + unlock_weighted_transitive * 2
+                + unlock_transitive
+            )
 
             effective_rank = base_rank
             if unlock_enabled and boost_levels > 0 and unlock_signal > 0:
@@ -141,6 +204,9 @@ class QueueManager:
 
             return (
                 effective_rank,
+                -unblock_value,
+                -unlock_weighted_immediate,
+                -unlock_weighted_total,
                 -unlock_immediate,
                 -unlock_total,
                 base_rank,

@@ -156,6 +156,130 @@ class QueueSchedulerPriorityTests(unittest.TestCase):
         assert selected is not None
         self.assertEqual(selected["id"], "HIGH-1")
 
+    def test_higher_unblock_value_wins_between_same_priority_candidates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            queue = QueueManager(Path(tmpdir))
+            queue.completed = []
+            queue.blocked = []
+            queue.active = [
+                {
+                    "id": "NORMAL-A",
+                    "owner_role": "design",
+                    "priority": "normal",
+                    "status": "queued",
+                    "dependencies": [],
+                    "created_at": "2026-02-25T00:00:01+00:00",
+                },
+                {
+                    "id": "NORMAL-B",
+                    "owner_role": "design",
+                    "priority": "normal",
+                    "status": "queued",
+                    "dependencies": [],
+                    "created_at": "2026-02-25T00:00:02+00:00",
+                },
+                {
+                    "id": "A-DEP-HIGH",
+                    "owner_role": "design",
+                    "priority": "high",
+                    "status": "queued",
+                    "dependencies": ["NORMAL-A"],
+                    "created_at": "2026-02-25T00:00:03+00:00",
+                },
+                {
+                    "id": "A-DEP-NORMAL",
+                    "owner_role": "design",
+                    "priority": "normal",
+                    "status": "queued",
+                    "dependencies": ["NORMAL-A"],
+                    "created_at": "2026-02-25T00:00:04+00:00",
+                },
+                {
+                    "id": "B-DEP-LOW",
+                    "owner_role": "design",
+                    "priority": "low",
+                    "status": "queued",
+                    "dependencies": ["NORMAL-B"],
+                    "created_at": "2026-02-25T00:00:05+00:00",
+                },
+            ]
+            routing = {
+                "owner_role_map": {"design": "rowan-hale"},
+                "dependency_unlock_priority": {
+                    "enabled": True,
+                    "critical_priority_protected": True,
+                    "priority_boost_levels": 2,
+                    "prefer_immediate_unblocks": True,
+                },
+            }
+
+            selected = queue.select_next(routing, _base_stats())
+
+        assert selected is not None
+        self.assertEqual(selected["id"], "NORMAL-A")
+
+    def test_transitive_unlock_value_breaks_tie(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            queue = QueueManager(Path(tmpdir))
+            queue.completed = []
+            queue.blocked = []
+            queue.active = [
+                {
+                    "id": "ROOT-A",
+                    "owner_role": "design",
+                    "priority": "normal",
+                    "status": "queued",
+                    "dependencies": [],
+                    "created_at": "2026-02-25T00:00:01+00:00",
+                },
+                {
+                    "id": "ROOT-B",
+                    "owner_role": "design",
+                    "priority": "normal",
+                    "status": "queued",
+                    "dependencies": [],
+                    "created_at": "2026-02-25T00:00:02+00:00",
+                },
+                {
+                    "id": "A-STEP-1",
+                    "owner_role": "design",
+                    "priority": "normal",
+                    "status": "queued",
+                    "dependencies": ["ROOT-A"],
+                    "created_at": "2026-02-25T00:00:03+00:00",
+                },
+                {
+                    "id": "A-STEP-2",
+                    "owner_role": "design",
+                    "priority": "high",
+                    "status": "queued",
+                    "dependencies": ["A-STEP-1"],
+                    "created_at": "2026-02-25T00:00:04+00:00",
+                },
+                {
+                    "id": "B-STEP-1",
+                    "owner_role": "design",
+                    "priority": "normal",
+                    "status": "queued",
+                    "dependencies": ["ROOT-B"],
+                    "created_at": "2026-02-25T00:00:05+00:00",
+                },
+            ]
+            routing = {
+                "owner_role_map": {"design": "rowan-hale"},
+                "dependency_unlock_priority": {
+                    "enabled": True,
+                    "critical_priority_protected": True,
+                    "priority_boost_levels": 1,
+                    "prefer_immediate_unblocks": True,
+                },
+            }
+
+            selected = queue.select_next(routing, _base_stats())
+
+        assert selected is not None
+        self.assertEqual(selected["id"], "ROOT-A")
+
 
 if __name__ == "__main__":
     unittest.main()

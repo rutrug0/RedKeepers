@@ -287,5 +287,16 @@
                                                                 ]
                                     }
                                 ]
+    },
+    {
+        "ts":  "2026-02-26T14:16:14.1643696Z",
+        "item_id":  "RK-M0-0008",
+        "status":  "completed",
+        "summary":  "Added a thin first-slice settlement action adapter in client-web so Tick/Build/Train controls call dedicated contract-stub methods, update settlement resources/queue/garrison from payloads, render success/failure outcome text, and append mapped backend event keys into the event feed.",
+        "files":  [
+                      "client-web/app.js",
+                      "client-web/styles.css",
+                      "agents/sera-kest/outbox.json"
+                  ]
     }
 ]
