@@ -246,38 +246,53 @@
     "generated_from_item_id": "RK-HUMAN-0001"
   },
   {
-    "id": "RK-M0-0012-F01-F01",
-    "title": "Replace client web local loop stubs with backend transport invocation bridge",
-    "description": "Connect `client-web` settlement action adapter calls to the new backend first-slice transport route invocations (direct bridge/dev shim) so tick/build/train/scout actions no longer rely on duplicated local simulation logic.",
+    "id": "RK-AUTO-STALL-0011",
+    "title": "Resolve queue dependency stall",
+    "description": "The daemon detected queued work items that are not dependency-ready because one or more dependencies are currently blocked. Review blocked items, requeue/close obsolete items, and restore runnable work.",
     "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-M0-0012-F01"
-    ],
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
     "inputs": [
-      "client-web/app.js",
-      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts"
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/runtime/run-history.jsonl"
     ],
     "acceptance_criteria": [
-      "Client settlement tick/build/train action calls invoke the backend transport routes and consume returned contract payloads directly.",
-      "Client world-map scout interaction path invokes backend transport route and handles unavailable_tile failure via existing event key flow.",
-      "Client-side action adapter no longer duplicates first-slice economic/build/train/scout simulation rules that now exist in backend handlers."
+      "At least one dependency-stalled queued item is made runnable or explicitly closed",
+      "Blocked/obsolete queue artifacts are documented or consolidated",
+      "Backlog no longer stalls immediately on next daemon run"
     ],
-    "validation_commands": [],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-26T15:19:43.800016+00:00",
-    "updated_at": "2026-02-26T15:30:47.705887+00:00",
+    "created_at": "2026-02-26T15:30:49.268048+00:00",
+    "updated_at": "2026-02-26T15:36:53.107302+00:00",
     "estimated_effort": "S",
-    "token_budget": 8000,
+    "token_budget": 10000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-M0-0012-F01",
-    "assigned_agent": "sera-kest"
+    "auto_generated": "queue_stall_recovery",
+    "stall_snapshot": [
+      {
+        "item_id": "RK-M0-0011",
+        "blocked_dependencies": [
+          "RK-M0-0008"
+        ]
+      },
+      {
+        "item_id": "RK-M0-0013",
+        "blocked_dependencies": [
+          "RK-M0-0008"
+        ]
+      }
+    ],
+    "stall_fingerprint": "RK-M0-0011:RK-M0-0008|RK-M0-0013:RK-M0-0008",
+    "assigned_agent": "mara-voss"
   }
 ]

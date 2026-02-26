@@ -1734,5 +1734,66 @@
             "agents/mara-voss/outbox.json"
         ],
         "proposed_work_items": []
+    },
+    {
+        "ts": "2026-02-26T15:34:22.9160468Z",
+        "item_id": "RK-AUTO-STALL-0011",
+        "status": "completed",
+        "summary": "Requeued blocked replacement `RK-M0-0008-ESC-F01`, remapped stalled M0 dependencies to it, fixed queued world-map self-dependencies, and removed obsolete escalation-chain artifacts from active blocked backlog.",
+        "queue_recovery": {
+            "requeued_item_ids": [
+                "RK-M0-0008-ESC-F01"
+            ],
+            "dependency_updates": {
+                "RK-M0-0011": {
+                    "from": "RK-M0-0008",
+                    "to": "RK-M0-0008-ESC-F01"
+                },
+                "RK-M0-0013": {
+                    "from": "RK-M0-0008",
+                    "to": "RK-M0-0008-ESC-F01"
+                }
+            },
+            "self_dependency_fixes": {
+                "RK-HUMAN-0001-F01": {
+                    "from": [
+                        "RK-HUMAN-0001-F01"
+                    ],
+                    "to": []
+                },
+                "RK-HUMAN-0001-F02": {
+                    "from": [
+                        "RK-HUMAN-0001-F02"
+                    ],
+                    "to": [
+                        "RK-HUMAN-0001-F01"
+                    ]
+                }
+            },
+            "consolidated_blocked_removed_ids": [
+                "RK-M1-0001-ESC",
+                "RK-M1-0001-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC",
+                "RK-M1-0001-ESC-ESC-ESC-ESC"
+            ]
+        },
+        "validation": {
+            "command": "python tools/orchestrator.py status",
+            "result": "pass",
+            "queue_snapshot": {
+                "queued": 8,
+                "dependency_ready": 2,
+                "running": 1,
+                "blocked": 15,
+                "completed": 98
+            },
+            "status_note": "Daemon reported existing lock file (`daemon.lock`) but status command completed and queue no longer has zero dependency-ready items."
+        },
+        "files": [
+            "coordination/backlog/work-items.json",
+            "coordination/backlog/blocked-items.json",
+            "agents/mara-voss/outbox.json"
+        ],
+        "proposed_work_items": []
     }
 ]
