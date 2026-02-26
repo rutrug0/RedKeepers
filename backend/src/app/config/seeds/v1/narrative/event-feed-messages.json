@@ -947,6 +947,415 @@
       ]
     },
     {
+      "key": "event.world.hostile_dispatch_target_required",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Select a foreign settlement tile before dispatching a hostile march.",
+      "tokens": []
+    },
+    {
+      "key": "event.world.hostile_dispatch_accepted",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}",
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] {army_name} receives the black-seal order and departs {origin_settlement_name} for {target_tile_label}.",
+      "tokens": [
+        "army_name",
+        "origin_settlement_name",
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.world.hostile_dispatch_en_route",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}",
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] {army_name} crosses killing ground toward {target_tile_label}. ETA {eta_seconds}s.",
+      "tokens": [
+        "army_name",
+        "target_tile_label",
+        "eta_seconds"
+      ]
+    },
+    {
+      "key": "event.world.hostile_dispatch_failed",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Hostile march dispatch failed ({error_code}) near {target_tile_label}: {message}",
+      "tokens": [
+        "error_code",
+        "target_tile_label",
+        "message"
+      ]
+    },
+    {
+      "key": "event.world.hostile_dispatch_failed_source_target_not_foreign",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "error_code:source_target_not_foreign"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Dispatch denied: {source_settlement_name} cannot declare hostile action against its own banner.",
+      "tokens": [
+        "source_settlement_name"
+      ]
+    },
+    {
+      "key": "event.world.hostile_dispatch_failed_max_active_marches_reached",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "error_code:max_active_marches_reached"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Dispatch denied: {source_settlement_name} has no free march slot; active columns must resolve first.",
+      "tokens": [
+        "source_settlement_name"
+      ]
+    },
+    {
+      "key": "event.world.hostile_dispatch_failed_path_blocked_impassable",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "error_code:path_blocked_impassable"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Dispatch denied: route to {target_tile_label} breaks on impassable ground.",
+      "tokens": [
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.world.hostile_dispatch_failed_march_already_exists",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "error_code:march_already_exists"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Dispatch denied: march id {march_id} already carries a standing war order.",
+      "tokens": [
+        "march_id"
+      ]
+    },
+    {
+      "key": "event.world.hostile_march_arrived_outer_works",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}",
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] {army_name} reaches {target_tile_label}; horns sound from the outer works.",
+      "tokens": [
+        "army_name",
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.world.hostile_march_arrived_gate_contested",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}",
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] {army_name} closes on the gate at {target_tile_label}; defenders form under torchlight.",
+      "tokens": [
+        "army_name",
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.combat.hostile_resolve_attacker_win",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "combat_placeholder"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}",
+        "combat_outcome:attacker_win"
+      ],
+      "event_category": "combat_placeholder",
+      "template": "[PLACEHOLDER] {army_name} breaks {target_tile_label}. The garrison is cut down and banners fall.",
+      "tokens": [
+        "army_name",
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.combat.hostile_resolve_defender_win",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "combat_placeholder"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}",
+        "combat_outcome:defender_win"
+      ],
+      "event_category": "combat_placeholder",
+      "template": "[PLACEHOLDER] {army_name} is repelled at {target_tile_label}; the walls hold through the slaughter.",
+      "tokens": [
+        "army_name",
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.combat.hostile_resolve_tie_defender_holds",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "combat_placeholder"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}",
+        "combat_outcome:defender_win"
+      ],
+      "event_category": "combat_placeholder",
+      "template": "[PLACEHOLDER] The clash at {target_tile_label} ends even in blood, but the defender keeps the gate by decree.",
+      "tokens": [
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.combat.hostile_loss_report",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "combat_placeholder"
+      ],
+      "related_ids": [
+        "unit_id:*"
+      ],
+      "event_category": "combat_placeholder",
+      "template": "[PLACEHOLDER] Casualty ledger: attacker lost {attacker_units_lost}/{attacker_units_dispatched}; defender lost {defender_garrison_lost}/{defender_strength}.",
+      "tokens": [
+        "attacker_units_lost",
+        "attacker_units_dispatched",
+        "defender_garrison_lost",
+        "defender_strength"
+      ]
+    },
+    {
+      "key": "event.combat.hostile_garrison_broken",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "combat_placeholder"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}"
+      ],
+      "event_category": "combat_placeholder",
+      "template": "[PLACEHOLDER] Garrison at {target_tile_label} is broken; no shield line remains on the wall.",
+      "tokens": [
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.combat.hostile_counterfire_heavy",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "combat_placeholder"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}"
+      ],
+      "event_category": "combat_placeholder",
+      "template": "[PLACEHOLDER] Defender volleys tear through the front rank; command marks this assault as heavy-loss.",
+      "tokens": []
+    },
+    {
+      "key": "event.world.hostile_retreat_ordered",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Retreat ordered: {army_name} withdraws from {target_tile_label} toward {settlement_name}.",
+      "tokens": [
+        "army_name",
+        "target_tile_label",
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.world.hostile_retreat_in_motion",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Survivors of {army_name} are in retreat formation; rear guard buys distance.",
+      "tokens": [
+        "army_name"
+      ]
+    },
+    {
+      "key": "event.world.hostile_retreat_completed",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Retreat complete: {army_name} reaches {settlement_name} with {attacker_units_remaining} fighters fit for duty.",
+      "tokens": [
+        "army_name",
+        "settlement_name",
+        "attacker_units_remaining"
+      ]
+    },
+    {
+      "key": "event.world.hostile_defeat_force_shattered",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:*",
+        "combat_outcome:defender_win"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Defeat at {target_tile_label}: {army_name} is shattered and combat cohesion is lost.",
+      "tokens": [
+        "target_tile_label",
+        "army_name"
+      ]
+    },
+    {
+      "key": "event.world.hostile_defeat_command_silent",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:*",
+        "combat_outcome:defender_win"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Defeat report: no further signals from {army_name}; command slate marks column missing.",
+      "tokens": [
+        "army_name"
+      ]
+    },
+    {
+      "key": "event.world.hostile_post_battle_return_started",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Post-battle return: {army_name} turns for {settlement_name} under dim watchfires.",
+      "tokens": [
+        "army_name",
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.world.hostile_post_battle_returned",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:*"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] {army_name} returns to {settlement_name}; tally survivors and prepare the next war order.",
+      "tokens": [
+        "army_name",
+        "settlement_name"
+      ]
+    },
+    {
+      "key": "event.world.hostile_foreign_settlement_spotted",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "settlement_id:{target_settlement_id}"
+      ],
+      "event_category": "world_map",
+      "template": "[PLACEHOLDER] Foreign settlement sighted: {target_tile_label}. Scout glyphs mark it hostile.",
+      "tokens": [
+        "target_tile_label"
+      ]
+    },
+    {
       "key": "event.settlement.new_settlement_founded",
       "slice_status_scope": "playable_now",
       "categories": [

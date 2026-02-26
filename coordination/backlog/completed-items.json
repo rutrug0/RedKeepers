@@ -5467,5 +5467,43 @@
     "runtime_seconds": 524.22,
     "started_at": "2026-02-26T19:37:19.857385+00:00",
     "finished_at": "2026-02-26T19:46:04.076729+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F01-F01",
+    "title": "Enforce hostile attack march cap and deterministic impassable-path validation",
+    "description": "Extend the hostile settlement attack command flow to enforce `max_active_marches` and reject blocked paths per deterministic world-map v1 phasing rules (`path_blocked_impassable`, `max_active_marches_reached`).",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Attack dispatch rejects when active march count exceeds configured cap with `error_code=max_active_marches_reached`.",
+      "Attack dispatch rejects when deterministic route crosses impassable tiles with `error_code=path_blocked_impassable`.",
+      "Deterministic acceptance/failure outcomes are covered by backend tests and exposed through transport contract responses."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:27:21.718445+00:00",
+    "updated_at": "2026-02-26T19:52:24.923979+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/ilya-fen/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "0195b2c8c7128ade93d1863f34c91fb2f1cd6ba4",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 371.23,
+    "started_at": "2026-02-26T19:46:11.852404+00:00",
+    "finished_at": "2026-02-26T19:52:23.084089+00:00"
   }
 ]

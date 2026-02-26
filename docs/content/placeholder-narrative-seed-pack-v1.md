@@ -39,6 +39,19 @@ Primary references:
 | `starter_settlement_name.graveforge_03` | `starter_settlement_name_pool` | `graveforge_clans` | `balance_stub` | Tithe Quarry | Clan-industry tone |
 | `starter_settlement_name.graveforge_04` | `starter_settlement_name_pool` | `graveforge_clans` | `balance_stub` | Chain Anvil | Forge-war host tone |
 
+## 2A. Foreign Settlement Label Pool (Hostile Placeholder)
+
+All entries in this section are explicit replaceable placeholders for M0/M1 map marker labels.
+
+| key | category | slice_status_scope | settlement_label | notes |
+| --- | --- | --- | --- | --- |
+| `foreign_settlement_label.hostile_01` | `foreign_settlement_label_pool` | `playable_now` | Ruin Holdfast | Primary hostile fixture label in first-slice combat tests |
+| `foreign_settlement_label.hostile_02` | `foreign_settlement_label_pool` | `playable_now` | Gallows Wake | Roadside raider encampment tone |
+| `foreign_settlement_label.hostile_03` | `foreign_settlement_label_pool` | `playable_now` | Cinder Maw | Burned strongpoint tone |
+| `foreign_settlement_label.hostile_04` | `foreign_settlement_label_pool` | `playable_now` | Iron Ossuary | Bone/iron citadel tone |
+| `foreign_settlement_label.hostile_05` | `foreign_settlement_label_pool` | `playable_now` | Thorn Toll | Frontier extortion post tone |
+| `foreign_settlement_label.hostile_06` | `foreign_settlement_label_pool` | `playable_now` | Ash Pallisade | Fortified outer-wall tone |
+
 ## 3. Optional Placeholder Flavor Labels (Units/Buildings)
 
 These are replaceable text overlays for tooltips/cards. Do not replace stable IDs or base table `display_name` values in data.
@@ -108,6 +121,37 @@ These are replaceable text overlays for tooltips/cards. Do not replace stable ID
 | `event.combat.placeholder_skirmish_loss` | `combat_placeholder` | `unit_id:*` | `playable_now` | `{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.` |
 | `event.settlement.new_settlement_founded` | `settlement` | `civ_id:{civ_id}` | `playable_now` | `A new holding is founded: {settlement_name}. Tents, stores, and watchfires are raised before dusk.` |
 | `event.settlement.name_assigned` | `settlement` | `category:starter_settlement_name_pool` | `playable_now` | `Surveyors record the new holding as {settlement_name}. The name enters the ledger.` |
+
+### Hostile Loop Placeholder Copy Pack (Map Dispatch + Combat)
+
+All templates below are explicit replaceable placeholder copy for the first-slice hostile loop.
+
+| key | event_category | related_ids | slice_status_scope | template |
+| --- | --- | --- | --- | --- |
+| `event.world.hostile_dispatch_target_required` | `world_map` | `settlement_id:{target_settlement_id}` | `playable_now` | `[PLACEHOLDER] Select a foreign settlement tile before dispatching a hostile march.` |
+| `event.world.hostile_dispatch_accepted` | `world_map` | `settlement_id:{target_settlement_id};unit_id:*` | `playable_now` | `[PLACEHOLDER] {army_name} receives the black-seal order and departs {origin_settlement_name} for {target_tile_label}.` |
+| `event.world.hostile_dispatch_en_route` | `world_map` | `settlement_id:{target_settlement_id};unit_id:*` | `playable_now` | `[PLACEHOLDER] {army_name} crosses killing ground toward {target_tile_label}. ETA {eta_seconds}s.` |
+| `event.world.hostile_dispatch_failed` | `world_map` | `settlement_id:{target_settlement_id}` | `playable_now` | `[PLACEHOLDER] Hostile march dispatch failed ({error_code}) near {target_tile_label}: {message}` |
+| `event.world.hostile_dispatch_failed_source_target_not_foreign` | `world_map` | `error_code:source_target_not_foreign` | `playable_now` | `[PLACEHOLDER] Dispatch denied: {source_settlement_name} cannot declare hostile action against its own banner.` |
+| `event.world.hostile_dispatch_failed_max_active_marches_reached` | `world_map` | `error_code:max_active_marches_reached` | `playable_now` | `[PLACEHOLDER] Dispatch denied: {source_settlement_name} has no free march slot; active columns must resolve first.` |
+| `event.world.hostile_dispatch_failed_path_blocked_impassable` | `world_map` | `error_code:path_blocked_impassable` | `playable_now` | `[PLACEHOLDER] Dispatch denied: route to {target_tile_label} breaks on impassable ground.` |
+| `event.world.hostile_dispatch_failed_march_already_exists` | `world_map` | `error_code:march_already_exists` | `playable_now` | `[PLACEHOLDER] Dispatch denied: march id {march_id} already carries a standing war order.` |
+| `event.world.hostile_march_arrived_outer_works` | `world_map` | `settlement_id:{target_settlement_id};unit_id:*` | `playable_now` | `[PLACEHOLDER] {army_name} reaches {target_tile_label}; horns sound from the outer works.` |
+| `event.world.hostile_march_arrived_gate_contested` | `world_map` | `settlement_id:{target_settlement_id};unit_id:*` | `playable_now` | `[PLACEHOLDER] {army_name} closes on the gate at {target_tile_label}; defenders form under torchlight.` |
+| `event.combat.hostile_resolve_attacker_win` | `combat_placeholder` | `settlement_id:{target_settlement_id};combat_outcome:attacker_win` | `playable_now` | `[PLACEHOLDER] {army_name} breaks {target_tile_label}. The garrison is cut down and banners fall.` |
+| `event.combat.hostile_resolve_defender_win` | `combat_placeholder` | `settlement_id:{target_settlement_id};combat_outcome:defender_win` | `playable_now` | `[PLACEHOLDER] {army_name} is repelled at {target_tile_label}; the walls hold through the slaughter.` |
+| `event.combat.hostile_resolve_tie_defender_holds` | `combat_placeholder` | `settlement_id:{target_settlement_id};combat_outcome:defender_win` | `playable_now` | `[PLACEHOLDER] The clash at {target_tile_label} ends even in blood, but the defender keeps the gate by decree.` |
+| `event.combat.hostile_loss_report` | `combat_placeholder` | `unit_id:*` | `playable_now` | `[PLACEHOLDER] Casualty ledger: attacker lost {attacker_units_lost}/{attacker_units_dispatched}; defender lost {defender_garrison_lost}/{defender_strength}.` |
+| `event.combat.hostile_garrison_broken` | `combat_placeholder` | `settlement_id:{target_settlement_id}` | `playable_now` | `[PLACEHOLDER] Garrison at {target_tile_label} is broken; no shield line remains on the wall.` |
+| `event.combat.hostile_counterfire_heavy` | `combat_placeholder` | `settlement_id:{target_settlement_id}` | `playable_now` | `[PLACEHOLDER] Defender volleys tear through the front rank; command marks this assault as heavy-loss.` |
+| `event.world.hostile_retreat_ordered` | `world_map` | `unit_id:*` | `playable_now` | `[PLACEHOLDER] Retreat ordered: {army_name} withdraws from {target_tile_label} toward {settlement_name}.` |
+| `event.world.hostile_retreat_in_motion` | `world_map` | `unit_id:*` | `playable_now` | `[PLACEHOLDER] Survivors of {army_name} are in retreat formation; rear guard buys distance.` |
+| `event.world.hostile_retreat_completed` | `world_map` | `unit_id:*` | `playable_now` | `[PLACEHOLDER] Retreat complete: {army_name} reaches {settlement_name} with {attacker_units_remaining} fighters fit for duty.` |
+| `event.world.hostile_defeat_force_shattered` | `world_map` | `unit_id:*;combat_outcome:defender_win` | `playable_now` | `[PLACEHOLDER] Defeat at {target_tile_label}: {army_name} is shattered and combat cohesion is lost.` |
+| `event.world.hostile_defeat_command_silent` | `world_map` | `unit_id:*;combat_outcome:defender_win` | `playable_now` | `[PLACEHOLDER] Defeat report: no further signals from {army_name}; command slate marks column missing.` |
+| `event.world.hostile_post_battle_return_started` | `world_map` | `unit_id:*` | `playable_now` | `[PLACEHOLDER] Post-battle return: {army_name} turns for {settlement_name} under dim watchfires.` |
+| `event.world.hostile_post_battle_returned` | `world_map` | `unit_id:*` | `playable_now` | `[PLACEHOLDER] {army_name} returns to {settlement_name}; tally survivors and prepare the next war order.` |
+| `event.world.hostile_foreign_settlement_spotted` | `world_map` | `settlement_id:{target_settlement_id}` | `playable_now` | `[PLACEHOLDER] Foreign settlement sighted: {target_tile_label}. Scout glyphs mark it hostile.` |
 
 ### Loop-Feature Outcome Alias Keys (UI/stability)
 
