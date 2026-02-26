@@ -16,6 +16,7 @@ import {
   POST_WORLD_MAP_GATHER_MARCH_POLL_ROUTE,
   POST_WORLD_MAP_GATHER_MARCH_START_ROUTE,
   POST_WORLD_MAP_LIFECYCLE_ADVANCE_ROUTE,
+  POST_WORLD_MAP_SETTLEMENT_ATTACK_ROUTE,
   POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE,
   POST_WORLD_MAP_TILE_INTERACT_ROUTE,
 } from "../../modules/world_map";
@@ -33,6 +34,7 @@ test("local first-slice transport exposes all settlement loop routes and serves 
       POST_SETTLEMENT_BUILDING_UPGRADE_ROUTE,
       POST_SETTLEMENT_UNIT_TRAIN_ROUTE,
       POST_WORLD_MAP_LIFECYCLE_ADVANCE_ROUTE,
+      POST_WORLD_MAP_SETTLEMENT_ATTACK_ROUTE,
       POST_WORLD_MAP_MARCH_SNAPSHOT_ROUTE,
       POST_WORLD_MAP_TILE_INTERACT_ROUTE,
       POST_WORLD_MAP_GATHER_MARCH_START_ROUTE,
@@ -213,6 +215,70 @@ test("local first-slice transport serves deterministic world-map march snapshots
   assert.equal(response.body.flow, "world_map.march_snapshot_v1");
   assert.equal(response.body.march_state, "march_state_in_transit");
   assert.equal(response.body.interpolation_window !== undefined, true);
+});
+
+test("local first-slice transport serves deterministic hostile settlement attack contracts", () => {
+  const transport = createDeterministicFirstSliceSettlementLoopLocalRpcTransport();
+
+  const response = transport.invoke(POST_WORLD_MAP_SETTLEMENT_ATTACK_ROUTE, {
+    path: {
+      targetSettlementId: "settlement_hostile",
+    },
+    body: {
+      flow_version: "v1",
+      march_id: "march_attack_alpha",
+      source_settlement_id: "settlement_alpha",
+      source_settlement_name: "Cinderwatch Hold",
+      target_settlement_id: "settlement_hostile",
+      target_settlement_name: "Ruin Holdfast",
+      target_tile_label: "Ruin Holdfast",
+      origin: {
+        x: 0,
+        y: 0,
+      },
+      target: {
+        x: 2,
+        y: 1,
+      },
+      defender_garrison_strength: 40,
+      dispatched_units: [
+        {
+          unit_id: "watch_levy",
+          unit_count: 10,
+          unit_attack: 5,
+        },
+      ],
+      departed_at: "2026-02-26T19:30:00.000Z",
+    },
+  });
+
+  assert.equal(response.status_code, 200);
+  if (response.status_code !== 200) {
+    return;
+  }
+  assert.equal(response.body.status, "accepted");
+  if (response.body.status !== "accepted") {
+    return;
+  }
+  assert.equal(response.body.flow, "world_map.hostile_attack_v1");
+  assert.deepStrictEqual(
+    response.body.events.map((event) => event.payload_key),
+    ["dispatch_sent", "march_arrived", "combat_resolved"],
+  );
+  assert.equal(
+    response.body.event_payloads.dispatch_sent.content_key,
+    "event.world.march_started",
+  );
+  assert.equal(
+    response.body.event_payloads.march_arrived.content_key,
+    "event.world.march_returned",
+  );
+  assert.equal(
+    response.body.event_payloads.combat_resolved.content_key,
+    "event.combat.placeholder_skirmish_win",
+  );
+  assert.equal(response.body.losses.attacker_units_lost, 2);
+  assert.equal(response.body.losses.defender_garrison_lost, 40);
 });
 
 test("local first-slice transport keeps unavailable_tile error_code for world-map scout failures", () => {
