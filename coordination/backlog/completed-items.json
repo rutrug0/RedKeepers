@@ -3889,5 +3889,46 @@
     "human_instruction_file": "Human/2026-02-26-world-map-feature-brief.md",
     "assigned_agent": "mara-voss",
     "commit_sha": "22999d061ef5b5c5b1632586714fb793fddb1ecb"
+  },
+  {
+    "id": "RK-AUTO-STALL-0008-F01",
+    "title": "Guard against non-actionable blocked reasons causing queue deadlock",
+    "description": "Add a backlog health check that flags blocked items with empty/non-actionable blocker reasons (for example `- None.`) and either auto-requeues when dependencies are complete or routes explicit lead triage before those items can block queued dependents.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-STALL-0008"
+    ],
+    "inputs": [
+      "tools/orchestrator.py",
+      "tools/queue_manager.py",
+      "coordination/backlog/blocked-items.json",
+      "tests/"
+    ],
+    "acceptance_criteria": [
+      "Blocked items with non-actionable blocker reasons are detected during daemon status/run checks.",
+      "When dependencies are complete, affected blocked items can be requeued automatically or a deterministic triage action is emitted.",
+      "Regression coverage prevents dependency-ready starvation from recurring due to `- None.` blocker reasons."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T13:33:54.772238+00:00",
+    "updated_at": "2026-02-26T13:48:33.820577+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `python tools/orchestrator.py status` passed and now prints `Backlog health warnings` for current non-actionable blocked reasons.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-STALL-0008",
+    "assigned_agent": "tomas-grell",
+    "recovered_from_stale_in_progress": true,
+    "commit_sha": "48469c7b64d6bb015fc9421324cee20f702ed5ed"
   }
 ]
