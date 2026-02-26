@@ -1,4 +1,5 @@
 import type { WorldMapMarchCombatOutcome } from "./world-map-march-snapshot-contract";
+import type { WorldMapMarchDispatchHeroAttachmentDto } from "./world-map-march-dispatch-contract";
 
 export const WORLD_MAP_HOSTILE_ATTACK_FLOW = "world_map.hostile_attack_v1" as const;
 
@@ -11,10 +12,24 @@ export const WORLD_MAP_HOSTILE_ATTACK_EVENT_PAYLOAD_KEYS = [
 export type WorldMapHostileAttackEventPayloadKey =
   (typeof WORLD_MAP_HOSTILE_ATTACK_EVENT_PAYLOAD_KEYS)[number];
 
+export const WORLD_MAP_HOSTILE_ATTACK_HERO_RUNTIME_PAYLOAD_KEYS = [
+  "hero_attached",
+] as const;
+
+export type WorldMapHostileAttackHeroRuntimePayloadKey =
+  (typeof WORLD_MAP_HOSTILE_ATTACK_HERO_RUNTIME_PAYLOAD_KEYS)[number];
+
 export interface WorldMapHostileAttackEventPayload {
   readonly payload_key: WorldMapHostileAttackEventPayloadKey;
   readonly content_key: string;
   readonly content_key_aliases?: readonly string[];
+  readonly occurred_at: Date;
+  readonly tokens: Readonly<Record<string, string>>;
+}
+
+export interface WorldMapHostileAttackHeroRuntimePayload {
+  readonly payload_key: WorldMapHostileAttackHeroRuntimePayloadKey;
+  readonly content_key: "event.hero.assigned";
   readonly occurred_at: Date;
   readonly tokens: Readonly<Record<string, string>>;
 }
@@ -44,6 +59,8 @@ export interface WorldMapHostileAttackResolvedResponseDto {
   readonly defender_strength: number;
   readonly combat_outcome: WorldMapMarchCombatOutcome;
   readonly losses: WorldMapHostileAttackLossSummaryDto;
+  readonly hero_attachment: WorldMapMarchDispatchHeroAttachmentDto | null;
+  readonly hero_runtime_payloads: readonly WorldMapHostileAttackHeroRuntimePayload[];
   readonly event_payloads: {
     readonly dispatch_sent: WorldMapHostileAttackEventPayload;
     readonly march_arrived: WorldMapHostileAttackEventPayload;

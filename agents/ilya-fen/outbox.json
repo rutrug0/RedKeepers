@@ -1934,4 +1934,46 @@
 
                                 ]
     }
+,
+    {
+        "timestamp_utc":  "2026-02-26T20:40:24.8528807Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-HUMAN-0001-F03-F02-F01",
+        "status":  "done",
+        "summary":  "Wired hostile settlement attack transport hero attachment runtime keys end-to-end: endpoint now accepts optional hero attachment request fields, hostile attack resolution returns explicit `hero_attachment` metadata plus deterministic `hero_runtime_payloads`, and hero dispatch failure codes are surfaced through hostile attack contract responses.",
+        "changed_files":  [
+                              "backend/src/modules/world_map/domain/world-map-hostile-attack-contract.ts",
+                              "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+                              "backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.ts",
+                              "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+                              "backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.test.ts",
+                              "backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --experimental-strip-types --check backend/src/modules/world_map/domain/world-map-hostile-attack-contract.ts backend/src/modules/world_map/application/world-map-hostile-attack-service.ts backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.ts backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.test.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                                    "node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.test.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                                    "python tools/orchestrator.py status"
+                                ],
+        "results":  {
+                        "validation_note":  "TypeScript strip-types checks passed for touched files. `python tools/orchestrator.py status` succeeded. Node strip-types test execution remains blocked by existing repository runtime limitations (`ERR_UNSUPPORTED_DIR_IMPORT`, `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX`)."
+                    },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Consume backend hostile hero attachment payloads in web world-map adapter",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M2",
+                                        "priority":  "normal",
+                                        "description":  "Update web hostile dispatch UI adapter to use backend-provided `hero_attachment` and `hero_runtime_payloads` from hostile attack responses instead of local hero mock composition so hero feedback aligns with backend-owned runtime payloads.",
+                                        "acceptance_criteria":  [
+                                                                    "Hostile dispatch accepted UI path reads hero assignment metadata from response `hero_attachment` when present.",
+                                                                    "Hero feedback/event rendering uses backend `hero_runtime_payloads` rows and keeps deterministic payload ordering expectations intact.",
+                                                                    "No regressions in no-hero hostile dispatch rendering paths (explicit null hero attachment remains supported)."
+                                                                ]
+                                    }
+                                ]
+    }
 ]

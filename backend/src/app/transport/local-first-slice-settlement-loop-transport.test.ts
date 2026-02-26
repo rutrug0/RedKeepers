@@ -291,6 +291,8 @@ test("local first-slice transport serves deterministic hostile settlement attack
   );
   assert.equal(response.body.losses.attacker_units_lost, 2);
   assert.equal(response.body.losses.defender_garrison_lost, 40);
+  assert.equal(response.body.hero_attachment, null);
+  assert.deepStrictEqual(response.body.hero_runtime_payloads, []);
 });
 
 test("local first-slice transport returns hostile attack failure contract codes for march cap and blocked path", () => {
@@ -391,6 +393,44 @@ test("local first-slice transport returns hostile attack failure contract codes 
     assert.equal(blockedPathResponse.body.status, "failed");
     if (blockedPathResponse.body.status === "failed") {
       assert.equal(blockedPathResponse.body.error_code, "path_blocked_impassable");
+    }
+  }
+
+  const heroGateResponse = blockedPathTransport.invoke(POST_WORLD_MAP_SETTLEMENT_ATTACK_ROUTE, {
+    path: {
+      targetSettlementId: "settlement_hostile",
+    },
+    body: {
+      flow_version: "v1",
+      march_id: "march_attack_hero_gate",
+      source_settlement_id: "settlement_alpha",
+      target_settlement_id: "settlement_hostile",
+      origin: {
+        x: 0,
+        y: 0,
+      },
+      target: {
+        x: 1,
+        y: 0,
+      },
+      defender_garrison_strength: 20,
+      dispatched_units: [
+        {
+          unit_id: "watch_levy",
+          unit_count: 4,
+          unit_attack: 4,
+        },
+      ],
+      player_id: "player_world",
+      hero_id: "hero_frontline",
+      hero_target_scope: "army",
+    },
+  });
+  assert.equal(heroGateResponse.status_code, 200);
+  if (heroGateResponse.status_code === 200) {
+    assert.equal(heroGateResponse.body.status, "failed");
+    if (heroGateResponse.body.status === "failed") {
+      assert.equal(heroGateResponse.body.error_code, "feature_not_in_slice");
     }
   }
 });

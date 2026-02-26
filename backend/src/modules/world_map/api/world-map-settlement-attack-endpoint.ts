@@ -7,6 +7,7 @@ import {
   WORLD_MAP_HOSTILE_ATTACK_FLOW,
   type WorldMapHostileAttackResolvedResponseDto,
 } from "../domain";
+import type { HeroAssignmentBoundContextType } from "../../heroes/ports";
 
 export const POST_WORLD_MAP_SETTLEMENT_ATTACK_ROUTE =
   "/world-map/settlements/{targetSettlementId}/attack" as const;
@@ -42,6 +43,10 @@ export interface PostWorldMapSettlementAttackRequestBodyDto {
   readonly departed_at?: string;
   readonly seconds_per_tile?: number;
   readonly army_name?: string;
+  readonly player_id?: string;
+  readonly hero_id?: string;
+  readonly hero_target_scope?: HeroAssignmentBoundContextType;
+  readonly hero_assignment_context_id?: string;
 }
 
 export interface PostWorldMapSettlementAttackRequestDto {
@@ -155,6 +160,10 @@ export class WorldMapSettlementAttackEndpointHandler {
       departed_at: parseOptionalInstant(request.body.departed_at),
       seconds_per_tile: parseOptionalPositiveInteger(request.body.seconds_per_tile),
       army_name: normalizeOptionalId(request.body.army_name),
+      player_id: normalizeOptionalId(request.body.player_id),
+      hero_id: normalizeOptionalId(request.body.hero_id),
+      hero_target_scope: request.body.hero_target_scope,
+      hero_assignment_context_id: normalizeOptionalId(request.body.hero_assignment_context_id),
     });
   }
 

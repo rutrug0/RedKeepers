@@ -1,41 +1,5 @@
 [
   {
-    "id": "RK-HUMAN-0001-F03-F02",
-    "title": "Integrate optional post-onboarding hero attach UX in dispatch flow",
-    "description": "Expose an optional hero attach control and cooldown/readiness preview in dispatch UI after unlock while preserving a fully functional no-hero dispatch path.",
-    "milestone": "M2",
-    "type": "feature",
-    "priority": "low",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-HUMAN-0001-F03"
-    ],
-    "inputs": [
-      "docs/design/m2-hero-units-prototype-concept.md",
-      "docs/design/world-map-v1-phasing.md",
-      "client-web/hero-wireframes.html"
-    ],
-    "acceptance_criteria": [
-      "Players can dispatch marches without selecting a hero and still complete core loop actions",
-      "Hero attach UI appears only after unlock and presents clear cooldown/readiness states before commit",
-      "Event/combat feedback surfaces show hero modifier deltas using shared event keys"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T18:14:14.106079+00:00",
-    "updated_at": "2026-02-26T20:31:59.735001+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-HUMAN-0001-F03",
-    "assigned_agent": "sera-kest"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0004-F06",
     "title": "Add critical golden-path smoke for full first-slice loop including attack resolve",
     "description": "Add a release-blocking smoke path that verifies the full first-slice loop (tick, build, train, map interaction, hostile dispatch, deterministic combat resolve, event feed output) using scoped checks only.",
@@ -74,5 +38,39 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0004"
+  },
+  {
+    "id": "RK-HUMAN-0001-F03-F02-F01",
+    "title": "Wire hero attachment payload + runtime keys through hostile attack transport",
+    "description": "Extend `POST /world-map/settlements/{targetSettlementId}/attack` contracts to accept optional hero attachment fields and return deterministic hero attachment metadata/event rows so frontend hero feedback can rely on backend-owned runtime payloads instead of local mock composition.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F03-F02"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "World-map hostile attack endpoint accepts optional `player_id`, `hero_id`, `hero_target_scope`, and `hero_assignment_context_id` without breaking no-hero dispatch behavior",
+      "Accepted hostile dispatch responses include stable hero attachment metadata (or explicit null) and preserve deterministic lifecycle payload ordering",
+      "Hero-related failure codes (`feature_not_in_slice`, `hero_unavailable`, `hero_already_assigned`, `hero_target_scope_mismatch`) are surfaced consistently through hostile dispatch contract responses"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "validating",
+    "retry_count": 0,
+    "created_at": "2026-02-26T20:32:01.130977+00:00",
+    "updated_at": "2026-02-26T20:41:14.999810+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-HUMAN-0001-F03-F02",
+    "assigned_agent": "ilya-fen"
   }
 ]

@@ -1,5 +1,6 @@
 import type {
   WorldMapHostileAttackResolvedResponseDto,
+  WorldMapMarchDispatchHeroAttachmentDto,
   WorldMapMarchCombatOutcome,
   WorldMapTerrainPassabilityResolver,
   WorldMapTerrainPassabilitySeedTableV1,
@@ -11,10 +12,13 @@ import type { WorldMapMarchStateRepository } from "../ports";
 import type {
   WorldMapMarchDispatchService,
 } from "./world-map-march-dispatch-service";
+import {
+  WorldMapMarchDispatchOperationError,
+} from "./world-map-march-dispatch-service";
 import type {
   WorldMapMarchSnapshotService,
 } from "./world-map-march-snapshot-service";
-import { WorldMapMarchDispatchOperationError } from "./world-map-march-dispatch-service";
+import type { HeroAssignmentBoundContextType } from "../../heroes/ports";
 import { DeterministicWorldMapTerrainPassabilityResolver } from "./world-map-terrain-passability-resolver";
 
 const DEFAULT_ARMY_NAME = "Raid Column";
@@ -67,6 +71,10 @@ export interface WorldMapHostileAttackCommandInput {
   readonly departed_at?: Date;
   readonly seconds_per_tile?: number;
   readonly army_name?: string;
+  readonly player_id?: string;
+  readonly hero_id?: string;
+  readonly hero_target_scope?: HeroAssignmentBoundContextType;
+  readonly hero_assignment_context_id?: string;
 }
 
 export interface WorldMapHostileAttackService {
@@ -76,6 +84,10 @@ export interface WorldMapHostileAttackService {
 export type WorldMapHostileAttackOperationErrorCode =
   | "source_target_not_foreign"
   | "march_already_exists"
+  | "feature_not_in_slice"
+  | "hero_unavailable"
+  | "hero_already_assigned"
+  | "hero_target_scope_mismatch"
   | "max_active_marches_reached"
   | "path_blocked_impassable";
 
@@ -217,6 +229,10 @@ export class DeterministicWorldMapHostileAttackService
       seconds_per_tile: normalizeOptionalPositiveInteger(input.seconds_per_tile),
       attacker_strength: attackerStrength,
       defender_strength: defenderStrength,
+      player_id: normalizeOptionalText(input.player_id),
+      hero_id: normalizeOptionalText(input.hero_id),
+      hero_target_scope: input.hero_target_scope,
+      hero_assignment_context_id: normalizeOptionalText(input.hero_assignment_context_id),
     });
 
     const snapshot = this.marchSnapshotService.emitMarchSnapshot({
@@ -284,6 +300,8 @@ export class DeterministicWorldMapHostileAttackService
         settlement_name: sourceSettlementName,
       },
     };
+    const heroAttachment = cloneOptionalHeroAttachment(dispatch.hero_attachment);
+    const heroRuntimePayloads = resolveHeroRuntimePayloads(heroAttachment);
 
     return {
       flow: WORLD_MAP_HOSTILE_ATTACK_FLOW,
@@ -308,6 +326,8 @@ export class DeterministicWorldMapHostileAttackService
         defender_garrison_remaining: defenderGarrisonRemaining,
         attacker_unit_losses_by_id: unitLosses,
       },
+      hero_attachment: heroAttachment,
+      hero_runtime_payloads: heroRuntimePayloads,
       event_payloads: {
         dispatch_sent: dispatchEvent,
         march_arrived: marchArrivedEvent,
@@ -336,15 +356,19 @@ export class DeterministicWorldMapHostileAttackService
     readonly seconds_per_tile?: number;
     readonly attacker_strength: number;
     readonly defender_strength: number;
+    readonly player_id?: string;
+    readonly hero_id?: string;
+    readonly hero_target_scope?: HeroAssignmentBoundContextType;
+    readonly hero_assignment_context_id?: string;
   }) {
     try {
       return this.marchDispatchService.dispatchMarch(input);
     } catch (error: unknown) {
-      if (
-        error instanceof WorldMapMarchDispatchOperationError
-        && error.code === "march_already_exists"
-      ) {
-        throw new WorldMapHostileAttackOperationError("march_already_exists", error.message);
+      if (error instanceof WorldMapMarchDispatchOperationError) {
+        const mappedErrorCode = mapDispatchErrorCodeToHostileErrorCode(error);
+        if (mappedErrorCode !== null) {
+          throw new WorldMapHostileAttackOperationError(mappedErrorCode, error.message);
+        }
       }
       throw error;
     }
@@ -410,6 +434,21 @@ function resolveCombatOutcome(
   defenderStrength: number,
 ): WorldMapMarchCombatOutcome {
   return attackerStrength > defenderStrength ? "attacker_win" : "defender_win";
+}
+
+function mapDispatchErrorCodeToHostileErrorCode(
+  error: WorldMapMarchDispatchOperationError,
+): WorldMapHostileAttackOperationErrorCode | null {
+  switch (error.code) {
+    case "march_already_exists":
+    case "feature_not_in_slice":
+    case "hero_unavailable":
+    case "hero_already_assigned":
+    case "hero_target_scope_mismatch":
+      return error.code;
+    default:
+      return null;
+  }
 }
 
 function resolveCombatNarrativeContent(input: {
@@ -484,6 +523,44 @@ function resolveAttackerUnitLosses(
   return lossesByUnitId;
 }
 
+function cloneOptionalHeroAttachment(
+  input: WorldMapMarchDispatchHeroAttachmentDto | undefined,
+): WorldMapMarchDispatchHeroAttachmentDto | null {
+  if (input === undefined) {
+    return null;
+  }
+  return {
+    ...input,
+    attached_at: new Date(input.attached_at.getTime()),
+    detached_at: input.detached_at === undefined
+      ? undefined
+      : new Date(input.detached_at.getTime()),
+  };
+}
+
+function resolveHeroRuntimePayloads(
+  heroAttachment: WorldMapMarchDispatchHeroAttachmentDto | null,
+): WorldMapHostileAttackResolvedResponseDto["hero_runtime_payloads"] {
+  if (heroAttachment === null) {
+    return [];
+  }
+
+  return [
+    {
+      payload_key: "hero_attached",
+      content_key: "event.hero.assigned",
+      occurred_at: new Date(heroAttachment.attached_at.getTime()),
+      tokens: {
+        player_id: heroAttachment.player_id,
+        hero_id: heroAttachment.hero_id,
+        assignment_id: heroAttachment.assignment_id,
+        assignment_context_type: heroAttachment.assignment_context_type,
+        assignment_context_id: heroAttachment.assignment_context_id,
+      },
+    },
+  ];
+}
+
 function sumRecordValues(input: Readonly<Record<string, number>>): number {
   return Object.values(input).reduce(
     (total, value) => total + normalizeNonNegativeInteger(value),
@@ -505,6 +582,14 @@ function normalizeFallbackText(value: string | undefined, fallback: string): str
   }
   const normalized = value.trim();
   return normalized.length > 0 ? normalized : fallback;
+}
+
+function normalizeOptionalText(value: string | undefined): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : undefined;
 }
 
 function normalizeOptionalPositiveInteger(value: number | undefined): number | undefined {

@@ -5749,5 +5749,47 @@
     "runtime_seconds": 336.75,
     "started_at": "2026-02-26T20:16:28.851936+00:00",
     "finished_at": "2026-02-26T20:22:05.608012+00:00"
+  },
+  {
+    "id": "RK-HUMAN-0001-F03-F02",
+    "title": "Integrate optional post-onboarding hero attach UX in dispatch flow",
+    "description": "Expose an optional hero attach control and cooldown/readiness preview in dispatch UI after unlock while preserving a fully functional no-hero dispatch path.",
+    "milestone": "M2",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-HUMAN-0001-F03"
+    ],
+    "inputs": [
+      "docs/design/m2-hero-units-prototype-concept.md",
+      "docs/design/world-map-v1-phasing.md",
+      "client-web/hero-wireframes.html"
+    ],
+    "acceptance_criteria": [
+      "Players can dispatch marches without selecting a hero and still complete core loop actions",
+      "Hero attach UI appears only after unlock and presents clear cooldown/readiness states before commit",
+      "Event/combat feedback surfaces show hero modifier deltas using shared event keys"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T18:14:14.106079+00:00",
+    "updated_at": "2026-02-26T20:32:00.962210+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/sera-kest/outbox.json](D:/RedKeepers/agents/sera-kest/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-HUMAN-0001-F03",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "c380ff843c2215e53c05500999bc2c54aaeb604a",
+    "resolved_by_agent": "sera-kest",
+    "resolved_by_role": "frontend",
+    "runtime_seconds": 586.97,
+    "started_at": "2026-02-26T20:22:12.715658+00:00",
+    "finished_at": "2026-02-26T20:31:59.673726+00:00"
   }
 ]
