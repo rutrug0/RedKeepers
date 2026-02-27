@@ -6419,5 +6419,42 @@
     "runtime_seconds": 134.84,
     "started_at": "2026-02-27T09:21:28.624843+00:00",
     "finished_at": "2026-02-27T09:23:43.466654+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F02-F01-F01-F01",
+    "title": "Fix async throw assertions in first-slice runtime manifest lock validator tests",
+    "description": "Update `first-slice-runtime-manifest-lock-validator.test.ts` failing cases to use async-aware assertion patterns (`assert.rejects`) so expected validation errors are asserted correctly under Node test runner.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F02-F01-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "The two failing drift tests in `first-slice-runtime-manifest-lock-validator.test.ts` assert expected error messages using async-aware assertions.",
+      "`node --experimental-strip-types --test --test-isolation=none backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.test.ts` passes."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T09:21:23.287992+00:00",
+    "updated_at": "2026-02-27T09:25:32.077723+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/ilya-fen/outbox.json](/D:/RedKeepers/agents/ilya-fen/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F02-F01-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "f29ff1fcb5028f596003a88d0f988e2178935898",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 99.77,
+    "started_at": "2026-02-27T09:23:50.646680+00:00",
+    "finished_at": "2026-02-27T09:25:30.414009+00:00"
   }
 ]

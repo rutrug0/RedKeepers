@@ -2474,5 +2474,27 @@
                 ]
             }
         ]
+    },
+    {
+        "ts": "2026-02-27T09:25:32.798701+00:00",
+        "item_id": "RK-AUTO-STALL-0012",
+        "status": "completed",
+        "summary": "Cleared dependency stall by rerouting RK-AUTO-BACKLOG-0004-F06 from blocked RK-AUTO-BACKLOG-0004-F05 to completed replacement RK-AUTO-BACKLOG-0005-F01; annotated obsolete blocked artifact as superseded for audit.",
+        "queue_recovery": {
+            "made_runnable_item_ids": [
+                "RK-AUTO-BACKLOG-0004-F06"
+            ],
+            "remaining_blocked_dependency_edges_removed": [
+                "RK-AUTO-BACKLOG-0004-F06 -> RK-AUTO-BACKLOG-0004-F05"
+            ],
+            "obsolete_artifacts_documented": [
+                "RK-AUTO-BACKLOG-0004-F05 (superseded_by RK-AUTO-BACKLOG-0005-F01)"
+            ]
+        },
+        "files": [
+            "coordination/backlog/work-items.json",
+            "coordination/backlog/blocked-items.json",
+            "agents/mara-voss/outbox.json"
+        ]
     }
 ]

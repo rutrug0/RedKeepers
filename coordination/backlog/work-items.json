@@ -80,34 +80,57 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0005"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0005-F02-F01-F01-F01",
-    "title": "Fix async throw assertions in first-slice runtime manifest lock validator tests",
-    "description": "Update `first-slice-runtime-manifest-lock-validator.test.ts` failing cases to use async-aware assertion patterns (`assert.rejects`) so expected validation errors are asserted correctly under Node test runner.",
+    "id": "RK-AUTO-STALL-0012",
+    "title": "Resolve queue dependency stall",
+    "description": "The daemon detected queued work items that are not dependency-ready due to unmet dependencies (blocked, cyclic, or otherwise unresolved). Review blocked items and dependency graph health, requeue/close obsolete items, and restore runnable work.",
     "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0005-F02-F01-F01"
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/runtime/run-history.jsonl"
     ],
-    "inputs": [],
     "acceptance_criteria": [
-      "The two failing drift tests in `first-slice-runtime-manifest-lock-validator.test.ts` assert expected error messages using async-aware assertions.",
-      "`node --experimental-strip-types --test --test-isolation=none backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.test.ts` passes."
+      "At least one dependency-stalled queued item is made runnable or explicitly closed",
+      "Blocked/obsolete queue artifacts are documented or consolidated",
+      "Backlog no longer stalls immediately on next daemon run"
     ],
-    "validation_commands": [],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-27T09:21:23.287992+00:00",
-    "updated_at": "2026-02-27T09:25:30.433709+00:00",
+    "created_at": "2026-02-27T09:25:32.309147+00:00",
+    "updated_at": "2026-02-27T09:27:45.103582+00:00",
     "estimated_effort": "S",
-    "token_budget": 8000,
+    "token_budget": 10000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F02-F01-F01",
-    "assigned_agent": "ilya-fen"
+    "auto_generated": "queue_stall_recovery",
+    "stall_snapshot": [
+      {
+        "item_id": "RK-AUTO-BACKLOG-0004-F06",
+        "unmet_dependencies": [
+          "RK-AUTO-BACKLOG-0004-F05"
+        ],
+        "blocked_dependencies": [
+          "RK-AUTO-BACKLOG-0004-F05"
+        ]
+      },
+      {
+        "item_id": "RK-AUTO-BACKLOG-0005-F06",
+        "unmet_dependencies": [
+          "RK-AUTO-BACKLOG-0004-F06"
+        ],
+        "blocked_dependencies": []
+      }
+    ],
+    "stall_fingerprint": "RK-AUTO-BACKLOG-0004-F06:unmet=RK-AUTO-BACKLOG-0004-F05:blocked=RK-AUTO-BACKLOG-0004-F05|RK-AUTO-BACKLOG-0005-F06:unmet=RK-AUTO-BACKLOG-0004-F06:blocked=",
+    "assigned_agent": "mara-voss"
   }
 ]
