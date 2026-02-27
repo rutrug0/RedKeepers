@@ -1,44 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0009-F04",
-    "title": "Extend backend contract drift validator to enforce canonical loop-event coverage",
-    "description": "Build on the hostile token drift validator to enforce canonical/alias constraints across loop namespace keys (tick/build/train/scout/hostile) and emit key-level mismatch diagnostics.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0008-F01-F01",
-      "RK-AUTO-BACKLOG-0009-F02"
-    ],
-    "inputs": [
-      "backend/src/app/config/seeds/v1/narrative/first-slice-hostile-runtime-token-contract.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
-    ],
-    "acceptance_criteria": [
-      "Validator fails when canonical loop namespace keys required for first-slice tick/build/train/scout/hostile coverage are missing from manifest or seed rows",
-      "Validator fails when compatibility alias keys are selected as canonical defaults in loop namespace mappings",
-      "Failure output reports per-key and per-token mismatch details to enable one-pass correction"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T12:15:39.726072+00:00",
-    "updated_at": "2026-02-27T12:44:34.103351+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0009",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0009-F06",
     "title": "Run release-blocking slice gate with loop-key drift and wrapper evidence",
     "description": "Execute the first-slice release gate after loop-key migration and wrapper sweep, then publish PASS/FAIL evidence with owner-tagged blockers for any failing critical stage.",
@@ -66,17 +27,18 @@
       "python tools/first_slice_release_gate_runner.py",
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T12:15:39.726072+00:00",
-    "updated_at": "2026-02-27T12:15:39.726072+00:00",
+    "updated_at": "2026-02-27T12:48:21.162466+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0009"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0009",
+    "assigned_agent": "tomas-grell"
   },
   {
     "id": "RK-AUTO-BACKLOG-0009-F01-F01",

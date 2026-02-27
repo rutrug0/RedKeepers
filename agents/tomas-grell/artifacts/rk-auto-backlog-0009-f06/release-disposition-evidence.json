@@ -1,0 +1,95 @@
+{
+    "item_id":  "RK-AUTO-BACKLOG-0009-F06",
+    "timestamp_utc":  "2026-02-27T12:45:18.389726Z",
+    "release_gate_command":  "python tools/first_slice_release_gate_runner.py",
+    "status_command":  "python tools/orchestrator.py status",
+    "overall_status":  "PASS",
+    "criteria":  {
+                     "playable":  {
+                                      "status":  "PASS",
+                                      "owner_role_if_failed":  "backend",
+                                      "evidence":  {
+                                                       "source":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\release-gate-evidence.json",
+                                                       "summary":  "RK-M0-0011_SMOKE summary status=PASS pass=23 fail=0",
+                                                       "artifact_log":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\playable-gate.log"
+                                                   }
+                                  },
+                     "scope":  {
+                                   "status":  "PASS",
+                                   "owner_role_if_failed":  "design",
+                                   "evidence":  {
+                                                    "source_of_truth":  "docs/design/first-vertical-slice.md",
+                                                    "critical_loop_stage_evidence":  [
+                                                                                         "stage_tick_progression PASS",
+                                                                                         "stage_build_upgrade PASS",
+                                                                                         "stage_unit_training PASS",
+                                                                                         "stage_map_interaction PASS",
+                                                                                         "stage_hostile_dispatch PASS",
+                                                                                         "stage_deterministic_combat_resolve PASS",
+                                                                                         "stage_event_feed_output PASS"
+                                                                                     ],
+                                                    "loop_key_drift_guard":  {
+                                                                                 "status":  "PASS",
+                                                                                 "summary":  "hostile runtime token contract: D:\\RedKeepers\\backend\\src\\app\\config\\seeds\\v1\\narrative\\first-slice-hostile-runtime-token-contract.json",
+                                                                                 "artifact_log":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\hostile-token-contract-gate.log"
+                                                                             },
+                                                    "fallback_marker_scan":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\fallback-marker-scan.log",
+                                                    "fallback_marker_scan_status":  "PASS"
+                                                }
+                               },
+                     "quality":  {
+                                     "status":  "PASS",
+                                     "owner_role_if_failed":  "qa",
+                                     "evidence":  {
+                                                      "source":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\release-gate-evidence.json",
+                                                      "summary":  "Workload Buckets: ready=dependency-ready queued, waiting=queued with unmet dependencies.",
+                                                      "artifact_log":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\quality-gate.log"
+                                                  }
+                                 },
+                     "platform":  {
+                                      "status":  "PASS",
+                                      "owner_role_if_failed":  "platform",
+                                      "evidence":  {
+                                                       "source":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\release-gate-evidence.json",
+                                                       "summary":  "Wrapper prepare smoke passed for Steam Tauri and Android Capacitor entry scripts.",
+                                                       "artifact_log":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\platform-gate.log"
+                                                   }
+                                  },
+                     "release_readiness":  {
+                                               "status":  "PASS",
+                                               "owner_role_if_failed":  "qa",
+                                               "checklist":  {
+                                                                 "slice_checklist_complete":  "PASS",
+                                                                 "known_issues_logged":  "PASS",
+                                                                 "local_reproduction_runbook":  "PASS"
+                                                             },
+                                               "known_issues":  [
+
+                                                                ],
+                                               "reproduction":  {
+                                                                    "command":  "python tools/first_slice_release_gate_runner.py",
+                                                                    "runbook":  "docs/operations/first-slice-release-gate.md"
+                                                                }
+                                           }
+                 },
+    "supplemental_checks":  {
+                                "hostile_token_contract":  {
+                                                               "status":  "PASS",
+                                                               "owner_role_if_failed":  "backend",
+                                                               "evidence":  {
+                                                                                "source":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\release-gate-evidence.json",
+                                                                                "summary":  "hostile runtime token contract: D:\\RedKeepers\\backend\\src\\app\\config\\seeds\\v1\\narrative\\first-slice-hostile-runtime-token-contract.json",
+                                                                                "artifact_log":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\hostile-token-contract-gate.log"
+                                                                            }
+                                                           }
+                            },
+    "evidence_links":  {
+                           "runner_evidence_json":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\release-gate-evidence.json",
+                           "runner_evidence_md":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\first-slice-release-gate\\release-gate-evidence.md",
+                           "orchestrator_status_log":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\orchestrator-status.log",
+                           "fallback_marker_scan_log":  "agents\\tomas-grell\\artifacts\\rk-auto-backlog-0009-f06\\fallback-marker-scan.log"
+                       },
+    "blocker_entries":  [
+
+                        ]
+}

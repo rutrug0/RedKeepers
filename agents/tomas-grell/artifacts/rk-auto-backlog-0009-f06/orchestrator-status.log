@@ -1,0 +1,15 @@
+RedKeepers Daemon Status
+State: running
+Lock held: True
+Last updated (UTC): 2026-02-27T12:44:40.988163+00:00
+Active: RK-AUTO-BACKLOG-0009-F06 | Run release-blocking slice gate with loop-key drift and wrapper evidence | tomas-grell (qa)
+Queue: queued=2 dependency_ready=2 running=1 blocked=21 completed=177
+Agent Utilization:
+  - ilya-fen (backend): runs=40 done=39 fail=1 time=15807.3s load=65.85 | open: ready=1 waiting=0 running=0 total=1 | backlog: blocked=2 completed=61
+  - sera-kest (frontend): runs=24 done=17 fail=2 time=9781.6s load=34.3 | open: ready=1 waiting=0 running=0 total=1 | backlog: blocked=7 completed=22
+  - tomas-grell (qa): runs=24 done=15 fail=8 time=9319.6s load=34.53 | open: ready=0 waiting=0 running=1 total=1 | backlog: blocked=3 completed=21
+  - juno-cairn (platform): runs=7 done=6 fail=0 time=2332.6s load=9.89 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=3 completed=8
+  - mara-voss (lead): runs=37 done=35 fail=0 time=9953.8s load=51.59 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=6 completed=42
+  - nika-thorn (content): runs=5 done=5 fail=0 time=1383.6s load=7.31 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=0 completed=8
+  - rowan-hale (design): runs=8 done=7 fail=0 time=1473.3s load=9.46 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=0 completed=15
+Workload Buckets: ready=dependency-ready queued, waiting=queued with unmet dependencies.

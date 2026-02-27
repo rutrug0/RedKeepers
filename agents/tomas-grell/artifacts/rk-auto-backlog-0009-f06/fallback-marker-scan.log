@@ -1,0 +1,5 @@
+check: playable log fallback marker scan
+target: agents\tomas-grell\artifacts\rk-auto-backlog-0009-f06\first-slice-release-gate\playable-gate.log
+patterns: [Missing placeholder template:, fallback_for:, Fallback narrative key applied
+status: PASS
+matches: none
