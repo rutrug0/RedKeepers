@@ -744,5 +744,21 @@
                                     "node --check client-android-capacitor/www/app.js",
                                     "python -m unittest tests.test_hostile_runtime_token_contract_validation"
                                 ]
+    },
+    {
+        "ts":  "2026-02-27T13:28:26.4282626Z",
+        "item_id":  "RK-AUTO-BACKLOG-0010-F04",
+        "status":  "completed",
+        "summary":  "Added a first-session objective strip to the web client shell with ordered tick/build/train/scout/attack/resolve progression states, canonical objective-key resolution with compatibility-alias lookup only, and deterministic placeholder objective copy fallback when objective template rows are missing.",
+        "files":  [
+                      "client-web/index.html",
+                      "client-web/styles.css",
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "python tools/rk_m0_0011_first_slice_loop_smoke.py"
+                                ]
     }
 ]

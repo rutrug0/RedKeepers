@@ -26,49 +26,10 @@
     "validation_commands": [
       "python tools/rk_m0_0011_first_slice_loop_smoke.py"
     ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:02:20.592470+00:00",
-    "updated_at": "2026-02-27T13:02:20.592470+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0010-F05",
-    "title": "Add deterministic release-candidate prep command for web and wrapper lanes",
-    "description": "Create one canonical prep command/script that refreshes first-slice frontend manifest artifacts and then runs Steam/Android wrapper prepare lanes in deterministic order for reproducible local release-candidate packaging.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "platform",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0010-F03"
-    ],
-    "inputs": [
-      "launch-local-game.bat",
-      "scripts/wrapper_steam_tauri.ps1",
-      "scripts/wrapper_android_capacitor.ps1",
-      "tools/generate_first_slice_frontend_manifest_snapshot.py",
-      "docs/operations/first-slice-release-gate.md"
-    ],
-    "acceptance_criteria": [
-      "A single documented command refreshes first-slice manifest artifacts before running Steam and Android wrapper prepare commands",
-      "Prep flow exits non-zero on stage failure and prints per-stage status in deterministic order",
-      "Platform metadata/assets remain explicitly placeholder-only and replaceable"
-    ],
-    "validation_commands": [
-      "python tools/platform_wrapper_prepare_smoke.py"
-    ],
     "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T13:02:20.592470+00:00",
-    "updated_at": "2026-02-27T13:22:24.766883+00:00",
+    "updated_at": "2026-02-27T13:29:24.070386+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -76,7 +37,7 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
-    "assigned_agent": "juno-cairn"
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-AUTO-BACKLOG-0010-F06",

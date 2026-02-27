@@ -737,6 +737,123 @@
           return lookup;
         }, {}),
     );
+  const objectiveKeyStatusCanonicalDefault = "canonical-default";
+  const objectiveKeyStatusCompatibilityOnly = "compatibility-only";
+  const firstSessionObjectiveContractRowsV1 = Object.freeze([
+    Object.freeze({
+      canonical_objective_key: "first_session.tick.observe_income.v1",
+      loop_step: "tick",
+      required_canonical_default_content_keys: Object.freeze([
+        "event.tick.passive_income",
+        "event.tick.passive_gain_success",
+      ]),
+      compatibility_alias_keys: Object.freeze([
+        "objective.first_session.tick.observe_income.v1",
+      ]),
+      fallback_template: "Run one settlement tick to confirm passive income flow.",
+    }),
+    Object.freeze({
+      canonical_objective_key: "first_session.build.complete_first_upgrade.v1",
+      loop_step: "build",
+      required_canonical_default_content_keys: Object.freeze([
+        "event.build.upgrade_started",
+        "event.build.upgrade_completed",
+      ]),
+      compatibility_alias_keys: Object.freeze([
+        "objective.first_session.build.complete_first_upgrade.v1",
+      ]),
+      fallback_template: "Queue one building upgrade in the settlement panel.",
+    }),
+    Object.freeze({
+      canonical_objective_key: "first_session.train.complete_first_batch.v1",
+      loop_step: "train",
+      required_canonical_default_content_keys: Object.freeze([
+        "event.train.started",
+        "event.train.completed",
+      ]),
+      compatibility_alias_keys: Object.freeze([
+        "objective.first_session.train.complete_first_batch.v1",
+      ]),
+      fallback_template: "Train one unit batch from the barracks queue.",
+    }),
+    Object.freeze({
+      canonical_objective_key: "first_session.scout.confirm_hostile_target.v1",
+      loop_step: "scout",
+      required_canonical_default_content_keys: Object.freeze([
+        "event.scout.dispatched_success",
+        "event.scout.return_hostile",
+      ]),
+      compatibility_alias_keys: Object.freeze([
+        "objective.first_session.scout.confirm_hostile_target.v1",
+      ]),
+      fallback_template: "Scout the hostile tile to confirm target activity.",
+    }),
+    Object.freeze({
+      canonical_objective_key: "first_session.attack.dispatch_hostile_march.v1",
+      loop_step: "attack",
+      required_canonical_default_content_keys: Object.freeze([
+        "event.world.hostile_dispatch_accepted",
+        "event.world.hostile_dispatch_en_route",
+        "event.world.hostile_march_arrived_outer_works",
+      ]),
+      compatibility_alias_keys: Object.freeze([
+        "objective.first_session.attack.dispatch_hostile_march.v1",
+      ]),
+      fallback_template: "Dispatch one hostile march from your settlement.",
+    }),
+    Object.freeze({
+      canonical_objective_key: "first_session.resolve_hostile_outcome.v1",
+      loop_step: "resolve",
+      required_canonical_default_content_keys: Object.freeze([
+        "event.combat.hostile_resolve_attacker_win",
+        "event.combat.hostile_resolve_defender_win",
+        "event.combat.hostile_resolve_tie_defender_holds",
+      ]),
+      compatibility_alias_keys: Object.freeze([
+        "objective.first_session.resolve_hostile_outcome.v1",
+      ]),
+      fallback_template: "Resolve one hostile combat outcome on the world map.",
+    }),
+  ]);
+  const firstSessionObjectiveKeyStatusByKey = Object.freeze(
+    firstSessionObjectiveContractRowsV1.reduce((lookup, row) => {
+      lookup[row.canonical_objective_key] = objectiveKeyStatusCanonicalDefault;
+      for (const aliasKey of row.compatibility_alias_keys) {
+        lookup[aliasKey] = objectiveKeyStatusCompatibilityOnly;
+      }
+      return lookup;
+    }, {}),
+  );
+  const firstSessionObjectiveRowByCanonicalKey = Object.freeze(
+    firstSessionObjectiveContractRowsV1.reduce((lookup, row) => {
+      lookup[row.canonical_objective_key] = row;
+      return lookup;
+    }, {}),
+  );
+  const firstSessionObjectiveCanonicalCandidatesByAlias = Object.freeze(
+    firstSessionObjectiveContractRowsV1.reduce((lookup, row) => {
+      for (const aliasKey of row.compatibility_alias_keys) {
+        if (!Array.isArray(lookup[aliasKey])) {
+          lookup[aliasKey] = [];
+        }
+        if (!lookup[aliasKey].includes(row.canonical_objective_key)) {
+          lookup[aliasKey].push(row.canonical_objective_key);
+        }
+      }
+      return lookup;
+    }, {}),
+  );
+  const firstSessionObjectiveCanonicalKeyByLoopStep = Object.freeze(
+    firstSessionObjectiveContractRowsV1.reduce((lookup, row) => {
+      lookup[row.loop_step] = row.canonical_objective_key;
+      return lookup;
+    }, {}),
+  );
+  const firstSessionResolveOutcomeCanonicalKeySet = new Set([
+    "event.combat.hostile_resolve_attacker_win",
+    "event.combat.hostile_resolve_defender_win",
+    "event.combat.hostile_resolve_tie_defender_holds",
+  ]);
   const firstSliceDeferredPostSliceEventContentKeys = Object.freeze([
     "event.world.gather_started",
     "event.world.gather_completed",
@@ -1252,6 +1369,9 @@
       controls: document.getElementById("event-feed-panel-state-controls"),
     },
   };
+  const shellRefs = {
+    firstSessionObjectiveStrip: document.getElementById("first-session-objective-strip"),
+  };
 
   const firstSliceResourceIds = Object.freeze([...firstSlicePlayableDefaults.resources]);
   const firstSlicePlayableUnitIdSet = new Set(firstSlicePlayableDefaults.units);
@@ -1408,6 +1528,13 @@
         modifier_deltas: [...entry.modifier_deltas],
       })),
     },
+  };
+  const firstSessionObjectiveProgressRuntime = {
+    completed_by_canonical_key: firstSessionObjectiveContractRowsV1.reduce((lookup, row) => {
+      lookup[row.canonical_objective_key] = false;
+      return lookup;
+    }, {}),
+    observed_canonical_default_event_keys: new Set(),
   };
   let worldMapHeroCooldownRefreshTimer = null;
 
@@ -2078,6 +2205,60 @@
   };
   const mapBackendEventKeyToClientKey = (contentKey) =>
     resolveManifestScopedEventContentKey(contentKey);
+  const getFirstSessionObjectiveKeyStatus = (objectiveKey) =>
+    firstSessionObjectiveKeyStatusByKey[String(objectiveKey || "").trim()] || "";
+  const isCanonicalDefaultFirstSessionObjectiveKey = (objectiveKey) =>
+    getFirstSessionObjectiveKeyStatus(objectiveKey) === objectiveKeyStatusCanonicalDefault;
+  const isCompatibilityOnlyFirstSessionObjectiveKey = (objectiveKey) =>
+    getFirstSessionObjectiveKeyStatus(objectiveKey) === objectiveKeyStatusCompatibilityOnly;
+  const resolveCanonicalFirstSessionObjectiveKeyFromAlias = (objectiveAliasKey) => {
+    const normalizedAliasKey = String(objectiveAliasKey || "").trim();
+    if (normalizedAliasKey.length < 1) {
+      return "";
+    }
+    if (!isCompatibilityOnlyFirstSessionObjectiveKey(normalizedAliasKey)) {
+      return "";
+    }
+    const canonicalCandidates =
+      firstSessionObjectiveCanonicalCandidatesByAlias[normalizedAliasKey];
+    if (!Array.isArray(canonicalCandidates) || canonicalCandidates.length < 1) {
+      return "";
+    }
+    for (const canonicalCandidate of canonicalCandidates) {
+      if (isCanonicalDefaultFirstSessionObjectiveKey(canonicalCandidate)) {
+        return canonicalCandidate;
+      }
+    }
+    return "";
+  };
+  const resolveCanonicalFirstSessionObjectiveKey = (objectiveKey) => {
+    const normalizedObjectiveKey = String(objectiveKey || "").trim();
+    if (normalizedObjectiveKey.length < 1) {
+      return "";
+    }
+    if (isCanonicalDefaultFirstSessionObjectiveKey(normalizedObjectiveKey)) {
+      return normalizedObjectiveKey;
+    }
+    if (!isCompatibilityOnlyFirstSessionObjectiveKey(normalizedObjectiveKey)) {
+      return "";
+    }
+    return resolveCanonicalFirstSessionObjectiveKeyFromAlias(normalizedObjectiveKey);
+  };
+  const registerFirstSessionObjectiveObservedEventKey = (contentKey) => {
+    const scopedContentKey = resolveManifestScopedEventContentKey(contentKey);
+    if (!isManifestAllowedCanonicalDefaultEventContentKey(scopedContentKey)) {
+      return "";
+    }
+    firstSessionObjectiveProgressRuntime.observed_canonical_default_event_keys.add(scopedContentKey);
+    return scopedContentKey;
+  };
+  const markFirstSessionObjectiveLoopStepComplete = (loopStep) => {
+    const canonicalObjectiveKey = firstSessionObjectiveCanonicalKeyByLoopStep[loopStep];
+    if (!canonicalObjectiveKey) {
+      return;
+    }
+    firstSessionObjectiveProgressRuntime.completed_by_canonical_key[canonicalObjectiveKey] = true;
+  };
   const hostileDispatchFailureContentKeyByCode = Object.freeze({
     source_target_not_foreign: "event.world.hostile_dispatch_failed_source_target_not_foreign",
     max_active_marches_reached: "event.world.hostile_dispatch_failed_max_active_marches_reached",
@@ -2106,6 +2287,23 @@
       return manifestTemplateRow.template;
     }
     return localNarrativeFallbackTemplates[normalizedContentKey] || "";
+  };
+  const getFirstSessionObjectiveText = (objectiveKey) => {
+    const canonicalObjectiveKey = resolveCanonicalFirstSessionObjectiveKey(objectiveKey);
+    if (canonicalObjectiveKey.length < 1) {
+      const fallbackUnknownKey = String(objectiveKey || "objective.unknown").trim() || "objective.unknown";
+      return `[Objective placeholder: ${fallbackUnknownKey}]`;
+    }
+    const objectiveRow = firstSessionObjectiveRowByCanonicalKey[canonicalObjectiveKey];
+    if (!objectiveRow) {
+      return `[Objective placeholder: ${canonicalObjectiveKey}]`;
+    }
+    const canonicalTemplate = getNarrativeTemplateByContentKey(canonicalObjectiveKey);
+    if (canonicalTemplate.length > 0) {
+      return canonicalTemplate;
+    }
+
+    return `[Objective placeholder: ${canonicalObjectiveKey}] ${objectiveRow.fallback_template}`;
   };
   const getNarrativeTemplateWithFallback = (contentKey) => {
     if (!contentKey) {
@@ -2435,6 +2633,9 @@
     const scopedContentKey = rawContentKey.startsWith("event.")
       ? resolveManifestScopedEventContentKey(rawContentKey)
       : rawContentKey;
+    if (scopedContentKey.startsWith("event.")) {
+      registerFirstSessionObjectiveObservedEventKey(scopedContentKey);
+    }
     const usedFallbackContentKey =
       rawContentKey.startsWith("event.")
       && scopedContentKey !== rawContentKey;
@@ -2568,6 +2769,7 @@
     settlementActionRuntime.resource_stock_by_id = cloneResourceValues(response.resource_stock_by_id);
     const appended = appendPlaceholderEvents("tick", response, "event.tick.passive_income");
     setLastActionOutcome("tick", response, appended.contentKey, appended.tokens);
+    markFirstSessionObjectiveLoopStepComplete("tick");
   };
 
   const applyBuildActionResult = (response) => {
@@ -2639,6 +2841,7 @@
 
     const appended = appendPlaceholderEvents("build", response, "event.build.upgrade_started");
     setLastActionOutcome("build", response, appended.contentKey, appended.tokens);
+    markFirstSessionObjectiveLoopStepComplete("build");
   };
 
   const applyTrainActionResult = (response) => {
@@ -2702,6 +2905,7 @@
       (Number(response.quantity) || 0);
     const appended = appendPlaceholderEvents("train", response, "event.train.started");
     setLastActionOutcome("train", response, appended.contentKey, appended.tokens);
+    markFirstSessionObjectiveLoopStepComplete("train");
   };
 
   const resolveActionErrorCode = (error) => {
@@ -3146,6 +3350,22 @@
         target_tile_label: targetTileLabel,
       },
     );
+    markFirstSessionObjectiveLoopStepComplete("attack");
+    const dispatchLifecycleKeys = [
+      resolvedPayloads.dispatch_sent?.content_key,
+      resolvedPayloads.march_arrived?.content_key,
+      resolvedPayloads.combat_resolved?.content_key,
+      outcomeContentKey,
+    ];
+    for (const lifecycleKey of dispatchLifecycleKeys) {
+      registerFirstSessionObjectiveObservedEventKey(lifecycleKey);
+    }
+    const resolvedCombatContentKey = registerFirstSessionObjectiveObservedEventKey(
+      resolvedPayloads.combat_resolved?.content_key || outcomeContentKey,
+    );
+    if (firstSessionResolveOutcomeCanonicalKeySet.has(resolvedCombatContentKey)) {
+      markFirstSessionObjectiveLoopStepComplete("resolve");
+    }
     worldMapActionRuntime.hostile_dispatch_outcome = {
       status: "accepted",
       flow: response?.flow || "world_map.hostile_attack_v1",
@@ -3191,6 +3411,7 @@
     }
     if (!isFailure) {
       worldMapActionRuntime.completed_scouts += 1;
+      markFirstSessionObjectiveLoopStepComplete("scout");
     }
 
     appendEventFeedEntry({
@@ -3400,6 +3621,74 @@
       worldMapActionRuntime.pending_action = null;
       renderPanels();
     }
+  };
+
+  const renderFirstSessionObjectiveStrip = () => {
+    const target = shellRefs.firstSessionObjectiveStrip;
+    if (!target) {
+      return;
+    }
+
+    const completionByCanonicalKey = firstSessionObjectiveProgressRuntime.completed_by_canonical_key;
+    let activeCanonicalObjectiveKey = "";
+    for (const objectiveRow of firstSessionObjectiveContractRowsV1) {
+      const canonicalObjectiveKey = resolveCanonicalFirstSessionObjectiveKey(
+        objectiveRow.canonical_objective_key,
+      );
+      if (canonicalObjectiveKey.length < 1) {
+        continue;
+      }
+      if (completionByCanonicalKey[canonicalObjectiveKey] !== true) {
+        activeCanonicalObjectiveKey = canonicalObjectiveKey;
+        break;
+      }
+    }
+
+    const completedCount = firstSessionObjectiveContractRowsV1.reduce((total, objectiveRow) => {
+      const canonicalObjectiveKey = resolveCanonicalFirstSessionObjectiveKey(
+        objectiveRow.canonical_objective_key,
+      );
+      return total + (completionByCanonicalKey[canonicalObjectiveKey] === true ? 1 : 0);
+    }, 0);
+    const objectiveRows = firstSessionObjectiveContractRowsV1
+      .map((objectiveRow) => {
+        const canonicalObjectiveKey = resolveCanonicalFirstSessionObjectiveKey(
+          objectiveRow.canonical_objective_key,
+        );
+        if (canonicalObjectiveKey.length < 1) {
+          return "";
+        }
+
+        const isCompleted = completionByCanonicalKey[canonicalObjectiveKey] === true;
+        const isActive = !isCompleted && canonicalObjectiveKey === activeCanonicalObjectiveKey;
+        const stateClass = isCompleted ? " is-completed" : isActive ? " is-active" : "";
+        const stateLabel = isCompleted ? "Completed" : isActive ? "Active" : "Pending";
+        const objectiveText = getFirstSessionObjectiveText(canonicalObjectiveKey);
+
+        return `
+          <li
+            class="objective-step${stateClass}"
+            data-objective-key="${escapeHtml(canonicalObjectiveKey)}"
+            data-loop-step="${escapeHtml(objectiveRow.loop_step)}"
+            aria-current="${isActive ? "step" : "false"}"
+          >
+            <span class="objective-step__state">${escapeHtml(stateLabel)}</span>
+            <p class="objective-step__label">${escapeHtml(objectiveText)}</p>
+            <p class="objective-step__key">${escapeHtml(canonicalObjectiveKey)}</p>
+          </li>
+        `;
+      })
+      .join("");
+
+    target.innerHTML = `
+      <div class="objective-strip__head">
+        <h2 class="objective-strip__title">First-Session Objectives</h2>
+        <span class="objective-strip__meta">${escapeHtml(`${completedCount}/${firstSessionObjectiveContractRowsV1.length} complete`)}</span>
+      </div>
+      <ol class="objective-strip__list" aria-label="First-session objective progression">
+        ${objectiveRows}
+      </ol>
+    `;
   };
 
   const renderStateControls = (panelKey) => {
@@ -4392,6 +4681,7 @@
   };
 
   const renderPanels = () => {
+    renderFirstSessionObjectiveStrip();
     renderStateControls("settlement");
     renderStateControls("worldMap");
     renderStateControls("eventFeed");
