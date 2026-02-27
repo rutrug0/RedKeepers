@@ -377,6 +377,8 @@
       "The Cinder Throne Legates hold the frontier by ash, ration, and decree. Their magistrates build roads before monuments, and their branded levies turn every settlement into a hard post that is costly to break.",
     "event.units.upkeep_reduced_garrison":
       "{settlement_name}: garrison ration discipline reduces stationed troop upkeep.",
+    "event.build.failure_insufficient_resources":
+      "{settlement_name}: {building_id} upgrade paused for insufficient resources. Required {required_cost_by_id}; available {available_stock_by_id}.",
     "event.world.scout_unavailable_tile":
       "Scout dispatch to {target_tile_label} aborted: tile is unavailable for this route.",
     "event.scout.unavailable_tile":

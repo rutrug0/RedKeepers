@@ -678,5 +678,20 @@
         "results":  {
                         "validation_note":  "Frontend visual smoke unit tests passed (14/14). `rk_m0_0011_first_slice_loop_smoke.py` still reports an existing `negative_insufficient_resources` token assertion failure outside this template-snapshot client scope."
                     }
+    },
+    {
+        "ts":  "2026-02-27T10:55:59.7264130Z",
+        "item_id":  "RK-AUTO-BACKLOG-0007-F05-F01",
+        "status":  "completed",
+        "summary":  "Fixed the release-gate `negative_insufficient_resources` smoke regression by restoring a deterministic local fallback template key for `event.build.failure_insufficient_resources` in the web client narrative map, preserving manifest-backed behavior while satisfying token-contract checks.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "python tools/rk_m0_0011_first_slice_loop_smoke.py",
+                                    "python tools/first_slice_release_gate_runner.py"
+                                ]
     }
 ]
