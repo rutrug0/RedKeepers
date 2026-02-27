@@ -1,44 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0010-F02",
-    "title": "Align narrative placeholder rows to first-session objective outcomes",
-    "description": "Update first-slice narrative seed rows so each objective step has canonical success/failure placeholder coverage (including key negative states) with token fields aligned to the objective contract and loop token matrix.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "content",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0010-F01"
-    ],
-    "inputs": [
-      "docs/content/placeholder-narrative-seed-pack-v1.md",
-      "docs/design/first-slice-event-token-contract-matrix.md",
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
-    ],
-    "acceptance_criteria": [
-      "Canonical placeholder rows cover objective-step outcomes for success plus at least one negative case per loop family (insufficient_resources/cooldown/invalid_target/combat_loss)",
-      "Token placeholders for each row match required token names in the canonical matrix and objective contract",
-      "No new out-of-scope key families are added to default first-session coverage"
-    ],
-    "validation_commands": [
-      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:02:20.591961+00:00",
-    "updated_at": "2026-02-27T13:11:31.208438+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
-    "assigned_agent": "nika-thorn"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0010-F03",
     "title": "Enforce objective contract parity in first-slice seed validation",
     "description": "Extend backend first-slice validation so objective contract key references, canonical-default usage, and token requirements are checked against the content-key manifest and narrative seed rows with deterministic diagnostics.",
@@ -66,17 +27,18 @@
     "validation_commands": [
       "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T13:02:20.592470+00:00",
-    "updated_at": "2026-02-27T13:02:20.592470+00:00",
+    "updated_at": "2026-02-27T13:17:42.025079+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-AUTO-BACKLOG-0010-F04",
@@ -229,5 +191,42 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0010-F01"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010-F02-F01",
+    "title": "Expose first-session objective outcome key contract as machine-readable manifest data",
+    "description": "Add a structured objective-step outcome contract section to `first-slice-content-key-manifest.json` so objective success/failure key coverage is data-driven instead of test-local constants.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F02"
+    ],
+    "inputs": [
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+      "docs/design/first-slice-event-token-contract-matrix.md"
+    ],
+    "acceptance_criteria": [
+      "Manifest includes objective-step success and negative canonical key lists for first-session loops",
+      "Negative-state family coverage includes insufficient_resources, cooldown, invalid_target, and combat_loss",
+      "Snapshot/seed contract tests read objective-step coverage from manifest instead of hard-coded test-only fixtures"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:11:33.210149+00:00",
+    "updated_at": "2026-02-27T13:11:33.210149+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010-F02"
   }
 ]

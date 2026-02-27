@@ -8111,5 +8111,50 @@
     "runtime_seconds": 150.64,
     "started_at": "2026-02-27T13:05:35.890905+00:00",
     "finished_at": "2026-02-27T13:08:06.524168+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010-F02",
+    "title": "Align narrative placeholder rows to first-session objective outcomes",
+    "description": "Update first-slice narrative seed rows so each objective step has canonical success/failure placeholder coverage (including key negative states) with token fields aligned to the objective contract and loop token matrix.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F01"
+    ],
+    "inputs": [
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+    ],
+    "acceptance_criteria": [
+      "Canonical placeholder rows cover objective-step outcomes for success plus at least one negative case per loop family (insufficient_resources/cooldown/invalid_target/combat_loss)",
+      "Token placeholders for each row match required token names in the canonical matrix and objective contract",
+      "No new out-of-scope key families are added to default first-session coverage"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:02:20.591961+00:00",
+    "updated_at": "2026-02-27T13:11:32.980913+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Appended this run entry to `agents/nika-thorn/outbox.json` with one follow-up `proposed_work_items` task.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
+    "assigned_agent": "nika-thorn",
+    "commit_sha": "ad205b01684e1165ff610ae36f6f19c4d0624d67",
+    "resolved_by_agent": "nika-thorn",
+    "resolved_by_role": "content",
+    "runtime_seconds": 197.2,
+    "started_at": "2026-02-27T13:08:13.991325+00:00",
+    "finished_at": "2026-02-27T13:11:31.189324+00:00"
   }
 ]

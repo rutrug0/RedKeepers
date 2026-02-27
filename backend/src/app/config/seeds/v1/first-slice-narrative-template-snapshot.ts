@@ -54,6 +54,33 @@ interface FirstSliceAliasLookupContractV1 {
   readonly direct_default_selection_excludes_legacy_alias_only_keys: boolean;
 }
 
+type FirstSliceObjectiveLoopStepKeyV1 =
+  | "tick"
+  | "build"
+  | "train"
+  | "scout"
+  | "attack"
+  | "resolve";
+
+type FirstSliceNegativeStateFamilyV1 =
+  | "insufficient_resources"
+  | "cooldown"
+  | "invalid_target"
+  | "combat_loss";
+
+interface FirstSliceObjectiveStepOutcomeContractRowV1 {
+  readonly objective_id: string;
+  readonly loop_step: FirstSliceObjectiveLoopStepKeyV1;
+  readonly success_canonical_keys: readonly string[];
+  readonly negative_canonical_keys: readonly string[];
+  readonly required_negative_state_families: readonly FirstSliceNegativeStateFamilyV1[];
+}
+
+interface FirstSliceObjectiveCanonicalTokenContractRowV1 {
+  readonly canonical_key: string;
+  readonly required_tokens: readonly string[];
+}
+
 export interface FirstSliceContentKeyManifestV1 {
   readonly schema_version: typeof FIRST_SLICE_CONTENT_KEY_MANIFEST_SCHEMA_VERSION_V1;
   readonly manifest_id: string;
@@ -66,6 +93,176 @@ export interface FirstSliceContentKeyManifestV1 {
   readonly alias_lookup_contract: FirstSliceAliasLookupContractV1;
   readonly deferred_post_slice_keys: readonly FirstSliceDeferredPostSliceKeyRowV1[];
 }
+
+const FIRST_SLICE_OBJECTIVE_STEP_OUTCOME_CONTRACT_V1: readonly FirstSliceObjectiveStepOutcomeContractRowV1[] = [
+  {
+    objective_id: "first_session.tick.observe_income.v1",
+    loop_step: "tick",
+    success_canonical_keys: [
+      "event.tick.passive_income",
+      "event.tick.passive_gain_success",
+    ],
+    negative_canonical_keys: [
+      "event.tick.passive_gain_stalled",
+    ],
+    required_negative_state_families: [],
+  },
+  {
+    objective_id: "first_session.build.complete_first_upgrade.v1",
+    loop_step: "build",
+    success_canonical_keys: [
+      "event.build.upgrade_started",
+      "event.build.upgrade_completed",
+    ],
+    negative_canonical_keys: [
+      "event.build.failure_insufficient_resources",
+    ],
+    required_negative_state_families: ["insufficient_resources"],
+  },
+  {
+    objective_id: "first_session.train.complete_first_batch.v1",
+    loop_step: "train",
+    success_canonical_keys: [
+      "event.train.started",
+      "event.train.completed",
+    ],
+    negative_canonical_keys: [
+      "event.train.failure_cooldown",
+    ],
+    required_negative_state_families: ["cooldown"],
+  },
+  {
+    objective_id: "first_session.scout.confirm_hostile_target.v1",
+    loop_step: "scout",
+    success_canonical_keys: [
+      "event.scout.dispatched_success",
+      "event.scout.return_hostile",
+    ],
+    negative_canonical_keys: [
+      "event.scout.return_empty",
+    ],
+    required_negative_state_families: [],
+  },
+  {
+    objective_id: "first_session.attack.dispatch_hostile_march.v1",
+    loop_step: "attack",
+    success_canonical_keys: [
+      "event.world.hostile_dispatch_accepted",
+      "event.world.hostile_dispatch_en_route",
+      "event.world.hostile_march_arrived_outer_works",
+    ],
+    negative_canonical_keys: [
+      "event.world.hostile_dispatch_target_required",
+      "event.world.hostile_dispatch_failed_source_target_not_foreign",
+    ],
+    required_negative_state_families: ["invalid_target"],
+  },
+  {
+    objective_id: "first_session.resolve_hostile_outcome.v1",
+    loop_step: "resolve",
+    success_canonical_keys: [
+      "event.combat.hostile_resolve_attacker_win",
+    ],
+    negative_canonical_keys: [
+      "event.combat.hostile_resolve_defender_win",
+      "event.combat.hostile_loss_report",
+    ],
+    required_negative_state_families: ["combat_loss"],
+  },
+];
+
+const FIRST_SLICE_OBJECTIVE_CANONICAL_TOKEN_CONTRACT_V1: readonly FirstSliceObjectiveCanonicalTokenContractRowV1[] = [
+  {
+    canonical_key: "event.tick.passive_income",
+    required_tokens: ["settlement_name", "food_gain", "wood_gain", "stone_gain", "iron_gain"],
+  },
+  {
+    canonical_key: "event.tick.passive_gain_success",
+    required_tokens: ["settlement_name", "duration_ms"],
+  },
+  {
+    canonical_key: "event.tick.passive_gain_stalled",
+    required_tokens: ["settlement_name", "duration_ms"],
+  },
+  {
+    canonical_key: "event.build.upgrade_started",
+    required_tokens: ["settlement_name", "building_label", "from_level", "to_level"],
+  },
+  {
+    canonical_key: "event.build.upgrade_completed",
+    required_tokens: ["settlement_name", "building_label", "new_level"],
+  },
+  {
+    canonical_key: "event.build.failure_insufficient_resources",
+    required_tokens: [
+      "building_id",
+      "missing_resources_by_id",
+      "required_cost_by_id",
+      "available_stock_by_id",
+    ],
+  },
+  {
+    canonical_key: "event.train.started",
+    required_tokens: ["settlement_name", "quantity", "unit_label"],
+  },
+  {
+    canonical_key: "event.train.completed",
+    required_tokens: ["settlement_name", "quantity", "unit_label"],
+  },
+  {
+    canonical_key: "event.train.failure_cooldown",
+    required_tokens: ["unit_id", "queue_available_at", "cooldown_remaining_ms"],
+  },
+  {
+    canonical_key: "event.scout.dispatched_success",
+    required_tokens: ["settlement_name", "target_tile_label"],
+  },
+  {
+    canonical_key: "event.scout.return_hostile",
+    required_tokens: ["target_tile_label", "hostile_force_estimate"],
+  },
+  {
+    canonical_key: "event.scout.return_empty",
+    required_tokens: ["target_tile_label"],
+  },
+  {
+    canonical_key: "event.world.hostile_dispatch_accepted",
+    required_tokens: ["army_name", "origin_settlement_name", "target_tile_label"],
+  },
+  {
+    canonical_key: "event.world.hostile_dispatch_en_route",
+    required_tokens: ["army_name", "target_tile_label", "eta_seconds"],
+  },
+  {
+    canonical_key: "event.world.hostile_march_arrived_outer_works",
+    required_tokens: ["army_name", "target_tile_label"],
+  },
+  {
+    canonical_key: "event.world.hostile_dispatch_target_required",
+    required_tokens: [],
+  },
+  {
+    canonical_key: "event.world.hostile_dispatch_failed_source_target_not_foreign",
+    required_tokens: ["source_settlement_name"],
+  },
+  {
+    canonical_key: "event.combat.hostile_resolve_attacker_win",
+    required_tokens: ["army_name", "target_tile_label"],
+  },
+  {
+    canonical_key: "event.combat.hostile_resolve_defender_win",
+    required_tokens: ["army_name", "target_tile_label"],
+  },
+  {
+    canonical_key: "event.combat.hostile_loss_report",
+    required_tokens: [
+      "attacker_units_lost",
+      "attacker_units_dispatched",
+      "defender_garrison_lost",
+      "defender_strength",
+    ],
+  },
+];
 
 export interface FirstSliceNarrativeTemplateSnapshotEntryV1 {
   readonly key: string;
@@ -299,15 +496,31 @@ export const validateFirstSliceNarrativeTemplateSnapshotLockV1 = (
 export const createFirstSliceNarrativeTemplateSnapshotV1 = (input: {
   readonly narrative_seed_bundle: LoadNarrativeSeedBundleV1;
   readonly first_slice_content_key_manifest: FirstSliceContentKeyManifestV1;
+  readonly objective_step_outcome_contract?: readonly FirstSliceObjectiveStepOutcomeContractRowV1[];
+  readonly objective_canonical_token_contract?: readonly FirstSliceObjectiveCanonicalTokenContractRowV1[];
 }): FirstSliceNarrativeTemplateSnapshotV1 => {
   const manifest = input.first_slice_content_key_manifest;
   const eventFeed = input.narrative_seed_bundle.event_feed_messages;
   const rowsByKey = createNarrativeRowsByKeyMap(eventFeed);
+  const objectiveStepOutcomeContract = input.objective_step_outcome_contract
+    ?? FIRST_SLICE_OBJECTIVE_STEP_OUTCOME_CONTRACT_V1;
+  const objectiveCanonicalTokenContract = input.objective_canonical_token_contract
+    ?? FIRST_SLICE_OBJECTIVE_CANONICAL_TOKEN_CONTRACT_V1;
 
   const includeScopes = new Set(manifest.default_first_slice_seed_usage.include_slice_status_scopes);
   const excludeScopes = new Set(manifest.default_first_slice_seed_usage.exclude_slice_status_scopes);
   const canonicalKeys = [...manifest.default_first_slice_seed_usage.include_only_content_keys];
   const canonicalKeySet = new Set(canonicalKeys);
+  const compatibilityAliasOnlyKeySet = new Set(manifest.compatibility_alias_only_keys);
+
+  validateFirstSliceObjectiveContractParityV1({
+    manifestCanonicalKeySet: canonicalKeySet,
+    compatibilityAliasOnlyKeySet,
+    rowsByKey,
+    objectiveStepOutcomeContract,
+    objectiveCanonicalTokenContract,
+  });
+
   const loopRequiredKeys = collectLoopRequiredKeys(manifest.loop_required_keys);
   const missingLoopRequiredRows = toUniqueSorted(
     loopRequiredKeys.filter((key) => !rowsByKey.has(key)),
@@ -762,6 +975,142 @@ function collectLoopRequiredKeys(loopRequired: FirstSliceLoopRequiredKeysV1): st
     ...loopRequired.scout,
     ...loopRequired.hostile_dispatch_and_resolve,
   ];
+}
+
+function validateFirstSliceObjectiveContractParityV1(input: {
+  readonly manifestCanonicalKeySet: ReadonlySet<string>;
+  readonly compatibilityAliasOnlyKeySet: ReadonlySet<string>;
+  readonly rowsByKey: ReadonlyMap<string, EventFeedMessagesSeedV1["rows"][number]>;
+  readonly objectiveStepOutcomeContract: readonly FirstSliceObjectiveStepOutcomeContractRowV1[];
+  readonly objectiveCanonicalTokenContract: readonly FirstSliceObjectiveCanonicalTokenContractRowV1[];
+}): void {
+  const requiredTokensByCanonicalKey = new Map<string, readonly string[]>();
+  for (const row of input.objectiveCanonicalTokenContract) {
+    if (requiredTokensByCanonicalKey.has(row.canonical_key)) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Objective token contract drift: duplicate canonical key '${row.canonical_key}'.`,
+      );
+    }
+    requiredTokensByCanonicalKey.set(row.canonical_key, row.required_tokens);
+  }
+
+  for (const objectiveRow of input.objectiveStepOutcomeContract) {
+    if (objectiveRow.success_canonical_keys.length < 1) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '<none>': success_canonical_keys must include at least one key.`,
+      );
+    }
+    if (objectiveRow.negative_canonical_keys.length < 1) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '<none>': negative_canonical_keys must include at least one key.`,
+      );
+    }
+
+    const allObjectiveKeys = [
+      ...objectiveRow.success_canonical_keys,
+      ...objectiveRow.negative_canonical_keys,
+    ];
+
+    const seenKeys = new Set<string>();
+    for (const key of allObjectiveKeys) {
+      if (seenKeys.has(key)) {
+        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${key}': duplicate key reference in success/negative canonical key lists.`,
+        );
+      }
+      seenKeys.add(key);
+    }
+
+    for (const canonicalKey of allObjectiveKeys) {
+      if (input.compatibilityAliasOnlyKeySet.has(canonicalKey)) {
+        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${canonicalKey}': compatibility-only alias keys are lookup-only and cannot be objective canonical defaults.`,
+          {
+            details: {
+              objective_id: objectiveRow.objective_id,
+              key: canonicalKey,
+            },
+          },
+        );
+      }
+
+      if (!input.manifestCanonicalKeySet.has(canonicalKey)) {
+        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${canonicalKey}': missing from default_first_slice_seed_usage.include_only_content_keys.`,
+          {
+            details: {
+              objective_id: objectiveRow.objective_id,
+              key: canonicalKey,
+            },
+          },
+        );
+      }
+
+      const narrativeRow = input.rowsByKey.get(canonicalKey);
+      if (narrativeRow === undefined) {
+        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${canonicalKey}': missing from narrative event feed seed rows.`,
+          {
+            details: {
+              objective_id: objectiveRow.objective_id,
+              key: canonicalKey,
+            },
+          },
+        );
+      }
+
+      const expectedTokens = requiredTokensByCanonicalKey.get(canonicalKey);
+      if (expectedTokens === undefined) {
+        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${canonicalKey}': missing required token contract row.`,
+          {
+            details: {
+              objective_id: objectiveRow.objective_id,
+              key: canonicalKey,
+            },
+          },
+        );
+      }
+
+      const actualTokens = [...narrativeRow.tokens];
+      const actualTokenSet = new Set(actualTokens);
+      const expectedTokenSet = new Set(expectedTokens);
+      const missingTokens = toUniqueSorted(
+        expectedTokens.filter((token) => !actualTokenSet.has(token)),
+      );
+      const unexpectedTokens = toUniqueSorted(
+        actualTokens.filter((token) => !expectedTokenSet.has(token)),
+      );
+      const maxComparableLength = Math.min(expectedTokens.length, actualTokens.length);
+      let orderDriftIndex = -1;
+      for (let i = 0; i < maxComparableLength; i += 1) {
+        if (expectedTokens[i] !== actualTokens[i]) {
+          orderDriftIndex = i;
+          break;
+        }
+      }
+      const hasOrderDrift = orderDriftIndex >= 0;
+      if (missingTokens.length > 0 || unexpectedTokens.length > 0 || hasOrderDrift) {
+        const orderDriftSummary = hasOrderDrift
+          ? `, first_order_drift_index=${orderDriftIndex}`
+          : "";
+        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${canonicalKey}': token requirements mismatch; missing_tokens=[${missingTokens.join(", ")}], unexpected_tokens=[${unexpectedTokens.join(", ")}], expected_tokens=[${expectedTokens.join(", ")}], actual_tokens=[${actualTokens.join(", ")}]${orderDriftSummary}.`,
+          {
+            details: {
+              objective_id: objectiveRow.objective_id,
+              key: canonicalKey,
+              missing_tokens: missingTokens,
+              unexpected_tokens: unexpectedTokens,
+              expected_tokens: expectedTokens,
+              actual_tokens: actualTokens,
+              first_order_drift_index: hasOrderDrift ? orderDriftIndex : undefined,
+            },
+          },
+        );
+      }
+    }
+  }
 }
 
 function toUniqueSorted(values: readonly string[]): string[] {

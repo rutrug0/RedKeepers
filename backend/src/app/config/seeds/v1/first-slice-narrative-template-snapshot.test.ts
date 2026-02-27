@@ -605,6 +605,148 @@ test("first-session objective steps include canonical success/failure placeholde
   }
 });
 
+test("createFirstSliceNarrativeTemplateSnapshotV1 fails when objective contract references key outside canonical default selection", async () => {
+  const narrativeSeedBundle = await loadNarrativeSeedBundleV1(
+    defaultPaths.narrative_seed_paths,
+  );
+  const manifest = await loadFirstSliceContentKeyManifestV1(
+    defaultPaths.first_slice_content_key_manifest_path!,
+  );
+  const objectiveId = "first_session.tick.observe_income.v1";
+  const outOfCanonicalSelectionKey = "event.world.gather_started";
+  const driftedObjectiveContract = firstSliceObjectiveStepOutcomeContractV1.map((row) =>
+    row.objective_id === objectiveId
+      ? {
+        ...row,
+        success_canonical_keys: [
+          outOfCanonicalSelectionKey,
+          ...row.success_canonical_keys.slice(1),
+        ],
+      }
+      : row
+  );
+
+  assert.throws(
+    () => {
+      createFirstSliceNarrativeTemplateSnapshotV1({
+        narrative_seed_bundle: narrativeSeedBundle,
+        first_slice_content_key_manifest: manifest,
+        objective_step_outcome_contract: driftedObjectiveContract,
+      });
+    },
+    (error) =>
+      error instanceof FirstSliceNarrativeTemplateSnapshotValidationError
+      && error.message.includes(objectiveId)
+      && error.message.includes(outOfCanonicalSelectionKey)
+      && error.message.includes("include_only_content_keys"),
+  );
+});
+
+test("createFirstSliceNarrativeTemplateSnapshotV1 fails when objective contract references compatibility alias-only key", async () => {
+  const narrativeSeedBundle = await loadNarrativeSeedBundleV1(
+    defaultPaths.narrative_seed_paths,
+  );
+  const manifest = await loadFirstSliceContentKeyManifestV1(
+    defaultPaths.first_slice_content_key_manifest_path!,
+  );
+  const objectiveId = "first_session.tick.observe_income.v1";
+  const compatibilityAliasKey = "event.economy.tick_passive_income";
+  const driftedObjectiveContract = firstSliceObjectiveStepOutcomeContractV1.map((row) =>
+    row.objective_id === objectiveId
+      ? {
+        ...row,
+        success_canonical_keys: [
+          compatibilityAliasKey,
+          ...row.success_canonical_keys.slice(1),
+        ],
+      }
+      : row
+  );
+
+  assert.throws(
+    () => {
+      createFirstSliceNarrativeTemplateSnapshotV1({
+        narrative_seed_bundle: narrativeSeedBundle,
+        first_slice_content_key_manifest: manifest,
+        objective_step_outcome_contract: driftedObjectiveContract,
+      });
+    },
+    (error) =>
+      error instanceof FirstSliceNarrativeTemplateSnapshotValidationError
+      && error.message.includes(objectiveId)
+      && error.message.includes(compatibilityAliasKey)
+      && error.message.includes("compatibility-only alias keys"),
+  );
+});
+
+test("createFirstSliceNarrativeTemplateSnapshotV1 fails when objective canonical key is missing from narrative seed rows", async () => {
+  const narrativeSeedBundle = await loadNarrativeSeedBundleV1(
+    defaultPaths.narrative_seed_paths,
+  );
+  const manifest = await loadFirstSliceContentKeyManifestV1(
+    defaultPaths.first_slice_content_key_manifest_path!,
+  );
+  const objectiveId = "first_session.train.complete_first_batch.v1";
+  const missingObjectiveKey = "event.train.started";
+  const driftedBundle = {
+    ...narrativeSeedBundle,
+    event_feed_messages: {
+      ...narrativeSeedBundle.event_feed_messages,
+      rows: narrativeSeedBundle.event_feed_messages.rows.filter((row) => row.key !== missingObjectiveKey),
+    },
+  };
+
+  assert.throws(
+    () => {
+      createFirstSliceNarrativeTemplateSnapshotV1({
+        narrative_seed_bundle: driftedBundle,
+        first_slice_content_key_manifest: manifest,
+      });
+    },
+    (error) =>
+      error instanceof FirstSliceNarrativeTemplateSnapshotValidationError
+      && error.message.includes(objectiveId)
+      && error.message.includes(missingObjectiveKey)
+      && error.message.includes("missing from narrative event feed seed rows"),
+  );
+});
+
+test("createFirstSliceNarrativeTemplateSnapshotV1 objective token diagnostics include missing token details", async () => {
+  const narrativeSeedBundle = await loadNarrativeSeedBundleV1(
+    defaultPaths.narrative_seed_paths,
+  );
+  const manifest = await loadFirstSliceContentKeyManifestV1(
+    defaultPaths.first_slice_content_key_manifest_path!,
+  );
+  const objectiveId = "first_session.train.complete_first_batch.v1";
+  const canonicalKey = "event.train.started";
+  const driftedBundle = {
+    ...narrativeSeedBundle,
+    event_feed_messages: {
+      ...narrativeSeedBundle.event_feed_messages,
+      rows: narrativeSeedBundle.event_feed_messages.rows.map((row) =>
+        row.key === canonicalKey
+          ? { ...row, tokens: row.tokens.filter((token) => token !== "quantity") }
+          : row
+      ),
+    },
+  };
+
+  assert.throws(
+    () => {
+      createFirstSliceNarrativeTemplateSnapshotV1({
+        narrative_seed_bundle: driftedBundle,
+        first_slice_content_key_manifest: manifest,
+      });
+    },
+    (error) =>
+      error instanceof FirstSliceNarrativeTemplateSnapshotValidationError
+      && error.message.includes(objectiveId)
+      && error.message.includes(canonicalKey)
+      && error.message.includes("missing_tokens=[quantity]"),
+  );
+});
+
 test("createFirstSliceNarrativeTemplateSnapshotV1 fails on missing canonical key coverage", async () => {
   const narrativeSeedBundle = await loadNarrativeSeedBundleV1(
     defaultPaths.narrative_seed_paths,
@@ -612,7 +754,17 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 fails on missing canonical key
   const manifest = await loadFirstSliceContentKeyManifestV1(
     defaultPaths.first_slice_content_key_manifest_path!,
   );
-  const canonicalToDrop = manifest.default_first_slice_seed_usage.include_only_content_keys[0];
+  const objectiveCanonicalKeys = new Set(
+    firstSliceObjectiveStepOutcomeContractV1.flatMap((row) => [
+      ...row.success_canonical_keys,
+      ...row.negative_canonical_keys,
+    ]),
+  );
+  const canonicalToDrop = manifest.default_first_slice_seed_usage.include_only_content_keys
+    .find((key) => !objectiveCanonicalKeys.has(key));
+  if (canonicalToDrop === undefined) {
+    throw new Error("Expected at least one canonical key not referenced by objective contract.");
+  }
   const driftedBundle = {
     ...narrativeSeedBundle,
     event_feed_messages: {
