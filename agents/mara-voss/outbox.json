@@ -3385,5 +3385,29 @@
       "agents/mara-voss/outbox.json"
     ],
     "proposed_work_items": []
+  },
+  {
+    "ts": "2026-02-27T14:33:03.5312924Z",
+    "item_id": "RK-AUTO-STALL-0014",
+    "status": "completed",
+    "summary": "Recovered dependency-stalled queue flow by requeueing RK-AUTO-BACKLOG-0011-F02 from blocked to queued after confirming dependencies were completed and the blocker note was transient.",
+    "queue_recovery": {
+      "consolidated_blocked_removed_ids": [
+        "RK-AUTO-BACKLOG-0011-F02"
+      ],
+      "made_dependency_ready_ids": [
+        "RK-AUTO-BACKLOG-0011-F02"
+      ],
+      "status_after": "queued=5 dependency_ready=1 running=1 blocked=22 completed=192"
+    },
+    "validation": [
+      "python tools/orchestrator.py status"
+    ],
+    "files": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "agents/mara-voss/outbox.json"
+    ],
+    "proposed_work_items": []
   }
 ]
