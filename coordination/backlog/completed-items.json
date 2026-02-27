@@ -7663,5 +7663,49 @@
     "runtime_seconds": 193.09,
     "started_at": "2026-02-27T12:15:44.990893+00:00",
     "finished_at": "2026-02-27T12:18:58.090178+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0009-F02",
+    "title": "Align narrative seed rows with canonical loop-event namespace matrix",
+    "description": "Update first-slice narrative seed rows so canonical loop-event namespaces and required tokens stay synchronized with the migration matrix while keeping alias keys compatibility-only.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0009-F01"
+    ],
+    "inputs": [
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "docs/design/first-slice-event-token-contract-matrix.md"
+    ],
+    "acceptance_criteria": [
+      "Canonical loop-event rows exist for tick/build/train/scout/hostile outcomes with token fields matching the migration matrix",
+      "Compatibility alias rows remain mapped to canonical keys and are not selected as default first-session keys",
+      "No out-of-scope mechanics or post-slice keys are added to default first-slice seed coverage"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T12:15:39.726072+00:00",
+    "updated_at": "2026-02-27T12:21:45.948887+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/nika-thorn/outbox.json](D:\\RedKeepers\\agents\\nika-thorn\\outbox.json): added `RK-AUTO-BACKLOG-0009-F02` outbox record with completion summary and follow-up proposal.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0009",
+    "assigned_agent": "nika-thorn",
+    "commit_sha": "e6082d7fc4d1745ae10553ae69894ecc275160e7",
+    "resolved_by_agent": "nika-thorn",
+    "resolved_by_role": "content",
+    "runtime_seconds": 159.23,
+    "started_at": "2026-02-27T12:19:05.171338+00:00",
+    "finished_at": "2026-02-27T12:21:44.406141+00:00"
   }
 ]

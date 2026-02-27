@@ -14,6 +14,16 @@ from git_guard import _normalize_validation_command
 from python_runtime import resolve_python_executable
 from schemas import load_json, load_yaml_like, validate_work_items
 
+HOSTILE_RUNTIME_TOKEN_CONTRACT_PATH = Path(
+    "backend/src/app/config/seeds/v1/narrative/first-slice-hostile-runtime-token-contract.json"
+)
+FIRST_SLICE_CONTENT_KEY_MANIFEST_PATH = Path(
+    "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+)
+EVENT_FEED_MESSAGES_PATH = Path(
+    "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+)
+
 
 def _validate_json_list(
     *,
@@ -252,6 +262,352 @@ def _validate_runtime_python_policy(*, errors: list[str], runtime_policy: Any) -
     )
 
 
+def _as_json_object(value: Any, *, label: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError(f"{label} must contain a JSON object.")
+    return value
+
+
+def _read_string_list(value: Any, *, label: str) -> list[str]:
+    if not isinstance(value, list):
+        raise ValueError(f"{label} must be a list.")
+    normalized: list[str] = []
+    for idx, entry in enumerate(value):
+        if not isinstance(entry, str) or len(entry.strip()) < 1:
+            raise ValueError(f"{label}[{idx}] must be a non-empty string.")
+        normalized.append(entry.strip())
+    return normalized
+
+
+def _append_hostile_contract_drift_error(
+    errors: list[str],
+    message: str,
+) -> None:
+    errors.append(f"first-slice-hostile-runtime-token-contract drift: {message}")
+
+
+def _validate_first_slice_hostile_runtime_token_contract_drift(*, errors: list[str], root: Path) -> None:
+    contract_path = root / HOSTILE_RUNTIME_TOKEN_CONTRACT_PATH
+    manifest_path = root / FIRST_SLICE_CONTENT_KEY_MANIFEST_PATH
+    event_feed_path = root / EVENT_FEED_MESSAGES_PATH
+    if not (contract_path.exists() and manifest_path.exists() and event_feed_path.exists()):
+        return
+
+    try:
+        contract = _as_json_object(
+            load_json(contract_path, {}),
+            label=str(HOSTILE_RUNTIME_TOKEN_CONTRACT_PATH),
+        )
+        manifest = _as_json_object(
+            load_json(manifest_path, {}),
+            label=str(FIRST_SLICE_CONTENT_KEY_MANIFEST_PATH),
+        )
+        event_feed = _as_json_object(
+            load_json(event_feed_path, {}),
+            label=str(EVENT_FEED_MESSAGES_PATH),
+        )
+    except Exception as exc:
+        _append_hostile_contract_drift_error(errors, f"failed loading validation inputs: {exc}")
+        return
+
+    try:
+        runtime_rows_raw = contract.get("required_runtime_keys")
+        if not isinstance(runtime_rows_raw, list):
+            raise ValueError("required_runtime_keys must be a list.")
+
+        runtime_rows: list[dict[str, Any]] = []
+        runtime_canonical_keys: list[str] = []
+        runtime_alias_keys: list[str] = []
+        for idx, raw_row in enumerate(runtime_rows_raw):
+            if not isinstance(raw_row, dict):
+                raise ValueError(f"required_runtime_keys[{idx}] must be an object.")
+            canonical_key = str(raw_row.get("canonical_key", "")).strip()
+            if len(canonical_key) < 1:
+                raise ValueError(f"required_runtime_keys[{idx}].canonical_key must be a non-empty string.")
+            required_tokens = _read_string_list(
+                raw_row.get("required_tokens"),
+                label=f"required_runtime_keys[{idx}].required_tokens",
+            )
+            compatibility_alias_keys = _read_string_list(
+                raw_row.get("compatibility_alias_keys"),
+                label=f"required_runtime_keys[{idx}].compatibility_alias_keys",
+            )
+            runtime_rows.append(
+                {
+                    "canonical_key": canonical_key,
+                    "required_tokens": required_tokens,
+                    "compatibility_alias_keys": compatibility_alias_keys,
+                }
+            )
+            runtime_canonical_keys.append(canonical_key)
+            runtime_alias_keys.extend(compatibility_alias_keys)
+
+        contract_alias_only_keys = _read_string_list(
+            contract.get("compatibility_alias_only_keys"),
+            label="compatibility_alias_only_keys",
+        )
+
+        deferred_contract_rows = contract.get("deferred_post_slice_keys_excluded_from_contract")
+        if not isinstance(deferred_contract_rows, list):
+            raise ValueError("deferred_post_slice_keys_excluded_from_contract must be a list.")
+        deferred_contract_keys: list[str] = []
+        for idx, row in enumerate(deferred_contract_rows):
+            if not isinstance(row, dict):
+                raise ValueError(f"deferred_post_slice_keys_excluded_from_contract[{idx}] must be an object.")
+            key = str(row.get("key", "")).strip()
+            if len(key) < 1:
+                raise ValueError(
+                    f"deferred_post_slice_keys_excluded_from_contract[{idx}].key must be a non-empty string."
+                )
+            deferred_contract_keys.append(key)
+
+        default_usage = _as_json_object(
+            manifest.get("default_first_slice_seed_usage"),
+            label="first-slice-content-key-manifest.default_first_slice_seed_usage",
+        )
+        manifest_default_canonical_keys = _read_string_list(
+            default_usage.get("include_only_content_keys"),
+            label="first-slice-content-key-manifest.default_first_slice_seed_usage.include_only_content_keys",
+        )
+
+        loop_required = _as_json_object(
+            manifest.get("loop_required_keys"),
+            label="first-slice-content-key-manifest.loop_required_keys",
+        )
+        manifest_hostile_loop_required_keys = _read_string_list(
+            loop_required.get("hostile_dispatch_and_resolve"),
+            label="first-slice-content-key-manifest.loop_required_keys.hostile_dispatch_and_resolve",
+        )
+
+        manifest_alias_only_keys = _read_string_list(
+            manifest.get("compatibility_alias_only_keys"),
+            label="first-slice-content-key-manifest.compatibility_alias_only_keys",
+        )
+
+        manifest_legacy_alias_mapping_raw = manifest.get("legacy_alias_mapping")
+        if not isinstance(manifest_legacy_alias_mapping_raw, list):
+            raise ValueError("first-slice-content-key-manifest.legacy_alias_mapping must be a list.")
+        manifest_alias_map: dict[str, list[str]] = {}
+        for idx, row in enumerate(manifest_legacy_alias_mapping_raw):
+            if not isinstance(row, dict):
+                raise ValueError(f"first-slice-content-key-manifest.legacy_alias_mapping[{idx}] must be an object.")
+            canonical_key = str(row.get("canonical_key", "")).strip()
+            if len(canonical_key) < 1:
+                raise ValueError(
+                    f"first-slice-content-key-manifest.legacy_alias_mapping[{idx}].canonical_key must be a non-empty string."
+                )
+            legacy_keys = _read_string_list(
+                row.get("legacy_keys"),
+                label=f"first-slice-content-key-manifest.legacy_alias_mapping[{idx}].legacy_keys",
+            )
+            manifest_alias_map[canonical_key] = legacy_keys
+
+        manifest_deferred_rows = manifest.get("deferred_post_slice_keys")
+        if not isinstance(manifest_deferred_rows, list):
+            raise ValueError("first-slice-content-key-manifest.deferred_post_slice_keys must be a list.")
+        manifest_deferred_keys: list[str] = []
+        for idx, row in enumerate(manifest_deferred_rows):
+            if not isinstance(row, dict):
+                raise ValueError(f"first-slice-content-key-manifest.deferred_post_slice_keys[{idx}] must be an object.")
+            key = str(row.get("key", "")).strip()
+            if len(key) < 1:
+                raise ValueError(
+                    f"first-slice-content-key-manifest.deferred_post_slice_keys[{idx}].key must be a non-empty string."
+                )
+            manifest_deferred_keys.append(key)
+
+        event_rows = event_feed.get("rows")
+        if not isinstance(event_rows, list):
+            raise ValueError("event-feed-messages.rows must be a list.")
+        event_tokens_by_key: dict[str, list[str]] = {}
+        for idx, row in enumerate(event_rows):
+            if not isinstance(row, dict):
+                raise ValueError(f"event-feed-messages.rows[{idx}] must be an object.")
+            key = str(row.get("key", "")).strip()
+            if len(key) < 1:
+                raise ValueError(f"event-feed-messages.rows[{idx}].key must be a non-empty string.")
+            event_tokens_by_key[key] = _read_string_list(
+                row.get("tokens"),
+                label=f"event-feed-messages.rows[{idx}].tokens",
+            )
+    except Exception as exc:
+        _append_hostile_contract_drift_error(errors, f"invalid contract/seed structure: {exc}")
+        return
+
+    manifest_hostile_required_set = set(manifest_hostile_loop_required_keys)
+    manifest_default_canonical_set = set(manifest_default_canonical_keys)
+    runtime_canonical_set = set(runtime_canonical_keys)
+    contract_alias_only_set = set(contract_alias_only_keys)
+    manifest_alias_only_set = set(manifest_alias_only_keys)
+    deferred_union = set(deferred_contract_keys).union(manifest_deferred_keys)
+
+    declared_aliases_by_runtime_rows = {alias for alias in runtime_alias_keys}
+    for canonical_key in runtime_canonical_keys:
+        if canonical_key not in manifest_hostile_required_set:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    f"canonical_key '{canonical_key}' is missing from "
+                    "first-slice-content-key-manifest.loop_required_keys.hostile_dispatch_and_resolve."
+                ),
+            )
+        if canonical_key not in event_tokens_by_key:
+            _append_hostile_contract_drift_error(
+                errors,
+                f"canonical_key '{canonical_key}' is missing from event-feed-messages rows.",
+            )
+
+    for row in runtime_rows:
+        canonical_key = row["canonical_key"]
+        required_tokens = row["required_tokens"]
+        compatibility_alias_keys = row["compatibility_alias_keys"]
+
+        if canonical_key in contract_alias_only_set:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    f"canonical_key '{canonical_key}' is declared in compatibility_alias_only_keys and cannot be "
+                    "selected as a direct default canonical key."
+                ),
+            )
+        if canonical_key in deferred_union:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    f"deferred key '{canonical_key}' appears in required_runtime_keys.canonical_key. "
+                    "Deferred hero/gather/ambush keys must remain excluded."
+                ),
+            )
+        if canonical_key in event_tokens_by_key:
+            event_tokens = event_tokens_by_key[canonical_key]
+            if event_tokens != required_tokens:
+                missing_tokens = sorted(set(required_tokens) - set(event_tokens))
+                extra_tokens = sorted(set(event_tokens) - set(required_tokens))
+                _append_hostile_contract_drift_error(
+                    errors,
+                    (
+                        f"token mismatch for canonical_key '{canonical_key}': "
+                        f"contract_tokens={required_tokens}, event_feed_tokens={event_tokens}, "
+                        f"missing_in_event_feed={missing_tokens}, extra_in_event_feed={extra_tokens}."
+                    ),
+                )
+
+        manifest_aliases_for_canonical = set(manifest_alias_map.get(canonical_key, []))
+        contract_aliases_for_canonical = set(compatibility_alias_keys)
+        missing_in_manifest_alias_mapping = sorted(contract_aliases_for_canonical - manifest_aliases_for_canonical)
+        if missing_in_manifest_alias_mapping:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    f"canonical_key '{canonical_key}' declares alias(es) not present in "
+                    f"first-slice-content-key-manifest.legacy_alias_mapping: {missing_in_manifest_alias_mapping}."
+                ),
+            )
+        missing_in_contract_alias_mapping = sorted(manifest_aliases_for_canonical - contract_aliases_for_canonical)
+        if missing_in_contract_alias_mapping:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    f"canonical_key '{canonical_key}' is missing alias(es) from hostile contract "
+                    f"that exist in first-slice-content-key-manifest.legacy_alias_mapping: {missing_in_contract_alias_mapping}."
+                ),
+            )
+
+        for alias_key in compatibility_alias_keys:
+            if alias_key in manifest_default_canonical_set:
+                _append_hostile_contract_drift_error(
+                    errors,
+                    (
+                        f"compatibility alias key '{alias_key}' is selected in "
+                        "first-slice-content-key-manifest.default_first_slice_seed_usage.include_only_content_keys."
+                    ),
+                )
+            if alias_key in runtime_canonical_set:
+                _append_hostile_contract_drift_error(
+                    errors,
+                    f"compatibility alias key '{alias_key}' appears as required_runtime_keys.canonical_key.",
+                )
+            if alias_key in deferred_union:
+                _append_hostile_contract_drift_error(
+                    errors,
+                    (
+                        f"deferred key '{alias_key}' appears in required_runtime_keys.compatibility_alias_keys. "
+                        "Deferred hero/gather/ambush keys must remain excluded."
+                    ),
+                )
+            if alias_key not in contract_alias_only_set:
+                _append_hostile_contract_drift_error(
+                    errors,
+                    f"compatibility alias key '{alias_key}' is not listed in contract compatibility_alias_only_keys.",
+                )
+            if alias_key not in manifest_alias_only_set:
+                _append_hostile_contract_drift_error(
+                    errors,
+                    (
+                        f"compatibility alias key '{alias_key}' is missing from "
+                        "first-slice-content-key-manifest.compatibility_alias_only_keys."
+                    ),
+                )
+            if alias_key not in event_tokens_by_key:
+                _append_hostile_contract_drift_error(
+                    errors,
+                    f"compatibility alias key '{alias_key}' is missing from event-feed-messages rows.",
+                )
+            else:
+                alias_tokens = event_tokens_by_key[alias_key]
+                if alias_tokens != required_tokens:
+                    _append_hostile_contract_drift_error(
+                        errors,
+                        (
+                            f"alias token mismatch for canonical_key '{canonical_key}' via alias '{alias_key}': "
+                            f"contract_tokens={required_tokens}, event_feed_tokens={alias_tokens}."
+                        ),
+                    )
+
+    for alias_key in contract_alias_only_keys:
+        if alias_key not in declared_aliases_by_runtime_rows:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    f"compatibility_alias_only_keys entry '{alias_key}' is not referenced by any "
+                    "required_runtime_keys.compatibility_alias_keys row."
+                ),
+            )
+        if alias_key in manifest_default_canonical_set:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    f"compatibility alias key '{alias_key}' is selected in "
+                    "first-slice-content-key-manifest.default_first_slice_seed_usage.include_only_content_keys."
+                ),
+            )
+        if alias_key in runtime_canonical_set:
+            _append_hostile_contract_drift_error(
+                errors,
+                f"compatibility alias key '{alias_key}' appears as required_runtime_keys.canonical_key.",
+            )
+
+    missing_contract_deferred_keys = sorted(set(manifest_deferred_keys) - set(deferred_contract_keys))
+    if missing_contract_deferred_keys:
+        _append_hostile_contract_drift_error(
+            errors,
+            (
+                "deferred_post_slice_keys_excluded_from_contract is missing keys declared in "
+                f"first-slice-content-key-manifest.deferred_post_slice_keys: {missing_contract_deferred_keys}."
+            ),
+        )
+
+    missing_manifest_deferred_keys = sorted(set(deferred_contract_keys) - set(manifest_deferred_keys))
+    if missing_manifest_deferred_keys:
+        _append_hostile_contract_drift_error(
+            errors,
+            (
+                "first-slice-content-key-manifest.deferred_post_slice_keys is missing keys declared in "
+                f"deferred_post_slice_keys_excluded_from_contract: {missing_manifest_deferred_keys}."
+            ),
+        )
+
+
 def validate_environment(root: Path) -> list[str]:
     errors: list[str] = []
     runtime_dir = root / "coordination" / "runtime"
@@ -342,6 +698,7 @@ def validate_environment(root: Path) -> list[str]:
 
     _validate_runtime_python_policy(errors=errors, runtime_policy=runtime_policy_rules)
     _validate_frontend_visual_qa_preflight(errors=errors, commit_rules=commit_guard_rules)
+    _validate_first_slice_hostile_runtime_token_contract_drift(errors=errors, root=root)
 
     codex_error = codex_command_preflight_error()
     if codex_error:
