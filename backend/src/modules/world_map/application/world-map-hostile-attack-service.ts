@@ -263,8 +263,11 @@ export class DeterministicWorldMapHostileAttackService
       occurred_at: new Date(dispatch.departed_at.getTime()),
       tokens: {
         army_name: armyName,
-        origin_settlement_name: sourceSettlementName,
         target_tile_label: targetTileLabel,
+        eta_seconds: resolveEtaSecondsToken({
+          departed_at: dispatch.departed_at,
+          arrives_at: dispatch.arrives_at,
+        }),
       },
     };
     const postCombatWorldNarrative = resolvePostCombatWorldNarrativeContent({
@@ -666,4 +669,15 @@ function isCoordinateWithinMapBounds(input: {
     && input.coordinate.y >= 0
     && input.coordinate.x < input.map_size
     && input.coordinate.y < input.map_size;
+}
+
+function resolveEtaSecondsToken(input: {
+  readonly departed_at: Date;
+  readonly arrives_at: Date;
+}): string {
+  const etaSeconds = Math.max(
+    0,
+    Math.trunc((input.arrives_at.getTime() - input.departed_at.getTime()) / 1000),
+  );
+  return `${etaSeconds}`;
 }

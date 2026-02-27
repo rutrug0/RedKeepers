@@ -2778,4 +2778,70 @@
       }
     ]
   }
+  ,
+  {
+    "ts": "2026-02-27T11:32:00.000000+00:00",
+    "item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC",
+    "status": "completed",
+    "summary": "Escalation analysis confirmed the source implementation is present but validation failed due pre-existing Node TypeScript runtime incompatibilities in world-map module imports/syntax, not due hostile token-contract logic regressions.",
+    "root_cause": "Work item RK-AUTO-BACKLOG-0007-F04-F01 used a validation command (`node --test ...world-map-hostile-attack-service.test.ts`) that cannot execute current backend world-map TypeScript modules in this runtime: default strip-only parsing rejects TypeScript parameter properties, and transform-types then fails on existing directory-import ESM resolution.",
+    "evidence": {
+      "run_history_entry": "coordination/runtime/run-history.jsonl:249",
+      "source_item_status": "coordination/backlog/blocked-items.json (RK-AUTO-BACKLOG-0007-F04-F01, retry_count=1, blocker_reason=retry threshold exceeded; escalated)",
+      "repro_command_1": "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts -> ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "repro_command_2": "node --experimental-transform-types --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts -> ERR_UNSUPPORTED_DIR_IMPORT",
+      "implementation_diff_observed": "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts + .test.ts include canonical dispatch tokens (army_name, target_tile_label, eta_seconds)"
+    },
+    "files": [
+      "agents/mara-voss/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "title": "Normalize world-map TypeScript runtime compatibility for direct Node test execution",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "high",
+        "inputs": [
+          "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+          "backend/src/modules/world_map/application/world-map-march-dispatch-service.ts",
+          "backend/src/modules/world_map/domain/",
+          "backend/src/modules/world_map/application/"
+        ],
+        "description": "Resolve pre-existing world-map TypeScript runtime incompatibilities so the canonical targeted hostile attack test command runs without syntax/import loader failures in this repo environment.",
+        "acceptance_criteria": [
+          "A canonical validation command for `world-map-hostile-attack-service.test.ts` executes without `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` and without `ERR_UNSUPPORTED_DIR_IMPORT`.",
+          "Any required import-path/syntax updates are limited to runtime compatibility and do not alter first-slice hostile gameplay behavior.",
+          "The selected command is documented in the work-item result for deterministic reuse."
+        ],
+        "validation_commands": [
+          "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
+        ]
+      },
+      {
+        "title": "Replay and close hostile dispatch canonical-token alignment after runtime compatibility fix",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "Normalize world-map TypeScript runtime compatibility for direct Node test execution"
+        ],
+        "inputs": [
+          "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+          "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "coordination/backlog/blocked-items.json"
+        ],
+        "description": "Re-apply/verify canonical hostile dispatch payload token emission (`army_name`, `target_tile_label`, `eta_seconds`) and close the blocked source item once runtime-compatible validation is available.",
+        "acceptance_criteria": [
+          "Dispatch runtime payload for `event.world.hostile_dispatch_en_route` includes canonical token fields required by first-slice contract.",
+          "Targeted hostile attack service test assertions cover canonical dispatch token shape and pass under the stabilized runtime command.",
+          "Blocked source item `RK-AUTO-BACKLOG-0007-F04-F01` is resolved (completed or cleanly superseded) to unblock dependent work."
+        ],
+        "validation_commands": [
+          "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
+  }
 ]

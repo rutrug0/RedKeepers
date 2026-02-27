@@ -1,78 +1,258 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0007-F04-F01",
-    "title": "Align hostile attack runtime payload tokens with canonical dispatch contract",
-    "description": "Update hostile dispatch runtime payload token emission so canonical `event.world.hostile_dispatch_en_route` templates render from canonical token fields (`army_name`, `target_tile_label`, `eta_seconds`) without relying on legacy alias-era token shapes.",
+    "id": "RK-AUTO-BACKLOG-0008-F01",
+    "title": "Publish machine-readable hostile runtime token contract for first-slice events",
+    "description": "Create a machine-readable hostile-loop runtime token contract artifact that locks canonical keys, required token fields, and compatibility aliases for first-slice dispatch/arrive/resolve/post-battle events.",
     "milestone": "M0",
     "type": "feature",
     "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F04-F01"
+    ],
+    "inputs": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "A machine-readable hostile token contract artifact exists and enumerates canonical hostile dispatch/resolve/post-battle keys required in first-slice runtime payloads",
+      "Each key defines required token names and compatibility alias expectations without promoting alias-only keys to default selection",
+      "Contract explicitly excludes deferred post-slice hero/gather/ambush keys and stays within first-vertical-slice scope"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:14:57.959007+00:00",
+    "updated_at": "2026-02-27T11:14:57.959007+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0008-F02",
+    "title": "Enforce hostile runtime payload token contract in backend attack service tests",
+    "description": "Apply hostile runtime token contract assertions to world-map hostile attack runtime payload emission so dispatch/arrival/combat events always include required canonical token fields.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
     "owner_role": "backend",
     "preferred_agent": null,
     "dependencies": [
-      "RK-AUTO-BACKLOG-0007-F04"
+      "RK-AUTO-BACKLOG-0007-F04-F01",
+      "RK-AUTO-BACKLOG-0008-F01"
     ],
     "inputs": [
       "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-      "docs/design/first-slice-event-token-contract-matrix.md"
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+      "docs/design/first-slice-hostile-runtime-token-contract.json"
     ],
     "acceptance_criteria": [
-      "Dispatch event payload includes `eta_seconds` token for `event.world.hostile_dispatch_en_route` in first-slice hostile flow",
-      "Runtime payload token names match canonical template token contract for dispatch events",
-      "Existing compatibility aliases remain optional lookup aids, not required for successful render token substitution"
+      "Hostile dispatch payload includes canonical required tokens (`army_name`, `target_tile_label`, `eta_seconds`) without requiring legacy alias token shapes",
+      "Hostile arrival/combat/post-battle runtime payload token sets match the machine-readable hostile token contract for canonical keys",
+      "Backend tests fail deterministically when hostile runtime payload keys or required token names drift"
     ],
     "validation_commands": [
       "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
     ],
     "status": "queued",
     "retry_count": 0,
-    "created_at": "2026-02-27T10:39:42.386023+00:00",
-    "updated_at": "2026-02-27T10:39:42.386023+00:00",
+    "created_at": "2026-02-27T11:14:57.959007+00:00",
+    "updated_at": "2026-02-27T11:14:57.959007+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "generated_by_agent": "nika-thorn",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04"
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0008",
-    "title": "Generate next backlog tranche",
-    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas. Prioritize fast cycle throughput: bias toward implementation tasks (backend/frontend/design/content/platform) and add dedicated QA/regression tasks only when risk is critical or release-blocking.",
+    "id": "RK-AUTO-BACKLOG-0008-F03",
+    "title": "Align hostile narrative seed templates with locked runtime token contract",
+    "description": "Update hostile-loop placeholder narrative seed rows so canonical first-slice hostile keys and token lists align with the locked runtime token contract while keeping aliases compatibility-only.",
     "milestone": "M0",
-    "type": "qa",
-    "priority": "high",
-    "owner_role": "lead",
-    "preferred_agent": "mara-voss",
-    "dependencies": [],
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0008-F01"
+    ],
     "inputs": [
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/completed-items.json",
-      "coordination/backlog/blocked-items.json",
-      "docs/design/first-vertical-slice.md",
-      "coordination/runtime/run-history.jsonl"
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "docs/design/first-slice-hostile-runtime-token-contract.json"
     ],
     "acceptance_criteria": [
-      "At least 3 new queued tasks are created or requeued",
-      "Each task has owner_role, dependencies, and acceptance criteria",
-      "Tasks reflect current project priorities and unblock progress",
-      "Generated tranche is implementation-heavy; non-critical QA/lead coordination tasks are minimized",
-      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
+      "Hostile-loop canonical content keys in narrative seeds match required token names from the hostile runtime token contract",
+      "Alias-only hostile keys remain supported for compatibility lookup but are not introduced into default first-session canonical selection",
+      "No new out-of-scope mechanics or post-slice keys are introduced into first-slice default seed usage"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:14:57.959007+00:00",
+    "updated_at": "2026-02-27T11:14:57.959007+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0008-F04",
+    "title": "Use hostile token contract for deterministic frontend event-feed rendering",
+    "description": "Update frontend hostile event-feed key/token handling to consume the hostile runtime token contract so canonical hostile keys render deterministically and alias handling stays compatibility-only.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0008-F02",
+      "RK-AUTO-BACKLOG-0008-F03"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "client-web/first-slice-manifest-snapshot.js",
+      "docs/design/first-slice-hostile-runtime-token-contract.json"
+    ],
+    "acceptance_criteria": [
+      "Frontend hostile dispatch/arrival/combat/post-battle feed rendering resolves canonical hostile keys and expected token substitutions without missing-template markers",
+      "Legacy hostile alias keys resolve through deterministic compatibility mapping and do not override canonical default key selection",
+      "When hostile payload tokens are incomplete, frontend fallback messaging remains deterministic and action-scoped"
     ],
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "validating",
+    "status": "queued",
     "retry_count": 0,
-    "created_at": "2026-02-27T11:07:21.174570+00:00",
-    "updated_at": "2026-02-27T11:14:56.207370+00:00",
+    "created_at": "2026-02-27T11:14:57.959507+00:00",
+    "updated_at": "2026-02-27T11:14:57.959507+00:00",
     "estimated_effort": "S",
-    "token_budget": 12000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "backlog_refill",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0008-F05",
+    "title": "Add hostile token-contract stage to first-slice release gate runner",
+    "description": "Extend the single-command first-slice release gate to run a dedicated hostile token-contract validation stage and include its disposition in gate evidence output.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0008-F04"
+    ],
+    "inputs": [
+      "tools/first_slice_release_gate_runner.py",
+      "docs/operations/first-slice-release-gate.md",
+      "coordination/runtime/first-slice-release-gate/"
+    ],
+    "acceptance_criteria": [
+      "Release gate runner executes a hostile token-contract validation stage in deterministic order with existing playable/quality/platform stages",
+      "Gate evidence artifacts include explicit PASS/FAIL summary for hostile token-contract validation",
+      "Runner exits non-zero when hostile token-contract stage fails"
+    ],
+    "validation_commands": [
+      "python tools/first_slice_release_gate_runner.py"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:14:57.959507+00:00",
+    "updated_at": "2026-02-27T11:14:57.959507+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0008-F06",
+    "title": "Run release-blocking hostile token-contract gate and publish evidence",
+    "description": "Execute the updated first-slice release gate (including hostile token-contract stage) and publish disposition evidence with owner-tagged blockers for any failing stage.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0008-F05"
+    ],
+    "inputs": [
+      "tools/first_slice_release_gate_runner.py",
+      "coordination/runtime/first-slice-release-gate/",
+      "docs/design/vertical-slice-done-v1.md"
+    ],
+    "acceptance_criteria": [
+      "Gate run records PASS/FAIL for playable, quality, platform, and hostile token-contract stages in evidence artifacts",
+      "Any failing stage is documented with actionable blocker ownership rather than generic failure text",
+      "Evidence links and disposition summary are published in the run result for daemon operators"
+    ],
+    "validation_commands": [
+      "python tools/first_slice_release_gate_runner.py",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:14:57.959507+00:00",
+    "updated_at": "2026-02-27T11:14:57.959507+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC",
+    "title": "Escalation: Align hostile attack runtime payload tokens with canonical dispatch contract",
+    "description": "Investigate repeated failure for item RK-AUTO-BACKLOG-0007-F04-F01. Reason: retry threshold exceeded",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "validating",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:18:40.646889+00:00",
+    "updated_at": "2026-02-27T11:21:12.886218+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-AUTO-BACKLOG-0007-F04-F01",
     "assigned_agent": "mara-voss"
   }
 ]

@@ -2237,4 +2237,30 @@
 
                                 ]
     }
+,
+    {
+        "timestamp_utc":  "2026-02-27T11:18:01.1267870Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0007-F04-F01",
+        "status":  "done",
+        "summary":  "Aligned hostile dispatch runtime payload tokens with canonical `event.world.hostile_dispatch_en_route` contract by emitting `army_name`, `target_tile_label`, and computed `eta_seconds`, and added deterministic test coverage for the dispatch token payload shape.",
+        "changed_files":  [
+                              "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+                              "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+                                    "node --experimental-strip-types --check backend/src/modules/world_map/application/world-map-hostile-attack-service.ts backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "The requested `node --test` command is blocked in this environment by existing TypeScript/ESM runtime constraints (`ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` for parameter properties, then `ERR_UNSUPPORTED_DIR_IMPORT` when transform-types is enabled). Strip-types static checks passed for both touched files."
+                    },
+        "proposed_work_items":  [
+
+                                ]
+    }
 ]

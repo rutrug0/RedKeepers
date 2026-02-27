@@ -101,6 +101,14 @@ test("hostile attack service resolves deterministic attacker-win losses and pers
     response.event_payloads.dispatch_sent.content_key_aliases,
     ["event.world.march_started"],
   );
+  assert.deepStrictEqual(
+    response.event_payloads.dispatch_sent.tokens,
+    {
+      army_name: "Raid Column",
+      target_tile_label: "Ruin Holdfast",
+      eta_seconds: "90",
+    },
+  );
   assert.equal(
     response.event_payloads.march_arrived.content_key,
     "event.world.hostile_post_battle_returned",
