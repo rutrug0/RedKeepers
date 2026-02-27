@@ -1,13 +1,19 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
-import type { HeroAssignmentContextOwnershipReadRepositories } from "../../heroes/ports";
-import { InMemoryHeroRuntimePersistenceRepository } from "../../heroes/infra";
-import { InMemoryWorldMapMarchStateRepository } from "../infra";
+import type {
+  HeroAssignmentContextOwnershipReadRepositories,
+} from "../../heroes/ports/hero-runtime-persistence-repository.ts";
+import {
+  InMemoryHeroRuntimePersistenceRepository,
+} from "../../heroes/infra/in-memory-hero-runtime-persistence-repository.ts";
+import {
+  InMemoryWorldMapMarchStateRepository,
+} from "../infra/in-memory-world-map-march-state-repository.ts";
 import {
   DeterministicWorldMapMarchDispatchService,
   WorldMapMarchDispatchOperationError,
-} from "./world-map-march-dispatch-service";
+} from "./world-map-march-dispatch-service.ts";
 
 test("dispatch rejects hero attachment with feature_not_in_slice when hero attachment gate is disabled", () => {
   const marchRepository = new InMemoryWorldMapMarchStateRepository();

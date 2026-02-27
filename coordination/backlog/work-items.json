@@ -225,44 +225,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0008"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F02",
-    "title": "Replay and close hostile dispatch canonical-token alignment after runtime compatibility fix",
-    "description": "Re-apply/verify canonical hostile dispatch payload token emission (`army_name`, `target_tile_label`, `eta_seconds`) and close the blocked source item once runtime-compatible validation is available.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
-      "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
-      "docs/design/first-slice-event-token-contract-matrix.md",
-      "coordination/backlog/blocked-items.json"
-    ],
-    "acceptance_criteria": [
-      "Dispatch runtime payload for `event.world.hostile_dispatch_en_route` includes canonical token fields required by first-slice contract.",
-      "Targeted hostile attack service test assertions cover canonical dispatch token shape and pass under the stabilized runtime command.",
-      "Blocked source item `RK-AUTO-BACKLOG-0007-F04-F01` is resolved (completed or cleanly superseded) to unblock dependent work."
-    ],
-    "validation_commands": [
-      "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T11:21:14.869554+00:00",
-    "updated_at": "2026-02-27T11:32:01.507791+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01",
     "title": "Normalize remaining world-map TypeScript ESM/runtime compatibility for direct Node test runs",
     "description": "Apply the same import-specifier and constructor-syntax compatibility rules across the remaining world-map module test targets so direct `node --test` execution is deterministic without environment-specific loader flags.",
@@ -280,16 +242,17 @@
       "Changes remain compatibility-focused and do not alter first-slice gameplay outcomes."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T11:26:16.197580+00:00",
-    "updated_at": "2026-02-27T11:26:16.197580+00:00",
+    "updated_at": "2026-02-27T11:35:32.452481+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01",
+    "assigned_agent": "ilya-fen"
   }
 ]
