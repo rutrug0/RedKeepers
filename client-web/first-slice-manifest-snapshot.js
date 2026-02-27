@@ -13,6 +13,10 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
       "path": "backend/src/app/config/seeds/v1/narrative/first-slice-narrative-template-snapshot.lock.json",
       "manifest_id": "first_slice_content_key_manifest_v1",
       "snapshot_id": "first_slice_narrative_template_snapshot_v1"
+    },
+    "hostile_runtime_tokens": {
+      "path": "backend/src/app/config/seeds/v1/narrative/first-slice-hostile-runtime-token-contract.json",
+      "contract_id": "first_slice_hostile_runtime_token_contract_v1"
     }
   },
   "playable": {
@@ -232,6 +236,246 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
         ]
       }
     ],
+    "hostile_runtime_token_contract": {
+      "contract_id": "first_slice_hostile_runtime_token_contract_v1",
+      "scope_contract": {
+        "default_selection_policy": {
+          "canonical_keys_only": true,
+          "direct_default_selection_excludes_alias_only_keys": true
+        },
+        "alias_lookup_contract": {
+          "deterministic_resolution_order": [
+            "canonical_key",
+            "legacy_keys_in_declared_order"
+          ],
+          "alias_keys_are_lookup_only": true
+        }
+      },
+      "required_runtime_keys": [
+        {
+          "phase": "dispatch",
+          "canonical_key": "event.world.hostile_foreign_settlement_spotted",
+          "required_tokens": [
+            "target_tile_label"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "dispatch",
+          "canonical_key": "event.world.hostile_dispatch_target_required",
+          "required_tokens": [],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "dispatch",
+          "canonical_key": "event.world.hostile_dispatch_accepted",
+          "required_tokens": [
+            "army_name",
+            "origin_settlement_name",
+            "target_tile_label"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "dispatch",
+          "canonical_key": "event.world.hostile_dispatch_en_route",
+          "required_tokens": [
+            "army_name",
+            "target_tile_label",
+            "eta_seconds"
+          ],
+          "compatibility_alias_keys": [
+            "event.world.march_started"
+          ]
+        },
+        {
+          "phase": "dispatch",
+          "canonical_key": "event.world.hostile_dispatch_failed",
+          "required_tokens": [
+            "error_code",
+            "target_tile_label",
+            "message"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "dispatch",
+          "canonical_key": "event.world.hostile_dispatch_failed_source_target_not_foreign",
+          "required_tokens": [
+            "source_settlement_name"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "dispatch",
+          "canonical_key": "event.world.hostile_dispatch_failed_max_active_marches_reached",
+          "required_tokens": [
+            "source_settlement_name"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "dispatch",
+          "canonical_key": "event.world.hostile_dispatch_failed_path_blocked_impassable",
+          "required_tokens": [
+            "target_tile_label"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "dispatch",
+          "canonical_key": "event.world.hostile_dispatch_failed_march_already_exists",
+          "required_tokens": [
+            "march_id"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "arrive",
+          "canonical_key": "event.world.hostile_march_arrived_outer_works",
+          "required_tokens": [
+            "army_name",
+            "target_tile_label"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "arrive",
+          "canonical_key": "event.world.hostile_march_arrived_gate_contested",
+          "required_tokens": [
+            "army_name",
+            "target_tile_label"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "resolve",
+          "canonical_key": "event.combat.hostile_resolve_attacker_win",
+          "required_tokens": [
+            "army_name",
+            "target_tile_label"
+          ],
+          "compatibility_alias_keys": [
+            "event.combat.placeholder_skirmish_win"
+          ]
+        },
+        {
+          "phase": "resolve",
+          "canonical_key": "event.combat.hostile_resolve_defender_win",
+          "required_tokens": [
+            "army_name",
+            "target_tile_label"
+          ],
+          "compatibility_alias_keys": [
+            "event.combat.placeholder_skirmish_loss"
+          ]
+        },
+        {
+          "phase": "resolve",
+          "canonical_key": "event.combat.hostile_resolve_tie_defender_holds",
+          "required_tokens": [
+            "target_tile_label"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "resolve",
+          "canonical_key": "event.combat.hostile_loss_report",
+          "required_tokens": [
+            "attacker_units_lost",
+            "attacker_units_dispatched",
+            "defender_garrison_lost",
+            "defender_strength"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "resolve",
+          "canonical_key": "event.combat.hostile_garrison_broken",
+          "required_tokens": [
+            "target_tile_label"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "resolve",
+          "canonical_key": "event.combat.hostile_counterfire_heavy",
+          "required_tokens": [],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "post_battle",
+          "canonical_key": "event.world.hostile_retreat_ordered",
+          "required_tokens": [
+            "army_name",
+            "target_tile_label",
+            "settlement_name"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "post_battle",
+          "canonical_key": "event.world.hostile_retreat_in_motion",
+          "required_tokens": [
+            "army_name"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "post_battle",
+          "canonical_key": "event.world.hostile_retreat_completed",
+          "required_tokens": [
+            "army_name",
+            "settlement_name",
+            "attacker_units_remaining"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "post_battle",
+          "canonical_key": "event.world.hostile_defeat_force_shattered",
+          "required_tokens": [
+            "target_tile_label",
+            "army_name"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "post_battle",
+          "canonical_key": "event.world.hostile_defeat_command_silent",
+          "required_tokens": [
+            "army_name"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "post_battle",
+          "canonical_key": "event.world.hostile_post_battle_return_started",
+          "required_tokens": [
+            "army_name",
+            "settlement_name"
+          ],
+          "compatibility_alias_keys": []
+        },
+        {
+          "phase": "post_battle",
+          "canonical_key": "event.world.hostile_post_battle_returned",
+          "required_tokens": [
+            "army_name",
+            "settlement_name"
+          ],
+          "compatibility_alias_keys": [
+            "event.world.march_returned"
+          ]
+        }
+      ],
+      "compatibility_alias_only_keys": [
+        "event.world.march_started",
+        "event.world.march_returned",
+        "event.combat.placeholder_skirmish_win",
+        "event.combat.placeholder_skirmish_loss"
+      ]
+    },
     "default_first_session_narrative_templates": {
       "snapshot_id": "first_slice_narrative_template_snapshot_v1",
       "manifest_id": "first_slice_content_key_manifest_v1",

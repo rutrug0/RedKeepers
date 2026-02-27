@@ -123,6 +123,31 @@
 
     const playableSourceManifest = readSourceManifest("playable");
     const contentKeySourceManifest = readSourceManifest("content_keys");
+    const readHostileRuntimeTokenSourceManifest = () => {
+      const sourceManifest = sourceManifests.hostile_runtime_tokens;
+      if (!sourceManifest || typeof sourceManifest !== "object") {
+        throw new Error(
+          `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.source_manifests.hostile_runtime_tokens`,
+        );
+      }
+      const sourceManifestPath = String(sourceManifest.path || "").trim();
+      if (sourceManifestPath.length < 1) {
+        throw new Error(
+          `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.source_manifests.hostile_runtime_tokens.path`,
+        );
+      }
+      const sourceContractId = String(sourceManifest.contract_id || "").trim();
+      if (!stableIdPattern.test(sourceContractId)) {
+        throw new Error(
+          `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.source_manifests.hostile_runtime_tokens.contract_id`,
+        );
+      }
+      return {
+        path: sourceManifestPath,
+        contract_id: sourceContractId,
+      };
+    };
+    const hostileRuntimeTokenSourceManifest = readHostileRuntimeTokenSourceManifest();
     const canonicalPlayableNow = playableManifest.canonical_playable_now;
     if (!canonicalPlayableNow || typeof canonicalPlayableNow !== "object") {
       throw new Error(
@@ -198,6 +223,211 @@
         legacy_keys: Object.freeze(legacyKeys),
       });
     });
+    const hostileRuntimeTokenContractRaw = contentKeyManifest.hostile_runtime_token_contract;
+    if (!hostileRuntimeTokenContractRaw || typeof hostileRuntimeTokenContractRaw !== "object") {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract`,
+      );
+    }
+    const hostileRuntimeTokenContractId = String(
+      hostileRuntimeTokenContractRaw.contract_id || "",
+    ).trim();
+    if (!stableIdPattern.test(hostileRuntimeTokenContractId)) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.contract_id`,
+      );
+    }
+    if (hostileRuntimeTokenContractId !== hostileRuntimeTokenSourceManifest.contract_id) {
+      throw new Error(
+        `Snapshot contract mismatch: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.contract_id`,
+      );
+    }
+    const hostileRuntimeScopeContract = hostileRuntimeTokenContractRaw.scope_contract;
+    if (!hostileRuntimeScopeContract || typeof hostileRuntimeScopeContract !== "object") {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.scope_contract`,
+      );
+    }
+    const hostileRuntimeDefaultSelectionPolicy = hostileRuntimeScopeContract.default_selection_policy;
+    if (
+      !hostileRuntimeDefaultSelectionPolicy
+      || typeof hostileRuntimeDefaultSelectionPolicy !== "object"
+    ) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.scope_contract.default_selection_policy`,
+      );
+    }
+    const hostileRuntimeCanonicalKeysOnly =
+      hostileRuntimeDefaultSelectionPolicy.canonical_keys_only;
+    if (hostileRuntimeCanonicalKeysOnly !== true) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.scope_contract.default_selection_policy.canonical_keys_only`,
+      );
+    }
+    const hostileRuntimeDirectDefaultSelectionExcludesAliasOnlyKeys =
+      hostileRuntimeDefaultSelectionPolicy.direct_default_selection_excludes_alias_only_keys;
+    if (hostileRuntimeDirectDefaultSelectionExcludesAliasOnlyKeys !== true) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.scope_contract.default_selection_policy.direct_default_selection_excludes_alias_only_keys`,
+      );
+    }
+    const hostileRuntimeAliasLookupContract =
+      hostileRuntimeScopeContract.alias_lookup_contract;
+    if (!hostileRuntimeAliasLookupContract || typeof hostileRuntimeAliasLookupContract !== "object") {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.scope_contract.alias_lookup_contract`,
+      );
+    }
+    const hostileRuntimeDeterministicResolutionOrderRaw =
+      hostileRuntimeAliasLookupContract.deterministic_resolution_order;
+    if (
+      !Array.isArray(hostileRuntimeDeterministicResolutionOrderRaw)
+      || hostileRuntimeDeterministicResolutionOrderRaw.length < 1
+    ) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.scope_contract.alias_lookup_contract.deterministic_resolution_order`,
+      );
+    }
+    const hostileRuntimeDeterministicResolutionOrder =
+      hostileRuntimeDeterministicResolutionOrderRaw.map((token, tokenIndex) => {
+        const normalizedToken = String(token || "").trim();
+        if (normalizedToken.length < 1) {
+          throw new Error(
+            `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.scope_contract.alias_lookup_contract.deterministic_resolution_order[${tokenIndex}]`,
+          );
+        }
+        return normalizedToken;
+      });
+    if (
+      hostileRuntimeDeterministicResolutionOrder.length !== 2
+      || hostileRuntimeDeterministicResolutionOrder[0] !== "canonical_key"
+      || hostileRuntimeDeterministicResolutionOrder[1] !== "legacy_keys_in_declared_order"
+    ) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.scope_contract.alias_lookup_contract.deterministic_resolution_order`,
+      );
+    }
+    const hostileRuntimeAliasKeysAreLookupOnly =
+      hostileRuntimeAliasLookupContract.alias_keys_are_lookup_only;
+    if (hostileRuntimeAliasKeysAreLookupOnly !== true) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.scope_contract.alias_lookup_contract.alias_keys_are_lookup_only`,
+      );
+    }
+    const hostileRuntimeCompatibilityAliasOnlyKeysRaw =
+      hostileRuntimeTokenContractRaw.compatibility_alias_only_keys;
+    if (!Array.isArray(hostileRuntimeCompatibilityAliasOnlyKeysRaw)) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.compatibility_alias_only_keys`,
+      );
+    }
+    const hostileRuntimeCompatibilityAliasOnlyKeys =
+      hostileRuntimeCompatibilityAliasOnlyKeysRaw.map((aliasKey, aliasIndex) => {
+        const normalizedAliasKey = String(aliasKey || "").trim();
+        if (normalizedAliasKey.length < 1) {
+          throw new Error(
+            `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.compatibility_alias_only_keys[${aliasIndex}]`,
+          );
+        }
+        return normalizedAliasKey;
+      });
+    const hostileRuntimeRequiredRuntimeKeysRaw =
+      hostileRuntimeTokenContractRaw.required_runtime_keys;
+    if (
+      !Array.isArray(hostileRuntimeRequiredRuntimeKeysRaw)
+      || hostileRuntimeRequiredRuntimeKeysRaw.length < 1
+    ) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys`,
+      );
+    }
+    const hostileRuntimeRequiredCanonicalKeySet = new Set();
+    const hostileRuntimeDeclaredAliasKeySet = new Set();
+    const hostileRuntimeRequiredRuntimeKeys =
+      hostileRuntimeRequiredRuntimeKeysRaw.map((row, rowIndex) => {
+        if (!row || typeof row !== "object") {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys[${rowIndex}]`,
+          );
+        }
+        const phase = String(row.phase || "").trim();
+        if (phase.length < 1) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys[${rowIndex}].phase`,
+          );
+        }
+        const canonicalKey = String(row.canonical_key || "").trim();
+        if (canonicalKey.length < 1) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys[${rowIndex}].canonical_key`,
+          );
+        }
+        if (hostileRuntimeRequiredCanonicalKeySet.has(canonicalKey)) {
+          throw new Error(
+            `Invalid snapshot row: duplicate canonical key '${canonicalKey}' in ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys`,
+          );
+        }
+        hostileRuntimeRequiredCanonicalKeySet.add(canonicalKey);
+        if (!includeOnlyContentKeys.includes(canonicalKey)) {
+          throw new Error(
+            `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys[${rowIndex}].canonical_key must exist in include_only_content_keys`,
+          );
+        }
+        if (!Array.isArray(row.required_tokens)) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys[${rowIndex}].required_tokens`,
+          );
+        }
+        const requiredTokens = row.required_tokens.map((token, tokenIndex) => {
+          const normalizedToken = String(token || "").trim();
+          if (normalizedToken.length < 1) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys[${rowIndex}].required_tokens[${tokenIndex}]`,
+            );
+          }
+          return normalizedToken;
+        });
+        if (!Array.isArray(row.compatibility_alias_keys)) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys[${rowIndex}].compatibility_alias_keys`,
+          );
+        }
+        const compatibilityAliasKeys = row.compatibility_alias_keys.map((aliasKey, aliasIndex) => {
+          const normalizedAliasKey = String(aliasKey || "").trim();
+          if (normalizedAliasKey.length < 1) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys[${rowIndex}].compatibility_alias_keys[${aliasIndex}]`,
+            );
+          }
+          hostileRuntimeDeclaredAliasKeySet.add(normalizedAliasKey);
+          return normalizedAliasKey;
+        });
+        return Object.freeze({
+          phase,
+          canonical_key: canonicalKey,
+          required_tokens: Object.freeze(requiredTokens),
+          compatibility_alias_keys: Object.freeze(compatibilityAliasKeys),
+        });
+      });
+    for (const aliasKey of hostileRuntimeCompatibilityAliasOnlyKeys) {
+      if (!hostileRuntimeDeclaredAliasKeySet.has(aliasKey)) {
+        throw new Error(
+          `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.compatibility_alias_only_keys contains '${aliasKey}' which is missing in required_runtime_keys compatibility_alias_keys`,
+        );
+      }
+      if (includeOnlyContentKeys.includes(aliasKey)) {
+        throw new Error(
+          `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.compatibility_alias_only_keys contains canonical default key '${aliasKey}'`,
+        );
+      }
+    }
+    for (const aliasKey of hostileRuntimeDeclaredAliasKeySet) {
+      if (!hostileRuntimeCompatibilityAliasOnlyKeys.includes(aliasKey)) {
+        throw new Error(
+          `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.hostile_runtime_token_contract.required_runtime_keys compatibility alias '${aliasKey}' must be listed in compatibility_alias_only_keys`,
+        );
+      }
+    }
     const defaultFirstSessionNarrativeTemplatesRaw =
       contentKeyManifest.default_first_session_narrative_templates;
     if (
@@ -338,6 +568,7 @@
       source_manifests: Object.freeze({
         playable: Object.freeze(playableSourceManifest),
         content_keys: Object.freeze(contentKeySourceManifest),
+        hostile_runtime_tokens: Object.freeze(hostileRuntimeTokenSourceManifest),
       }),
       playable_manifest: Object.freeze({
         manifest_id: playableSourceManifest.manifest_id,
@@ -359,6 +590,25 @@
           include_only_content_keys: Object.freeze(includeOnlyContentKeys),
         }),
         legacy_alias_mapping: Object.freeze(legacyAliasMapping),
+        hostile_runtime_token_contract: Object.freeze({
+          contract_id: hostileRuntimeTokenContractId,
+          scope_contract: Object.freeze({
+            default_selection_policy: Object.freeze({
+              canonical_keys_only: true,
+              direct_default_selection_excludes_alias_only_keys: true,
+            }),
+            alias_lookup_contract: Object.freeze({
+              deterministic_resolution_order: Object.freeze(
+                hostileRuntimeDeterministicResolutionOrder,
+              ),
+              alias_keys_are_lookup_only: true,
+            }),
+          }),
+          required_runtime_keys: Object.freeze(hostileRuntimeRequiredRuntimeKeys),
+          compatibility_alias_only_keys: Object.freeze(
+            hostileRuntimeCompatibilityAliasOnlyKeys,
+          ),
+        }),
         default_first_session_narrative_templates: Object.freeze({
           snapshot_id: defaultFirstSessionNarrativeTemplateSnapshotId,
           manifest_id: defaultFirstSessionNarrativeTemplateManifestId,
@@ -410,6 +660,37 @@
     firstSliceManifestSnapshotSourceV1.playable_manifest;
   const firstSliceContentKeyManifestV1 =
     firstSliceManifestSnapshotSourceV1.content_key_manifest;
+  const firstSliceHostileRuntimeTokenContractV1 =
+    firstSliceContentKeyManifestV1.hostile_runtime_token_contract;
+  const firstSliceHostileRuntimeRequiredRowByCanonicalKey = Object.freeze(
+    firstSliceHostileRuntimeTokenContractV1.required_runtime_keys.reduce((lookup, row) => {
+      lookup[row.canonical_key] = row;
+      return lookup;
+    }, {}),
+  );
+  const firstSliceHostileRuntimeCanonicalKeySet = new Set(
+    firstSliceHostileRuntimeTokenContractV1.required_runtime_keys.map((row) => row.canonical_key),
+  );
+  const firstSliceHostileRuntimeCanonicalKeyCandidatesByLegacyAlias = Object.freeze(
+    firstSliceHostileRuntimeTokenContractV1.required_runtime_keys.reduce((lookup, row) => {
+      for (const legacyKey of row.compatibility_alias_keys) {
+        const normalizedLegacyKey = String(legacyKey || "").trim();
+        if (normalizedLegacyKey.length < 1) {
+          continue;
+        }
+        if (!Array.isArray(lookup[normalizedLegacyKey])) {
+          lookup[normalizedLegacyKey] = [];
+        }
+        if (!lookup[normalizedLegacyKey].includes(row.canonical_key)) {
+          lookup[normalizedLegacyKey].push(row.canonical_key);
+        }
+      }
+      return lookup;
+    }, {}),
+  );
+  const firstSliceHostileRuntimeCompatibilityAliasOnlyKeySet = new Set(
+    firstSliceHostileRuntimeTokenContractV1.compatibility_alias_only_keys,
+  );
   const firstSliceDefaultFirstSessionNarrativeTemplatesV1 =
     firstSliceContentKeyManifestV1.default_first_session_narrative_templates;
   const firstSliceNarrativeTemplateRowsByContentKey =
@@ -1658,6 +1939,38 @@
     }
     return "";
   };
+  const resolveCanonicalHostileRuntimeEventKeyFromLegacyAlias = (legacyAliasKey) => {
+    const normalizedLegacyAlias = normalizeManifestEventContentKey(legacyAliasKey);
+    if (normalizedLegacyAlias.length < 1) {
+      return "";
+    }
+    if (!firstSliceHostileRuntimeCompatibilityAliasOnlyKeySet.has(normalizedLegacyAlias)) {
+      return "";
+    }
+    const canonicalCandidates =
+      firstSliceHostileRuntimeCanonicalKeyCandidatesByLegacyAlias[normalizedLegacyAlias];
+    if (!Array.isArray(canonicalCandidates) || canonicalCandidates.length < 1) {
+      return "";
+    }
+    for (const canonicalCandidate of canonicalCandidates) {
+      if (isManifestAllowedCanonicalEventContentKey(canonicalCandidate)) {
+        return canonicalCandidate;
+      }
+    }
+    return "";
+  };
+  const resolveCanonicalHostileRuntimeEventKey = (contentKey) => {
+    const normalizedContentKey = normalizeManifestEventContentKey(contentKey);
+    if (normalizedContentKey.length < 1) {
+      return "";
+    }
+    if (firstSliceHostileRuntimeCanonicalKeySet.has(normalizedContentKey)) {
+      return isManifestAllowedCanonicalEventContentKey(normalizedContentKey)
+        ? normalizedContentKey
+        : "";
+    }
+    return resolveCanonicalHostileRuntimeEventKeyFromLegacyAlias(normalizedContentKey);
+  };
   const resolveDeterministicFallbackEventContentKey = (contentKey) => {
     const normalizedContentKey = normalizeManifestEventContentKey(contentKey);
     if (
@@ -1693,6 +2006,10 @@
     const normalizedContentKey = normalizeManifestEventContentKey(contentKey);
     if (normalizedContentKey.length < 1) {
       return "";
+    }
+    const hostileCanonicalKey = resolveCanonicalHostileRuntimeEventKey(normalizedContentKey);
+    if (hostileCanonicalKey.length > 0) {
+      return hostileCanonicalKey;
     }
     if (isManifestAllowedCanonicalEventContentKey(normalizedContentKey)) {
       return normalizedContentKey;
@@ -1967,6 +2284,94 @@
       message: `Fallback narrative key applied for '${sourceContentKey}'.`,
     };
   };
+  const isMissingRequiredRuntimeTokenValue = (value) =>
+    value === undefined
+    || value === null
+    || (typeof value === "string" && value.trim().length < 1);
+  const resolveDeterministicHostileDispatchEtaSeconds = () => {
+    const homeMarker = resolveWorldMapHomeMarker();
+    const hostileMarker =
+      getWorldMapMarkerList().find((marker) => marker.target_kind === "hostile_settlement")
+      || resolveSelectedWorldMapMarker();
+    const distanceTiles = toMapMarkerDistance(homeMarker, hostileMarker);
+    return Math.max(0, distanceTiles * firstSliceWorldMapHostileDispatchFixture.seconds_per_tile);
+  };
+  const resolveDeterministicHostileRuntimeFallbackTokenValue = (
+    canonicalContentKey,
+    phase,
+    tokenName,
+  ) => {
+    const dispatchedUnitCount = firstSliceWorldMapHostileDispatchFixture.dispatched_units
+      .reduce((total, unit) => total + (Number(unit.unit_count) || 0), 0);
+    if (tokenName === "target_tile_label") {
+      return firstSliceForeignHostileProfile.target_tile_label;
+    }
+    if (tokenName === "army_name") {
+      return firstSliceWorldMapHostileDispatchFixture.army_name;
+    }
+    if (tokenName === "origin_settlement_name") {
+      return settlementActionRuntime.settlement_name;
+    }
+    if (tokenName === "source_settlement_name") {
+      return settlementActionRuntime.settlement_name;
+    }
+    if (tokenName === "settlement_name") {
+      return settlementActionRuntime.settlement_name;
+    }
+    if (tokenName === "eta_seconds") {
+      return resolveDeterministicHostileDispatchEtaSeconds();
+    }
+    if (tokenName === "error_code") {
+      return `missing_${phase}_token`;
+    }
+    if (tokenName === "message") {
+      return `Contract fallback (${phase}) applied for ${canonicalContentKey}.`;
+    }
+    if (tokenName === "march_id") {
+      return worldMapActionRuntime.hostile_dispatch_outcome?.march_id || "march_unknown";
+    }
+    if (tokenName === "attacker_units_lost") {
+      return 0;
+    }
+    if (tokenName === "attacker_units_dispatched") {
+      return dispatchedUnitCount;
+    }
+    if (tokenName === "defender_garrison_lost") {
+      return 0;
+    }
+    if (tokenName === "defender_strength") {
+      return Number(firstSliceForeignHostileProfile.defender_garrison_strength) || 0;
+    }
+    if (tokenName === "attacker_units_remaining") {
+      return dispatchedUnitCount;
+    }
+    return `missing_${tokenName}`;
+  };
+  const applyDeterministicHostileRuntimeTokenFallbacks = (contentKey, payload = {}) => {
+    const canonicalHostileKey = resolveCanonicalHostileRuntimeEventKey(contentKey);
+    const normalizedPayload = payload && typeof payload === "object"
+      ? { ...payload }
+      : {};
+    if (canonicalHostileKey.length < 1) {
+      return normalizedPayload;
+    }
+    const hostileContractRow =
+      firstSliceHostileRuntimeRequiredRowByCanonicalKey[canonicalHostileKey];
+    if (!hostileContractRow) {
+      return normalizedPayload;
+    }
+    for (const tokenName of hostileContractRow.required_tokens) {
+      if (!isMissingRequiredRuntimeTokenValue(normalizedPayload[tokenName])) {
+        continue;
+      }
+      normalizedPayload[tokenName] = resolveDeterministicHostileRuntimeFallbackTokenValue(
+        canonicalHostileKey,
+        hostileContractRow.phase,
+        tokenName,
+      );
+    }
+    return normalizedPayload;
+  };
 
   const appendEventFeedEntry = (entry) => {
     const eventScenario = getPopulatedEventScenario();
@@ -1997,22 +2402,24 @@
   };
 
   const mapPlaceholderEventTokens = (contentKey, payload) => {
-    if (!payload) {
-      return {};
-    }
+    const normalizedPayload = payload && typeof payload === "object"
+      ? payload
+      : {};
 
     if (contentKey === "event.tick.passive_income") {
-      const deltaById = payload.resource_delta_by_id || {};
-      return {
-        settlement_name: payload.settlement_name || settlementActionRuntime.settlement_name,
+      const deltaById = normalizedPayload.resource_delta_by_id || {};
+      return applyDeterministicHostileRuntimeTokenFallbacks(contentKey, {
+        settlement_name: normalizedPayload.settlement_name || settlementActionRuntime.settlement_name,
         food_gain: Number(deltaById.food) || 0,
         wood_gain: Number(deltaById.wood) || 0,
         stone_gain: Number(deltaById.stone) || 0,
         iron_gain: Number(deltaById.iron) || 0,
-      };
+      });
     }
 
-    return { ...payload };
+    return applyDeterministicHostileRuntimeTokenFallbacks(contentKey, {
+      ...normalizedPayload,
+    });
   };
 
   const syncSettlementScenarioFromRuntime = () => {

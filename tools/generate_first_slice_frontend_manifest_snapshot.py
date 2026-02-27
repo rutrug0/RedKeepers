@@ -32,6 +32,17 @@ NARRATIVE_TEMPLATE_SNAPSHOT_LOCK_PATH = (
     / "narrative"
     / "first-slice-narrative-template-snapshot.lock.json"
 )
+HOSTILE_RUNTIME_TOKEN_CONTRACT_PATH = (
+    ROOT
+    / "backend"
+    / "src"
+    / "app"
+    / "config"
+    / "seeds"
+    / "v1"
+    / "narrative"
+    / "first-slice-hostile-runtime-token-contract.json"
+)
 DEFAULT_OUTPUT_PATH = ROOT / "client-web" / "first-slice-manifest-snapshot.js"
 SNAPSHOT_GLOBAL_NAME = "__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__"
 
@@ -145,10 +156,55 @@ def _to_templates_by_key(values: dict[str, Any], *, label: str) -> dict[str, dic
     return templates
 
 
+def _read_required_bool(payload: dict[str, Any], key: str, *, label: str) -> bool:
+    value = payload.get(key)
+    if not isinstance(value, bool):
+        raise ValueError(f"Missing boolean '{key}' in {label}.")
+    return value
+
+
+def _to_hostile_runtime_required_key_rows(
+    values: list[Any], *, label: str
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    seen_canonical_keys: set[str] = set()
+    for idx, raw_row in enumerate(values):
+        if not isinstance(raw_row, dict):
+            raise ValueError(f"{label}[{idx}] must be an object.")
+        canonical_key = _read_required_string(
+            raw_row, "canonical_key", label=f"{label}[{idx}]"
+        )
+        if canonical_key in seen_canonical_keys:
+            raise ValueError(
+                f"{label}[{idx}] canonical_key '{canonical_key}' is duplicated."
+            )
+        seen_canonical_keys.add(canonical_key)
+        rows.append(
+            {
+                "phase": _read_required_string(raw_row, "phase", label=f"{label}[{idx}]"),
+                "canonical_key": canonical_key,
+                "required_tokens": _to_string_list(
+                    _read_required_array(
+                        raw_row, "required_tokens", label=f"{label}[{idx}]"
+                    ),
+                    label=f"{label}[{idx}].required_tokens",
+                ),
+                "compatibility_alias_keys": _to_string_list(
+                    _read_required_array(
+                        raw_row, "compatibility_alias_keys", label=f"{label}[{idx}]"
+                    ),
+                    label=f"{label}[{idx}].compatibility_alias_keys",
+                ),
+            }
+        )
+    return rows
+
+
 def _build_snapshot_payload(
     playable_manifest: dict[str, Any],
     content_key_manifest: dict[str, Any],
     narrative_template_snapshot: dict[str, Any],
+    hostile_runtime_token_contract: dict[str, Any],
 ) -> dict[str, Any]:
     playable_manifest_id = _read_required_string(
         playable_manifest,
@@ -252,6 +308,77 @@ def _build_snapshot_payload(
         ),
         label="legacy_alias_mapping",
     )
+    hostile_required_runtime_keys = _to_hostile_runtime_required_key_rows(
+        _read_required_array(
+            hostile_runtime_token_contract,
+            "required_runtime_keys",
+            label="first-slice-hostile-runtime-token-contract.json",
+        ),
+        label="required_runtime_keys",
+    )
+    if len(hostile_required_runtime_keys) < 1:
+        raise ValueError(
+            "first-slice-hostile-runtime-token-contract.json.required_runtime_keys must contain at least one row."
+        )
+    hostile_contract_id = _read_required_string(
+        hostile_runtime_token_contract,
+        "contract_id",
+        label="first-slice-hostile-runtime-token-contract.json",
+    )
+    hostile_compatibility_alias_only_keys = _to_string_list(
+        _read_required_array(
+            hostile_runtime_token_contract,
+            "compatibility_alias_only_keys",
+            label="first-slice-hostile-runtime-token-contract.json",
+        ),
+        label="compatibility_alias_only_keys",
+    )
+    hostile_scope_contract = _read_required_object(
+        hostile_runtime_token_contract,
+        "scope_contract",
+        label="first-slice-hostile-runtime-token-contract.json",
+    )
+    hostile_default_selection_policy = _read_required_object(
+        hostile_scope_contract,
+        "default_selection_policy",
+        label="first-slice-hostile-runtime-token-contract.json.scope_contract",
+    )
+    hostile_alias_lookup_contract = _read_required_object(
+        hostile_scope_contract,
+        "alias_lookup_contract",
+        label="first-slice-hostile-runtime-token-contract.json.scope_contract",
+    )
+    hostile_deterministic_resolution_order = _to_string_list(
+        _read_required_array(
+            hostile_alias_lookup_contract,
+            "deterministic_resolution_order",
+            label="first-slice-hostile-runtime-token-contract.json.scope_contract.alias_lookup_contract",
+        ),
+        label="scope_contract.alias_lookup_contract.deterministic_resolution_order",
+    )
+
+    include_only_content_key_set = set(include_only_content_keys)
+    declared_hostile_aliases = {
+        alias
+        for row in hostile_required_runtime_keys
+        for alias in row["compatibility_alias_keys"]
+    }
+    for row in hostile_required_runtime_keys:
+        canonical_key = row["canonical_key"]
+        if canonical_key not in include_only_content_key_set:
+            raise ValueError(
+                f"hostile runtime canonical key '{canonical_key}' must be included in default_first_slice_seed_usage.include_only_content_keys."
+            )
+    for alias_key in hostile_compatibility_alias_only_keys:
+        if alias_key not in declared_hostile_aliases:
+            raise ValueError(
+                f"hostile compatibility alias key '{alias_key}' is not referenced by any required_runtime_keys row."
+            )
+    for alias_key in declared_hostile_aliases:
+        if alias_key not in hostile_compatibility_alias_only_keys:
+            raise ValueError(
+                f"hostile required_runtime_keys alias '{alias_key}' must be listed in compatibility_alias_only_keys."
+            )
 
     return {
         "schema_version": "rk-v1-first-slice-manifest-snapshot",
@@ -268,6 +395,10 @@ def _build_snapshot_payload(
                 "path": "backend/src/app/config/seeds/v1/narrative/first-slice-narrative-template-snapshot.lock.json",
                 "manifest_id": narrative_snapshot_manifest_id,
                 "snapshot_id": narrative_snapshot_id,
+            },
+            "hostile_runtime_tokens": {
+                "path": "backend/src/app/config/seeds/v1/narrative/first-slice-hostile-runtime-token-contract.json",
+                "contract_id": hostile_contract_id,
             },
         },
         "playable": {
@@ -376,6 +507,33 @@ def _build_snapshot_payload(
                 "include_only_content_keys": include_only_content_keys,
             },
             "legacy_alias_mapping": legacy_alias_mapping,
+            "hostile_runtime_token_contract": {
+                "contract_id": hostile_contract_id,
+                "scope_contract": {
+                    "default_selection_policy": {
+                        "canonical_keys_only": _read_required_bool(
+                            hostile_default_selection_policy,
+                            "canonical_keys_only",
+                            label="first-slice-hostile-runtime-token-contract.json.scope_contract.default_selection_policy",
+                        ),
+                        "direct_default_selection_excludes_alias_only_keys": _read_required_bool(
+                            hostile_default_selection_policy,
+                            "direct_default_selection_excludes_alias_only_keys",
+                            label="first-slice-hostile-runtime-token-contract.json.scope_contract.default_selection_policy",
+                        ),
+                    },
+                    "alias_lookup_contract": {
+                        "deterministic_resolution_order": hostile_deterministic_resolution_order,
+                        "alias_keys_are_lookup_only": _read_required_bool(
+                            hostile_alias_lookup_contract,
+                            "alias_keys_are_lookup_only",
+                            label="first-slice-hostile-runtime-token-contract.json.scope_contract.alias_lookup_contract",
+                        ),
+                    },
+                },
+                "required_runtime_keys": hostile_required_runtime_keys,
+                "compatibility_alias_only_keys": hostile_compatibility_alias_only_keys,
+            },
             "default_first_session_narrative_templates": {
                 "snapshot_id": narrative_snapshot_id,
                 "manifest_id": narrative_snapshot_manifest_id,
@@ -417,10 +575,12 @@ def main() -> int:
         playable_manifest = _read_json_file(PLAYABLE_MANIFEST_PATH)
         content_key_manifest = _read_json_file(CONTENT_KEY_MANIFEST_PATH)
         narrative_template_snapshot = _read_json_file(NARRATIVE_TEMPLATE_SNAPSHOT_LOCK_PATH)
+        hostile_runtime_token_contract = _read_json_file(HOSTILE_RUNTIME_TOKEN_CONTRACT_PATH)
         payload = _build_snapshot_payload(
             playable_manifest,
             content_key_manifest,
             narrative_template_snapshot,
+            hostile_runtime_token_contract,
         )
         _write_snapshot_js(payload, output_path)
     except (ValueError, json.JSONDecodeError, OSError) as exc:
@@ -432,7 +592,8 @@ def main() -> int:
         f"Generated first-slice frontend manifest snapshot: {output_path}\n"
         f"playable manifest: {PLAYABLE_MANIFEST_PATH}\n"
         f"content-key manifest: {CONTENT_KEY_MANIFEST_PATH}\n"
-        f"narrative template snapshot: {NARRATIVE_TEMPLATE_SNAPSHOT_LOCK_PATH}"
+        f"narrative template snapshot: {NARRATIVE_TEMPLATE_SNAPSHOT_LOCK_PATH}\n"
+        f"hostile runtime token contract: {HOSTILE_RUNTIME_TOKEN_CONTRACT_PATH}"
     )
     return 0
 

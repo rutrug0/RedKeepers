@@ -7358,5 +7358,49 @@
     "runtime_seconds": 148.33,
     "started_at": "2026-02-27T11:45:46.905389+00:00",
     "finished_at": "2026-02-27T11:48:15.225332+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0008-F03",
+    "title": "Align hostile narrative seed templates with locked runtime token contract",
+    "description": "Update hostile-loop placeholder narrative seed rows so canonical first-slice hostile keys and token lists align with the locked runtime token contract while keeping aliases compatibility-only.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0008-F01"
+    ],
+    "inputs": [
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "docs/design/first-slice-hostile-runtime-token-contract.json"
+    ],
+    "acceptance_criteria": [
+      "Hostile-loop canonical content keys in narrative seeds match required token names from the hostile runtime token contract",
+      "Alias-only hostile keys remain supported for compatibility lookup but are not introduced into default first-session canonical selection",
+      "No new out-of-scope mechanics or post-slice keys are introduced into first-slice default seed usage"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:14:57.959007+00:00",
+    "updated_at": "2026-02-27T11:51:12.976176+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Passed: 8/8 tests.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008",
+    "assigned_agent": "nika-thorn",
+    "commit_sha": "f025867789714e451c0c97061e8291213401bee6",
+    "resolved_by_agent": "nika-thorn",
+    "resolved_by_role": "content",
+    "runtime_seconds": 169.22,
+    "started_at": "2026-02-27T11:48:21.992242+00:00",
+    "finished_at": "2026-02-27T11:51:11.204330+00:00"
   }
 ]
