@@ -29,6 +29,15 @@ python tools/first_slice_release_gate_runner.py --output-dir coordination/runtim
 
 The runner always executes in this order and exits non-zero if any gate is `FAIL`.
 
+## Platform Gate Wrapper Commands
+
+The `platform` gate command (`python tools/platform_wrapper_prepare_smoke.py`) validates wrapper prepare reproducibility by executing these canonical script commands in order:
+
+1. `scripts/wrapper_steam_tauri.ps1 -Mode prepare -CleanWeb`
+2. `scripts/wrapper_android_capacitor.ps1 -Mode prepare -CleanWeb`
+
+These commands are the canonical first-slice wrapper prepare paths referenced by platform stage validation.
+
 ## Evidence Artifacts
 
 - Gate evidence JSON: `coordination/runtime/first-slice-release-gate/release-gate-evidence.json`

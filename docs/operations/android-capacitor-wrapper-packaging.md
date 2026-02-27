@@ -26,6 +26,21 @@ cd ..
 
 ## Commands
 
+Canonical deterministic wrapper command lanes:
+
+| Lane | Script command | Python command | Prerequisites | Primary outputs |
+| --- | --- | --- | --- | --- |
+| prepare | `scripts/wrapper_android_capacitor.ps1 -Mode prepare -CleanWeb` | `python tools/android_capacitor_wrapper.py prepare --clean-web` | Python 3.11+ | `coordination/runtime/android-capacitor-wrapper/web-dist/`, `client-android-capacitor/www/`, `coordination/runtime/android-capacitor-wrapper/wrapper-input-manifest.json` |
+| dev | `scripts/wrapper_android_capacitor.ps1 -Mode dev -CleanWeb` | `python tools/android_capacitor_wrapper.py dev --clean-web` | Python 3.11+, Node.js/npm, Capacitor deps (`npm install`) | Android project opened in IDE after sync, refreshed wrapper runtime manifest |
+| package | `scripts/wrapper_android_capacitor.ps1 -Mode package -CleanWeb` | `python tools/android_capacitor_wrapper.py build-debug --clean-web` | Python 3.11+, Node.js/npm, Capacitor deps, Android SDK, JDK 17+ | Debug APK at `client-android-capacitor/android/app/build/outputs/apk/debug/`, refreshed wrapper runtime manifest |
+| package-release | `scripts/wrapper_android_capacitor.ps1 -Mode package-release -CleanWeb` | `python tools/android_capacitor_wrapper.py build-release --clean-web` | Python 3.11+, Node.js/npm, Capacitor deps, Android SDK, JDK 17+ | Release APK at `client-android-capacitor/android/app/build/outputs/apk/release/`, refreshed wrapper runtime manifest |
+
+Canonical reproducible script entry point (web artifact -> Android prepare):
+
+```powershell
+scripts/wrapper_android_capacitor.ps1 -Mode prepare -CleanWeb
+```
+
 Canonical reproducible script entry point (web artifact -> Android debug package):
 
 ```powershell
@@ -47,6 +62,7 @@ scripts/wrapper_android_capacitor.ps1 -Mode dev -CleanWeb
 Underlying Python commands (same behavior):
 
 ```powershell
+python tools/android_capacitor_wrapper.py prepare --clean-web
 python tools/android_capacitor_wrapper.py build-debug --clean-web
 python tools/android_capacitor_wrapper.py build-release --clean-web
 python tools/android_capacitor_wrapper.py dev --clean-web
@@ -94,6 +110,8 @@ scripts/package_android_capacitor_wrapper.ps1 -Variant release -CleanWeb
 
 ## Placeholder Store/Build Metadata
 
-- Metadata file: `client-android-capacitor/store-placeholders/android-store-metadata.placeholder.json`
+- Metadata/assets manifest file: `client-android-capacitor/store-placeholders/android-store-metadata.placeholder.json`
 - Placeholder assets: `client-android-capacitor/store-placeholders/*.txt`
 - `art_status` must remain `placeholder-only` for first-slice packaging.
+- `replaceable` must be `true` at metadata level and for each `placeholder_assets[]` entry.
+- The prepare lane writes this manifest reference into `coordination/runtime/android-capacitor-wrapper/wrapper-input-manifest.json`.

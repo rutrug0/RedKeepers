@@ -5,24 +5,28 @@
   "title": "RedKeepers Steam Wrapper Placeholder Build",
   "description": "Placeholder-only Steam wrapper metadata for first-vertical-slice packaging.",
   "art_status": "placeholder-only",
+  "replaceable": true,
   "placeholder_assets": [
     {
       "id": "steam_client_icon",
       "kind": "icon",
       "path": "store-placeholders/steam-client-icon-256.txt",
-      "status": "placeholder"
+      "status": "placeholder",
+      "replaceable": true
     },
     {
       "id": "steam_capsule_main_616x353",
       "kind": "capsule",
       "path": "store-placeholders/steam-capsule-main-616x353.txt",
-      "status": "placeholder"
+      "status": "placeholder",
+      "replaceable": true
     },
     {
       "id": "steam_screenshot_slot_01",
       "kind": "screenshot",
       "path": "store-placeholders/steam-screenshot-slot-01.txt",
-      "status": "placeholder"
+      "status": "placeholder",
+      "replaceable": true
     }
   ],
   "notes": [

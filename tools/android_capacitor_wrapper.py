@@ -79,12 +79,18 @@ def _load_store_metadata() -> dict[str, Any]:
     metadata = json.loads(metadata_path.read_text(encoding="utf-8-sig"))
     if metadata.get("art_status") != "placeholder-only":
         raise ValueError("Android placeholder metadata must set art_status to 'placeholder-only'")
+    if metadata.get("replaceable") is not True:
+        raise ValueError("Android placeholder metadata must set replaceable=true.")
 
     placeholder_assets = metadata.get("placeholder_assets")
     if not isinstance(placeholder_assets, list) or not placeholder_assets:
         raise ValueError("Android placeholder metadata must include non-empty placeholder_assets")
 
     for asset in placeholder_assets:
+        if asset.get("status") != "placeholder":
+            raise ValueError("Android placeholder assets must set status to 'placeholder'.")
+        if asset.get("replaceable") is not True:
+            raise ValueError("Android placeholder assets must set replaceable=true.")
         asset_path = WRAPPER_ROOT / Path(str(asset.get("path", "")))
         if not asset_path.is_file():
             raise ValueError(f"missing Android placeholder asset reference: {asset_path}")
@@ -110,7 +116,7 @@ def _inject_wrapper_baselines(index_path: Path) -> None:
         index_path.write_text(updated, encoding="utf-8")
 
 
-def _prepare_web_dist(clean_web: bool) -> tuple[str, int]:
+def _prepare_web_dist(*, clean_web: bool, store_metadata: dict[str, Any]) -> tuple[str, int]:
     package_command = [sys.executable, str(WEB_PACKAGE_TOOL), "package"]
     if clean_web:
         package_command.append("--clean")
@@ -154,6 +160,12 @@ def _prepare_web_dist(clean_web: bool) -> tuple[str, int]:
         "source_web_artifact": {
             "path": str(WEB_ARTIFACT_PATH.relative_to(ROOT).as_posix()),
             "sha256": artifact_sha256,
+        },
+        "placeholder_metadata_manifest": {
+            "path": str((WRAPPER_ROOT / STORE_METADATA_REL_PATH).relative_to(ROOT).as_posix()),
+            "art_status": store_metadata.get("art_status"),
+            "replaceable": store_metadata.get("replaceable"),
+            "placeholder_asset_count": len(store_metadata.get("placeholder_assets", [])),
         },
         "prepared_web_dist_path": str(WRAPPER_WEB_DIST_ROOT.relative_to(ROOT).as_posix()),
         "wrapper_web_dir_path": str(WRAPPER_WEB_WWW_ROOT.relative_to(ROOT).as_posix()),
@@ -246,8 +258,11 @@ def _run_gradle(task: str) -> int:
 
 def _prepare(args: argparse.Namespace) -> int:
     try:
-        _load_store_metadata()
-        artifact_sha256, prepared_file_count = _prepare_web_dist(clean_web=bool(args.clean_web))
+        store_metadata = _load_store_metadata()
+        artifact_sha256, prepared_file_count = _prepare_web_dist(
+            clean_web=bool(args.clean_web),
+            store_metadata=store_metadata,
+        )
     except (ValueError, RuntimeError, json.JSONDecodeError) as exc:
         print(f"STATUS: BLOCKED\n{exc}")
         return 1
@@ -265,9 +280,9 @@ def _prepare(args: argparse.Namespace) -> int:
 
 def _sync(args: argparse.Namespace) -> int:
     try:
-        _load_store_metadata()
+        store_metadata = _load_store_metadata()
         if not args.skip_prepare:
-            _prepare_web_dist(clean_web=bool(args.clean_web))
+            _prepare_web_dist(clean_web=bool(args.clean_web), store_metadata=store_metadata)
         _ensure_android_project_exists()
         returncode = _run_capacitor("sync", "android")
         if returncode != 0:
@@ -287,10 +302,10 @@ def _sync(args: argparse.Namespace) -> int:
 
 def _dev(args: argparse.Namespace) -> int:
     try:
-        _load_store_metadata()
+        store_metadata = _load_store_metadata()
         if not args.skip_sync:
             if not args.skip_prepare:
-                _prepare_web_dist(clean_web=bool(args.clean_web))
+                _prepare_web_dist(clean_web=bool(args.clean_web), store_metadata=store_metadata)
             _ensure_android_project_exists()
             sync_returncode = _run_capacitor("sync", "android")
             if sync_returncode != 0:
@@ -313,10 +328,10 @@ def _dev(args: argparse.Namespace) -> int:
 def _build(args: argparse.Namespace, *, release: bool) -> int:
     gradle_task = "assembleRelease" if release else "assembleDebug"
     try:
-        _load_store_metadata()
+        store_metadata = _load_store_metadata()
         if not args.skip_sync:
             if not args.skip_prepare:
-                _prepare_web_dist(clean_web=bool(args.clean_web))
+                _prepare_web_dist(clean_web=bool(args.clean_web), store_metadata=store_metadata)
             _ensure_android_project_exists()
             sync_returncode = _run_capacitor("sync", "android")
             if sync_returncode != 0:

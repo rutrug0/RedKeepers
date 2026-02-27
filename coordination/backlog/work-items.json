@@ -1,44 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0008-F01-F01",
-    "title": "Add CI validation for first-slice hostile runtime token contract drift",
-    "description": "Add a validator that cross-checks canonical hostile keys, required tokens, alias mappings, and deferred exclusions in `first-slice-hostile-runtime-token-contract.json` against `first-slice-content-key-manifest.json` and `event-feed-messages.json` so dispatch/arrive/resolve/post-battle payload contracts stay locked.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0008-F01"
-    ],
-    "inputs": [
-      "backend/src/app/config/seeds/v1/narrative/first-slice-hostile-runtime-token-contract.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
-    ],
-    "acceptance_criteria": [
-      "Validation fails if any hostile canonical key in the contract is missing from manifest loop required keys or event feed seed rows",
-      "Validation fails if any declared compatibility alias key is selected as a direct default canonical key",
-      "Validation fails if any deferred hero/gather/ambush key appears in hostile contract required runtime keys",
-      "Failure output includes key-level mismatch details for fast correction"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T11:45:41.657282+00:00",
-    "updated_at": "2026-02-27T12:26:34.448378+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0008-F01",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0009-F03",
     "title": "Finish frontend event-feed migration to canonical loop namespaces",
     "description": "Complete client event key selection/rendering migration so tick/build/train/scout/hostile canonical keys render deterministically with compatibility alias fallback and no default alias selection.",
@@ -140,17 +101,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T12:15:39.726072+00:00",
-    "updated_at": "2026-02-27T12:15:39.726072+00:00",
+    "updated_at": "2026-02-27T12:31:46.816635+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0009"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0009",
+    "assigned_agent": "juno-cairn"
   },
   {
     "id": "RK-AUTO-BACKLOG-0009-F06",
