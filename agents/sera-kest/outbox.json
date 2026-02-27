@@ -711,5 +711,20 @@
                                     "python -m py_compile tools/generate_first_slice_frontend_manifest_snapshot.py",
                                     "python tools/orchestrator.py status"
                                 ]
+    },
+    {
+        "ts":  "2026-02-27T12:36:20.4783841Z",
+        "item_id":  "RK-AUTO-BACKLOG-0009-F03",
+        "status":  "completed",
+        "summary":  "Finished canonical loop-namespace event-key migration in the web client by enforcing compatibility-alias-only selection rules from legacy mappings, preserving deterministic alias-to-canonical resolution order, and switching remaining scout/hostile default fallback keys to canonical namespaces.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "python tools/rk_m0_0011_first_slice_loop_smoke.py",
+                                    "python tools/orchestrator.py status"
+                                ]
     }
 ]

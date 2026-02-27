@@ -223,6 +223,26 @@
         legacy_keys: Object.freeze(legacyKeys),
       });
     });
+    const compatibilityAliasOnlyEventKeys = [];
+    for (const row of legacyAliasMapping) {
+      if (!includeOnlyContentKeys.includes(row.canonical_key)) {
+        throw new Error(
+          `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.legacy_alias_mapping canonical key '${row.canonical_key}' must exist in default_first_slice_seed_usage.include_only_content_keys`,
+        );
+      }
+      for (const legacyKey of row.legacy_keys) {
+        if (!compatibilityAliasOnlyEventKeys.includes(legacyKey)) {
+          compatibilityAliasOnlyEventKeys.push(legacyKey);
+        }
+      }
+    }
+    for (const legacyAliasKey of compatibilityAliasOnlyEventKeys) {
+      if (includeOnlyContentKeys.includes(legacyAliasKey)) {
+        throw new Error(
+          `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.legacy_alias_mapping compatibility alias key '${legacyAliasKey}' must not be selected in default_first_slice_seed_usage.include_only_content_keys`,
+        );
+      }
+    }
     const hostileRuntimeTokenContractRaw = contentKeyManifest.hostile_runtime_token_contract;
     if (!hostileRuntimeTokenContractRaw || typeof hostileRuntimeTokenContractRaw !== "object") {
       throw new Error(
@@ -590,6 +610,7 @@
           include_only_content_keys: Object.freeze(includeOnlyContentKeys),
         }),
         legacy_alias_mapping: Object.freeze(legacyAliasMapping),
+        compatibility_alias_only_keys: Object.freeze(compatibilityAliasOnlyEventKeys),
         hostile_runtime_token_contract: Object.freeze({
           contract_id: hostileRuntimeTokenContractId,
           scope_contract: Object.freeze({
@@ -718,6 +739,9 @@
   );
   const firstSliceDeferredPostSliceEventContentKeySet = new Set(
     firstSliceDeferredPostSliceEventContentKeys,
+  );
+  const firstSliceCompatibilityAliasOnlyEventKeySet = new Set(
+    firstSliceContentKeyManifestV1.compatibility_alias_only_keys,
   );
   const firstSliceCanonicalEventKeyCandidatesByLegacyAlias = Object.freeze(
     firstSliceContentKeyManifestV1.legacy_alias_mapping.reduce((lookup, row) => {
@@ -2011,11 +2035,16 @@
     if (hostileCanonicalKey.length > 0) {
       return hostileCanonicalKey;
     }
+    const canonicalKeyFromLegacyAlias =
+      resolveCanonicalFirstSliceEventKeyFromLegacyAlias(normalizedContentKey);
+    if (firstSliceCompatibilityAliasOnlyEventKeySet.has(normalizedContentKey)) {
+      return canonicalKeyFromLegacyAlias.length > 0
+        ? canonicalKeyFromLegacyAlias
+        : resolveDeterministicFallbackEventContentKey(normalizedContentKey);
+    }
     if (isManifestAllowedCanonicalEventContentKey(normalizedContentKey)) {
       return normalizedContentKey;
     }
-    const canonicalKeyFromLegacyAlias =
-      resolveCanonicalFirstSliceEventKeyFromLegacyAlias(normalizedContentKey);
     if (canonicalKeyFromLegacyAlias.length > 0) {
       return canonicalKeyFromLegacyAlias;
     }
@@ -3083,7 +3112,7 @@
       || resolvedPayloads.march_arrived
       || resolvedPayloads.dispatch_sent;
     const outcomeContentKey = mapBackendEventKeyToClientKey(
-      primaryOutcomePayload?.content_key || "event.world.march_started",
+      primaryOutcomePayload?.content_key || "event.world.hostile_dispatch_en_route",
     );
     const outcomeTokens = mapPlaceholderEventTokens(
       outcomeContentKey,
@@ -3114,7 +3143,7 @@
     const isFailure = response?.status === "failed";
     const fallbackBackendContentKey = isFailure
       ? "event.world.scout_unavailable_tile"
-      : "event.world.scout_dispatched";
+      : "event.scout.dispatched";
     const backendContentKey = response?.event?.content_key || fallbackBackendContentKey;
     const contentKey = mapBackendEventKeyToClientKey(backendContentKey);
     const fallbackTileId =

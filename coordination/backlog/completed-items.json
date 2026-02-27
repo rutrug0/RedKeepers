@@ -7752,5 +7752,50 @@
     "runtime_seconds": 283.0,
     "started_at": "2026-02-27T12:21:51.451469+00:00",
     "finished_at": "2026-02-27T12:26:34.442258+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0009-F05",
+    "title": "Requeue platform wrapper lane sweep for Steam and Android command reproducibility",
+    "description": "Deliver a clean implementation pass that supersedes prior blocked wrapper artifacts by proving deterministic Steam Tauri and Android Capacitor wrapper prepare/dev/package command lanes with placeholder-only metadata.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0008-F05"
+    ],
+    "inputs": [
+      "scripts/wrapper_steam_tauri.ps1",
+      "scripts/wrapper_android_capacitor.ps1",
+      "docs/architecture/client-cross-platform-strategy.md",
+      "docs/operations/first-slice-release-gate.md"
+    ],
+    "acceptance_criteria": [
+      "Steam and Android wrapper scripts expose deterministic prepare/dev/package command paths with documented prerequisites and outputs",
+      "Platform placeholder metadata/assets manifest is present for both wrappers and explicitly marked replaceable",
+      "Release-gate documentation references the canonical wrapper commands used by platform stage validation"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T12:15:39.726072+00:00",
+    "updated_at": "2026-02-27T12:31:50.314347+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Outbox updated for `RK-AUTO-BACKLOG-0009-F05` with status `done`, summary, changed files, and no blockers.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0009",
+    "assigned_agent": "juno-cairn",
+    "commit_sha": "956023e11fd599981419e91a2d8b2317f8016581",
+    "resolved_by_agent": "juno-cairn",
+    "resolved_by_role": "platform",
+    "runtime_seconds": 305.53,
+    "started_at": "2026-02-27T12:26:41.271581+00:00",
+    "finished_at": "2026-02-27T12:31:46.798848+00:00"
   }
 ]

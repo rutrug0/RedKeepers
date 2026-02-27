@@ -25,17 +25,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T12:15:39.726072+00:00",
-    "updated_at": "2026-02-27T12:15:39.726072+00:00",
+    "updated_at": "2026-02-27T12:37:21.815973+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0009"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0009",
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-AUTO-BACKLOG-0009-F04",
@@ -74,45 +75,6 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0009"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0009-F05",
-    "title": "Requeue platform wrapper lane sweep for Steam and Android command reproducibility",
-    "description": "Deliver a clean implementation pass that supersedes prior blocked wrapper artifacts by proving deterministic Steam Tauri and Android Capacitor wrapper prepare/dev/package command lanes with placeholder-only metadata.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "platform",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0008-F05"
-    ],
-    "inputs": [
-      "scripts/wrapper_steam_tauri.ps1",
-      "scripts/wrapper_android_capacitor.ps1",
-      "docs/architecture/client-cross-platform-strategy.md",
-      "docs/operations/first-slice-release-gate.md"
-    ],
-    "acceptance_criteria": [
-      "Steam and Android wrapper scripts expose deterministic prepare/dev/package command paths with documented prerequisites and outputs",
-      "Platform placeholder metadata/assets manifest is present for both wrappers and explicitly marked replaceable",
-      "Release-gate documentation references the canonical wrapper commands used by platform stage validation"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T12:15:39.726072+00:00",
-    "updated_at": "2026-02-27T12:31:46.816635+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0009",
-    "assigned_agent": "juno-cairn"
   },
   {
     "id": "RK-AUTO-BACKLOG-0009-F06",
