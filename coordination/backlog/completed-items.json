@@ -6970,5 +6970,48 @@
     "runtime_seconds": 304.58,
     "started_at": "2026-02-27T10:57:01.435851+00:00",
     "finished_at": "2026-02-27T11:02:06.012416+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F03-F01",
+    "title": "Add contract validation for first-slice canonical event key/token matrix",
+    "description": "Add a startup/CI validator that cross-checks `loop_required_keys`, `legacy_alias_mapping`, and `deferred_post_slice_keys` in `first-slice-content-key-manifest.json` against `event-feed-messages.json` token rows so canonical rendering contracts cannot drift silently.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F03"
+    ],
+    "inputs": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+    ],
+    "acceptance_criteria": [
+      "Validation fails if any `loop_required_keys` canonical key has no narrative row",
+      "Validation fails if any mapped `legacy_alias_mapping` key is also selected as a direct default rendering key",
+      "Validation fails if a deferred post-slice key appears in default first-slice include list",
+      "Failure output identifies exact offending key names for quick correction"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T10:18:40.023163+00:00",
+    "updated_at": "2026-02-27T11:07:20.977521+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [outbox.json](D:\\RedKeepers\\agents\\ilya-fen\\outbox.json): added structured completion entry for `RK-AUTO-BACKLOG-0007-F03-F01`.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F03",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "e52b9a3812737c4607e8c3eef89cff350ac68f96",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 306.05,
+    "started_at": "2026-02-27T11:02:13.289500+00:00",
+    "finished_at": "2026-02-27T11:07:19.332135+00:00"
   }
 ]
