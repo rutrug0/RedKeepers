@@ -65,17 +65,94 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 fails on missing canonical key
       rows: narrativeSeedBundle.event_feed_messages.rows.filter((row) => row.key !== canonicalToDrop),
     },
   };
+  const driftedManifest = {
+    ...manifest,
+    loop_required_keys: {
+      tick: manifest.loop_required_keys.tick.filter((key) => key !== canonicalToDrop),
+      build: manifest.loop_required_keys.build.filter((key) => key !== canonicalToDrop),
+      train: manifest.loop_required_keys.train.filter((key) => key !== canonicalToDrop),
+      scout: manifest.loop_required_keys.scout.filter((key) => key !== canonicalToDrop),
+      hostile_dispatch_and_resolve: manifest.loop_required_keys.hostile_dispatch_and_resolve
+        .filter((key) => key !== canonicalToDrop),
+    },
+  };
 
   assert.throws(
     () => {
       createFirstSliceNarrativeTemplateSnapshotV1({
         narrative_seed_bundle: driftedBundle,
-        first_slice_content_key_manifest: manifest,
+        first_slice_content_key_manifest: driftedManifest,
       });
     },
     (error) =>
       error instanceof FirstSliceNarrativeTemplateSnapshotValidationError
       && error.message.includes(`Missing canonical key '${canonicalToDrop}'`),
+  );
+});
+
+test("createFirstSliceNarrativeTemplateSnapshotV1 fails when loop_required_keys canonical keys are missing from narrative rows", async () => {
+  const narrativeSeedBundle = await loadNarrativeSeedBundleV1(
+    defaultPaths.narrative_seed_paths,
+  );
+  const manifest = await loadFirstSliceContentKeyManifestV1(
+    defaultPaths.first_slice_content_key_manifest_path!,
+  );
+  const missingLoopRequiredKey = "event.tick.synthetic_missing_contract_key";
+  const driftedManifest = {
+    ...manifest,
+    loop_required_keys: {
+      ...manifest.loop_required_keys,
+      tick: [...manifest.loop_required_keys.tick, missingLoopRequiredKey],
+    },
+  };
+
+  assert.throws(
+    () => {
+      createFirstSliceNarrativeTemplateSnapshotV1({
+        narrative_seed_bundle: narrativeSeedBundle,
+        first_slice_content_key_manifest: driftedManifest,
+      });
+    },
+    (error) =>
+      error instanceof FirstSliceNarrativeTemplateSnapshotValidationError
+      && error.message.includes("loop_required_keys")
+      && error.message.includes(missingLoopRequiredKey),
+  );
+});
+
+test("createFirstSliceNarrativeTemplateSnapshotV1 fails when mapped legacy alias keys leak into default canonical selection", async () => {
+  const narrativeSeedBundle = await loadNarrativeSeedBundleV1(
+    defaultPaths.narrative_seed_paths,
+  );
+  const manifest = await loadFirstSliceContentKeyManifestV1(
+    defaultPaths.first_slice_content_key_manifest_path!,
+  );
+  const legacyAliasKey = manifest.legacy_alias_mapping[0]?.legacy_keys[0];
+  if (legacyAliasKey === undefined) {
+    throw new Error("Expected legacy alias mapping fixture rows.");
+  }
+  const driftedManifest = {
+    ...manifest,
+    default_first_slice_seed_usage: {
+      ...manifest.default_first_slice_seed_usage,
+      include_only_content_keys: [
+        ...manifest.default_first_slice_seed_usage.include_only_content_keys,
+        legacyAliasKey,
+      ],
+    },
+  };
+
+  assert.throws(
+    () => {
+      createFirstSliceNarrativeTemplateSnapshotV1({
+        narrative_seed_bundle: narrativeSeedBundle,
+        first_slice_content_key_manifest: driftedManifest,
+      });
+    },
+    (error) =>
+      error instanceof FirstSliceNarrativeTemplateSnapshotValidationError
+      && error.message.includes("legacy_alias_mapping")
+      && error.message.includes(legacyAliasKey),
   );
 });
 
@@ -149,6 +226,7 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 fails when deferred post-slice
     },
     (error) =>
       error instanceof FirstSliceNarrativeTemplateSnapshotValidationError
+      && error.message.includes("deferred_post_slice_keys")
       && error.message.includes(deferredKey),
   );
 });

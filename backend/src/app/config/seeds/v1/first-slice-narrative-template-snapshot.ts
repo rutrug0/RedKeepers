@@ -28,6 +28,14 @@ interface FirstSliceDefaultSeedUsageV1 {
   readonly include_only_content_keys: readonly string[];
 }
 
+interface FirstSliceLoopRequiredKeysV1 {
+  readonly tick: readonly string[];
+  readonly build: readonly string[];
+  readonly train: readonly string[];
+  readonly scout: readonly string[];
+  readonly hostile_dispatch_and_resolve: readonly string[];
+}
+
 interface FirstSliceLegacyAliasMappingRowV1 {
   readonly canonical_key: string;
   readonly legacy_keys: readonly string[];
@@ -52,6 +60,7 @@ export interface FirstSliceContentKeyManifestV1 {
   readonly slice_id: string;
   readonly source_docs: readonly string[];
   readonly default_first_slice_seed_usage: FirstSliceDefaultSeedUsageV1;
+  readonly loop_required_keys: FirstSliceLoopRequiredKeysV1;
   readonly compatibility_alias_only_keys: readonly string[];
   readonly legacy_alias_mapping: readonly FirstSliceLegacyAliasMappingRowV1[];
   readonly alias_lookup_contract: FirstSliceAliasLookupContractV1;
@@ -299,11 +308,38 @@ export const createFirstSliceNarrativeTemplateSnapshotV1 = (input: {
   const excludeScopes = new Set(manifest.default_first_slice_seed_usage.exclude_slice_status_scopes);
   const canonicalKeys = [...manifest.default_first_slice_seed_usage.include_only_content_keys];
   const canonicalKeySet = new Set(canonicalKeys);
+  const loopRequiredKeys = collectLoopRequiredKeys(manifest.loop_required_keys);
+  const missingLoopRequiredRows = toUniqueSorted(
+    loopRequiredKeys.filter((key) => !rowsByKey.has(key)),
+  );
+  if (missingLoopRequiredRows.length > 0) {
+    throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+      `loop_required_keys canonical keys missing from narrative event feed seed rows: [${missingLoopRequiredRows.join(", ")}].`,
+    );
+  }
 
   const aliasCoverageSet = new Set(manifest.compatibility_alias_only_keys);
   const mappedLegacyAliasSet = new Set(
     manifest.legacy_alias_mapping.flatMap((entry) => entry.legacy_keys),
   );
+  const mappedLegacyAliasKeysSelectedAsCanonical = toUniqueSorted(
+    [...mappedLegacyAliasSet].filter((legacyAliasKey) => canonicalKeySet.has(legacyAliasKey)),
+  );
+  if (mappedLegacyAliasKeysSelectedAsCanonical.length > 0) {
+    throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+      `legacy_alias_mapping keys must not appear in default_first_slice_seed_usage.include_only_content_keys: [${mappedLegacyAliasKeysSelectedAsCanonical.join(", ")}].`,
+    );
+  }
+  const deferredKeysSelectedAsCanonical = toUniqueSorted(
+    manifest.deferred_post_slice_keys
+      .map((row) => row.key)
+      .filter((key) => canonicalKeySet.has(key)),
+  );
+  if (deferredKeysSelectedAsCanonical.length > 0) {
+    throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+      `deferred_post_slice_keys must not appear in default_first_slice_seed_usage.include_only_content_keys: [${deferredKeysSelectedAsCanonical.join(", ")}].`,
+    );
+  }
 
   for (const canonicalKey of canonicalKeys) {
     const row = rowsByKey.get(canonicalKey);
@@ -325,11 +361,6 @@ export const createFirstSliceNarrativeTemplateSnapshotV1 = (input: {
   }
 
   for (const deferred of manifest.deferred_post_slice_keys) {
-    if (canonicalKeySet.has(deferred.key)) {
-      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
-        `Deferred key '${deferred.key}' must not appear in default_first_slice_seed_usage.include_only_content_keys.`,
-      );
-    }
     if (deferred.present_in_event_feed_seed && !rowsByKey.has(deferred.key)) {
       throw new FirstSliceNarrativeTemplateSnapshotValidationError(
         `Deferred key '${deferred.key}' is marked present_in_event_feed_seed=true but is missing in narrative event feed seed rows.`,
@@ -476,6 +507,10 @@ export const parseFirstSliceContentKeyManifestV1 = (
     "include_only_content_keys",
     "$.default_first_slice_seed_usage",
   );
+  const loopRequiredKeys = parseLoopRequiredKeys(
+    readUnknown(root, "loop_required_keys", "$"),
+    "$.loop_required_keys",
+  );
   const compatibilityAliasOnlyKeys = readContentKeyArray(
     root,
     "compatibility_alias_only_keys",
@@ -528,6 +563,7 @@ export const parseFirstSliceContentKeyManifestV1 = (
       exclude_slice_status_scopes: excludeScopes,
       include_only_content_keys: includeOnlyContentKeys,
     },
+    loop_required_keys: loopRequiredKeys,
     compatibility_alias_only_keys: compatibilityAliasOnlyKeys,
     legacy_alias_mapping: legacyAliasMapping,
     alias_lookup_contract: {
@@ -635,6 +671,24 @@ export const parseFirstSliceNarrativeTemplateSnapshotLockV1 = (
   };
 };
 
+function parseLoopRequiredKeys(
+  raw: unknown,
+  path: string,
+): FirstSliceLoopRequiredKeysV1 {
+  const root = asRecord(raw, path);
+  return {
+    tick: readContentKeyArray(root, "tick", path),
+    build: readContentKeyArray(root, "build", path),
+    train: readContentKeyArray(root, "train", path),
+    scout: readContentKeyArray(root, "scout", path),
+    hostile_dispatch_and_resolve: readContentKeyArray(
+      root,
+      "hostile_dispatch_and_resolve",
+      path,
+    ),
+  };
+}
+
 function parseLegacyAliasMappingRows(
   raw: unknown,
   path: string,
@@ -698,6 +752,20 @@ function createNarrativeRowsByKeyMap(eventFeed: EventFeedMessagesSeedV1): Map<st
     rowsByKey.set(row.key, row);
   }
   return rowsByKey;
+}
+
+function collectLoopRequiredKeys(loopRequired: FirstSliceLoopRequiredKeysV1): string[] {
+  return [
+    ...loopRequired.tick,
+    ...loopRequired.build,
+    ...loopRequired.train,
+    ...loopRequired.scout,
+    ...loopRequired.hostile_dispatch_and_resolve,
+  ];
+}
+
+function toUniqueSorted(values: readonly string[]): string[] {
+  return [...new Set(values)].sort((left, right) => left.localeCompare(right));
 }
 
 function readUnknown(

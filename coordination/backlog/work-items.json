@@ -1,37 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0007-F06",
-    "title": "Run release-blocking first-slice gate and publish disposition evidence",
-    "description": "Execute the new release gate command and publish pass/fail disposition with owner-tagged blockers for any failures.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0007-F05"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Gate run records pass/fail for playable, scope, quality, platform, and readiness criteria.",
-      "Critical loop evidence confirms no missing-template fallback markers.",
-      "Failures produce actionable blocker entries with owning role."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T10:15:35.546325+00:00",
-    "updated_at": "2026-02-27T11:02:06.036795+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
-    "assigned_agent": "tomas-grell"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0007-F03-F01",
     "title": "Add contract validation for first-slice canonical event key/token matrix",
     "description": "Add a startup/CI validator that cross-checks `loop_required_keys`, `legacy_alias_mapping`, and `deferred_post_slice_keys` in `first-slice-content-key-manifest.json` against `event-feed-messages.json` token rows so canonical rendering contracts cannot drift silently.",
@@ -55,17 +23,18 @@
       "Failure output identifies exact offending key names for quick correction"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T10:18:40.023163+00:00",
-    "updated_at": "2026-02-27T10:18:40.023163+00:00",
+    "updated_at": "2026-02-27T11:07:19.367866+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F03"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F03",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-AUTO-BACKLOG-0007-F04-F01",

@@ -6932,5 +6932,43 @@
     "runtime_seconds": 171.47,
     "started_at": "2026-02-27T10:54:00.763840+00:00",
     "finished_at": "2026-02-27T10:56:52.230930+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F06",
+    "title": "Run release-blocking first-slice gate and publish disposition evidence",
+    "description": "Execute the new release gate command and publish pass/fail disposition with owner-tagged blockers for any failures.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F05"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Gate run records pass/fail for playable, scope, quality, platform, and readiness criteria.",
+      "Critical loop evidence confirms no missing-template fallback markers.",
+      "Failures produce actionable blocker entries with owning role."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T10:15:35.546325+00:00",
+    "updated_at": "2026-02-27T11:02:08.060120+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/tomas-grell/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "9006ecfda3af4c891f5aa2e61f08e885fc70ff60",
+    "resolved_by_agent": "tomas-grell",
+    "resolved_by_role": "qa",
+    "runtime_seconds": 304.58,
+    "started_at": "2026-02-27T10:57:01.435851+00:00",
+    "finished_at": "2026-02-27T11:02:06.012416+00:00"
   }
 ]
