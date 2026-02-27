@@ -774,5 +774,19 @@
                                     "node --check client-web/app.js",
                                     "python tools/rk_m0_0011_first_slice_loop_smoke.py"
                                 ]
+    },
+    {
+        "ts":  "2026-02-27T15:05:53.8854018Z",
+        "item_id":  "RK-AUTO-BACKLOG-0011-F04",
+        "status":  "completed",
+        "summary":  "Refactored first-session objective strip and completion gating to consume snapshot-backed objective contract rows and alias policy, removing hard-coded objective contract arrays while preserving canonical-first, lookup-only compatibility alias resolution and deterministic objective fallback copy.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "python tools/rk_m0_0011_first_slice_loop_smoke.py"
+                                ]
     }
 ]

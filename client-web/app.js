@@ -255,6 +255,244 @@
       }
       migrationKeyStatusByKey[compatibilityAliasKey] = "compatibility-only";
     }
+    const legacyAliasKeysByCanonicalKey = legacyAliasMapping.reduce((lookup, row) => {
+      lookup[row.canonical_key] = row.legacy_keys.slice();
+      return lookup;
+    }, {});
+    const firstSessionObjectiveContractRaw = contentKeyManifest.first_session_objective_contract;
+    if (!firstSessionObjectiveContractRaw || typeof firstSessionObjectiveContractRaw !== "object") {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract`,
+      );
+    }
+    const firstSessionObjectiveRowsRaw = firstSessionObjectiveContractRaw.rows;
+    if (!Array.isArray(firstSessionObjectiveRowsRaw) || firstSessionObjectiveRowsRaw.length < 1) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows`,
+      );
+    }
+    const firstSessionObjectiveAliasLookupContractRaw =
+      firstSessionObjectiveContractRaw.alias_lookup_contract;
+    if (
+      !firstSessionObjectiveAliasLookupContractRaw
+      || typeof firstSessionObjectiveAliasLookupContractRaw !== "object"
+    ) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.alias_lookup_contract`,
+      );
+    }
+    const firstSessionObjectiveDeterministicResolutionOrderRaw =
+      firstSessionObjectiveAliasLookupContractRaw.deterministic_resolution_order;
+    if (
+      !Array.isArray(firstSessionObjectiveDeterministicResolutionOrderRaw)
+      || firstSessionObjectiveDeterministicResolutionOrderRaw.length < 1
+    ) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.alias_lookup_contract.deterministic_resolution_order`,
+      );
+    }
+    const firstSessionObjectiveDeterministicResolutionOrder =
+      firstSessionObjectiveDeterministicResolutionOrderRaw.map((token, tokenIndex) => {
+        const normalizedToken = String(token || "").trim();
+        if (normalizedToken.length < 1) {
+          throw new Error(
+            `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.alias_lookup_contract.deterministic_resolution_order[${tokenIndex}]`,
+          );
+        }
+        return normalizedToken;
+      });
+    if (
+      firstSessionObjectiveDeterministicResolutionOrder.length !== 2
+      || firstSessionObjectiveDeterministicResolutionOrder[0] !== "canonical_key"
+      || firstSessionObjectiveDeterministicResolutionOrder[1] !== "legacy_keys_in_declared_order"
+    ) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.alias_lookup_contract.deterministic_resolution_order`,
+      );
+    }
+    if (
+      firstSessionObjectiveAliasLookupContractRaw
+        .direct_default_selection_excludes_legacy_alias_only_keys
+      !== true
+    ) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.alias_lookup_contract.direct_default_selection_excludes_legacy_alias_only_keys`,
+      );
+    }
+    const firstSessionObjectiveCanonicalKeySet = new Set();
+    const firstSessionObjectiveContractRows = firstSessionObjectiveRowsRaw.map((row, rowIndex) => {
+      if (!row || typeof row !== "object") {
+        throw new Error(
+          `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}]`,
+        );
+      }
+      const canonicalObjectiveKey = String(row.canonical_objective_key || "").trim();
+      if (canonicalObjectiveKey.length < 1) {
+        throw new Error(
+          `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].canonical_objective_key`,
+        );
+      }
+      if (firstSessionObjectiveCanonicalKeySet.has(canonicalObjectiveKey)) {
+        throw new Error(
+          `Invalid snapshot row: duplicate canonical objective key '${canonicalObjectiveKey}' in ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows`,
+        );
+      }
+      firstSessionObjectiveCanonicalKeySet.add(canonicalObjectiveKey);
+      if (!includeOnlyContentKeys.includes(canonicalObjectiveKey)) {
+        throw new Error(
+          `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].canonical_objective_key must exist in include_only_content_keys`,
+        );
+      }
+      if (migrationKeyStatusByKey[canonicalObjectiveKey] !== "canonical-default") {
+        throw new Error(
+          `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].canonical_objective_key must be canonical-default`,
+        );
+      }
+      const loopStep = String(row.loop_step || "").trim();
+      if (loopStep.length < 1) {
+        throw new Error(
+          `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].loop_step`,
+        );
+      }
+      if (!Array.isArray(row.required_all_canonical_keys) || row.required_all_canonical_keys.length < 1) {
+        throw new Error(
+          `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].required_all_canonical_keys`,
+        );
+      }
+      const requiredAllCanonicalKeys = row.required_all_canonical_keys.map(
+        (requiredKey, requiredKeyIndex) => {
+          const normalizedKey = String(requiredKey || "").trim();
+          if (normalizedKey.length < 1) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].required_all_canonical_keys[${requiredKeyIndex}]`,
+            );
+          }
+          if (!includeOnlyContentKeys.includes(normalizedKey)) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].required_all_canonical_keys[${requiredKeyIndex}] must exist in include_only_content_keys`,
+            );
+          }
+          if (migrationKeyStatusByKey[normalizedKey] !== "canonical-default") {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].required_all_canonical_keys[${requiredKeyIndex}] must be canonical-default`,
+            );
+          }
+          return normalizedKey;
+        },
+      );
+      const requiredAnyCanonicalKeysRaw = Array.isArray(row.required_any_canonical_keys)
+        ? row.required_any_canonical_keys
+        : [];
+      const requiredAnyCanonicalKeys = requiredAnyCanonicalKeysRaw.map(
+        (requiredKey, requiredKeyIndex) => {
+          const normalizedKey = String(requiredKey || "").trim();
+          if (normalizedKey.length < 1) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].required_any_canonical_keys[${requiredKeyIndex}]`,
+            );
+          }
+          if (!includeOnlyContentKeys.includes(normalizedKey)) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].required_any_canonical_keys[${requiredKeyIndex}] must exist in include_only_content_keys`,
+            );
+          }
+          if (migrationKeyStatusByKey[normalizedKey] !== "canonical-default") {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].required_any_canonical_keys[${requiredKeyIndex}] must be canonical-default`,
+            );
+          }
+          return normalizedKey;
+        },
+      );
+      const requiredCanonicalGateKeys = [...requiredAllCanonicalKeys, ...requiredAnyCanonicalKeys];
+      const requiredCanonicalGateKeySet = new Set(requiredCanonicalGateKeys);
+      const compatibilityAliasLookupKeysRaw = row.compatibility_alias_lookup_keys;
+      if (
+        !compatibilityAliasLookupKeysRaw
+        || typeof compatibilityAliasLookupKeysRaw !== "object"
+        || Array.isArray(compatibilityAliasLookupKeysRaw)
+      ) {
+        throw new Error(
+          `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].compatibility_alias_lookup_keys`,
+        );
+      }
+      const compatibilityAliasLookupCanonicalKeys = Object.keys(compatibilityAliasLookupKeysRaw);
+      if (compatibilityAliasLookupCanonicalKeys.length !== requiredCanonicalGateKeySet.size) {
+        throw new Error(
+          `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].compatibility_alias_lookup_keys must include every required canonical key`,
+        );
+      }
+      const normalizedCompatibilityAliasLookupKeys = {};
+      for (const requiredCanonicalGateKey of requiredCanonicalGateKeys) {
+        if (
+          !Object.prototype.hasOwnProperty.call(
+            compatibilityAliasLookupKeysRaw,
+            requiredCanonicalGateKey,
+          )
+        ) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].compatibility_alias_lookup_keys is missing '${requiredCanonicalGateKey}'`,
+          );
+        }
+        const rawAliases = compatibilityAliasLookupKeysRaw[requiredCanonicalGateKey];
+        if (!Array.isArray(rawAliases)) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].compatibility_alias_lookup_keys['${requiredCanonicalGateKey}']`,
+          );
+        }
+        const normalizedAliases = rawAliases.map((aliasKey, aliasIndex) => {
+          const normalizedAliasKey = String(aliasKey || "").trim();
+          if (normalizedAliasKey.length < 1) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].compatibility_alias_lookup_keys['${requiredCanonicalGateKey}'][${aliasIndex}]`,
+            );
+          }
+          if (includeOnlyContentKeys.includes(normalizedAliasKey)) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].compatibility_alias_lookup_keys['${requiredCanonicalGateKey}'][${aliasIndex}] must remain lookup-only`,
+            );
+          }
+          if (migrationKeyStatusByKey[normalizedAliasKey] !== "compatibility-only") {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].compatibility_alias_lookup_keys['${requiredCanonicalGateKey}'][${aliasIndex}] must be compatibility-only`,
+            );
+          }
+          return normalizedAliasKey;
+        });
+        const declaredLegacyAliases =
+          legacyAliasKeysByCanonicalKey[requiredCanonicalGateKey] || [];
+        if (normalizedAliases.length !== declaredLegacyAliases.length) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].compatibility_alias_lookup_keys['${requiredCanonicalGateKey}'] must match declared legacy alias rows`,
+          );
+        }
+        for (let aliasIndex = 0; aliasIndex < declaredLegacyAliases.length; aliasIndex += 1) {
+          if (normalizedAliases[aliasIndex] !== declaredLegacyAliases[aliasIndex]) {
+            throw new Error(
+              `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].compatibility_alias_lookup_keys['${requiredCanonicalGateKey}'] must preserve declared legacy alias order`,
+            );
+          }
+        }
+        normalizedCompatibilityAliasLookupKeys[requiredCanonicalGateKey] =
+          Object.freeze(normalizedAliases);
+      }
+      for (const declaredCanonicalGateKey of compatibilityAliasLookupCanonicalKeys) {
+        if (!requiredCanonicalGateKeySet.has(declaredCanonicalGateKey)) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.first_session_objective_contract.rows[${rowIndex}].compatibility_alias_lookup_keys contains undeclared canonical gate key '${declaredCanonicalGateKey}'`,
+          );
+        }
+      }
+      return Object.freeze({
+        canonical_objective_key: canonicalObjectiveKey,
+        loop_step: loopStep,
+        required_canonical_default_content_keys: Object.freeze(requiredAllCanonicalKeys),
+        required_any_canonical_default_content_keys: Object.freeze(requiredAnyCanonicalKeys),
+        compatibility_alias_lookup_keys: Object.freeze(
+          normalizedCompatibilityAliasLookupKeys,
+        ),
+      });
+    });
     const hostileRuntimeTokenContractRaw = contentKeyManifest.hostile_runtime_token_contract;
     if (!hostileRuntimeTokenContractRaw || typeof hostileRuntimeTokenContractRaw !== "object") {
       throw new Error(
@@ -624,6 +862,15 @@
         migration_key_status_by_key: Object.freeze(migrationKeyStatusByKey),
         legacy_alias_mapping: Object.freeze(legacyAliasMapping),
         compatibility_alias_only_keys: Object.freeze(compatibilityAliasOnlyEventKeys),
+        first_session_objective_contract: Object.freeze({
+          rows: Object.freeze(firstSessionObjectiveContractRows),
+          alias_lookup_contract: Object.freeze({
+            deterministic_resolution_order: Object.freeze(
+              firstSessionObjectiveDeterministicResolutionOrder,
+            ),
+            direct_default_selection_excludes_legacy_alias_only_keys: true,
+          }),
+        }),
         hostile_runtime_token_contract: Object.freeze({
           contract_id: hostileRuntimeTokenContractId,
           scope_contract: Object.freeze({
@@ -739,14 +986,6 @@
     );
   const objectiveKeyStatusCanonicalDefault = "canonical-default";
   const objectiveKeyStatusCompatibilityOnly = "compatibility-only";
-  const firstSessionObjectiveCanonicalIdSequenceV1 = Object.freeze([
-    "first_session.tick.observe_income.v1",
-    "first_session.build.complete_first_upgrade.v1",
-    "first_session.train.complete_first_batch.v1",
-    "first_session.scout.confirm_hostile_target.v1",
-    "first_session.attack.dispatch_hostile_march.v1",
-    "first_session.resolve_hostile_outcome.v1",
-  ]);
   const firstSessionObjectiveLoopStepSequenceV1 = Object.freeze([
     "tick",
     "build",
@@ -755,93 +994,45 @@
     "attack",
     "resolve",
   ]);
-  const firstSessionObjectiveContractRowsV1 = Object.freeze([
-    Object.freeze({
-      canonical_objective_key: "first_session.tick.observe_income.v1",
-      loop_step: "tick",
-      required_canonical_default_content_keys: Object.freeze([
-        "event.tick.passive_income",
-        "event.tick.passive_gain_success",
-      ]),
-      compatibility_alias_keys: Object.freeze([
-        "objective.first_session.tick.observe_income.v1",
-      ]),
-      fallback_template: "Run one settlement tick to confirm passive income flow.",
-    }),
-    Object.freeze({
-      canonical_objective_key: "first_session.build.complete_first_upgrade.v1",
-      loop_step: "build",
-      required_canonical_default_content_keys: Object.freeze([
-        "event.build.upgrade_started",
-        "event.build.upgrade_completed",
-      ]),
-      compatibility_alias_keys: Object.freeze([
-        "objective.first_session.build.complete_first_upgrade.v1",
-      ]),
-      fallback_template: "Queue one building upgrade in the settlement panel.",
-    }),
-    Object.freeze({
-      canonical_objective_key: "first_session.train.complete_first_batch.v1",
-      loop_step: "train",
-      required_canonical_default_content_keys: Object.freeze([
-        "event.train.started",
-        "event.train.completed",
-      ]),
-      compatibility_alias_keys: Object.freeze([
-        "objective.first_session.train.complete_first_batch.v1",
-      ]),
-      fallback_template: "Train one unit batch from the barracks queue.",
-    }),
-    Object.freeze({
-      canonical_objective_key: "first_session.scout.confirm_hostile_target.v1",
-      loop_step: "scout",
-      required_canonical_default_content_keys: Object.freeze([
-        "event.scout.dispatched_success",
-        "event.scout.return_hostile",
-      ]),
-      compatibility_alias_keys: Object.freeze([
-        "objective.first_session.scout.confirm_hostile_target.v1",
-      ]),
-      fallback_template: "Scout the hostile tile to confirm target activity.",
-    }),
-    Object.freeze({
-      canonical_objective_key: "first_session.attack.dispatch_hostile_march.v1",
-      loop_step: "attack",
-      required_canonical_default_content_keys: Object.freeze([
-        "event.world.hostile_dispatch_accepted",
-        "event.world.hostile_dispatch_en_route",
-        "event.world.hostile_march_arrived_outer_works",
-      ]),
-      compatibility_alias_keys: Object.freeze([
-        "objective.first_session.attack.dispatch_hostile_march.v1",
-      ]),
-      fallback_template: "Dispatch one hostile march from your settlement.",
-    }),
-    Object.freeze({
-      canonical_objective_key: "first_session.resolve_hostile_outcome.v1",
-      loop_step: "resolve",
-      required_canonical_default_content_keys: Object.freeze([
-        "event.combat.hostile_loss_report",
-      ]),
-      required_any_canonical_default_content_keys: Object.freeze([
-        "event.combat.hostile_resolve_attacker_win",
-        "event.combat.hostile_resolve_defender_win",
-        "event.combat.hostile_resolve_tie_defender_holds",
-      ]),
-      compatibility_alias_keys: Object.freeze([
-        "objective.first_session.resolve_hostile_outcome.v1",
-      ]),
-      fallback_template: "Resolve one hostile combat outcome on the world map.",
-    }),
-  ]);
+  const firstSessionObjectiveFallbackTemplateByCanonicalKey = Object.freeze({
+    "first_session.tick.observe_income.v1":
+      "Run one settlement tick to confirm passive income flow.",
+    "first_session.build.complete_first_upgrade.v1":
+      "Queue one building upgrade in the settlement panel.",
+    "first_session.train.complete_first_batch.v1":
+      "Train one unit batch from the barracks queue.",
+    "first_session.scout.confirm_hostile_target.v1":
+      "Scout the hostile tile to confirm target activity.",
+    "first_session.attack.dispatch_hostile_march.v1":
+      "Dispatch one hostile march from your settlement.",
+    "first_session.resolve_hostile_outcome.v1":
+      "Resolve one hostile combat outcome on the world map.",
+  });
+  const firstSessionObjectiveContractV1 =
+    firstSliceContentKeyManifestV1.first_session_objective_contract;
+  const firstSessionObjectiveContractRowsV1 = firstSessionObjectiveContractV1.rows;
+  const firstSessionObjectiveAliasLookupContractV1 =
+    firstSessionObjectiveContractV1.alias_lookup_contract;
+  const firstSessionObjectiveCanonicalKeySet = new Set(
+    firstSessionObjectiveContractRowsV1.map((row) => row.canonical_objective_key),
+  );
+  const firstSessionObjectiveLegacyAliasRows =
+    firstSliceContentKeyManifestV1.legacy_alias_mapping.filter((row) =>
+      firstSessionObjectiveCanonicalKeySet.has(row.canonical_key),
+    );
   const firstSessionObjectiveKeyStatusByKey = Object.freeze(
-    firstSessionObjectiveContractRowsV1.reduce((lookup, row) => {
-      lookup[row.canonical_objective_key] = objectiveKeyStatusCanonicalDefault;
-      for (const aliasKey of row.compatibility_alias_keys) {
-        lookup[aliasKey] = objectiveKeyStatusCompatibilityOnly;
-      }
-      return lookup;
-    }, {}),
+    firstSessionObjectiveLegacyAliasRows.reduce(
+      (lookup, row) => {
+        for (const aliasKey of row.legacy_keys) {
+          lookup[aliasKey] = objectiveKeyStatusCompatibilityOnly;
+        }
+        return lookup;
+      },
+      firstSessionObjectiveContractRowsV1.reduce((lookup, row) => {
+        lookup[row.canonical_objective_key] = objectiveKeyStatusCanonicalDefault;
+        return lookup;
+      }, {}),
+    ),
   );
   const firstSessionObjectiveRowByCanonicalKey = Object.freeze(
     firstSessionObjectiveContractRowsV1.reduce((lookup, row) => {
@@ -850,13 +1041,13 @@
     }, {}),
   );
   const firstSessionObjectiveCanonicalCandidatesByAlias = Object.freeze(
-    firstSessionObjectiveContractRowsV1.reduce((lookup, row) => {
-      for (const aliasKey of row.compatibility_alias_keys) {
+    firstSessionObjectiveLegacyAliasRows.reduce((lookup, row) => {
+      for (const aliasKey of row.legacy_keys) {
         if (!Array.isArray(lookup[aliasKey])) {
           lookup[aliasKey] = [];
         }
-        if (!lookup[aliasKey].includes(row.canonical_objective_key)) {
-          lookup[aliasKey].push(row.canonical_objective_key);
+        if (!lookup[aliasKey].includes(row.canonical_key)) {
+          lookup[aliasKey].push(row.canonical_key);
         }
       }
       return lookup;
@@ -917,24 +1108,60 @@
     );
   };
   const assertFirstSessionObjectiveContractRows = (rows) => {
-    if (rows.length !== firstSessionObjectiveCanonicalIdSequenceV1.length) {
+    if (rows.length !== firstSessionObjectiveLoopStepSequenceV1.length) {
       throw new Error(
-        "Objective contract mismatch: first-session objective count must stay fixed at six canonical IDs.",
+        "Objective contract mismatch: first-session objective count must stay fixed at six ordered loop steps.",
       );
     }
+    const aliasLookupResolutionOrder =
+      firstSessionObjectiveAliasLookupContractV1.deterministic_resolution_order;
+    if (
+      !Array.isArray(aliasLookupResolutionOrder)
+      || aliasLookupResolutionOrder.length !== 2
+      || aliasLookupResolutionOrder[0] !== "canonical_key"
+      || aliasLookupResolutionOrder[1] !== "legacy_keys_in_declared_order"
+    ) {
+      throw new Error(
+        "Objective contract mismatch: alias lookup contract deterministic resolution order must remain canonical-first, legacy-second.",
+      );
+    }
+    if (
+      firstSessionObjectiveAliasLookupContractV1
+        .direct_default_selection_excludes_legacy_alias_only_keys
+      !== true
+    ) {
+      throw new Error(
+        "Objective contract mismatch: direct default selection must exclude legacy alias-only keys.",
+      );
+    }
+    const seenObjectiveCanonicalKeySet = new Set();
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
       const row = rows[rowIndex];
-      const expectedObjectiveId = firstSessionObjectiveCanonicalIdSequenceV1[rowIndex];
       const expectedLoopStep = firstSessionObjectiveLoopStepSequenceV1[rowIndex];
-      if (row.canonical_objective_key !== expectedObjectiveId) {
+      const canonicalObjectiveKey = String(row.canonical_objective_key || "").trim();
+      if (canonicalObjectiveKey.length < 1) {
         throw new Error(
-          `Objective contract mismatch at order ${rowIndex + 1}: expected '${expectedObjectiveId}', received '${row.canonical_objective_key}'.`,
+          `Objective contract mismatch at order ${rowIndex + 1}: missing canonical objective key.`,
+        );
+      }
+      if (seenObjectiveCanonicalKeySet.has(canonicalObjectiveKey)) {
+        throw new Error(
+          `Objective contract mismatch at order ${rowIndex + 1}: duplicate canonical objective key '${canonicalObjectiveKey}'.`,
+        );
+      }
+      seenObjectiveCanonicalKeySet.add(canonicalObjectiveKey);
+      if (
+        firstSessionObjectiveKeyStatusByKey[canonicalObjectiveKey]
+        !== objectiveKeyStatusCanonicalDefault
+      ) {
+        throw new Error(
+          `Objective contract mismatch for '${canonicalObjectiveKey}': objective key must remain canonical-default.`,
         );
       }
       if (row.loop_step !== expectedLoopStep) {
         throw new Error(
-          `Objective contract mismatch for '${row.canonical_objective_key}': expected loop step '${expectedLoopStep}', received '${row.loop_step}'.`,
+          `Objective contract mismatch for '${canonicalObjectiveKey}': expected loop step '${expectedLoopStep}', received '${row.loop_step}'.`,
         );
       }
 
@@ -947,7 +1174,72 @@
       for (const requiredGateKey of [...requiredAllKeys, ...requiredAnyKeys]) {
         if (!isCanonicalObjectiveGateContentKey(requiredGateKey)) {
           throw new Error(
-            `Objective contract mismatch for '${row.canonical_objective_key}': gate key '${requiredGateKey}' must be canonical-default and in first-slice scope.`,
+            `Objective contract mismatch for '${canonicalObjectiveKey}': gate key '${requiredGateKey}' must be canonical-default and in first-slice scope.`,
+          );
+        }
+      }
+      const compatibilityAliasLookupKeys = row.compatibility_alias_lookup_keys;
+      if (
+        !compatibilityAliasLookupKeys
+        || typeof compatibilityAliasLookupKeys !== "object"
+        || Array.isArray(compatibilityAliasLookupKeys)
+      ) {
+        throw new Error(
+          `Objective contract mismatch for '${canonicalObjectiveKey}': compatibility alias lookup map is required.`,
+        );
+      }
+      for (const requiredGateKey of [...requiredAllKeys, ...requiredAnyKeys]) {
+        const compatibilityAliasKeys = compatibilityAliasLookupKeys[requiredGateKey];
+        if (!Array.isArray(compatibilityAliasKeys)) {
+          throw new Error(
+            `Objective contract mismatch for '${canonicalObjectiveKey}': compatibility alias row missing for '${requiredGateKey}'.`,
+          );
+        }
+        for (const aliasKey of compatibilityAliasKeys) {
+          if (
+            firstSliceMigrationKeyStatusByEventContentKey[aliasKey]
+            !== migrationKeyStatusCompatibilityOnly
+          ) {
+            throw new Error(
+              `Objective contract mismatch for '${canonicalObjectiveKey}': alias gate key '${aliasKey}' must remain compatibility-only.`,
+            );
+          }
+          const canonicalGateCandidates =
+            firstSliceCanonicalEventKeyCandidatesByLegacyAlias[aliasKey];
+          if (
+            !Array.isArray(canonicalGateCandidates)
+            || !canonicalGateCandidates.includes(requiredGateKey)
+          ) {
+            throw new Error(
+              `Objective contract mismatch for '${canonicalObjectiveKey}': alias gate key '${aliasKey}' must resolve to canonical '${requiredGateKey}'.`,
+            );
+          }
+        }
+      }
+    }
+    if (firstSessionObjectiveLegacyAliasRows.length !== rows.length) {
+      throw new Error(
+        "Objective contract mismatch: each canonical objective key must declare lookup-only compatibility alias rows.",
+      );
+    }
+    for (const objectiveAliasRow of firstSessionObjectiveLegacyAliasRows) {
+      const canonicalObjectiveKey = objectiveAliasRow.canonical_key;
+      for (const aliasKey of objectiveAliasRow.legacy_keys) {
+        if (
+          firstSessionObjectiveKeyStatusByKey[aliasKey]
+          !== objectiveKeyStatusCompatibilityOnly
+        ) {
+          throw new Error(
+            `Objective contract mismatch for '${canonicalObjectiveKey}': alias objective key '${aliasKey}' must remain compatibility-only.`,
+          );
+        }
+        const canonicalCandidates = firstSessionObjectiveCanonicalCandidatesByAlias[aliasKey];
+        if (
+          !Array.isArray(canonicalCandidates)
+          || !canonicalCandidates.includes(canonicalObjectiveKey)
+        ) {
+          throw new Error(
+            `Objective contract mismatch for '${canonicalObjectiveKey}': alias objective key '${aliasKey}' must deterministically resolve to canonical objective key.`,
           );
         }
       }
@@ -2402,16 +2694,17 @@
       const fallbackUnknownKey = String(objectiveKey || "objective.unknown").trim() || "objective.unknown";
       return `[Objective placeholder: ${fallbackUnknownKey}]`;
     }
-    const objectiveRow = firstSessionObjectiveRowByCanonicalKey[canonicalObjectiveKey];
-    if (!objectiveRow) {
+    if (!firstSessionObjectiveRowByCanonicalKey[canonicalObjectiveKey]) {
       return `[Objective placeholder: ${canonicalObjectiveKey}]`;
     }
     const canonicalTemplate = getNarrativeTemplateByContentKey(canonicalObjectiveKey);
     if (canonicalTemplate.length > 0) {
       return canonicalTemplate;
     }
-
-    return `[Objective placeholder: ${canonicalObjectiveKey}] ${objectiveRow.fallback_template}`;
+    const fallbackTemplate =
+      firstSessionObjectiveFallbackTemplateByCanonicalKey[canonicalObjectiveKey]
+      || "Complete the current first-session objective step.";
+    return `[Objective placeholder: ${canonicalObjectiveKey}] ${fallbackTemplate}`;
   };
   const getNarrativeTemplateWithFallback = (contentKey) => {
     if (!contentKey) {
