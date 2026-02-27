@@ -572,5 +572,41 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-27T10:17:50.0773497Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-AUTO-BACKLOG-0007-F03",
+    "status": "done",
+    "summary": "Published a first-slice canonical event token contract matrix for tick/build/train/scout/hostile loops, including required token sets per key, explicit legacy alias-to-canonical mapping, and explicit post-slice exclusion from required default rendering coverage.",
+    "changed_files": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Add contract validation for first-slice canonical event key/token matrix",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Add a startup/CI validator that cross-checks `loop_required_keys`, `legacy_alias_mapping`, and `deferred_post_slice_keys` in `first-slice-content-key-manifest.json` against `event-feed-messages.json` token rows so canonical rendering contracts cannot drift silently.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0007-F03"
+        ],
+        "inputs": [
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+        ],
+        "acceptance_criteria": [
+          "Validation fails if any `loop_required_keys` canonical key has no narrative row",
+          "Validation fails if any mapped `legacy_alias_mapping` key is also selected as a direct default rendering key",
+          "Validation fails if a deferred post-slice key appears in default first-slice include list",
+          "Failure output identifies exact offending key names for quick correction"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]
