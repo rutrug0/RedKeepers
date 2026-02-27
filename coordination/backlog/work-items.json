@@ -1,46 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0011-F03",
-    "title": "Emit first-session objective contract in frontend snapshot generator",
-    "description": "Extend the manifest snapshot generator so first-session objective contract rows are emitted from backend manifest/seed data and validated for ordering, canonical-default key usage, and alias lookup policy.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0010-F02-F01",
-      "RK-AUTO-BACKLOG-0011-F02"
-    ],
-    "inputs": [
-      "tools/generate_first_slice_frontend_manifest_snapshot.py",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
-      "client-web/first-slice-manifest-snapshot.js"
-    ],
-    "acceptance_criteria": [
-      "Generated snapshot includes a first-session objective contract block sourced from manifest/seed data with no hard-coded objective row constants",
-      "Generator fails with deterministic diagnostics on duplicate objective ids, invalid step order, or compatibility-only key default selection",
-      "Objective contract emission and validation are covered by targeted tests and the standard narrative snapshot test suite"
-    ],
-    "validation_commands": [
-      "python tools/generate_first_slice_frontend_manifest_snapshot.py --output coordination/runtime/first-slice-release-gate/objective-contract-snapshot.js",
-      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:44:54.339624+00:00",
-    "updated_at": "2026-02-27T14:56:19.061612+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0011",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0011-F04",
     "title": "Drive objective-strip rendering from snapshot objective contract rows",
     "description": "Refactor client objective-strip and completion-gate logic to read objective rows from the frontend snapshot payload, removing hard-coded objective contract arrays while preserving deterministic fallback behavior.",
@@ -104,17 +63,18 @@
       "python tools/first_slice_release_gate_runner.py",
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T13:44:54.339624+00:00",
-    "updated_at": "2026-02-27T13:44:54.339624+00:00",
+    "updated_at": "2026-02-27T15:00:16.065938+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0011"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0011",
+    "assigned_agent": "juno-cairn"
   },
   {
     "id": "RK-AUTO-BACKLOG-0011-F06",

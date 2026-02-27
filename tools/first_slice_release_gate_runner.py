@@ -11,6 +11,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_DIR = Path("coordination/runtime/first-slice-release-gate")
+CHECKLIST_FILENAME = "release-readiness-checklist.md"
+KNOWN_ISSUES_FILENAME = "known-issues.md"
+STATUS_PASS = "PASS"
+STATUS_FAIL = "FAIL"
+STATUS_NA = "N/A"
 
 
 @dataclass(frozen=True)
@@ -79,6 +84,163 @@ def _to_relative_path(path: Path, root: Path) -> str:
         return path.relative_to(root).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def _normalize_status(value: object) -> str:
+    token = str(value).strip().upper()
+    if token in {STATUS_PASS, STATUS_FAIL, STATUS_NA}:
+        return token
+    return STATUS_FAIL
+
+
+def _collect_gate_statuses(gate_results: list[dict[str, object]]) -> dict[str, str]:
+    status_by_id: dict[str, str] = {}
+    for gate in gate_results:
+        gate_id = str(gate.get("gate_id", "")).strip()
+        if not gate_id:
+            continue
+        status_by_id[gate_id] = _normalize_status(gate.get("status", STATUS_FAIL))
+    return status_by_id
+
+
+def _collect_gate_artifact_logs(gate_results: list[dict[str, object]]) -> dict[str, str]:
+    logs_by_id: dict[str, str] = {}
+    for gate in gate_results:
+        gate_id = str(gate.get("gate_id", "")).strip()
+        artifact_log = str(gate.get("artifact_log", "")).strip()
+        if gate_id and artifact_log:
+            logs_by_id[gate_id] = artifact_log
+    return logs_by_id
+
+
+def _derive_release_readiness_status(gate_status_by_id: dict[str, str]) -> str:
+    required_ids = {"playable", "quality", "platform", "hostile_token_contract"}
+    if required_ids.issubset(gate_status_by_id.keys()):
+        return STATUS_PASS
+    return STATUS_FAIL
+
+
+def _build_release_readiness_rows(
+    *,
+    gate_status_by_id: dict[str, str],
+    gate_logs_by_id: dict[str, str],
+    evidence_json_rel: str,
+    evidence_md_rel: str,
+    checklist_rel: str,
+    known_issues_rel: str,
+) -> list[dict[str, object]]:
+    release_readiness_status = _derive_release_readiness_status(gate_status_by_id)
+    return [
+        {
+            "gate_id": "playable",
+            "title": "Playable Loop Gate",
+            "status": gate_status_by_id.get("playable", STATUS_FAIL),
+            "artifacts": [
+                evidence_json_rel,
+                gate_logs_by_id.get("playable", "missing:playable-gate.log"),
+            ],
+        },
+        {
+            "gate_id": "scope",
+            "title": "Scope Gate",
+            "status": gate_status_by_id.get("hostile_token_contract", STATUS_FAIL),
+            "artifacts": [
+                evidence_json_rel,
+                gate_logs_by_id.get("hostile_token_contract", "missing:hostile-token-contract-gate.log"),
+            ],
+        },
+        {
+            "gate_id": "quality",
+            "title": "Quality Gate",
+            "status": gate_status_by_id.get("quality", STATUS_FAIL),
+            "artifacts": [
+                evidence_json_rel,
+                gate_logs_by_id.get("quality", "missing:quality-gate.log"),
+            ],
+        },
+        {
+            "gate_id": "platform",
+            "title": "Platform Gate",
+            "status": gate_status_by_id.get("platform", STATUS_FAIL),
+            "artifacts": [
+                evidence_json_rel,
+                gate_logs_by_id.get("platform", "missing:platform-gate.log"),
+            ],
+        },
+        {
+            "gate_id": "release_readiness",
+            "title": "Release Readiness Gate",
+            "status": release_readiness_status,
+            "artifacts": [
+                evidence_md_rel,
+                checklist_rel,
+                known_issues_rel,
+            ],
+        },
+    ]
+
+
+def _write_release_readiness_checklist(
+    *,
+    checklist_path: Path,
+    timestamp_utc: str,
+    overall_status: str,
+    canonical_command: str,
+    checklist_rows: list[dict[str, object]],
+) -> None:
+    lines = [
+        "# First-Slice Release Readiness Checklist",
+        "",
+        f"Timestamp (UTC): {timestamp_utc}",
+        f"Overall Gate Runner Status: {overall_status}",
+        "",
+        "Canonical Reproduction Command:",
+        f"- `{canonical_command}`",
+        "",
+        "| Gate | Status | Artifact References |",
+        "| --- | --- | --- |",
+    ]
+    for row in checklist_rows:
+        artifacts = ", ".join(f"`{artifact}`" for artifact in row["artifacts"])
+        lines.append(f"| {row['title']} | {row['status']} | {artifacts} |")
+    checklist_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _write_known_issues(
+    *,
+    known_issues_path: Path,
+    timestamp_utc: str,
+    evidence_json_rel: str,
+    checklist_rows: list[dict[str, object]],
+) -> None:
+    failing_rows = [row for row in checklist_rows if row["status"] == STATUS_FAIL]
+    lines = [
+        "# First-Slice Known Issues",
+        "",
+        f"Timestamp (UTC): {timestamp_utc}",
+        f"Evidence Source: `{evidence_json_rel}`",
+        "",
+    ]
+    if not failing_rows:
+        lines.extend(
+            [
+                "Mandatory Gate Failures:",
+                "- `none`",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "| Gate | Severity | Owner | Issue | Artifact Reference |",
+                "| --- | --- | --- | --- | --- |",
+            ]
+        )
+        for row in failing_rows:
+            first_artifact = str(row["artifacts"][0]) if row["artifacts"] else evidence_json_rel
+            lines.append(
+                f"| {row['title']} | TBD-SEV | TBD-OWNER | Gate status is FAIL. | `{first_artifact}` |"
+            )
+    known_issues_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def _write_gate_log(
@@ -151,6 +313,8 @@ def run_release_gate(
 
     evidence_json_path = output_dir / "release-gate-evidence.json"
     evidence_md_path = output_dir / "release-gate-evidence.md"
+    checklist_path = output_dir / CHECKLIST_FILENAME
+    known_issues_path = output_dir / KNOWN_ISSUES_FILENAME
     evidence_payload: dict[str, object] = {
         "timestamp_utc": timestamp_utc,
         "overall_status": overall_status,
@@ -184,6 +348,33 @@ def run_release_gate(
         markdown_lines.append(f"  - artifact_log: `{gate['artifact_log']}`")
 
     evidence_md_path.write_text("\n".join(markdown_lines) + "\n", encoding="utf-8")
+
+    evidence_json_rel = _to_relative_path(evidence_json_path, root)
+    evidence_md_rel = _to_relative_path(evidence_md_path, root)
+    checklist_rel = _to_relative_path(checklist_path, root)
+    known_issues_rel = _to_relative_path(known_issues_path, root)
+
+    checklist_rows = _build_release_readiness_rows(
+        gate_status_by_id=_collect_gate_statuses(gate_results),
+        gate_logs_by_id=_collect_gate_artifact_logs(gate_results),
+        evidence_json_rel=evidence_json_rel,
+        evidence_md_rel=evidence_md_rel,
+        checklist_rel=checklist_rel,
+        known_issues_rel=known_issues_rel,
+    )
+    _write_release_readiness_checklist(
+        checklist_path=checklist_path,
+        timestamp_utc=timestamp_utc,
+        overall_status=overall_status,
+        canonical_command="python tools/first_slice_release_gate_runner.py",
+        checklist_rows=checklist_rows,
+    )
+    _write_known_issues(
+        known_issues_path=known_issues_path,
+        timestamp_utc=timestamp_utc,
+        evidence_json_rel=evidence_json_rel,
+        checklist_rows=checklist_rows,
+    )
     return exit_code, evidence_payload, evidence_json_path, evidence_md_path
 
 

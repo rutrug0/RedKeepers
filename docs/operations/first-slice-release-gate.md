@@ -46,6 +46,8 @@ Platform metadata/assets remain placeholder-only and replaceable per wrapper run
 
 - Gate evidence JSON: `coordination/runtime/first-slice-release-gate/release-gate-evidence.json`
 - Gate evidence Markdown: `coordination/runtime/first-slice-release-gate/release-gate-evidence.md`
+- Release-readiness checklist: `coordination/runtime/first-slice-release-gate/release-readiness-checklist.md`
+- Known issues: `coordination/runtime/first-slice-release-gate/known-issues.md`
 - Per-gate logs:
   - `coordination/runtime/first-slice-release-gate/playable-gate.log`
   - `coordination/runtime/first-slice-release-gate/quality-gate.log`
@@ -56,3 +58,11 @@ The JSON artifact includes:
 - gate-level `PASS`/`FAIL` status
 - deterministic executed command list
 - per-gate command, exit code, summary, and log path
+
+The release-readiness checklist includes:
+- explicit `PASS`/`FAIL`/`N/A` status rows for playable, scope, quality, platform, and release-readiness gates
+- artifact references for each row back to deterministic gate evidence/log outputs
+
+The known-issues artifact includes:
+- one row per failing mandatory gate with `severity`/`owner` placeholders
+- explicit `none` marker when all mandatory checklist gates pass

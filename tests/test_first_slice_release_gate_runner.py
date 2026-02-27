@@ -114,6 +114,18 @@ class FirstSliceReleaseGateRunnerTests(unittest.TestCase):
             self.assertTrue((output_dir / "platform-gate.log").is_file())
             self.assertTrue((output_dir / "hostile-token-contract-gate.log").is_file())
             self.assertTrue(evidence_md_path.is_file())
+            checklist_path = output_dir / "release-readiness-checklist.md"
+            known_issues_path = output_dir / "known-issues.md"
+            self.assertTrue(checklist_path.is_file())
+            self.assertTrue(known_issues_path.is_file())
+            checklist_text = checklist_path.read_text(encoding="utf-8")
+            self.assertIn("| Playable Loop Gate | PASS |", checklist_text)
+            self.assertIn("| Scope Gate | PASS |", checklist_text)
+            self.assertIn("| Quality Gate | PASS |", checklist_text)
+            self.assertIn("| Platform Gate | PASS |", checklist_text)
+            self.assertIn("| Release Readiness Gate | PASS |", checklist_text)
+            known_issues_text = known_issues_path.read_text(encoding="utf-8")
+            self.assertIn("- `none`", known_issues_text)
 
     def test_run_release_gate_exits_non_zero_when_any_gate_fails(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -160,6 +172,10 @@ class FirstSliceReleaseGateRunnerTests(unittest.TestCase):
             self.assertEqual(gate_status_by_id["quality"], "FAIL")
             self.assertEqual(gate_status_by_id["platform"], "PASS")
             self.assertEqual(gate_status_by_id["hostile_token_contract"], "PASS")
+            checklist_text = (output_dir / "release-readiness-checklist.md").read_text(encoding="utf-8")
+            self.assertIn("| Quality Gate | FAIL |", checklist_text)
+            known_issues_text = (output_dir / "known-issues.md").read_text(encoding="utf-8")
+            self.assertIn("| Quality Gate | TBD-SEV | TBD-OWNER | Gate status is FAIL. |", known_issues_text)
 
     def test_run_release_gate_exits_non_zero_when_hostile_token_contract_gate_fails(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -208,6 +224,10 @@ class FirstSliceReleaseGateRunnerTests(unittest.TestCase):
             self.assertEqual(json_payload["overall_status"], "FAIL")
             gate_status_by_id = {gate["gate_id"]: gate["status"] for gate in json_payload["gates"]}
             self.assertEqual(gate_status_by_id["hostile_token_contract"], "FAIL")
+            checklist_text = (output_dir / "release-readiness-checklist.md").read_text(encoding="utf-8")
+            self.assertIn("| Scope Gate | FAIL |", checklist_text)
+            known_issues_text = (output_dir / "known-issues.md").read_text(encoding="utf-8")
+            self.assertIn("| Scope Gate | TBD-SEV | TBD-OWNER | Gate status is FAIL. |", known_issues_text)
 
 
 if __name__ == "__main__":
