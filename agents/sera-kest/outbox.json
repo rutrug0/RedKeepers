@@ -622,8 +622,25 @@
                                                                 ],
                                         "validation_commands":  [
                                                                     "python tools/orchestrator.py status"
-                                                                ]
+                                        ]
                                     }
+                                ]
+    },
+    {
+        "ts":  "2026-02-27T08:55:54.8267397Z",
+        "item_id":  "RK-AUTO-BACKLOG-0005-F03-F01",
+        "status":  "completed",
+        "summary":  "Replaced client bootstrap default settlement/hostile IDs with a manifest-backed payload source loaded before app initialization, validated payload paths and canonical scope alignment with explicit bootstrap errors, and switched first-session settlement/hostile fallback IDs in action routing to the validated payload source.",
+        "files":  [
+                      "client-web/first-slice-bootstrap-payload.js",
+                      "client-web/index.html",
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/first-slice-bootstrap-payload.js",
+                                    "node --check client-web/app.js",
+                                    "python tools/rk_m0_0011_first_slice_loop_smoke.py"
                                 ]
     }
 ]

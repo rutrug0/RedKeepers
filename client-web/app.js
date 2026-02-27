@@ -4,6 +4,69 @@
     typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
       : null;
+  const stableIdPattern = /^[a-z0-9]+(?:_[a-z0-9]+)*$/;
+  const firstSliceBootstrapPayloadSourceGlobalPath =
+    "window.__RK_FIRST_SLICE_BOOTSTRAP_PAYLOAD_V1__";
+  const readManifestBackedFirstSliceBootstrapPayloadSource = () => {
+    const payloadRoot = window.__RK_FIRST_SLICE_BOOTSTRAP_PAYLOAD_V1__;
+    if (!payloadRoot || typeof payloadRoot !== "object") {
+      throw new Error(
+        `Missing manifest-backed bootstrap payload at ${firstSliceBootstrapPayloadSourceGlobalPath}.`,
+      );
+    }
+
+    const frontendPayload = payloadRoot.default_consumption_contract?.frontend;
+    if (!frontendPayload || typeof frontendPayload !== "object") {
+      throw new Error(
+        `Invalid bootstrap payload path: ${firstSliceBootstrapPayloadSourceGlobalPath}.default_consumption_contract.frontend`,
+      );
+    }
+    const sourceManifest = payloadRoot.source_manifest;
+    if (!sourceManifest || typeof sourceManifest !== "object") {
+      throw new Error(
+        `Invalid bootstrap payload path: ${firstSliceBootstrapPayloadSourceGlobalPath}.source_manifest`,
+      );
+    }
+    const sourceManifestPath = String(sourceManifest.path || "").trim();
+    if (sourceManifestPath.length < 1) {
+      throw new Error(
+        `Invalid bootstrap payload path: ${firstSliceBootstrapPayloadSourceGlobalPath}.source_manifest.path`,
+      );
+    }
+    const sourceManifestId = String(sourceManifest.manifest_id || "").trim();
+    if (!stableIdPattern.test(sourceManifestId)) {
+      throw new Error(
+        `Invalid bootstrap payload path: ${firstSliceBootstrapPayloadSourceGlobalPath}.source_manifest.manifest_id`,
+      );
+    }
+
+    const defaultSessionEntrySettlementId = String(
+      frontendPayload.default_session_entry_settlement_id || "",
+    ).trim();
+    if (!stableIdPattern.test(defaultSessionEntrySettlementId)) {
+      throw new Error(
+        `Invalid bootstrap payload path: ${firstSliceBootstrapPayloadSourceGlobalPath}.default_consumption_contract.frontend.default_session_entry_settlement_id`,
+      );
+    }
+
+    const defaultHostileTargetSettlementId = String(
+      frontendPayload.default_hostile_target_settlement_id || "",
+    ).trim();
+    if (!stableIdPattern.test(defaultHostileTargetSettlementId)) {
+      throw new Error(
+        `Invalid bootstrap payload path: ${firstSliceBootstrapPayloadSourceGlobalPath}.default_consumption_contract.frontend.default_hostile_target_settlement_id`,
+      );
+    }
+
+    return Object.freeze({
+      source_manifest_path: sourceManifestPath,
+      source_manifest_id: sourceManifestId,
+      default_session_entry_settlement_id: defaultSessionEntrySettlementId,
+      default_hostile_target_settlement_id: defaultHostileTargetSettlementId,
+    });
+  };
+  const firstSliceBootstrapPayloadSourceV1 =
+    readManifestBackedFirstSliceBootstrapPayloadSource();
   const placeholderNarrativeSeedTemplates = Object.freeze({
     "civ_intro.cinder_throne_legates":
       "The Cinder Throne Legates hold the frontier by ash, ration, and decree. Their magistrates build roads before monuments, and their branded levies turn every settlement into a hard post that is costly to break.",
@@ -140,8 +203,10 @@
     },
     default_consumption_contract: {
       frontend: {
-        default_session_entry_settlement_id: "settlement_alpha",
-        default_hostile_target_settlement_id: "settlement_hostile",
+        default_session_entry_settlement_id:
+          firstSliceBootstrapPayloadSourceV1.default_session_entry_settlement_id,
+        default_hostile_target_settlement_id:
+          firstSliceBootstrapPayloadSourceV1.default_hostile_target_settlement_id,
       },
     },
   });
@@ -240,7 +305,52 @@
   );
   const firstSliceDeterministicFallbackEventContentKey = "event.world.hostile_dispatch_failed";
   const firstSliceLocalProfileStorageKey = "rk:first_slice:local_player_profile_v1";
-  const stableIdPattern = /^[a-z0-9]+(?:_[a-z0-9]+)*$/;
+  const assertFirstSliceBootstrapDefaultsAlignManifestScope = (
+    manifest,
+    bootstrapPayload,
+  ) => {
+    const canonicalPrimarySettlementId =
+      manifest.canonical_playable_now.primary_settlement.settlement_id;
+    const canonicalHostileSettlementId =
+      manifest.canonical_playable_now.foreign_hostile_profile.settlement_id;
+    if (
+      bootstrapPayload.default_session_entry_settlement_id
+      !== canonicalPrimarySettlementId
+    ) {
+      throw new Error(
+        "Manifest scope drift: bootstrap default session settlement id diverges from canonical primary settlement id.",
+      );
+    }
+    if (
+      bootstrapPayload.default_hostile_target_settlement_id
+      !== canonicalHostileSettlementId
+    ) {
+      throw new Error(
+        "Manifest scope drift: bootstrap default hostile target settlement id diverges from canonical hostile settlement id.",
+      );
+    }
+    if (
+      bootstrapPayload.default_session_entry_settlement_id
+      === bootstrapPayload.default_hostile_target_settlement_id
+    ) {
+      throw new Error(
+        "Manifest scope drift: bootstrap default session and hostile target settlement ids must remain distinct.",
+      );
+    }
+    if (bootstrapPayload.source_manifest_id !== manifest.manifest_id) {
+      throw new Error(
+        "Manifest scope drift: bootstrap payload source manifest id diverges from first-slice playable manifest id.",
+      );
+    }
+  };
+  assertFirstSliceBootstrapDefaultsAlignManifestScope(
+    firstSlicePlayableManifestV1,
+    firstSliceBootstrapPayloadSourceV1,
+  );
+  const firstSliceDefaultSessionEntrySettlementId =
+    firstSliceBootstrapPayloadSourceV1.default_session_entry_settlement_id;
+  const firstSliceDefaultHostileTargetSettlementId =
+    firstSliceBootstrapPayloadSourceV1.default_hostile_target_settlement_id;
   const firstSlicePlayableDefaults = firstSlicePlayableManifestV1.canonical_playable_now;
   const firstSlicePrimarySettlement = firstSlicePlayableDefaults.primary_settlement;
   const firstSliceForeignHostileProfile = firstSlicePlayableDefaults.foreign_hostile_profile;
@@ -434,7 +544,7 @@
                 tile_id: firstSliceHomeTileId,
                 tile_label: firstSlicePrimarySettlement.settlement_name,
                 target_kind: "home_settlement",
-                settlement_id: firstSlicePrimarySettlement.settlement_id,
+                settlement_id: firstSliceDefaultSessionEntrySettlementId,
                 coords: { x: 0, y: 0 },
               },
               {
@@ -686,7 +796,7 @@
   }));
 
   const settlementActionRuntime = {
-    settlement_id: firstSlicePrimarySettlement.settlement_id,
+    settlement_id: firstSliceDefaultSessionEntrySettlementId,
     settlement_name: firstSlicePrimarySettlement.settlement_name,
     player_id: stableLocalProfile.player_id,
     profile_id: stableLocalProfile.profile_id,
@@ -2412,7 +2522,7 @@
     const targetTileLabel = context?.target_tile_label || "Hostile Settlement";
     const targetSettlementId =
       context?.target_settlement_id
-      || firstSlicePlayableManifestV1.default_consumption_contract.frontend.default_hostile_target_settlement_id;
+      || firstSliceDefaultHostileTargetSettlementId;
     const isFailedContract = response?.status === "failed";
     if (isFailedContract) {
       const failureErrorCode = response?.error_code || response?.failure_code || "hostile_dispatch_failed";
@@ -2631,7 +2741,7 @@
     const targetSettlementId =
       typeof selectedMarker?.settlement_id === "string" && selectedMarker.settlement_id.trim().length > 0
         ? selectedMarker.settlement_id.trim()
-        : firstSlicePlayableManifestV1.default_consumption_contract.frontend.default_hostile_target_settlement_id;
+        : firstSliceDefaultHostileTargetSettlementId;
     const targetSettlementName =
       typeof selectedMarker?.label === "string" && selectedMarker.label.trim().length > 0
         ? selectedMarker.label.trim()

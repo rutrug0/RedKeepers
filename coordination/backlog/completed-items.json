@@ -6139,5 +6139,47 @@
     "runtime_seconds": 688.47,
     "started_at": "2026-02-27T08:30:08.694035+00:00",
     "finished_at": "2026-02-27T08:41:37.167059+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F02-F01",
+    "title": "Validate first-slice runtime seeds against playable manifest lock",
+    "description": "Add a startup/CI validation step that cross-checks active first-slice seeds and default transport fixtures against `first-slice-playable-manifest.json` (IDs and caps) to prevent accidental scope drift.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F02"
+    ],
+    "inputs": [
+      "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
+      "backend/src/app/config/seeds/v1/first-slice-enablement.json",
+      "backend/src/app/config/seeds/v1/world-map-tile-seed-fixtures.json"
+    ],
+    "acceptance_criteria": [
+      "Validation fails if enabled civ/resource/building/unit IDs diverge from `canonical_playable_now` in the manifest",
+      "Validation fails if default primary settlement or hostile fixture IDs diverge from manifest lock values",
+      "CI output reports exact mismatched IDs to support quick correction without bespoke migration logic"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T20:59:07.602886+00:00",
+    "updated_at": "2026-02-27T08:50:56.648202+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- I left unrelated pre-existing modifications in `coordination/backlog/*.json` untouched.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F02",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "aaa6ee5e899e55239d940d6fa0fb963a6ee507b0",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 550.92,
+    "started_at": "2026-02-27T08:41:44.048177+00:00",
+    "finished_at": "2026-02-27T08:50:54.980631+00:00"
   }
 ]
