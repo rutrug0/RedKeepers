@@ -6703,5 +6703,41 @@
     "runtime_seconds": 575.81,
     "started_at": "2026-02-27T10:05:58.033207+00:00",
     "finished_at": "2026-02-27T10:15:33.855292+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F03",
+    "title": "Publish first-slice event token contract matrix for settlement and map loops",
+    "description": "Publish one design token contract mapping canonical first-slice loop keys to required placeholders/tokens for backend/frontend/content alignment.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Canonical keys and required token sets are listed for tick/build/train/scout/hostile flows.",
+      "Legacy alias-to-canonical mapping is explicit.",
+      "Post-slice keys are excluded from required default rendering coverage."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T10:15:35.546325+00:00",
+    "updated_at": "2026-02-27T10:18:39.821870+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/rowan-hale/outbox.json](D:\\RedKeepers\\agents\\rowan-hale\\outbox.json): appended `RK-AUTO-BACKLOG-0007-F03` completion entry with structured follow-up work item.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
+    "assigned_agent": "rowan-hale",
+    "commit_sha": "f9ebf8714215b7651faa7606190413d9d80cbb3c",
+    "resolved_by_agent": "rowan-hale",
+    "resolved_by_role": "design",
+    "runtime_seconds": 177.66,
+    "started_at": "2026-02-27T10:15:40.806418+00:00",
+    "finished_at": "2026-02-27T10:18:38.456748+00:00"
   }
 ]

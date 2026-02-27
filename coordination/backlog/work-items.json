@@ -16,17 +16,18 @@
       "Deferred post-slice keys remain excluded from default first-session coverage."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T10:15:35.546325+00:00",
-    "updated_at": "2026-02-27T10:15:35.546325+00:00",
+    "updated_at": "2026-02-27T10:32:16.872211+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-AUTO-BACKLOG-0007-F02",
@@ -59,36 +60,6 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0007"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0007-F03",
-    "title": "Publish first-slice event token contract matrix for settlement and map loops",
-    "description": "Publish one design token contract mapping canonical first-slice loop keys to required placeholders/tokens for backend/frontend/content alignment.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "design",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Canonical keys and required token sets are listed for tick/build/train/scout/hostile flows.",
-      "Legacy alias-to-canonical mapping is explicit.",
-      "Post-slice keys are excluded from required default rendering coverage."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T10:15:35.546325+00:00",
-    "updated_at": "2026-02-27T10:18:38.485551+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
-    "assigned_agent": "rowan-hale"
   },
   {
     "id": "RK-AUTO-BACKLOG-0007-F04",
@@ -183,5 +154,41 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0007"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F03-F01",
+    "title": "Add contract validation for first-slice canonical event key/token matrix",
+    "description": "Add a startup/CI validator that cross-checks `loop_required_keys`, `legacy_alias_mapping`, and `deferred_post_slice_keys` in `first-slice-content-key-manifest.json` against `event-feed-messages.json` token rows so canonical rendering contracts cannot drift silently.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F03"
+    ],
+    "inputs": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+    ],
+    "acceptance_criteria": [
+      "Validation fails if any `loop_required_keys` canonical key has no narrative row",
+      "Validation fails if any mapped `legacy_alias_mapping` key is also selected as a direct default rendering key",
+      "Validation fails if a deferred post-slice key appears in default first-slice include list",
+      "Failure output identifies exact offending key names for quick correction"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T10:18:40.023163+00:00",
+    "updated_at": "2026-02-27T10:18:40.023163+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F03"
   }
 ]
