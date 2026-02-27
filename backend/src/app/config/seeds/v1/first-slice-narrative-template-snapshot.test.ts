@@ -1,4 +1,6 @@
 import { strict as assert } from "node:assert";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { test } from "node:test";
 
 import {
@@ -13,6 +15,27 @@ import {
 import { loadNarrativeSeedBundleV1 } from "./narrative-seed-loaders.ts";
 
 const defaultPaths = createDefaultFirstSliceNarrativeTemplateSnapshotFilePathsV1();
+const firstSliceHostileRuntimeTokenContractPath = join(
+  process.cwd(),
+  "backend/src/app/config/seeds/v1/narrative/first-slice-hostile-runtime-token-contract.json",
+);
+
+interface FirstSliceHostileRuntimeKeyContractRowV1 {
+  readonly canonical_key: string;
+  readonly required_tokens: readonly string[];
+  readonly compatibility_alias_keys: readonly string[];
+}
+
+interface FirstSliceHostileRuntimeTokenContractV1 {
+  readonly required_runtime_keys: readonly FirstSliceHostileRuntimeKeyContractRowV1[];
+  readonly compatibility_alias_only_keys: readonly string[];
+  readonly deferred_post_slice_keys_excluded_from_contract: readonly {
+    readonly key: string;
+  }[];
+}
+
+const loadFirstSliceHostileRuntimeTokenContractV1 = async (): Promise<FirstSliceHostileRuntimeTokenContractV1> =>
+  JSON.parse(await readFile(firstSliceHostileRuntimeTokenContractPath, "utf8")) as FirstSliceHostileRuntimeTokenContractV1;
 
 test("loadAndValidateFirstSliceNarrativeTemplateSnapshotLockV1 passes for committed narrative lock", async () => {
   const result = await loadAndValidateFirstSliceNarrativeTemplateSnapshotLockV1();
@@ -48,6 +71,102 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 includes canonical and legacy 
     snapshot.default_first_session.supported_legacy_alias_keys,
     manifest.compatibility_alias_only_keys,
   );
+});
+
+test("hostile canonical narrative seed keys and tokens align with locked runtime token contract", async () => {
+  const narrativeSeedBundle = await loadNarrativeSeedBundleV1(
+    defaultPaths.narrative_seed_paths,
+  );
+  const manifest = await loadFirstSliceContentKeyManifestV1(
+    defaultPaths.first_slice_content_key_manifest_path!,
+  );
+  const hostileTokenContract = await loadFirstSliceHostileRuntimeTokenContractV1();
+
+  const rowsByKey = new Map(
+    narrativeSeedBundle.event_feed_messages.rows.map((row) => [row.key, row] as const),
+  );
+  const canonicalSelectionSet = new Set(
+    manifest.default_first_slice_seed_usage.include_only_content_keys,
+  );
+  const hostileLoopCanonicalSet = new Set(
+    manifest.loop_required_keys.hostile_dispatch_and_resolve,
+  );
+  const hostileContractCanonicalKeys = hostileTokenContract.required_runtime_keys.map(
+    (row) => row.canonical_key,
+  );
+
+  assert.deepEqual(
+    [...new Set(hostileContractCanonicalKeys)].sort((left, right) => left.localeCompare(right)),
+    [...hostileLoopCanonicalSet].sort((left, right) => left.localeCompare(right)),
+  );
+
+  for (const contractRow of hostileTokenContract.required_runtime_keys) {
+    const narrativeRow = rowsByKey.get(contractRow.canonical_key);
+    assert.notEqual(
+      narrativeRow,
+      undefined,
+      `Missing hostile canonical key '${contractRow.canonical_key}' in narrative seeds.`,
+    );
+    assert.deepEqual(
+      narrativeRow!.tokens,
+      contractRow.required_tokens,
+      `Hostile token drift for canonical key '${contractRow.canonical_key}'.`,
+    );
+    assert.equal(
+      canonicalSelectionSet.has(contractRow.canonical_key),
+      true,
+      `Hostile canonical key '${contractRow.canonical_key}' must stay in default canonical selection.`,
+    );
+
+    for (const aliasKey of contractRow.compatibility_alias_keys) {
+      assert.equal(
+        rowsByKey.has(aliasKey),
+        true,
+        `Missing hostile alias key '${aliasKey}' in narrative seeds.`,
+      );
+      assert.equal(
+        manifest.compatibility_alias_only_keys.includes(aliasKey),
+        true,
+        `Hostile alias key '${aliasKey}' must be declared in compatibility_alias_only_keys.`,
+      );
+      assert.equal(
+        canonicalSelectionSet.has(aliasKey),
+        false,
+        `Hostile alias key '${aliasKey}' must not leak into default canonical selection.`,
+      );
+      assert.equal(
+        hostileLoopCanonicalSet.has(aliasKey),
+        false,
+        `Hostile alias key '${aliasKey}' must not appear as hostile loop canonical content key.`,
+      );
+    }
+  }
+
+  for (const aliasKey of hostileTokenContract.compatibility_alias_only_keys) {
+    assert.equal(
+      rowsByKey.has(aliasKey),
+      true,
+      `Missing hostile compatibility alias key '${aliasKey}' in narrative seeds.`,
+    );
+    assert.equal(
+      manifest.compatibility_alias_only_keys.includes(aliasKey),
+      true,
+      `Hostile compatibility alias key '${aliasKey}' must be listed in content-key manifest alias coverage.`,
+    );
+    assert.equal(
+      canonicalSelectionSet.has(aliasKey),
+      false,
+      `Hostile compatibility alias key '${aliasKey}' must not be selected as canonical default content.`,
+    );
+  }
+
+  for (const deferredRow of hostileTokenContract.deferred_post_slice_keys_excluded_from_contract) {
+    assert.equal(
+      canonicalSelectionSet.has(deferredRow.key),
+      false,
+      `Deferred post-slice key '${deferredRow.key}' must remain excluded from default canonical selection.`,
+    );
+  }
 });
 
 test("createFirstSliceNarrativeTemplateSnapshotV1 fails on missing canonical key coverage", async () => {

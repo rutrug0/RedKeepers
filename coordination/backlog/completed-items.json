@@ -7313,5 +7313,50 @@
     "runtime_seconds": 301.02,
     "started_at": "2026-02-27T11:40:38.533001+00:00",
     "finished_at": "2026-02-27T11:45:39.553117+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0008-F02",
+    "title": "Enforce hostile runtime payload token contract in backend attack service tests",
+    "description": "Apply hostile runtime token contract assertions to world-map hostile attack runtime payload emission so dispatch/arrival/combat events always include required canonical token fields.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F04-F01",
+      "RK-AUTO-BACKLOG-0008-F01"
+    ],
+    "inputs": [
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+      "docs/design/first-slice-hostile-runtime-token-contract.json"
+    ],
+    "acceptance_criteria": [
+      "Hostile dispatch payload includes canonical required tokens (`army_name`, `target_tile_label`, `eta_seconds`) without requiring legacy alias token shapes",
+      "Hostile arrival/combat/post-battle runtime payload token sets match the machine-readable hostile token contract for canonical keys",
+      "Backend tests fail deterministically when hostile runtime payload keys or required token names drift"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:14:57.959007+00:00",
+    "updated_at": "2026-02-27T11:48:16.750801+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Once you confirm, I\u2019ll finish by appending the structured run summary to `agents/ilya-fen/outbox.json`.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "a9d32f17db5a1ad873535f25d165bb415f168fab",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 148.33,
+    "started_at": "2026-02-27T11:45:46.905389+00:00",
+    "finished_at": "2026-02-27T11:48:15.225332+00:00"
   }
 ]
