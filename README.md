@@ -37,9 +37,11 @@ This repository is bootstrapped with the M0 orchestration foundation:
 ## Steam Tauri Wrapper Packaging (M0)
 
 - Standardized script entry point (recommended):
-  - `scripts/wrapper_steam_tauri.ps1 -Mode build -CleanWeb`
+  - `scripts/wrapper_steam_tauri.ps1 -Mode package -CleanWeb`
 - Standardized dev entry point:
   - `scripts/wrapper_steam_tauri.ps1 -Mode dev -CleanWeb`
+- Prepare-mode wrapper smoke:
+  - `python tools/platform_wrapper_prepare_smoke.py`
 - Legacy scripts and direct Python commands remain supported.
 - Runbook:
   - `docs/operations/steam-tauri-wrapper-packaging.md`
@@ -47,11 +49,13 @@ This repository is bootstrapped with the M0 orchestration foundation:
 ## Android Capacitor Wrapper Packaging (M0)
 
 - Standardized script entry point (recommended debug package):
-  - `scripts/wrapper_android_capacitor.ps1 -Mode build-debug -CleanWeb`
+  - `scripts/wrapper_android_capacitor.ps1 -Mode package-debug -CleanWeb`
 - Standardized script entry point (recommended release package):
-  - `scripts/wrapper_android_capacitor.ps1 -Mode build-release -CleanWeb`
+  - `scripts/wrapper_android_capacitor.ps1 -Mode package-release -CleanWeb`
 - Standardized dev entry point:
   - `scripts/wrapper_android_capacitor.ps1 -Mode dev -CleanWeb`
+- Prepare-mode wrapper smoke:
+  - `python tools/platform_wrapper_prepare_smoke.py`
 - Legacy scripts and direct Python commands remain supported.
 - Runbook:
   - `docs/operations/android-capacitor-wrapper-packaging.md`

@@ -2384,6 +2384,47 @@ def build_validation_commands(item: dict[str, Any], commit_rules: dict[str, Any]
                 ]
             commands.extend(platform_commands)
 
+    platform_wrapper_cfg = commit_rules.get("platform_wrapper_prepare_validation", {})
+    if not isinstance(platform_wrapper_cfg, dict):
+        platform_wrapper_cfg = {}
+    platform_wrapper_enabled = _boolish(platform_wrapper_cfg.get("enabled"), False)
+    env_platform_wrapper = os.environ.get("REDKEEPERS_ENABLE_PLATFORM_WRAPPER_PREPARE_VALIDATION")
+    if env_platform_wrapper is not None:
+        platform_wrapper_enabled = _boolish(env_platform_wrapper, platform_wrapper_enabled)
+
+    if platform_wrapper_enabled:
+        owner_roles_raw = _string_list(platform_wrapper_cfg.get("owner_roles"))
+        owner_roles = {_norm_path_text(role) for role in (owner_roles_raw or ["platform"])}
+        item_owner_role = _norm_path_text(str(item.get("owner_role", "")))
+        role_match = item_owner_role in owner_roles
+
+        input_tokens_raw = _string_list(platform_wrapper_cfg.get("match_inputs_any"))
+        input_tokens = [
+            _norm_path_text(token)
+            for token in (
+                input_tokens_raw
+                or [
+                    "scripts/wrapper_steam_tauri.ps1",
+                    "scripts/wrapper_android_capacitor.ps1",
+                    "client-steam-tauri/",
+                    "client-android-capacitor/",
+                ]
+            )
+        ]
+        item_inputs_raw = item.get("inputs", [])
+        item_inputs = []
+        if isinstance(item_inputs_raw, list):
+            item_inputs = [_norm_path_text(str(entry)) for entry in item_inputs_raw if str(entry).strip()]
+        input_match = bool(input_tokens) and any(
+            token in candidate for token in input_tokens for candidate in item_inputs
+        )
+
+        if role_match and input_match:
+            wrapper_commands = _string_list(platform_wrapper_cfg.get("commands"))
+            if not wrapper_commands:
+                wrapper_commands = ["python tools/platform_wrapper_prepare_smoke.py"]
+            commands.extend(wrapper_commands)
+
     commands = _dedupe_validation_commands(commands)
 
     scope_cfg = commit_rules.get("validation_scope_guard", {})
@@ -2550,6 +2591,26 @@ def platform_web_packaging_environment_blocker_reason(validation_results: list[d
         if not detail:
             detail = "Web vertical-slice packaging reported STATUS: BLOCKED"
         return f"Platform web packaging blocked by environment: {detail}"
+    return None
+
+
+def platform_wrapper_prepare_environment_blocker_reason(validation_results: list[dict[str, Any]]) -> str | None:
+    for result in validation_results:
+        if not isinstance(result, dict):
+            continue
+        command = str(result.get("command", ""))
+        effective_command = str(result.get("effective_command", ""))
+        command_text = f"{command}\n{effective_command}".replace("\\", "/").lower()
+        if "tools/platform_wrapper_prepare_smoke.py" not in command_text:
+            continue
+        stdout_tail = str(result.get("stdout_tail", ""))
+        stderr_tail = str(result.get("stderr_tail", ""))
+        status, detail = _extract_status_line(f"{stdout_tail}\n{stderr_tail}")
+        if status != "BLOCKED":
+            continue
+        if not detail:
+            detail = "Platform wrapper prepare smoke reported STATUS: BLOCKED"
+        return f"Platform wrapper prepare validation blocked by environment: {detail}"
     return None
 
 
@@ -3243,6 +3304,8 @@ def process_one(
             blocker_reason = frontend_visual_environment_blocker_reason(validation_results, root=ROOT)
             if blocker_reason is None:
                 blocker_reason = platform_web_packaging_environment_blocker_reason(validation_results)
+            if blocker_reason is None:
+                blocker_reason = platform_wrapper_prepare_environment_blocker_reason(validation_results)
             if blocker_reason is None:
                 blocker_reason = validation_scope_mismatch_blocker_reason(validation_results)
             if blocker_reason:

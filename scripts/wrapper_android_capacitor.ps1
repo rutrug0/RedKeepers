@@ -1,16 +1,39 @@
 param(
-  [ValidateSet("prepare", "sync", "dev", "build-debug", "build-release")]
+  [ValidateSet("prepare", "sync", "dev", "package-debug", "package-release", "build-debug", "build-release")]
   [string]$Mode = "prepare",
   [switch]$SkipSync,
   [switch]$SkipPrepare,
   [switch]$CleanWeb
 )
 
-$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+$scriptRoot = Split-Path -Parent $PSCommandPath
+$repoRoot = Resolve-Path (Join-Path $scriptRoot "..")
+$wrapperToolPath = Join-Path $repoRoot "tools/android_capacitor_wrapper.py"
+
+$resolvedMode = switch ($Mode) {
+  "package-debug" { "build-debug" }
+  "package-release" { "build-release" }
+  default { $Mode }
+}
+
+if (-not (Test-Path -LiteralPath $wrapperToolPath -PathType Leaf)) {
+  Write-Output "STATUS: BLOCKED`nAndroid wrapper tool script not found: $wrapperToolPath"
+  exit 1
+}
+
+$pythonCommand = Get-Command python -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+if (-not $pythonCommand) {
+  Write-Output "STATUS: BLOCKED`npython is not available on PATH."
+  exit 1
+}
+
 Push-Location $repoRoot
 try {
-  $cmd = @("tools/android_capacitor_wrapper.py", $Mode)
-  switch ($Mode) {
+  $cmd = @($wrapperToolPath, $resolvedMode)
+  switch ($resolvedMode) {
     "sync" {
       if ($SkipPrepare) {
         $cmd += "--skip-prepare"
@@ -44,8 +67,12 @@ try {
   if ($CleanWeb) {
     $cmd += "--clean-web"
   }
-  python @cmd
+  & $pythonCommand.Source @cmd
   exit $LASTEXITCODE
+}
+catch {
+  Write-Output "STATUS: BLOCKED`n$($_.Exception.Message)"
+  exit 1
 }
 finally {
   Pop-Location

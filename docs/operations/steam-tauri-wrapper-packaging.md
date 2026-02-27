@@ -17,10 +17,10 @@ This runbook defines the Steam-targeted Tauri wrapper scaffold around the packag
 
 ## Commands
 
-Canonical reproducible script entry point (web artifact -> Steam wrapper build):
+Canonical reproducible script entry point (web artifact -> Steam wrapper package build):
 
 ```powershell
-scripts/wrapper_steam_tauri.ps1 -Mode build -CleanWeb
+scripts/wrapper_steam_tauri.ps1 -Mode package -CleanWeb
 ```
 
 Canonical reproducible script entry point (web artifact -> Steam wrapper dev run):
@@ -34,6 +34,18 @@ Underlying Python commands (same behavior):
 ```powershell
 python tools/steam_tauri_wrapper.py build --clean-web
 python tools/steam_tauri_wrapper.py dev --clean-web
+```
+
+Compatibility alias:
+
+```powershell
+scripts/wrapper_steam_tauri.ps1 -Mode build -CleanWeb
+```
+
+Prepare-mode automation smoke:
+
+```powershell
+python tools/platform_wrapper_prepare_smoke.py
 ```
 
 Legacy script aliases (still supported):

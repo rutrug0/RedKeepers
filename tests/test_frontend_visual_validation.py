@@ -90,6 +90,56 @@ class PlatformValidationCommandTests(unittest.TestCase):
         commands = orchestrator.build_validation_commands(item, rules)
         self.assertEqual(commands, [])
 
+    def test_platform_wrapper_prepare_validation_enabled_for_matching_item(self) -> None:
+        item = {
+            "owner_role": "platform",
+            "validation_commands": ["python tools/orchestrator.py status"],
+            "inputs": ["client-steam-tauri/"],
+        }
+        rules = {
+            "default_validation_commands": [],
+            "platform_wrapper_prepare_validation": {
+                "enabled": True,
+                "owner_roles": ["platform"],
+                "match_inputs_any": [
+                    "scripts/wrapper_steam_tauri.ps1",
+                    "scripts/wrapper_android_capacitor.ps1",
+                    "client-steam-tauri/",
+                    "client-android-capacitor/",
+                ],
+                "commands": ["python tools/platform_wrapper_prepare_smoke.py"],
+            },
+        }
+
+        commands = orchestrator.build_validation_commands(item, rules)
+
+        self.assertIn("python tools/orchestrator.py status", commands)
+        self.assertIn("python tools/platform_wrapper_prepare_smoke.py", commands)
+
+    def test_platform_wrapper_prepare_validation_skips_non_matching_item(self) -> None:
+        item = {
+            "owner_role": "platform",
+            "validation_commands": [],
+            "inputs": ["tools/web_vertical_slice_packaging.py"],
+        }
+        rules = {
+            "default_validation_commands": [],
+            "platform_wrapper_prepare_validation": {
+                "enabled": True,
+                "owner_roles": ["platform"],
+                "match_inputs_any": [
+                    "scripts/wrapper_steam_tauri.ps1",
+                    "scripts/wrapper_android_capacitor.ps1",
+                    "client-steam-tauri/",
+                    "client-android-capacitor/",
+                ],
+                "commands": ["python tools/platform_wrapper_prepare_smoke.py"],
+            },
+        }
+
+        commands = orchestrator.build_validation_commands(item, rules)
+        self.assertEqual(commands, [])
+
 
 if __name__ == "__main__":
     unittest.main()

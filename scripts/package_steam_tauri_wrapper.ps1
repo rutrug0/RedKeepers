@@ -5,7 +5,7 @@ param(
 
 $wrapperScript = Join-Path $PSScriptRoot "wrapper_steam_tauri.ps1"
 $wrapperParams = @{
-  Mode = "build"
+  Mode = "package"
 }
 if ($SkipPrepare) {
   $wrapperParams["SkipPrepare"] = $true

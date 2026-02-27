@@ -6004,5 +6004,48 @@
     "runtime_seconds": 452.97,
     "started_at": "2026-02-27T08:11:42.098418+00:00",
     "finished_at": "2026-02-27T08:19:15.074029+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F04",
+    "title": "Publish first-slice content key manifest and defer post-slice templates",
+    "description": "Create a machine-readable first-slice content key manifest for tick/build/train/scout/hostile loops, and explicitly defer post-slice keys so default client/backend seed usage stays inside first vertical slice scope.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F02",
+      "RK-AUTO-BACKLOG-0004-F04"
+    ],
+    "inputs": [
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "docs/design/first-vertical-slice.md",
+      "client-web/"
+    ],
+    "acceptance_criteria": [
+      "First-slice manifest includes stable keys required for full playable loop, including hostile dispatch/resolve event outcomes.",
+      "Out-of-scope keys (for example hero-specific templates) are marked deferred and excluded from default first-slice seed usage.",
+      "Alias mapping for legacy key variants is documented so frontend rendering remains deterministic."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T20:55:12.234856+00:00",
+    "updated_at": "2026-02-27T08:23:36.616567+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Unrelated pre-existing workspace changes were present in `coordination/backlog/*`; they were not modified.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005",
+    "assigned_agent": "nika-thorn",
+    "commit_sha": "a1cefc1a79a64186bc3651ff59421a7834bfff95",
+    "resolved_by_agent": "nika-thorn",
+    "resolved_by_role": "content",
+    "runtime_seconds": 252.06,
+    "started_at": "2026-02-27T08:19:23.128731+00:00",
+    "finished_at": "2026-02-27T08:23:35.191746+00:00"
   }
 ]

@@ -7,7 +7,7 @@ param(
 )
 
 $wrapperScript = Join-Path $PSScriptRoot "wrapper_android_capacitor.ps1"
-$mode = if ($Variant -eq "release") { "build-release" } else { "build-debug" }
+$mode = if ($Variant -eq "release") { "package-release" } else { "package-debug" }
 $wrapperParams = @{
   Mode = $mode
 }

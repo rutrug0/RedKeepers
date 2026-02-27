@@ -26,5 +26,20 @@
       "python tools/web_vertical_slice_packaging.py package --clean",
       "python tools/web_vertical_slice_packaging.py smoke"
     ]
+  },
+  "platform_wrapper_prepare_validation": {
+    "enabled": true,
+    "owner_roles": [
+      "platform"
+    ],
+    "match_inputs_any": [
+      "scripts/wrapper_steam_tauri.ps1",
+      "scripts/wrapper_android_capacitor.ps1",
+      "client-steam-tauri/",
+      "client-android-capacitor/"
+    ],
+    "commands": [
+      "python tools/platform_wrapper_prepare_smoke.py"
+    ]
   }
 }

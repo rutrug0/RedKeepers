@@ -29,13 +29,13 @@ cd ..
 Canonical reproducible script entry point (web artifact -> Android debug package):
 
 ```powershell
-scripts/wrapper_android_capacitor.ps1 -Mode build-debug -CleanWeb
+scripts/wrapper_android_capacitor.ps1 -Mode package-debug -CleanWeb
 ```
 
 Canonical reproducible script entry point (web artifact -> Android release package):
 
 ```powershell
-scripts/wrapper_android_capacitor.ps1 -Mode build-release -CleanWeb
+scripts/wrapper_android_capacitor.ps1 -Mode package-release -CleanWeb
 ```
 
 Canonical reproducible script entry point (web artifact -> Android dev run):
@@ -50,6 +50,19 @@ Underlying Python commands (same behavior):
 python tools/android_capacitor_wrapper.py build-debug --clean-web
 python tools/android_capacitor_wrapper.py build-release --clean-web
 python tools/android_capacitor_wrapper.py dev --clean-web
+```
+
+Compatibility aliases:
+
+```powershell
+scripts/wrapper_android_capacitor.ps1 -Mode build-debug -CleanWeb
+scripts/wrapper_android_capacitor.ps1 -Mode build-release -CleanWeb
+```
+
+Prepare-mode automation smoke:
+
+```powershell
+python tools/platform_wrapper_prepare_smoke.py
 ```
 
 Legacy script aliases (still supported):
