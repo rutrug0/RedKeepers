@@ -4,16 +4,16 @@ import {
   type FirstSlicePlayableManifestV1,
   assertFirstSlicePlayableManifestSupportsDeterministicHostileFixtureV1,
   loadFirstSlicePlayableManifestV1,
-} from "./first-slice-playable-manifest-loaders";
+} from "./first-slice-playable-manifest-loaders.ts";
 import type {
   WorldMapScoutInteractionOutcome,
   WorldMapScoutEventContentKey,
   WorldMapTileState,
-} from "../../../modules/world_map/domain";
+} from "../../../../modules/world_map/domain/index.ts";
 import type {
   WorldMapTileSnapshot,
   WorldMapTileStateRepository,
-} from "../../../modules/world_map/ports";
+} from "../../../../modules/world_map/ports/index.ts";
 
 export const WORLD_MAP_SEED_SCHEMA_VERSION_V1 = "rk-v1-world-map-seed" as const;
 

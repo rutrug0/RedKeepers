@@ -1,20 +1,20 @@
 import {
   createFirstSlicePlayableRuntimeBootstrapV1,
   type FirstSlicePlayableRuntimeBootstrapV1,
-} from "./first-slice-playable-manifest-loaders";
+} from "./first-slice-playable-manifest-loaders.ts";
 import {
   applyFirstSliceFilteringV1,
   createDefaultStarterSeedFilePathsV1,
   loadStarterSeedBundleV1,
   type LoadStarterSeedsResultV1,
   type StarterSeedFilePathsV1,
-} from "./starter-seed-loaders";
+} from "./starter-seed-loaders.ts";
 import {
   createDefaultWorldMapSeedFilePathsV1,
   loadWorldMapSeedBundleV1,
   type WorldMapSeedBundleV1,
   type WorldMapTileSeedFilePathsV1,
-} from "./world-map-seed-loaders";
+} from "./world-map-seed-loaders.ts";
 
 type JsonFileReader = (filePath: string) => Promise<unknown>;
 

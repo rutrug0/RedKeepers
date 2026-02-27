@@ -2093,4 +2093,45 @@
                                     }
                                 ]
     }
+,
+    {
+        "timestamp_utc":  "2026-02-27T09:20:17.4420507Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0005-F02-F01-F01",
+        "status":  "done",
+        "summary":  "Normalized seed-loader TypeScript ESM specifiers for strip-types runtime compatibility by adding explicit `.ts` local imports/exports and correcting seed-loader module-relative paths so Node ESM resolution is deterministic without `ERR_MODULE_NOT_FOUND`.",
+        "changed_files":  [
+                              "backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.ts",
+                              "backend/src/app/config/seeds/v1/hero-runtime-seed-loaders.test.ts",
+                              "backend/src/app/config/seeds/v1/hero-runtime-seed-loaders.ts",
+                              "backend/src/app/config/seeds/v1/index.ts",
+                              "backend/src/app/config/seeds/v1/starter-seed-loaders.test.ts",
+                              "backend/src/app/config/seeds/v1/starter-seed-loaders.ts",
+                              "backend/src/app/config/seeds/v1/world-map-seed-loaders.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --experimental-strip-types --test --test-isolation=none backend/src/app/config/seeds/v1/first-slice-playable-manifest-loaders.test.ts backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.test.ts backend/src/app/config/seeds/v1/hero-runtime-seed-loaders.test.ts backend/src/app/config/seeds/v1/narrative-seed-loaders.test.ts backend/src/app/config/seeds/v1/starter-seed-loaders.test.ts",
+                                    "node --experimental-strip-types backend/src/app/config/seeds/v1/hero-runtime-seed-loaders.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "Seed-loader test modules resolve successfully under strip-types with no `ERR_MODULE_NOT_FOUND` across the v1 seed-loader test set. Full test run still reports three pre-existing assertion/data failures unrelated to import/runtime compatibility (`first-slice-runtime-manifest-lock-validator.test.ts` async throw assertions and `narrative-seed-loaders.test.ts` token-order mismatch)."
+                    },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Fix async throw assertions in first-slice runtime manifest lock validator tests",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M0",
+                                        "priority":  "normal",
+                                        "description":  "Update `first-slice-runtime-manifest-lock-validator.test.ts` failing cases to use async-aware assertion patterns (`assert.rejects`) so expected validation errors are asserted correctly under Node test runner.",
+                                        "acceptance_criteria":  [
+                                                                    "The two failing drift tests in `first-slice-runtime-manifest-lock-validator.test.ts` assert expected error messages using async-aware assertions.",
+                                                                    "`node --experimental-strip-types --test --test-isolation=none backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.test.ts` passes."
+                                                                ]
+                                    }
+                                ]
+    }
 ]

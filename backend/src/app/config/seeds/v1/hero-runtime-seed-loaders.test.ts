@@ -8,7 +8,7 @@ import {
   HeroRuntimeSeedValidationError,
   loadHeroRuntimeEventTokenSeedTableV1,
   parseHeroRuntimeEventTokenSeedTableV1,
-} from "./hero-runtime-seed-loaders";
+} from "./hero-runtime-seed-loaders.ts";
 
 const assertHeroRuntimeSeedValidationError = (
   operation: () => unknown,

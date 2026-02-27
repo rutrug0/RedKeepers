@@ -9,7 +9,7 @@ import {
   parseUnitVariantModifiersSeedV1,
   SeedValidationError,
   validateStarterSeedCrossReferencesV1,
-} from "./starter-seed-loaders";
+} from "./starter-seed-loaders.ts";
 
 const assertSeedValidationError = (
   operation: () => unknown,

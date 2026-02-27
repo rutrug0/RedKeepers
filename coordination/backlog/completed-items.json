@@ -6304,5 +6304,45 @@
     "runtime_seconds": 202.02,
     "started_at": "2026-02-27T09:03:14.919806+00:00",
     "finished_at": "2026-02-27T09:06:36.930075+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F05-F01",
+    "title": "Generate shared frontend manifest snapshot for client-web bootstrap",
+    "description": "Add a deterministic build/runtime artifact that exports first-slice playable/content manifest subsets for the web client so manifest defaults are consumed from one generated source instead of duplicated inline constants.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F05"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "A generated manifest snapshot artifact exists for client-web bootstrap and is sourced from backend `first-slice-playable-manifest.json` and `first-slice-content-key-manifest.json`",
+      "client-web consumes the generated snapshot for settlement/map default ids and event content-key allowlists without hard-coded manifest copies in `app.js`",
+      "A smoke check fails when generated snapshot and backend manifest ids diverge"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T08:41:38.799535+00:00",
+    "updated_at": "2026-02-27T09:14:57.044621+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- I also observed unrelated daemon-managed working tree changes in `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json`; I did not modify or revert them.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "sera-kest",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F05",
+    "assigned_agent": "juno-cairn",
+    "commit_sha": "bd6755a982da4c706d21e1af8b199659dca09c08",
+    "resolved_by_agent": "juno-cairn",
+    "resolved_by_role": "platform",
+    "runtime_seconds": 490.86,
+    "started_at": "2026-02-27T09:06:44.074070+00:00",
+    "finished_at": "2026-02-27T09:14:54.926081+00:00"
   }
 ]

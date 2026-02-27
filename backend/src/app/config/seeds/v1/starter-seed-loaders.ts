@@ -4,7 +4,7 @@ import {
   type FirstSlicePlayableManifestV1,
   assertFirstSlicePlayableManifestSupportsDeterministicHostileFixtureV1,
   loadFirstSlicePlayableManifestV1,
-} from "./first-slice-playable-manifest-loaders";
+} from "./first-slice-playable-manifest-loaders.ts";
 
 export const STARTER_SEED_SCHEMA_VERSION_V1 = "rk-v1-starter-seed" as const;
 

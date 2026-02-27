@@ -3,12 +3,12 @@ import { join } from "node:path";
 import {
   HERO_RUNTIME_EVENT_CONTENT_KEYS,
   HERO_RUNTIME_EVENT_TOKENS,
-} from "../../../modules/heroes/domain";
+} from "../../../../modules/heroes/domain/hero-runtime-event-contract.ts";
 import type {
   HeroRuntimeEventContentKey,
   HeroRuntimeEventToken,
   HeroRuntimeEventTokenizedPayload,
-} from "../../../modules/heroes/domain";
+} from "../../../../modules/heroes/domain/hero-runtime-event-contract.ts";
 
 export const HERO_RUNTIME_SEED_SCHEMA_VERSION_V1 = "rk-v1-hero-runtime-seed" as const;
 export const HERO_RUNTIME_EVENT_TOKENS_TABLE_ID = "heroes.hero_runtime_event_tokens";
