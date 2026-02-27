@@ -371,5 +371,42 @@
     ],
     "blockers": [],
     "proposed_work_items": []
+  },
+  {
+    "timestamp_utc": "2026-02-27T11:08:00Z",
+    "agent_id": "juno-cairn",
+    "work_item_id": "RK-AUTO-BACKLOG-0007-F05",
+    "status": "done",
+    "summary": "Implemented a deterministic single-command first-slice release gate runner that executes playable/quality/platform gates in order, emits compact PASS/FAIL evidence artifacts (with executed command list), and exits non-zero on any failing gate.",
+    "changed_files": [
+      "tools/first_slice_release_gate_runner.py",
+      "tests/test_first_slice_release_gate_runner.py",
+      "docs/operations/first-slice-release-gate.md",
+      "docs/operations/daemon-usage.md",
+      "README.md",
+      "agents/juno-cairn/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Fix failing `negative_insufficient_resources` playable smoke check for release-gate readiness",
+        "owner_role": "frontend",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0007-F05"
+        ],
+        "description": "Address the current RK-M0-0011 smoke regression where `negative_insufficient_resources` fails, so the new single-command release gate can pass for local candidate validation.",
+        "acceptance_criteria": [
+          "`python tools/rk_m0_0011_first_slice_loop_smoke.py` exits 0 with `RK-M0-0011_SMOKE summary status=PASS`",
+          "`python tools/first_slice_release_gate_runner.py` reports overall `PASS` in `release-gate-evidence.json`",
+          "No placeholder/fallback token regressions are introduced in settlement build/train insufficient-resources event handling"
+        ],
+        "validation_commands": [
+          "python tools/rk_m0_0011_first_slice_loop_smoke.py",
+          "python tools/first_slice_release_gate_runner.py"
+        ]
+      }
+    ]
   }
 ]

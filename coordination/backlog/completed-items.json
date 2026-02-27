@@ -6813,5 +6813,44 @@
     "runtime_seconds": 436.23,
     "started_at": "2026-02-27T10:32:23.892570+00:00",
     "finished_at": "2026-02-27T10:39:40.132719+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F02",
+    "title": "Replace client event template constants with generated snapshot consumption",
+    "description": "Switch client event-feed template lookup to generated snapshot data and remove duplicate hard-coded maps while keeping deterministic fallback behavior.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F01",
+      "RK-AUTO-BACKLOG-0007-F04"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Client lookup consumes generated snapshot data.",
+      "Canonical plus legacy alias keys resolve deterministic first-slice output.",
+      "Critical loop path emits no missing-template fallback markers."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T10:15:35.546325+00:00",
+    "updated_at": "2026-02-27T10:48:14.882772+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `python tools/rk_m0_0011_first_slice_loop_smoke.py` still has one existing failure: `negative_insufficient_resources` token assertion (outside this item\u2019s snapshot-consumption scope).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "e4559bd6d27ef2ca0a741b7644a44c261169a946",
+    "resolved_by_agent": "sera-kest",
+    "resolved_by_role": "frontend",
+    "runtime_seconds": 505.73,
+    "started_at": "2026-02-27T10:39:47.677169+00:00",
+    "finished_at": "2026-02-27T10:48:13.417325+00:00"
   }
 ]

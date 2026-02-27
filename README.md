@@ -59,3 +59,12 @@ This repository is bootstrapped with the M0 orchestration foundation:
 - Legacy scripts and direct Python commands remain supported.
 - Runbook:
   - `docs/operations/android-capacitor-wrapper-packaging.md`
+
+## First-Slice Release Gate (M0)
+
+- Single-command local release candidate gate pass:
+  - `python tools/first_slice_release_gate_runner.py`
+- Emits compact gate evidence artifacts under:
+  - `coordination/runtime/first-slice-release-gate/`
+- Runbook:
+  - `docs/operations/first-slice-release-gate.md`

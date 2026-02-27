@@ -11,6 +11,7 @@
 - `python tools/smoke_daemon_env.py` : read-only smoke validation for queue/policy/state files
 - `python tools/render_stats_html.py` : generate runtime dashboard HTML (global + per-session agent/model stats + backlog section)
 - `python tools/frontend_visual_smoke.py` : run multi-device frontend screenshot smoke checks (see `docs/operations/frontend-visual-qa.md`)
+- `python tools/first_slice_release_gate_runner.py` : run deterministic first-slice playable/quality/platform release gates and emit PASS/FAIL evidence artifacts (see `docs/operations/first-slice-release-gate.md`)
 
 ## Environment Variables
 
