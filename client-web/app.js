@@ -1386,6 +1386,16 @@
     return seeded;
   };
   const stableLocalProfile = resolveStableLocalProfile();
+  const firstSliceRuntimeModeTransportBacked = "transport_backed";
+  const firstSliceRuntimeModeOfflineFallback = "offline_fallback";
+  const firstSliceRuntimeState = {
+    mode: firstSliceRuntimeModeTransportBacked,
+    warning_message: "",
+    warning_code: "",
+  };
+  const allowManualPanelModeSelection = false;
+  const deterministicOfflineFallbackWarningMessage =
+    "Transport is unreachable. Running deterministic offline fallback placeholders so controls remain responsive.";
 
   const mockClientShellState = {
     panelModes: {
@@ -1720,6 +1730,76 @@
   };
   const shellRefs = {
     firstSessionObjectiveStrip: document.getElementById("first-session-objective-strip"),
+    sessionChipWorld: document.getElementById("session-chip-world"),
+    sessionChipPhase: document.getElementById("session-chip-phase"),
+    sessionChipNet: document.getElementById("session-chip-net"),
+    runtimeWarningBanner: document.getElementById("runtime-warning-banner"),
+  };
+  const enforceDeterministicPanelModes = () => {
+    mockClientShellState.panelModes.settlement = "populated";
+    mockClientShellState.panelModes.worldMap = "populated";
+    mockClientShellState.panelModes.eventFeed = "populated";
+  };
+  const buildOfflineFallbackWarningMessage = (errorCode, errorMessage) => {
+    const normalizedCode = String(errorCode || "").trim();
+    const normalizedMessage = String(errorMessage || "").trim();
+    if (normalizedCode.length > 0 && normalizedMessage.length > 0) {
+      return `${deterministicOfflineFallbackWarningMessage} (${normalizedCode}: ${normalizedMessage})`;
+    }
+    if (normalizedCode.length > 0) {
+      return `${deterministicOfflineFallbackWarningMessage} (${normalizedCode})`;
+    }
+    return deterministicOfflineFallbackWarningMessage;
+  };
+  const activateDeterministicOfflineFallbackMode = (errorCode, errorMessage) => {
+    firstSliceRuntimeState.mode = firstSliceRuntimeModeOfflineFallback;
+    firstSliceRuntimeState.warning_code = String(errorCode || "").trim();
+    firstSliceRuntimeState.warning_message = buildOfflineFallbackWarningMessage(
+      errorCode,
+      errorMessage,
+    );
+    enforceDeterministicPanelModes();
+  };
+  const isTransportConnectivityErrorCode = (value) => {
+    const normalized = String(value || "").trim();
+    return (
+      normalized === "transport_unreachable"
+      || normalized === "transport_handler_error"
+      || normalized === "transport_invalid_response"
+    );
+  };
+  const shouldSwitchToOfflineFallbackFromTransportResponse = (transportResponse) =>
+    isTransportConnectivityErrorCode(transportResponse?.body?.code)
+    || Number(transportResponse?.status_code) === 503;
+  const shouldSwitchToOfflineFallbackFromError = (error) =>
+    isTransportConnectivityErrorCode(error?.code)
+    || Number(error?.status_code) === 503;
+  const renderShellRuntimeStatus = () => {
+    const worldId = String(firstSlicePlayableDefaults.map_fixture_ids?.world_id || "world_alpha").trim();
+    if (shellRefs.sessionChipWorld) {
+      shellRefs.sessionChipWorld.textContent = `World: ${worldId.length > 0 ? worldId : "world_alpha"}`;
+    }
+    if (shellRefs.sessionChipPhase) {
+      shellRefs.sessionChipPhase.textContent = "Phase: First Slice";
+    }
+    if (shellRefs.sessionChipNet) {
+      const isOfflineFallback = firstSliceRuntimeState.mode === firstSliceRuntimeModeOfflineFallback;
+      shellRefs.sessionChipNet.textContent = isOfflineFallback
+        ? "Net: Offline Fallback"
+        : "Net: Transport";
+      shellRefs.sessionChipNet.classList.toggle("is-online", !isOfflineFallback);
+      shellRefs.sessionChipNet.classList.toggle("is-offline", isOfflineFallback);
+    }
+    if (!shellRefs.runtimeWarningBanner) {
+      return;
+    }
+    const warningMessage =
+      firstSliceRuntimeState.mode === firstSliceRuntimeModeOfflineFallback
+        ? String(firstSliceRuntimeState.warning_message || "").trim()
+        : "";
+    const shouldShowWarning = warningMessage.length > 0;
+    shellRefs.runtimeWarningBanner.hidden = !shouldShowWarning;
+    shellRefs.runtimeWarningBanner.textContent = shouldShowWarning ? warningMessage : "";
   };
 
   const firstSliceResourceIds = Object.freeze([...firstSlicePlayableDefaults.resources]);
@@ -2114,6 +2194,392 @@
     world_map_settlement_attack: "/world-map/settlements/{targetSettlementId}/attack",
     world_map_march_snapshot: "/world-map/marches/{marchId}/snapshot",
   });
+  const deterministicOfflineBuildCostById = Object.freeze({
+    food: 80,
+    wood: 140,
+    stone: 110,
+    iron: 30,
+  });
+  const deterministicOfflineTrainUnitCostById = Object.freeze({
+    food: 70,
+    wood: 30,
+    stone: 0,
+    iron: 20,
+  });
+  const multiplyResourceValues = (baseById, factor) => {
+    const normalizedFactor = Math.max(1, Math.floor(Number(factor) || 1));
+    const out = {};
+    for (const resourceId of firstSliceResourceIds) {
+      out[resourceId] = Math.max(
+        0,
+        Math.floor((Number(baseById?.[resourceId]) || 0) * normalizedFactor),
+      );
+    }
+    return out;
+  };
+  const subtractResourceValues = (availableById, costById) => {
+    const out = {};
+    for (const resourceId of firstSliceResourceIds) {
+      out[resourceId] = Math.max(
+        0,
+        (Number(availableById?.[resourceId]) || 0) - (Number(costById?.[resourceId]) || 0),
+      );
+    }
+    return out;
+  };
+  const resolveBuildingLabelById = (buildingId) => {
+    const byId = {
+      grain_plot: "Grain Plot",
+      timber_camp: "Timber Camp",
+      stone_quarry: "Stone Quarry",
+      iron_pit: "Iron Pit",
+      barracks: "Barracks",
+      rally_post: "Rally Post",
+    };
+    return byId[String(buildingId || "").trim()] || "Settlement Works";
+  };
+  const resolveUnitLabelById = (unitId) => {
+    const byId = {
+      watch_levy: "Watch Levy",
+      bow_crew: "Bow Crew",
+      trail_scout: "Trail Scout",
+      light_raider: "Light Raider",
+    };
+    return byId[String(unitId || "").trim()] || "Unit";
+  };
+  const resolveTransportBodyErrorCode = (transportResponse) =>
+    typeof transportResponse?.body?.code === "string"
+      ? transportResponse.body.code
+      : "";
+  const resolveTransportBodyErrorMessage = (transportResponse) =>
+    typeof transportResponse?.body?.message === "string"
+      ? transportResponse.body.message
+      : "";
+  const buildDeterministicOfflineFallbackTransportResponse = (routeTemplate, request) => {
+    const requestBody = request?.body && typeof request.body === "object"
+      ? request.body
+      : {};
+    const nowIso = new Date().toISOString();
+
+    if (routeTemplate === firstSliceTransportRoutes.settlement_tick) {
+      const settlementId = String(requestBody.settlement_id || request?.path?.settlementId || "").trim();
+      const settlementName = String(requestBody.settlement_name || settlementActionRuntime.settlement_name).trim();
+      const resourceStockById = cloneResourceValues(requestBody.resource_stock_by_id);
+      const passiveProdPerHourById = cloneResourceValues(requestBody.passive_prod_per_h_by_id);
+      const tickStartedAtIso = resolveIsoInstant(requestBody.tick_started_at, nowIso);
+      const tickEndedAtIso = resolveIsoInstant(requestBody.tick_ended_at, nowIso);
+      const durationMs = Math.max(
+        0,
+        Math.floor(new Date(tickEndedAtIso).getTime() - new Date(tickStartedAtIso).getTime()),
+      );
+      if (durationMs <= 0) {
+        return {
+          status_code: 200,
+          body: {
+            schema_version: "rk-v1-settlement-tick-response-offline",
+            flow: "economy.tick_passive_income_v1",
+            status: "failed",
+            error_code: "invalid_state",
+            duration_ms: 0,
+            settlement_id: settlementId,
+            settlement_name: settlementName,
+          },
+        };
+      }
+      const resourceDeltaById = {};
+      const resourceStockAfterById = {};
+      for (const resourceId of firstSliceResourceIds) {
+        const perHour = Math.max(0, Number(passiveProdPerHourById[resourceId]) || 0);
+        const deterministicDelta = Math.max(1, Math.floor((perHour * durationMs) / 3_600_000));
+        resourceDeltaById[resourceId] = deterministicDelta;
+        resourceStockAfterById[resourceId] =
+          (Number(resourceStockById[resourceId]) || 0) + deterministicDelta;
+      }
+      return {
+        status_code: 200,
+        body: {
+          schema_version: "rk-v1-settlement-tick-response-offline",
+          flow: "economy.tick_passive_income_v1",
+          status: "accepted",
+          settlement_id: settlementId,
+          settlement_name: settlementName,
+          duration_ms: durationMs,
+          resource_delta_by_id: resourceDeltaById,
+          resource_stock_by_id: resourceStockAfterById,
+          placeholder_events: [
+            {
+              payload: {
+                event_key: "event.economy.tick_passive_income",
+                settlement_name: settlementName,
+                resource_delta_by_id: resourceDeltaById,
+              },
+            },
+          ],
+        },
+      };
+    }
+
+    if (routeTemplate === firstSliceTransportRoutes.building_upgrade) {
+      const buildingId = String(requestBody.building_id || request?.path?.buildingId || "grain_plot").trim();
+      const settlementId = String(requestBody.settlement_id || request?.path?.settlementId || "").trim();
+      const settlementName = String(requestBody.settlement_name || settlementActionRuntime.settlement_name).trim();
+      const currentLevel = Math.max(0, Math.floor(Number(requestBody.current_level) || 0));
+      const availableStockById = cloneResourceValues(requestBody.resource_stock_by_id);
+      const requiredCostById = cloneResourceValues(deterministicOfflineBuildCostById);
+      if (hasInsufficientResourceStock(requiredCostById, availableStockById)) {
+        return {
+          status_code: 200,
+          body: {
+            schema_version: "rk-v1-building-upgrade-response-offline",
+            flow: "buildings.upgrade_v1",
+            status: "failed",
+            error_code: "insufficient_resources",
+            building_id: buildingId,
+            building_label: resolveBuildingLabelById(buildingId),
+            settlement_id: settlementId,
+            settlement_name: settlementName,
+            required_cost_by_id: requiredCostById,
+            available_stock_by_id: availableStockById,
+            missing_resources_by_id: buildMissingResourceValues(requiredCostById, availableStockById),
+          },
+        };
+      }
+      const fromLevel = currentLevel;
+      const toLevel = fromLevel + 1;
+      const resourceStockAfterById = subtractResourceValues(availableStockById, requiredCostById);
+      return {
+        status_code: 200,
+        body: {
+          schema_version: "rk-v1-building-upgrade-response-offline",
+          flow: "buildings.upgrade_v1",
+          status: "accepted",
+          settlement_id: settlementId,
+          settlement_name: settlementName,
+          building_id: buildingId,
+          building_label: resolveBuildingLabelById(buildingId),
+          from_level: fromLevel,
+          to_level: toLevel,
+          new_level: toLevel,
+          resource_cost_by_id: requiredCostById,
+          resource_stock_after_by_id: resourceStockAfterById,
+          upgrade_duration_s: 90,
+          placeholder_events: [
+            {
+              payload: {
+                event_key: "event.buildings.upgrade_started",
+                settlement_name: settlementName,
+                building_label: resolveBuildingLabelById(buildingId),
+                from_level: fromLevel,
+                to_level: toLevel,
+                new_level: toLevel,
+              },
+            },
+          ],
+        },
+      };
+    }
+
+    if (routeTemplate === firstSliceTransportRoutes.unit_train) {
+      const unitId = String(requestBody.unit_id || request?.path?.unitId || "watch_levy").trim();
+      const settlementId = String(requestBody.settlement_id || request?.path?.settlementId || "").trim();
+      const settlementName = String(requestBody.settlement_name || settlementActionRuntime.settlement_name).trim();
+      const quantity = Math.max(1, Math.floor(Number(requestBody.quantity) || 1));
+      const availableStockById = cloneResourceValues(requestBody.resource_stock_by_id);
+      const queueAvailableAt = parseIsoInstant(requestBody.queue_available_at);
+      if (queueAvailableAt !== null && queueAvailableAt.getTime() > Date.now()) {
+        return {
+          status_code: 200,
+          body: {
+            schema_version: "rk-v1-unit-train-response-offline",
+            flow: "units.train_v1",
+            status: "failed",
+            error_code: "cooldown",
+            settlement_id: settlementId,
+            settlement_name: settlementName,
+            unit_id: unitId,
+            unit_label: resolveUnitLabelById(unitId),
+            quantity,
+            queue_available_at: queueAvailableAt.toISOString(),
+            cooldown_remaining_ms: Math.max(0, queueAvailableAt.getTime() - Date.now()),
+          },
+        };
+      }
+      const batchMultiplier = Math.max(1, Math.ceil(quantity / 4));
+      const requiredCostById = multiplyResourceValues(
+        deterministicOfflineTrainUnitCostById,
+        batchMultiplier,
+      );
+      if (hasInsufficientResourceStock(requiredCostById, availableStockById)) {
+        return {
+          status_code: 200,
+          body: {
+            schema_version: "rk-v1-unit-train-response-offline",
+            flow: "units.train_v1",
+            status: "failed",
+            error_code: "insufficient_resources",
+            settlement_id: settlementId,
+            settlement_name: settlementName,
+            unit_id: unitId,
+            unit_label: resolveUnitLabelById(unitId),
+            quantity,
+            required_cost_by_id: requiredCostById,
+            available_stock_by_id: availableStockById,
+            missing_resources_by_id: buildMissingResourceValues(requiredCostById, availableStockById),
+          },
+        };
+      }
+      const resourceStockAfterById = subtractResourceValues(availableStockById, requiredCostById);
+      return {
+        status_code: 200,
+        body: {
+          schema_version: "rk-v1-unit-train-response-offline",
+          flow: "units.train_v1",
+          status: "accepted",
+          settlement_id: settlementId,
+          settlement_name: settlementName,
+          unit_id: unitId,
+          unit_label: resolveUnitLabelById(unitId),
+          quantity,
+          resource_cost_by_id: requiredCostById,
+          resource_stock_after_by_id: resourceStockAfterById,
+          placeholder_events: [
+            {
+              payload: {
+                event_key: "event.units.training_started",
+                settlement_name: settlementName,
+                quantity,
+                unit_label: resolveUnitLabelById(unitId),
+              },
+            },
+          ],
+        },
+      };
+    }
+
+    if (routeTemplate === firstSliceTransportRoutes.world_map_tile_interact) {
+      const tileId = String(requestBody.tile_id || request?.path?.tileId || firstSliceHostileTileId).trim();
+      return {
+        status_code: 200,
+        body: {
+          schema_version: "rk-v1-world-map-tile-interact-response-offline",
+          flow: "world_map.tile_interact_v1",
+          status: "accepted",
+          tile_id: tileId,
+          event: {
+            content_key: "event.scout.return_hostile",
+            tokens: {
+              settlement_name: settlementActionRuntime.settlement_name,
+              target_tile_label: resolveSelectedWorldMapTileLabel(tileId),
+              hostile_force_estimate: "3-5 squads",
+            },
+          },
+        },
+      };
+    }
+
+    if (routeTemplate === firstSliceTransportRoutes.world_map_settlement_attack) {
+      const marchId = String(requestBody.march_id || "march_offline_0001").trim();
+      const targetTileLabel = String(
+        requestBody.target_tile_label
+        || firstSliceForeignHostileProfile.target_tile_label
+        || "Hostile Settlement",
+      ).trim();
+      const sourceSettlementName = String(
+        requestBody.source_settlement_name || settlementActionRuntime.settlement_name,
+      ).trim();
+      const dispatchedUnits = Array.isArray(requestBody.dispatched_units)
+        ? requestBody.dispatched_units
+        : [];
+      const attackerStrength = dispatchedUnits.reduce(
+        (total, row) => total + Math.max(0, Number(row?.unit_count) || 0),
+        0,
+      );
+      const defenderStrength = Math.max(1, Number(requestBody.defender_garrison_strength) || 40);
+      const occurredAtIso = nowIso;
+      return {
+        status_code: 200,
+        body: {
+          schema_version: "rk-v1-world-map-hostile-attack-response-offline",
+          flow: "world_map.hostile_attack_v1",
+          status: "accepted",
+          march_id: marchId,
+          source_settlement_name: sourceSettlementName,
+          attacker_strength: attackerStrength,
+          defender_strength: defenderStrength,
+          combat_outcome: "attacker_win",
+          losses: {
+            attacker_units_lost: Math.min(attackerStrength, 2),
+            defender_garrison_lost: defenderStrength,
+            attacker_units_remaining: Math.max(0, attackerStrength - 2),
+          },
+          event_payloads: {
+            dispatch_sent: {
+              payload_key: "dispatch_sent",
+              content_key: "event.world.hostile_dispatch_en_route",
+              occurred_at: occurredAtIso,
+              tokens: {
+                army_name: requestBody.army_name || firstSliceWorldMapHostileDispatchFixture.army_name,
+                target_tile_label: targetTileLabel,
+                origin_settlement_name: sourceSettlementName,
+                eta_seconds: Number(requestBody.seconds_per_tile) || 30,
+                march_id: marchId,
+              },
+            },
+            march_arrived: {
+              payload_key: "march_arrived",
+              content_key: "event.world.hostile_march_arrived_outer_works",
+              occurred_at: occurredAtIso,
+              tokens: {
+                army_name: requestBody.army_name || firstSliceWorldMapHostileDispatchFixture.army_name,
+                target_tile_label: targetTileLabel,
+                march_id: marchId,
+              },
+            },
+            combat_resolved: {
+              payload_key: "combat_resolved",
+              content_key: "event.combat.hostile_resolve_attacker_win",
+              occurred_at: occurredAtIso,
+              tokens: {
+                army_name: requestBody.army_name || firstSliceWorldMapHostileDispatchFixture.army_name,
+                target_tile_label: targetTileLabel,
+                attacker_units_dispatched: attackerStrength,
+                attacker_units_lost: Math.min(attackerStrength, 2),
+                attacker_units_remaining: Math.max(0, attackerStrength - 2),
+                defender_strength: defenderStrength,
+                defender_garrison_lost: defenderStrength,
+                march_id: marchId,
+              },
+            },
+          },
+          hero_runtime_payloads: [],
+        },
+      };
+    }
+
+    if (routeTemplate === firstSliceTransportRoutes.world_map_march_snapshot) {
+      const marchId = String(requestBody.march_id || request?.path?.marchId || "march_snapshot").trim();
+      return {
+        status_code: 200,
+        body: {
+          schema_version: "rk-v1-world-map-march-snapshot-response-offline",
+          flow: "world_map.march_snapshot_v1",
+          status: "accepted",
+          march_id: marchId,
+          march_state: "resolved",
+          observed_at: nowIso,
+          lifecycle_phase: "combat_resolved",
+        },
+      };
+    }
+
+    return {
+      status_code: 404,
+      body: {
+        code: "route_not_found",
+        message: `No deterministic offline fallback route is wired for '${routeTemplate}'.`,
+      },
+    };
+  };
 
   const resolveIsoInstant = (value, fallbackIso) => {
     if (value instanceof Date && Number.isFinite(value.getTime())) {
@@ -2147,6 +2613,10 @@
     });
 
   const invokeFirstSliceTransportRoute = async (routeTemplate, request) => {
+    if (firstSliceRuntimeState.mode === firstSliceRuntimeModeOfflineFallback) {
+      return buildDeterministicOfflineFallbackTransportResponse(routeTemplate, request);
+    }
+
     const transportBridge = resolveWindowTransportBridge();
     if (transportBridge !== null) {
       try {
@@ -2229,6 +2699,23 @@
       Number.isFinite(transportResponse?.status_code) ? Math.trunc(transportResponse.status_code) : 500;
     throw error;
   };
+  const resolveTransportResponseWithOfflineFallback = (
+    routeTemplate,
+    routeRequest,
+    transportResponse,
+  ) => {
+    if (firstSliceRuntimeState.mode === firstSliceRuntimeModeOfflineFallback) {
+      return buildDeterministicOfflineFallbackTransportResponse(routeTemplate, routeRequest);
+    }
+    if (shouldSwitchToOfflineFallbackFromTransportResponse(transportResponse)) {
+      activateDeterministicOfflineFallbackMode(
+        resolveTransportBodyErrorCode(transportResponse),
+        resolveTransportBodyErrorMessage(transportResponse),
+      );
+      return buildDeterministicOfflineFallbackTransportResponse(routeTemplate, routeRequest);
+    }
+    return transportResponse;
+  };
 
   const createFirstSliceClientContractAdapter = () => ({
     tickSettlementCommand: async (input) => {
@@ -2237,161 +2724,203 @@
       const requestedAtMs = new Date(requestedAtIso).getTime();
       const durationMs = Math.max(0, Math.floor(Number(input.duration_ms) || 0));
       const tickEndedAtIso = new Date(requestedAtMs + durationMs).toISOString();
-
+      const routeRequest = {
+        path: {
+          settlementId: input.settlement_id,
+        },
+        body: {
+          settlement_id: input.settlement_id,
+          flow_version: "v1",
+          player_id: input.player_id,
+          tick_started_at: requestedAtIso,
+          tick_ended_at: tickEndedAtIso,
+          settlement_name: input.settlement_name,
+          resource_stock_by_id: input.resource_stock_by_id,
+          storage_cap_by_id: input.storage_cap_by_id,
+          passive_prod_per_h_by_id: input.passive_prod_per_h_by_id,
+          correlation_id: input.correlation_id,
+        },
+      };
       const transportResponse = await invokeFirstSliceTransportRoute(
         firstSliceTransportRoutes.settlement_tick,
-        {
-          path: {
-            settlementId: input.settlement_id,
-          },
-          body: {
-            settlement_id: input.settlement_id,
-            flow_version: "v1",
-            player_id: input.player_id,
-            tick_started_at: requestedAtIso,
-            tick_ended_at: tickEndedAtIso,
-            settlement_name: input.settlement_name,
-            resource_stock_by_id: input.resource_stock_by_id,
-            storage_cap_by_id: input.storage_cap_by_id,
-            passive_prod_per_h_by_id: input.passive_prod_per_h_by_id,
-            correlation_id: input.correlation_id,
-          },
-        },
+        routeRequest,
       );
-      return unwrapFirstSliceTransportSuccess(firstSliceTransportRoutes.settlement_tick, transportResponse);
+      const resolvedTransportResponse = resolveTransportResponseWithOfflineFallback(
+        firstSliceTransportRoutes.settlement_tick,
+        routeRequest,
+        transportResponse,
+      );
+      return unwrapFirstSliceTransportSuccess(
+        firstSliceTransportRoutes.settlement_tick,
+        resolvedTransportResponse,
+      );
     },
     buildUpgradeCommand: async (input) => {
       const requestedAtIso = resolveIsoInstant(input.requested_at, new Date().toISOString());
-
+      const routeRequest = {
+        path: {
+          settlementId: input.settlement_id,
+          buildingId: input.building_id,
+        },
+        body: {
+          settlement_id: input.settlement_id,
+          building_id: input.building_id,
+          flow_version: "v1",
+          player_id: input.player_id,
+          current_level: Number(input.current_level) || 0,
+          requested_at: requestedAtIso,
+          settlement_name: input.settlement_name,
+          resource_stock_by_id: input.resource_stock_by_id,
+          cooldown_ends_at: resolveIsoInstant(input.cooldown_ends_at, ""),
+          active_upgrade_ends_at: resolveIsoInstant(input.active_upgrade_ends_at, ""),
+          correlation_id: input.correlation_id,
+        },
+      };
       const transportResponse = await invokeFirstSliceTransportRoute(
         firstSliceTransportRoutes.building_upgrade,
-        {
-          path: {
-            settlementId: input.settlement_id,
-            buildingId: input.building_id,
-          },
-          body: {
-            settlement_id: input.settlement_id,
-            building_id: input.building_id,
-            flow_version: "v1",
-            player_id: input.player_id,
-            current_level: Number(input.current_level) || 0,
-            requested_at: requestedAtIso,
-            settlement_name: input.settlement_name,
-            resource_stock_by_id: input.resource_stock_by_id,
-            cooldown_ends_at: resolveIsoInstant(input.cooldown_ends_at, ""),
-            active_upgrade_ends_at: resolveIsoInstant(input.active_upgrade_ends_at, ""),
-            correlation_id: input.correlation_id,
-          },
-        },
+        routeRequest,
       );
-      return unwrapFirstSliceTransportSuccess(firstSliceTransportRoutes.building_upgrade, transportResponse);
+      const resolvedTransportResponse = resolveTransportResponseWithOfflineFallback(
+        firstSliceTransportRoutes.building_upgrade,
+        routeRequest,
+        transportResponse,
+      );
+      return unwrapFirstSliceTransportSuccess(
+        firstSliceTransportRoutes.building_upgrade,
+        resolvedTransportResponse,
+      );
     },
     trainUnitCommand: async (input) => {
       const requestedAtIso = resolveIsoInstant(input.requested_at, new Date().toISOString());
-
+      const routeRequest = {
+        path: {
+          settlementId: input.settlement_id,
+          unitId: input.unit_id,
+        },
+        body: {
+          settlement_id: input.settlement_id,
+          unit_id: input.unit_id,
+          flow_version: "v1",
+          player_id: input.player_id,
+          quantity: Number(input.quantity) || 0,
+          requested_at: requestedAtIso,
+          barracks_level: Number(input.barracks_level) || 0,
+          settlement_name: input.settlement_name,
+          resource_stock_by_id: input.resource_stock_by_id,
+          queue_available_at: resolveIsoInstant(input.queue_available_at, ""),
+          training_time_multiplier: Number(input.training_time_multiplier) || undefined,
+          correlation_id: input.correlation_id,
+        },
+      };
       const transportResponse = await invokeFirstSliceTransportRoute(
         firstSliceTransportRoutes.unit_train,
-        {
-          path: {
-            settlementId: input.settlement_id,
-            unitId: input.unit_id,
-          },
-          body: {
-            settlement_id: input.settlement_id,
-            unit_id: input.unit_id,
-            flow_version: "v1",
-            player_id: input.player_id,
-            quantity: Number(input.quantity) || 0,
-            requested_at: requestedAtIso,
-            barracks_level: Number(input.barracks_level) || 0,
-            settlement_name: input.settlement_name,
-            resource_stock_by_id: input.resource_stock_by_id,
-            queue_available_at: resolveIsoInstant(input.queue_available_at, ""),
-            training_time_multiplier: Number(input.training_time_multiplier) || undefined,
-            correlation_id: input.correlation_id,
-          },
-        },
+        routeRequest,
       );
-      return unwrapFirstSliceTransportSuccess(firstSliceTransportRoutes.unit_train, transportResponse);
+      const resolvedTransportResponse = resolveTransportResponseWithOfflineFallback(
+        firstSliceTransportRoutes.unit_train,
+        routeRequest,
+        transportResponse,
+      );
+      return unwrapFirstSliceTransportSuccess(
+        firstSliceTransportRoutes.unit_train,
+        resolvedTransportResponse,
+      );
     },
     scoutTileInteractCommand: async (input) => {
+      const routeRequest = {
+        path: {
+          tileId: input.tile_id,
+        },
+        body: {
+          settlement_id: input.settlement_id,
+          tile_id: input.tile_id,
+          interaction_type: "scout",
+          flow_version: "v1",
+          settlement_name: input.settlement_name,
+          player_id: input.player_id,
+          assignment_context_type: input.assignment_context_type,
+          assignment_context_id: input.assignment_context_id,
+        },
+      };
       const transportResponse = await invokeFirstSliceTransportRoute(
         firstSliceTransportRoutes.world_map_tile_interact,
-        {
-          path: {
-            tileId: input.tile_id,
-          },
-          body: {
-            settlement_id: input.settlement_id,
-            tile_id: input.tile_id,
-            interaction_type: "scout",
-            flow_version: "v1",
-            settlement_name: input.settlement_name,
-            player_id: input.player_id,
-            assignment_context_type: input.assignment_context_type,
-            assignment_context_id: input.assignment_context_id,
-          },
-        },
+        routeRequest,
+      );
+      const resolvedTransportResponse = resolveTransportResponseWithOfflineFallback(
+        firstSliceTransportRoutes.world_map_tile_interact,
+        routeRequest,
+        transportResponse,
       );
       return unwrapFirstSliceTransportSuccess(
         firstSliceTransportRoutes.world_map_tile_interact,
-        transportResponse,
+        resolvedTransportResponse,
       );
     },
     dispatchHostileSettlementAttackCommand: async (input) => {
       const departedAtIso = resolveIsoInstant(input.departed_at, new Date().toISOString());
+      const routeRequest = {
+        path: {
+          targetSettlementId: input.target_settlement_id,
+        },
+        body: {
+          flow_version: "v1",
+          march_id: input.march_id,
+          source_settlement_id: input.source_settlement_id,
+          source_settlement_name: input.source_settlement_name,
+          target_settlement_id: input.target_settlement_id,
+          target_settlement_name: input.target_settlement_name,
+          target_tile_label: input.target_tile_label,
+          origin: input.origin,
+          target: input.target,
+          defender_garrison_strength: Number(input.defender_garrison_strength) || 0,
+          dispatched_units: input.dispatched_units,
+          departed_at: departedAtIso,
+          seconds_per_tile: Number(input.seconds_per_tile) || undefined,
+          army_name: input.army_name,
+          player_id: input.player_id,
+          hero_id: input.hero_id,
+          hero_target_scope: input.hero_target_scope,
+          hero_assignment_context_id: input.hero_assignment_context_id,
+        },
+      };
       const transportResponse = await invokeFirstSliceTransportRoute(
         firstSliceTransportRoutes.world_map_settlement_attack,
-        {
-          path: {
-            targetSettlementId: input.target_settlement_id,
-          },
-          body: {
-            flow_version: "v1",
-            march_id: input.march_id,
-            source_settlement_id: input.source_settlement_id,
-            source_settlement_name: input.source_settlement_name,
-            target_settlement_id: input.target_settlement_id,
-            target_settlement_name: input.target_settlement_name,
-            target_tile_label: input.target_tile_label,
-            origin: input.origin,
-            target: input.target,
-            defender_garrison_strength: Number(input.defender_garrison_strength) || 0,
-            dispatched_units: input.dispatched_units,
-            departed_at: departedAtIso,
-            seconds_per_tile: Number(input.seconds_per_tile) || undefined,
-            army_name: input.army_name,
-            player_id: input.player_id,
-            hero_id: input.hero_id,
-            hero_target_scope: input.hero_target_scope,
-            hero_assignment_context_id: input.hero_assignment_context_id,
-          },
-        },
+        routeRequest,
+      );
+      const resolvedTransportResponse = resolveTransportResponseWithOfflineFallback(
+        firstSliceTransportRoutes.world_map_settlement_attack,
+        routeRequest,
+        transportResponse,
       );
       return unwrapFirstSliceTransportSuccess(
         firstSliceTransportRoutes.world_map_settlement_attack,
-        transportResponse,
+        resolvedTransportResponse,
       );
     },
     getMarchSnapshotCommand: async (input) => {
       const observedAtIso = resolveIsoInstant(input.observed_at, new Date().toISOString());
+      const routeRequest = {
+        path: {
+          marchId: input.march_id,
+        },
+        body: {
+          march_id: input.march_id,
+          flow_version: "v1",
+          observed_at: observedAtIso,
+        },
+      };
       const transportResponse = await invokeFirstSliceTransportRoute(
         firstSliceTransportRoutes.world_map_march_snapshot,
-        {
-          path: {
-            marchId: input.march_id,
-          },
-          body: {
-            march_id: input.march_id,
-            flow_version: "v1",
-            observed_at: observedAtIso,
-          },
-        },
+        routeRequest,
+      );
+      const resolvedTransportResponse = resolveTransportResponseWithOfflineFallback(
+        firstSliceTransportRoutes.world_map_march_snapshot,
+        routeRequest,
+        transportResponse,
       );
       return unwrapFirstSliceTransportSuccess(
         firstSliceTransportRoutes.world_map_march_snapshot,
-        transportResponse,
+        resolvedTransportResponse,
       );
     },
   });
@@ -3334,6 +3863,9 @@
 
   const handleActionInvocationError = (actionType, error, context = {}) => {
     const errorCode = resolveActionErrorCode(error);
+    if (shouldSwitchToOfflineFallbackFromError(error)) {
+      activateDeterministicOfflineFallbackMode(errorCode, resolveActionErrorMessage(error));
+    }
     const failureContentKeyByAction = {
       tick: "event.tick.passive_gain_stalled",
       build: "event.build.failure_invalid_state",
@@ -4116,6 +4648,12 @@
     if (!target) {
       return;
     }
+    if (!allowManualPanelModeSelection) {
+      target.hidden = true;
+      target.innerHTML = "";
+      return;
+    }
+    target.hidden = false;
 
     const buttons = panel.stateOptions
       .map((mode) => {
@@ -4381,13 +4919,21 @@
         ? "action-outcome is-failed"
         : "action-outcome is-success"
       : "action-outcome";
+    const adapterModeChipClass =
+      firstSliceRuntimeState.mode === firstSliceRuntimeModeOfflineFallback
+        ? "chip chip--small is-offline"
+        : "chip chip--small is-online";
+    const adapterModeChipText =
+      firstSliceRuntimeState.mode === firstSliceRuntimeModeOfflineFallback
+        ? "Offline Fallback"
+        : "Transport Bridge";
 
     refs.content.innerHTML = `
       <div class="stack">
         <section class="subpanel compact">
           <div class="subpanel__head">
             <h3>First-Slice Action Adapter</h3>
-            <span class="chip chip--small">Transport Bridge</span>
+            <span class="${adapterModeChipClass}">${escapeHtml(adapterModeChipText)}</span>
           </div>
           <p class="subpanel-note">Outcome path</p>
           <div class="segment-row segment-row--dual" role="group" aria-label="Settlement action outcome path">
@@ -5096,8 +5642,43 @@
       </div>
     `;
   };
+  const probeFirstSliceTransportAvailability = async () => {
+    if (firstSliceRuntimeState.mode === firstSliceRuntimeModeOfflineFallback) {
+      return;
+    }
+    const probeRequest = {
+      path: {
+        marchId: "bootstrap_probe",
+      },
+      body: {
+        march_id: "bootstrap_probe",
+        flow_version: "v1",
+        observed_at: new Date().toISOString(),
+      },
+    };
+    const probeResponse = await invokeFirstSliceTransportRoute(
+      firstSliceTransportRoutes.world_map_march_snapshot,
+      probeRequest,
+    );
+    if (shouldSwitchToOfflineFallbackFromTransportResponse(probeResponse)) {
+      activateDeterministicOfflineFallbackMode(
+        resolveTransportBodyErrorCode(probeResponse),
+        resolveTransportBodyErrorMessage(probeResponse),
+      );
+      renderPanels();
+      return;
+    }
+    firstSliceRuntimeState.mode = firstSliceRuntimeModeTransportBacked;
+    firstSliceRuntimeState.warning_code = "";
+    firstSliceRuntimeState.warning_message = "";
+    renderShellRuntimeStatus();
+  };
 
   const renderPanels = () => {
+    if (!allowManualPanelModeSelection) {
+      enforceDeterministicPanelModes();
+    }
+    renderShellRuntimeStatus();
     renderFirstSessionObjectiveStrip();
     renderStateControls("settlement");
     renderStateControls("worldMap");
@@ -5167,6 +5748,10 @@
       return;
     }
 
+    if (!allowManualPanelModeSelection) {
+      return;
+    }
+
     const button = event.target.closest("[data-mock-panel][data-mock-mode]");
 
     if (!button) {
@@ -5194,6 +5779,7 @@
   });
 
   renderPanels();
+  void probeFirstSliceTransportAvailability();
 
   const tabs = Array.from(document.querySelectorAll(".region-tab"));
 

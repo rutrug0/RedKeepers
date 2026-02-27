@@ -19,9 +19,9 @@
         </div>
       </div>
       <div class="session-strip" aria-label="Session status">
-        <span class="chip">World: Ashwake-01</span>
-        <span class="chip">Phase: Wireframe</span>
-        <span class="chip">Net: Mock</span>
+        <span id="session-chip-world" class="chip">World: Ashwake-01</span>
+        <span id="session-chip-phase" class="chip">Phase: First Slice</span>
+        <span id="session-chip-net" class="chip">Net: Probing</span>
       </div>
     </header>
 
@@ -30,6 +30,12 @@
       class="objective-strip"
       aria-label="First-session objectives"
       aria-live="polite"
+    ></section>
+    <section
+      id="runtime-warning-banner"
+      class="runtime-warning"
+      aria-live="polite"
+      hidden
     ></section>
 
     <nav class="region-nav" aria-label="Region quick navigation">

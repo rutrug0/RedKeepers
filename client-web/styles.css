@@ -232,10 +232,32 @@ a {
   font-size: 0.85rem;
 }
 
+.chip.is-online {
+  color: var(--good);
+  border-color: rgba(111, 186, 141, 0.45);
+  background: rgba(111, 186, 141, 0.09);
+}
+
+.chip.is-offline {
+  color: var(--warn);
+  border-color: rgba(214, 162, 77, 0.45);
+  background: rgba(214, 162, 77, 0.09);
+}
+
 .chip--small {
   min-height: 26px;
   padding: 4px 8px;
   font-size: 0.76rem;
+}
+
+.runtime-warning {
+  border: 1px solid rgba(214, 162, 77, 0.55);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(214, 162, 77, 0.14), rgba(214, 162, 77, 0.06));
+  color: #f7ddb3;
+  font-size: 0.85rem;
+  padding: 10px 12px;
+  box-shadow: var(--shadow);
 }
 
 .region-nav {

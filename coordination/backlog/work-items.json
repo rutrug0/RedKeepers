@@ -1,44 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0012-F03",
-    "title": "Backfill first-session narrative templates for transport-failure and cooldown paths",
-    "description": "Expand first-slice narrative seed rows so transport-backed settlement and world-map actions have canonical placeholder templates for both success and deterministic failure states without relying on client hard-coded fallback text.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "content",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0012-F01"
-    ],
-    "inputs": [
-      "docs/content/placeholder-narrative-seed-pack-v1.md",
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-      "client-web/app.js"
-    ],
-    "acceptance_criteria": [
-      "Canonical placeholder templates cover first-session action outcomes for success plus failure cases triggered in transport mode (insufficient_resources, cooldown, unavailable_tile, invalid_state, hostile dispatch failure)",
-      "Template token fields align with the first-session transport contract matrix and remain deterministic for frontend substitution",
-      "Content stays first-slice scoped and does not introduce post-slice hero/alliance or expanded PvP narrative branches"
-    ],
-    "validation_commands": [
-      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T15:16:12.686387+00:00",
-    "updated_at": "2026-02-27T15:38:40.595359+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
-    "assigned_agent": "nika-thorn"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0012-F04",
     "title": "Default client shell to transport-backed first-session state with deterministic fallback",
     "description": "Refactor client shell bootstrap so default populated mode is driven by transport-backed runtime actions/state, while preserving a deterministic offline fallback state when transport is unavailable.",
@@ -65,17 +26,18 @@
     "validation_commands": [
       "python tools/rk_m0_0011_first_slice_loop_smoke.py"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T15:16:12.686387+00:00",
-    "updated_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:49:59.009407+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0012"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-AUTO-BACKLOG-0012-F05",
@@ -266,5 +228,42 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0012-F02"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F03-F01",
+    "title": "Retire scout unavailable hardcoded fallback text after snapshot-backed verification",
+    "description": "Remove or gate `event.world.scout_unavailable_tile`/`event.scout.unavailable_tile` local fallback strings in `client-web/app.js` once manifest-backed template resolution is confirmed in visual smoke to prevent silent drift between seeded narrative and client literals.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F03"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "client-web/first-slice-manifest-snapshot.js",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+    ],
+    "acceptance_criteria": [
+      "Scout unavailable-tile rendering resolves from manifest-backed templates without requiring local fallback literals",
+      "Automated visual smoke run covers a failed scout dispatch and displays the seeded template text",
+      "No regression in legacy alias lookup behavior for `event.world.scout_unavailable_tile`"
+    ],
+    "validation_commands": [
+      "python tools/frontend_visual_smoke.py --help"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:38:43.052259+00:00",
+    "updated_at": "2026-02-27T15:38:43.052259+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012-F03"
   }
 ]

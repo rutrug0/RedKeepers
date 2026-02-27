@@ -411,7 +411,7 @@
                                         "validation_commands":  [
                                                                     "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
                                                                     "python tools/orchestrator.py status"
-                                        ]
+                                                                ]
                                     }
                                 ]
     },
@@ -419,7 +419,7 @@
         "ts":  "2026-02-26T18:42:40.8048414Z",
         "item_id":  "RK-AUTO-BACKLOG-0003-F01-F02-F01",
         "status":  "blocked",
-        "summary":  "Attempted dedicated strict hero-wireframes visual smoke in both the default `python` runtime and the runtime-policy Python interpreter. Default runtime is still missing Playwright (`No module named 'playwright'`), and the Playwright-capable interpreter remains blocked on browser launch (`[WinError 5] Access is denied`) before any live capture, so strict desktop/tablet/mobile validation and baseline regeneration could not run in this environment.",
+        "summary":  "Attempted dedicated strict hero-wireframes visual smoke in both the default `python` runtime and the runtime-policy Python interpreter. Default runtime is still missing Playwright (`No module named \u0027playwright\u0027`), and the Playwright-capable interpreter remains blocked on browser launch (`[WinError 5] Access is denied`) before any live capture, so strict desktop/tablet/mobile validation and baseline regeneration could not run in this environment.",
         "files":  [
                       "agents/sera-kest/outbox.json"
                   ],
@@ -447,7 +447,7 @@
                                                                     "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --update-baseline --max-overflow-px 0 --max-diff-percent 0.5 --strict",
                                                                     "python tools/frontend_visual_smoke.py --url http://127.0.0.1:4173/hero-wireframes.html --max-overflow-px 0 --max-diff-percent 0.5 --strict",
                                                                     "python tools/orchestrator.py status"
-                                        ]
+                                                                ]
                                     }
                                 ]
     },
@@ -483,7 +483,7 @@
                                                                     "python -m unittest tests.test_frontend_visual_smoke",
                                                                     "python tools/frontend_visual_smoke.py --max-overflow-px 0 --max-diff-percent 0.5 --strict",
                                                                     "python tools/orchestrator.py status"
-                                        ]
+                                                                ]
                                     }
                                 ]
     },
@@ -576,7 +576,7 @@
                                                                 ],
                                         "validation_commands":  [
                                                                     "python tools/orchestrator.py status"
-                                        ]
+                                                                ]
                                     }
                                 ]
     },
@@ -622,7 +622,7 @@
                                                                 ],
                                         "validation_commands":  [
                                                                     "python tools/orchestrator.py status"
-                                        ]
+                                                                ]
                                     }
                                 ]
     },
@@ -788,5 +788,17 @@
                                     "node --check client-web/app.js",
                                     "python tools/rk_m0_0011_first_slice_loop_smoke.py"
                                 ]
+    },
+    {
+        "ts":  "2026-02-27T15:48:54.0510373Z",
+        "item_id":  "RK-AUTO-BACKLOG-0012-F04",
+        "status":  "completed",
+        "summary":  "Refactored client bootstrap to default to transport-backed runtime mode with a transport health probe, added deterministic offline fallback contracts for tick/build/train/scout/attack(+snapshot) when transport is unreachable, surfaced explicit runtime warning/status in shell, and kept first-slice canonical objective/content-key progression intact without manual mock-state toggles.",
+        "files":  [
+                      "client-web/index.html",
+                      "client-web/styles.css",
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ]
     }
 ]
