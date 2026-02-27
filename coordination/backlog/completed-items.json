@@ -6382,5 +6382,42 @@
     "runtime_seconds": 378.27,
     "started_at": "2026-02-27T09:15:02.854754+00:00",
     "finished_at": "2026-02-27T09:21:21.120785+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F04-F02-F01",
+    "title": "Fix narrative event seed token ordering mismatch for passive gain reasoned message",
+    "description": "Resolve the existing validation failure in `event-feed-messages.json` by aligning the `event.tick.passive_gain_reasoned` token list order with template placeholder order so the baseline narrative seed loader test suite passes cleanly.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F04-F02"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "`event.tick.passive_gain_reasoned` row token order matches template placeholder order exactly.",
+      "`node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/narrative-seed-loaders.test.ts` passes without failures related to token mismatch."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T09:06:38.780912+00:00",
+    "updated_at": "2026-02-27T09:23:45.386147+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/ilya-fen/outbox.json](D:\\RedKeepers\\agents\\ilya-fen\\outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F04-F02",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "62e92ceab226ca91ff4a87d763fd86697918df83",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 134.84,
+    "started_at": "2026-02-27T09:21:28.624843+00:00",
+    "finished_at": "2026-02-27T09:23:43.466654+00:00"
   }
 ]

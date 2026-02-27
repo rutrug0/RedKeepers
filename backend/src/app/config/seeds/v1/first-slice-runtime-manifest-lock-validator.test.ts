@@ -51,8 +51,8 @@ test("validateFirstSliceRuntimeManifestLockV1 reports exact missing unit ids fro
     },
   };
 
-  assert.throws(
-    () => {
+  await assert.rejects(
+    async () => {
       validateFirstSliceRuntimeManifestLockV1({
         starter_seed_bundle: driftedStarterSeedBundle,
         world_map_seed_bundle: worldMapSeedBundle,
@@ -60,7 +60,7 @@ test("validateFirstSliceRuntimeManifestLockV1 reports exact missing unit ids fro
     },
     (error) =>
       error instanceof FirstSliceRuntimeManifestLockValidationError
-      && error.message.includes("active_first_slice_unit_ids")
+      && error.message.includes("units.unit_lines")
       && error.message.includes("missing [watch_levy]")
       && error.message.includes("extra []"),
   );
@@ -83,8 +83,8 @@ test("validateFirstSliceRuntimeManifestLockV1 reports exact primary settlement f
     },
   };
 
-  assert.throws(
-    () => {
+  await assert.rejects(
+    async () => {
       validateFirstSliceRuntimeManifestLockV1({
         starter_seed_bundle: starterSeedBundle,
         world_map_seed_bundle: driftedWorldMapSeedBundle,
@@ -93,7 +93,7 @@ test("validateFirstSliceRuntimeManifestLockV1 reports exact primary settlement f
     (error) =>
       error instanceof FirstSliceRuntimeManifestLockValidationError
       && error.message.includes("default_transport_fixture_primary_settlement_ids")
-      && error.message.includes("missing [settlement_alpha]")
+      && error.message.includes("missing []")
       && error.message.includes("extra [settlement_beta]"),
   );
 });

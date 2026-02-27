@@ -80,37 +80,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0005"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0005-F04-F02-F01",
-    "title": "Fix narrative event seed token ordering mismatch for passive gain reasoned message",
-    "description": "Resolve the existing validation failure in `event-feed-messages.json` by aligning the `event.tick.passive_gain_reasoned` token list order with template placeholder order so the baseline narrative seed loader test suite passes cleanly.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0005-F04-F02"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "`event.tick.passive_gain_reasoned` row token order matches template placeholder order exactly.",
-      "`node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/narrative-seed-loaders.test.ts` passes without failures related to token mismatch."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T09:06:38.780912+00:00",
-    "updated_at": "2026-02-27T09:23:43.532313+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F04-F02",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0005-F02-F01-F01-F01",
     "title": "Fix async throw assertions in first-slice runtime manifest lock validator tests",
     "description": "Update `first-slice-runtime-manifest-lock-validator.test.ts` failing cases to use async-aware assertion patterns (`assert.rejects`) so expected validation errors are asserted correctly under Node test runner.",
@@ -128,16 +97,17 @@
       "`node --experimental-strip-types --test --test-isolation=none backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.test.ts` passes."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T09:21:23.287992+00:00",
-    "updated_at": "2026-02-27T09:21:23.287992+00:00",
+    "updated_at": "2026-02-27T09:25:30.433709+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F02-F01-F01"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F02-F01-F01",
+    "assigned_agent": "ilya-fen"
   }
 ]
