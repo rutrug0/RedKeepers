@@ -176,6 +176,30 @@
 | `hostile_dispatch_and_resolve` | `event.world.hostile_post_battle_returned` | `canonical-default` | `event.world.hostile_post_battle_returned` | `yes` | `event.world.march_returned` |
 | `hostile_dispatch_and_resolve` | `event.world.march_returned` | `compatibility-only` | `event.world.hostile_post_battle_returned` | `no` | `(n/a)` |
 
+## First-Session Objective Sequence Contract (`tick -> build -> train -> scout -> attack -> resolve`)
+
+### Retention Rationale
+
+- Next 1-5 minute goal: complete one legible action per loop step and verify immediate event-feed confirmation with resolved tokens.
+- Session goal: finish one full settlement-to-hostile-resolution cycle with no ambiguous state transitions.
+- Return hook: queued growth + deterministic hostile outcomes make the next optimization attempt obvious on return.
+
+| order | objective_id | loop_step | required_canonical_default_content_keys | required_runtime_tokens |
+| --- | --- | --- | --- | --- |
+| `1` | `first_session.tick.observe_income.v1` | `tick` | `event.tick.passive_income`, `event.tick.passive_gain_success` | `event.tick.passive_income -> settlement_name, food_gain, wood_gain, stone_gain, iron_gain`; `event.tick.passive_gain_success -> settlement_name, duration_ms` |
+| `2` | `first_session.build.complete_first_upgrade.v1` | `build` | `event.build.upgrade_started`, `event.build.upgrade_completed` | `event.build.upgrade_started -> settlement_name, building_label, from_level, to_level`; `event.build.upgrade_completed -> settlement_name, building_label, new_level` |
+| `3` | `first_session.train.complete_first_batch.v1` | `train` | `event.train.started`, `event.train.completed` | `event.train.started -> settlement_name, quantity, unit_label`; `event.train.completed -> settlement_name, quantity, unit_label` |
+| `4` | `first_session.scout.confirm_hostile_target.v1` | `scout` | `event.scout.dispatched_success`, `event.scout.return_hostile` | `event.scout.dispatched_success -> settlement_name, target_tile_label`; `event.scout.return_hostile -> target_tile_label, hostile_force_estimate` |
+| `5` | `first_session.attack.dispatch_hostile_march.v1` | `attack` | `event.world.hostile_dispatch_accepted`, `event.world.hostile_dispatch_en_route`, `event.world.hostile_march_arrived_outer_works` | `event.world.hostile_dispatch_accepted -> army_name, origin_settlement_name, target_tile_label`; `event.world.hostile_dispatch_en_route -> army_name, target_tile_label, eta_seconds`; `event.world.hostile_march_arrived_outer_works -> army_name, target_tile_label` |
+| `6` | `first_session.resolve_hostile_outcome.v1` | `resolve` | `event.combat.hostile_resolve_attacker_win` OR `event.combat.hostile_resolve_defender_win` OR `event.combat.hostile_resolve_tie_defender_holds`, plus `event.combat.hostile_loss_report` | `event.combat.hostile_resolve_attacker_win -> army_name, target_tile_label`; `event.combat.hostile_resolve_defender_win -> army_name, target_tile_label`; `event.combat.hostile_resolve_tie_defender_holds -> target_tile_label`; `event.combat.hostile_loss_report -> attacker_units_lost, attacker_units_dispatched, defender_garrison_lost, defender_strength` |
+
+### Deferred and Excluded From Required Objective Coverage
+
+- Heroes remain deferred: `event.hero.assigned`, `event.hero.unassigned`, `event.hero.ability_activated`, `event.hero.cooldown_complete`.
+- Ambush branch remains deferred: `event.world.ambush_triggered`, `event.world.ambush_resolved`.
+- Gather branch remains deferred: `event.world.gather_started`, `event.world.gather_completed`.
+- These deferred keys must not be required by first-session objective completion checks for this slice.
+
 ## Post-Slice Keys Excluded From Required Default Rendering Coverage
 
 | key | slice_status | exclusion_reason |

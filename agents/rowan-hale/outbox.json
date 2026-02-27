@@ -682,5 +682,40 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-27T13:07:10.3213115Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-AUTO-BACKLOG-0010-F01",
+    "status": "done",
+    "summary": "Defined one canonical first-session objective sequence contract (`tick/build/train/scout/attack/resolve`) with stable objective IDs, canonical-default key mappings, required runtime tokens per step, and explicit exclusion of hero/ambush/gather branches from required objective completion coverage.",
+    "changed_files": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Wire first-session objective tracker to canonical objective IDs and key gates",
+        "owner_role": "frontend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Implement first-session objective progress tracking using the six contract IDs and canonical key gates so UI progression state advances only on the documented `tick/build/train/scout/attack/resolve` event sequence.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0010-F01"
+        ],
+        "inputs": [
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+          "client-web/src"
+        ],
+        "acceptance_criteria": [
+          "Objective tracker uses the exact six stable objective IDs from the design contract",
+          "Progression gates use canonical-default key names only, with compatibility aliases resolved upstream",
+          "Deferred hero/ambush/gather keys do not advance first-session objective completion"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]
