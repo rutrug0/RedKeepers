@@ -1,42 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0012-F01",
-    "title": "Lock first-session live transport action contract matrix",
-    "description": "Define one implementation-ready contract table for first-session tick/build/train/scout/attack actions so backend HTTP host, frontend adapter wiring, and content templates share the same required request/response fields and canonical event keys.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "design",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [
-      "docs/design/first-vertical-slice.md",
-      "docs/design/first-slice-event-token-contract-matrix.md",
-      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
-      "client-web/app.js"
-    ],
-    "acceptance_criteria": [
-      "Matrix documents canonical first-session actions in strict tick/build/train/scout/attack order with required request fields, success/failure statuses, and event-key mapping",
-      "Contract references existing first-slice route templates and keeps failure families scoped to insufficient_resources, cooldown, unavailable_tile, invalid_state, and deterministic hostile dispatch failures",
-      "Any mechanics outside first vertical slice (heroes/alliances/advanced PvP branches) are explicitly marked deferred and excluded from default contract rows"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T15:16:12.685880+00:00",
-    "updated_at": "2026-02-27T15:21:39.954665+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
-    "assigned_agent": "rowan-hale"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0012-F02",
     "title": "Expose deterministic first-slice settlement loop as local HTTP host",
     "description": "Implement a lightweight backend host that serves the existing deterministic settlement loop transport routes over HTTP so client-web fetch mode can run the full first-session loop without custom browser injection.",
@@ -64,17 +27,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T15:16:12.686387+00:00",
-    "updated_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:32:45.108829+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0012"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-AUTO-BACKLOG-0012-F03",
@@ -230,5 +194,79 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0012"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F01-F01",
+    "title": "Align scout unavailable-tile failure key with first-slice manifest canonical key policy",
+    "description": "Resolve the current transport-only scout unavailable key mismatch by adding an explicit canonical/alias mapping path for unavailable-tile scout failures so endpoint responses, manifest include lists, and frontend key resolution use one deterministic key family.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F01"
+    ],
+    "inputs": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.ts",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "client-web/app.js"
+    ],
+    "acceptance_criteria": [
+      "Scout unavailable-tile failures resolve through a declared canonical key with optional compatibility aliases (no undocumented transport-only key path)",
+      "Manifest include/alias tables and event-feed template rows are consistent with the chosen scout unavailable key",
+      "Frontend resolver and world-map scout action handling produce the same rendered key for unavailable-tile failures without fallback ambiguity"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:21:41.648959+00:00",
+    "updated_at": "2026-02-27T15:21:41.648959+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012-F01"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F01-F02",
+    "title": "Keep hero dispatch failure branches out of default first-session attack contract rows",
+    "description": "Ensure default first-session attack UI/error mapping keeps only deterministic hostile dispatch failures in-scope and treats hero failure branches as deferred diagnostics until hero systems are in-slice.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "low",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F01"
+    ],
+    "inputs": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "client-web/app.js",
+      "backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.ts"
+    ],
+    "acceptance_criteria": [
+      "Default first-session hostile dispatch handling prioritizes only `source_target_not_foreign`, `march_already_exists`, `max_active_marches_reached`, and `path_blocked_impassable`",
+      "Hero-related dispatch failure keys remain tagged deferred and do not appear in default first-session contract rows",
+      "UI fallback behavior for deferred hero failures is explicit and non-blocking when those errors surface in debug/non-default runs"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:21:41.648959+00:00",
+    "updated_at": "2026-02-27T15:21:41.648959+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012-F01"
   }
 ]

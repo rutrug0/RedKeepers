@@ -8942,5 +8942,48 @@
     "runtime_seconds": 240.56,
     "started_at": "2026-02-27T15:12:10.685096+00:00",
     "finished_at": "2026-02-27T15:16:11.239614+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F01",
+    "title": "Lock first-session live transport action contract matrix",
+    "description": "Define one implementation-ready contract table for first-session tick/build/train/scout/attack actions so backend HTTP host, frontend adapter wiring, and content templates share the same required request/response fields and canonical event keys.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "docs/design/first-vertical-slice.md",
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
+      "client-web/app.js"
+    ],
+    "acceptance_criteria": [
+      "Matrix documents canonical first-session actions in strict tick/build/train/scout/attack order with required request fields, success/failure statuses, and event-key mapping",
+      "Contract references existing first-slice route templates and keeps failure families scoped to insufficient_resources, cooldown, unavailable_tile, invalid_state, and deterministic hostile dispatch failures",
+      "Any mechanics outside first vertical slice (heroes/alliances/advanced PvP branches) are explicitly marked deferred and excluded from default contract rows"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:16:12.685880+00:00",
+    "updated_at": "2026-02-27T15:21:41.508429+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Note: the validation command also updated daemon-managed backlog files (`coordination/backlog/work-items.json`, `coordination/backlog/completed-items.json`) automatically; I did not manually edit those.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
+    "assigned_agent": "rowan-hale",
+    "commit_sha": "4575bd6977fc3d882b2d8fcb5efa8bf34b078430",
+    "resolved_by_agent": "rowan-hale",
+    "resolved_by_role": "design",
+    "runtime_seconds": 321.99,
+    "started_at": "2026-02-27T15:16:17.949587+00:00",
+    "finished_at": "2026-02-27T15:21:39.924450+00:00"
   }
 ]
