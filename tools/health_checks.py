@@ -279,6 +279,71 @@ def _read_string_list(value: Any, *, label: str) -> list[str]:
     return normalized
 
 
+FIRST_SLICE_REQUIRED_LOOP_KEYS_BY_NAMESPACE: dict[str, tuple[str, ...]] = {
+    "tick": (
+        "event.tick.passive_income",
+        "event.tick.storage_near_cap",
+        "event.tick.producer_unlocked_hint",
+        "event.tick.passive_gain_success",
+        "event.tick.passive_gain_reasoned",
+        "event.tick.passive_gain_stalled",
+        "event.tick.passive_gain_capped",
+    ),
+    "build": (
+        "event.build.upgrade_started",
+        "event.build.upgrade_completed",
+        "event.build.queue_blocked_resources",
+        "event.build.success",
+        "event.build.failure_insufficient_resources",
+        "event.build.failure_cooldown",
+        "event.build.failure_invalid_state",
+    ),
+    "train": (
+        "event.train.started",
+        "event.train.completed",
+        "event.train.queue_full",
+        "event.train.success",
+        "event.train.failure_insufficient_resources",
+        "event.train.failure_cooldown",
+        "event.train.failure_invalid_state",
+    ),
+    "scout": (
+        "event.scout.dispatched",
+        "event.scout.report_empty",
+        "event.scout.report_hostile",
+        "event.scout.dispatched_success",
+        "event.scout.return_empty",
+        "event.scout.return_hostile",
+    ),
+    "hostile_dispatch_and_resolve": (
+        "event.world.hostile_foreign_settlement_spotted",
+        "event.world.hostile_dispatch_target_required",
+        "event.world.hostile_dispatch_accepted",
+        "event.world.hostile_dispatch_en_route",
+        "event.world.hostile_dispatch_failed",
+        "event.world.hostile_dispatch_failed_source_target_not_foreign",
+        "event.world.hostile_dispatch_failed_max_active_marches_reached",
+        "event.world.hostile_dispatch_failed_path_blocked_impassable",
+        "event.world.hostile_dispatch_failed_march_already_exists",
+        "event.world.hostile_march_arrived_outer_works",
+        "event.world.hostile_march_arrived_gate_contested",
+        "event.combat.hostile_resolve_attacker_win",
+        "event.combat.hostile_resolve_defender_win",
+        "event.combat.hostile_resolve_tie_defender_holds",
+        "event.combat.hostile_loss_report",
+        "event.combat.hostile_garrison_broken",
+        "event.combat.hostile_counterfire_heavy",
+        "event.world.hostile_retreat_ordered",
+        "event.world.hostile_retreat_in_motion",
+        "event.world.hostile_retreat_completed",
+        "event.world.hostile_defeat_force_shattered",
+        "event.world.hostile_defeat_command_silent",
+        "event.world.hostile_post_battle_return_started",
+        "event.world.hostile_post_battle_returned",
+    ),
+}
+
+
 def _append_hostile_contract_drift_error(
     errors: list[str],
     message: str,
@@ -374,10 +439,33 @@ def _validate_first_slice_hostile_runtime_token_contract_drift(*, errors: list[s
             manifest.get("loop_required_keys"),
             label="first-slice-content-key-manifest.loop_required_keys",
         )
+        manifest_tick_loop_required_keys = _read_string_list(
+            loop_required.get("tick"),
+            label="first-slice-content-key-manifest.loop_required_keys.tick",
+        )
+        manifest_build_loop_required_keys = _read_string_list(
+            loop_required.get("build"),
+            label="first-slice-content-key-manifest.loop_required_keys.build",
+        )
+        manifest_train_loop_required_keys = _read_string_list(
+            loop_required.get("train"),
+            label="first-slice-content-key-manifest.loop_required_keys.train",
+        )
+        manifest_scout_loop_required_keys = _read_string_list(
+            loop_required.get("scout"),
+            label="first-slice-content-key-manifest.loop_required_keys.scout",
+        )
         manifest_hostile_loop_required_keys = _read_string_list(
             loop_required.get("hostile_dispatch_and_resolve"),
             label="first-slice-content-key-manifest.loop_required_keys.hostile_dispatch_and_resolve",
         )
+        manifest_loop_keys_by_namespace: dict[str, list[str]] = {
+            "tick": manifest_tick_loop_required_keys,
+            "build": manifest_build_loop_required_keys,
+            "train": manifest_train_loop_required_keys,
+            "scout": manifest_scout_loop_required_keys,
+            "hostile_dispatch_and_resolve": manifest_hostile_loop_required_keys,
+        }
 
         manifest_alias_only_keys = _read_string_list(
             manifest.get("compatibility_alias_only_keys"),
@@ -440,6 +528,80 @@ def _validate_first_slice_hostile_runtime_token_contract_drift(*, errors: list[s
     contract_alias_only_set = set(contract_alias_only_keys)
     manifest_alias_only_set = set(manifest_alias_only_keys)
     deferred_union = set(deferred_contract_keys).union(manifest_deferred_keys)
+
+    for namespace, required_keys in FIRST_SLICE_REQUIRED_LOOP_KEYS_BY_NAMESPACE.items():
+        manifest_namespace_keys = manifest_loop_keys_by_namespace.get(namespace, [])
+        manifest_namespace_set = set(manifest_namespace_keys)
+        missing_from_manifest_loop = sorted(
+            key for key in required_keys if key not in manifest_namespace_set
+        )
+        if missing_from_manifest_loop:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    f"missing canonical loop key(s) in first-slice-content-key-manifest.loop_required_keys.{namespace}: "
+                    f"{missing_from_manifest_loop}."
+                ),
+            )
+
+        missing_from_default_selection = sorted(
+            key for key in required_keys if key not in manifest_default_canonical_set
+        )
+        if missing_from_default_selection:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    "missing canonical loop key(s) in "
+                    "first-slice-content-key-manifest.default_first_slice_seed_usage.include_only_content_keys "
+                    f"for namespace '{namespace}': {missing_from_default_selection}."
+                ),
+            )
+
+        missing_from_event_feed = sorted(
+            key for key in required_keys if key not in event_tokens_by_key
+        )
+        if missing_from_event_feed:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    f"missing canonical loop key event rows for namespace '{namespace}' in event-feed-messages: "
+                    f"{missing_from_event_feed}."
+                ),
+            )
+
+        alias_keys_selected_as_loop_canonical = sorted(
+            key for key in manifest_namespace_keys if key in manifest_alias_only_set
+        )
+        if alias_keys_selected_as_loop_canonical:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    "compatibility alias key(s) selected as canonical in "
+                    f"first-slice-content-key-manifest.loop_required_keys.{namespace}: "
+                    f"{alias_keys_selected_as_loop_canonical}."
+                ),
+            )
+
+    for canonical_key, legacy_alias_keys in manifest_alias_map.items():
+        if canonical_key in event_tokens_by_key:
+            canonical_tokens = event_tokens_by_key[canonical_key]
+            for alias_key in legacy_alias_keys:
+                if alias_key not in event_tokens_by_key:
+                    continue
+                alias_tokens = event_tokens_by_key[alias_key]
+                if alias_tokens == canonical_tokens:
+                    continue
+                missing_alias_tokens = sorted(set(canonical_tokens) - set(alias_tokens))
+                extra_alias_tokens = sorted(set(alias_tokens) - set(canonical_tokens))
+                _append_hostile_contract_drift_error(
+                    errors,
+                    (
+                        f"alias token mismatch in legacy_alias_mapping for canonical_key '{canonical_key}' "
+                        f"via alias '{alias_key}': canonical_tokens={canonical_tokens}, "
+                        f"alias_tokens={alias_tokens}, missing_in_alias={missing_alias_tokens}, "
+                        f"extra_in_alias={extra_alias_tokens}."
+                    ),
+                )
 
     declared_aliases_by_runtime_rows = {alias for alias in runtime_alias_keys}
     for canonical_key in runtime_canonical_keys:
@@ -556,11 +718,14 @@ def _validate_first_slice_hostile_runtime_token_contract_drift(*, errors: list[s
             else:
                 alias_tokens = event_tokens_by_key[alias_key]
                 if alias_tokens != required_tokens:
+                    missing_alias_tokens = sorted(set(required_tokens) - set(alias_tokens))
+                    extra_alias_tokens = sorted(set(alias_tokens) - set(required_tokens))
                     _append_hostile_contract_drift_error(
                         errors,
                         (
                             f"alias token mismatch for canonical_key '{canonical_key}' via alias '{alias_key}': "
-                            f"contract_tokens={required_tokens}, event_feed_tokens={alias_tokens}."
+                            f"contract_tokens={required_tokens}, event_feed_tokens={alias_tokens}, "
+                            f"missing_in_event_feed={missing_alias_tokens}, extra_in_event_feed={extra_alias_tokens}."
                         ),
                     )
 
