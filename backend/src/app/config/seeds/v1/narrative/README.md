@@ -25,3 +25,12 @@ All narrative rows in the JSON tables in this folder include:
 ## Validation Shape
 
 Use `narrative-template-table.schema.json` to validate the common table/row structure for the three M1 narrative tables in this folder.
+
+## First-Slice Content Key Manifest
+
+- Use `first-slice-content-key-manifest.json` to drive default first-session content key selection for `tick`, `build`, `train`, `scout`, and hostile dispatch/resolve loops.
+- Default selection should use `default_first_slice_seed_usage.include_only_content_keys` and ignore `compatibility_alias_only_keys` for direct picks.
+- Legacy key variants remain documented in `legacy_alias_mapping` and should be resolved in deterministic order:
+  - `canonical_key`
+  - `legacy_keys_in_declared_order`
+- Keys listed in `deferred_post_slice_keys` are explicitly excluded from default first-slice seed usage.

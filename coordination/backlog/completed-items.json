@@ -5957,5 +5957,52 @@
     "runtime_seconds": 228.36,
     "started_at": "2026-02-26T20:55:17.502430+00:00",
     "finished_at": "2026-02-26T20:59:05.863304+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F03",
+    "title": "Enforce first-slice playable manifest in backend seed/bootstrap paths",
+    "description": "Use the first-slice playable manifest to gate backend default bootstrap payloads so runtime data always resolves one local player settlement plus one foreign hostile target fixture and excludes post-slice branches from first-session flow.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F02",
+      "RK-AUTO-BACKLOG-0004-F01"
+    ],
+    "inputs": [
+      "backend/",
+      "shared/",
+      "docs/design/first-vertical-slice.md",
+      "docs/design/vertical-slice-done-v1.md"
+    ],
+    "acceptance_criteria": [
+      "Backend bootstrap/load paths consume the playable manifest and expose only in-slice entities by default.",
+      "Map/bootstrap state guarantees one foreign settlement/profile suitable for deterministic hostile attack resolution.",
+      "Scoped backend checks fail when bootstrap payloads drift outside first-slice manifest constraints."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T20:55:12.234856+00:00",
+    "updated_at": "2026-02-27T08:19:17.584300+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/ilya-fen/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005",
+    "assigned_agent": "ilya-fen",
+    "recovered_from_stale_in_progress": true,
+    "commit_sha": "fc187a423c000f26b1a793c15721958aac08f118",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 452.97,
+    "started_at": "2026-02-27T08:11:42.098418+00:00",
+    "finished_at": "2026-02-27T08:19:15.074029+00:00"
   }
 ]

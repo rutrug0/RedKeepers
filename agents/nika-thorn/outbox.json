@@ -169,4 +169,57 @@
       }
     ]
   }
+  ,
+  {
+    "timestamp_utc": "2026-02-27T08:19:23.128224Z",
+    "agent_id": "nika-thorn",
+    "work_item_id": "RK-AUTO-BACKLOG-0005-F04",
+    "status": "done",
+    "summary": "Published a machine-readable first-slice content key manifest that whitelists canonical tick/build/train/scout/hostile loop keys, documents deterministic legacy alias mapping, and explicitly defers post-slice (including hero) templates from default first-slice seed usage.",
+    "changed_files": [
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+      "backend/src/app/config/seeds/v1/narrative/README.md",
+      "agents/nika-thorn/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Enforce first-slice narrative key whitelist in frontend event feed resolver",
+        "owner_role": "frontend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Load `first-slice-content-key-manifest.json` in client event feed key resolution so default rendering uses only canonical first-slice keys and only falls back to documented legacy aliases in deterministic order.",
+        "inputs": [
+          "client-web/app.js",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+        ],
+        "acceptance_criteria": [
+          "Default client event key selection is constrained to `default_first_slice_seed_usage.include_only_content_keys`",
+          "Legacy alias keys resolve only through `legacy_alias_mapping` with canonical-first ordering",
+          "Deferred keys in `deferred_post_slice_keys` are not directly selected in first-session UI flows"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "title": "Add backend contract test for first-slice narrative key manifest coverage",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Add a seed contract test that verifies manifest canonical keys exist in `event-feed-messages.json`, alias keys remain present for compatibility, and deferred seeded keys are excluded from default first-slice key selection logic.",
+        "inputs": [
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+          "backend/src/app/config/seeds/v1/narrative-seed-loaders.test.ts"
+        ],
+        "acceptance_criteria": [
+          "Every canonical key in `include_only_content_keys` exists in narrative event feed seeds",
+          "Every legacy key listed in `legacy_alias_mapping` exists in narrative event feed seeds",
+          "All seeded keys listed in `deferred_post_slice_keys` are absent from default first-slice key selection"
+        ],
+        "validation_commands": []
+      }
+    ]
+  }
 ]

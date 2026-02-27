@@ -79,47 +79,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0005"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0005-F03",
-    "title": "Enforce first-slice playable manifest in backend seed/bootstrap paths",
-    "description": "Use the first-slice playable manifest to gate backend default bootstrap payloads so runtime data always resolves one local player settlement plus one foreign hostile target fixture and excludes post-slice branches from first-session flow.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0005-F02",
-      "RK-AUTO-BACKLOG-0004-F01"
-    ],
-    "inputs": [
-      "backend/",
-      "shared/",
-      "docs/design/first-vertical-slice.md",
-      "docs/design/vertical-slice-done-v1.md"
-    ],
-    "acceptance_criteria": [
-      "Backend bootstrap/load paths consume the playable manifest and expose only in-slice entities by default.",
-      "Map/bootstrap state guarantees one foreign settlement/profile suitable for deterministic hostile attack resolution.",
-      "Scoped backend checks fail when bootstrap payloads drift outside first-slice manifest constraints."
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T20:55:12.234856+00:00",
-    "updated_at": "2026-02-27T08:19:15.095781+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0005",
-    "assigned_agent": "ilya-fen",
-    "recovered_from_stale_in_progress": true
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0005-F04",
     "title": "Publish first-slice content key manifest and defer post-slice templates",
     "description": "Create a machine-readable first-slice content key manifest for tick/build/train/scout/hostile loops, and explicitly defer post-slice keys so default client/backend seed usage stays inside first vertical slice scope.",
@@ -143,17 +102,18 @@
       "Alias mapping for legacy key variants is documented so frontend rendering remains deterministic."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T20:55:12.234856+00:00",
-    "updated_at": "2026-02-26T20:55:12.234856+00:00",
+    "updated_at": "2026-02-27T08:23:35.194299+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0005"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005",
+    "assigned_agent": "nika-thorn"
   },
   {
     "id": "RK-AUTO-BACKLOG-0005-F05",
@@ -268,5 +228,36 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F02"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F03-F01",
+    "title": "Align client bootstrap defaults with backend playable manifest IDs",
+    "description": "Replace hard-coded first-session settlement/hostile defaults in the client bootstrap adapter with a manifest-backed payload source so client route requests stay aligned with backend first-slice runtime scope locks.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F03"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Client first-session bootstrap reads default settlement and hostile target IDs from a manifest-backed payload source instead of hard-coded literals.",
+      "Default world map attack/scout flows continue to work without introducing post-slice entities.",
+      "Any missing/invalid bootstrap payload path fails clearly and does not silently fall back to out-of-slice IDs."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T08:19:17.801541+00:00",
+    "updated_at": "2026-02-27T08:19:17.801541+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F03"
   }
 ]
