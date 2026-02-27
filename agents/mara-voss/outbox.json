@@ -2843,5 +2843,175 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-27T12:13:58.206635+00:00",
+    "item_id": "RK-AUTO-BACKLOG-0009",
+    "status": "completed",
+    "summary": "Generated six queued M0 follow-up tasks across design/content/frontend/backend/platform plus one release-critical QA gate, focused on loop-key canonicalization and platform wrapper lane unblock.",
+    "generated_follow_up_item_ids": [
+      "RK-AUTO-BACKLOG-0009-F01",
+      "RK-AUTO-BACKLOG-0009-F02",
+      "RK-AUTO-BACKLOG-0009-F03",
+      "RK-AUTO-BACKLOG-0009-F04",
+      "RK-AUTO-BACKLOG-0009-F05",
+      "RK-AUTO-BACKLOG-0009-F06"
+    ],
+    "files": [
+      "coordination/backlog/work-items.json",
+      "agents/mara-voss/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "id": "RK-AUTO-BACKLOG-0009-F01",
+        "title": "Publish canonical loop-event namespace migration matrix for first-slice runtime keys",
+        "owner_role": "design",
+        "milestone": "M0",
+        "priority": "normal",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0008-F01"
+        ],
+        "inputs": [
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+          "docs/design/first-vertical-slice.md"
+        ],
+        "description": "Extend the first-slice token contract docs with one canonical migration matrix covering tick/build/train/scout/hostile keys, default-render keys, and compatibility-only aliases so backend/frontend/content use one source of truth.",
+        "acceptance_criteria": [
+          "Migration matrix lists canonical first-slice keys for tick/build/train/scout/hostile flows and their approved compatibility aliases",
+          "Each key is tagged as canonical-default or compatibility-only to prevent alias promotion in default rendering paths",
+          "Deferred hero/gather/ambush keys remain excluded from required first-slice canonical coverage"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0009-F02",
+        "title": "Align narrative seed rows with canonical loop-event namespace matrix",
+        "owner_role": "content",
+        "milestone": "M0",
+        "priority": "normal",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0009-F01"
+        ],
+        "inputs": [
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+          "docs/content/placeholder-narrative-seed-pack-v1.md",
+          "docs/design/first-slice-event-token-contract-matrix.md"
+        ],
+        "description": "Update first-slice narrative seed rows so canonical loop-event namespaces and required tokens stay synchronized with the migration matrix while keeping alias keys compatibility-only.",
+        "acceptance_criteria": [
+          "Canonical loop-event rows exist for tick/build/train/scout/hostile outcomes with token fields matching the migration matrix",
+          "Compatibility alias rows remain mapped to canonical keys and are not selected as default first-session keys",
+          "No out-of-scope mechanics or post-slice keys are added to default first-slice seed coverage"
+        ],
+        "validation_commands": [
+          "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0009-F03",
+        "title": "Finish frontend event-feed migration to canonical loop namespaces",
+        "owner_role": "frontend",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0009-F02",
+          "RK-AUTO-BACKLOG-0008-F04"
+        ],
+        "inputs": [
+          "client-web/app.js",
+          "client-web/first-slice-manifest-snapshot.js",
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+        ],
+        "description": "Complete client event key selection/rendering migration so tick/build/train/scout/hostile canonical keys render deterministically with compatibility alias fallback and no default alias selection.",
+        "acceptance_criteria": [
+          "Client resolves canonical loop namespace keys for tick/build/train/scout/hostile outcomes in default first-session rendering",
+          "Legacy key aliases resolve through deterministic compatibility mapping without overriding canonical defaults",
+          "Golden-path first-slice actions no longer emit missing-template fallback markers for loop-event keys"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0009-F04",
+        "title": "Extend backend contract drift validator to enforce canonical loop-event coverage",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0008-F01-F01",
+          "RK-AUTO-BACKLOG-0009-F02"
+        ],
+        "inputs": [
+          "backend/src/app/config/seeds/v1/narrative/first-slice-hostile-runtime-token-contract.json",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+        ],
+        "description": "Build on the hostile token drift validator to enforce canonical/alias constraints across loop namespace keys (tick/build/train/scout/hostile) and emit key-level mismatch diagnostics.",
+        "acceptance_criteria": [
+          "Validator fails when canonical loop namespace keys required for first-slice tick/build/train/scout/hostile coverage are missing from manifest or seed rows",
+          "Validator fails when compatibility alias keys are selected as canonical defaults in loop namespace mappings",
+          "Failure output reports per-key and per-token mismatch details to enable one-pass correction"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0009-F05",
+        "title": "Requeue platform wrapper lane sweep for Steam and Android command reproducibility",
+        "owner_role": "platform",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0008-F05"
+        ],
+        "inputs": [
+          "scripts/wrapper_steam_tauri.ps1",
+          "scripts/wrapper_android_capacitor.ps1",
+          "docs/architecture/client-cross-platform-strategy.md",
+          "docs/operations/first-slice-release-gate.md"
+        ],
+        "description": "Deliver a clean implementation pass that supersedes prior blocked wrapper artifacts by proving deterministic Steam Tauri and Android Capacitor wrapper prepare/dev/package command lanes with placeholder-only metadata.",
+        "acceptance_criteria": [
+          "Steam and Android wrapper scripts expose deterministic prepare/dev/package command paths with documented prerequisites and outputs",
+          "Platform placeholder metadata/assets manifest is present for both wrappers and explicitly marked replaceable",
+          "Release-gate documentation references the canonical wrapper commands used by platform stage validation"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0009-F06",
+        "title": "Run release-blocking slice gate with loop-key drift and wrapper evidence",
+        "owner_role": "qa",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0009-F03",
+          "RK-AUTO-BACKLOG-0009-F04",
+          "RK-AUTO-BACKLOG-0009-F05"
+        ],
+        "inputs": [
+          "tools/first_slice_release_gate_runner.py",
+          "coordination/runtime/first-slice-release-gate/",
+          "docs/design/vertical-slice-done-v1.md"
+        ],
+        "description": "Execute the first-slice release gate after loop-key migration and wrapper sweep, then publish PASS/FAIL evidence with owner-tagged blockers for any failing critical stage.",
+        "acceptance_criteria": [
+          "Gate evidence records PASS/FAIL for playable, scope, quality, platform, and release-readiness stages after the new tranche changes",
+          "Any failing critical stage includes a concrete owner-tagged blocker summary with the exact failing command or check",
+          "No additional non-critical QA-only follow-up tasks are created unless a release-blocking failure is present"
+        ],
+        "validation_commands": [
+          "python tools/first_slice_release_gate_runner.py",
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

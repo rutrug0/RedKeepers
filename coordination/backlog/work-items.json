@@ -1,37 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01-F01",
-    "title": "Normalize remaining world-map test files away from barrel and directory imports",
-    "description": "Apply explicit file `.ts` specifiers across the remaining world-map `*.test.ts` targets that still import from directories/barrels (`../application`, `../infra`, `../../heroes/infra`, `../../heroes/ports`) so direct `node --test` execution does not depend on loader-specific resolution behavior.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "At least one additional world-map API or application test target outside hostile and march-dispatch runs via `node --test --test-isolation=none` with no `ERR_UNSUPPORTED_DIR_IMPORT`.",
-      "Touched imports in targeted files use explicit local file paths with `.ts` extensions.",
-      "No assertions or gameplay logic are changed in those test files."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T11:35:34.354685+00:00",
-    "updated_at": "2026-02-27T12:09:31.613942+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0008-F01-F01",
     "title": "Add CI validation for first-slice hostile runtime token contract drift",
     "description": "Add a validator that cross-checks canonical hostile keys, required tokens, alias mappings, and deferred exclusions in `first-slice-hostile-runtime-token-contract.json` against `first-slice-content-key-manifest.json` and `event-feed-messages.json` so dispatch/arrive/resolve/post-battle payload contracts stay locked.",
@@ -68,5 +36,44 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0008-F01"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0009",
+    "title": "Generate next backlog tranche",
+    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas. Prioritize fast cycle throughput: bias toward implementation tasks (backend/frontend/design/content/platform) and add dedicated QA/regression tasks only when risk is critical or release-blocking.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-items.json",
+      "docs/design/first-vertical-slice.md",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "At least 3 new queued tasks are created or requeued",
+      "Each task has owner_role, dependencies, and acceptance criteria",
+      "Tasks reflect current project priorities and unblock progress",
+      "Generated tranche is implementation-heavy; non-critical QA/lead coordination tasks are minimized",
+      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "validating",
+    "retry_count": 0,
+    "created_at": "2026-02-27T12:09:33.713281+00:00",
+    "updated_at": "2026-02-27T12:15:38.051838+00:00",
+    "estimated_effort": "S",
+    "token_budget": 12000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "auto_generated": "backlog_refill",
+    "assigned_agent": "mara-voss"
   }
 ]

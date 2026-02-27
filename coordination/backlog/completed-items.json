@@ -7536,5 +7536,43 @@
     "runtime_seconds": 172.23,
     "started_at": "2026-02-27T12:00:31.507138+00:00",
     "finished_at": "2026-02-27T12:03:23.740416+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01-F01",
+    "title": "Normalize remaining world-map test files away from barrel and directory imports",
+    "description": "Apply explicit file `.ts` specifiers across the remaining world-map `*.test.ts` targets that still import from directories/barrels (`../application`, `../infra`, `../../heroes/infra`, `../../heroes/ports`) so direct `node --test` execution does not depend on loader-specific resolution behavior.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "At least one additional world-map API or application test target outside hostile and march-dispatch runs via `node --test --test-isolation=none` with no `ERR_UNSUPPORTED_DIR_IMPORT`.",
+      "Touched imports in targeted files use explicit local file paths with `.ts` extensions.",
+      "No assertions or gameplay logic are changed in those test files."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:35:34.354685+00:00",
+    "updated_at": "2026-02-27T12:09:33.478741+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Added outbox entry for `RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01-F01` with structured summary and validation results.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "c29d3f21cdf6dbdde5f9c75caf942ea867bd454c",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 357.94,
+    "started_at": "2026-02-27T12:03:33.641960+00:00",
+    "finished_at": "2026-02-27T12:09:31.589923+00:00"
   }
 ]
