@@ -7095,5 +7095,50 @@
     "runtime_seconds": 146.84,
     "started_at": "2026-02-27T11:18:46.004255+00:00",
     "finished_at": "2026-02-27T11:21:12.858448+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01",
+    "title": "Normalize world-map TypeScript runtime compatibility for direct Node test execution",
+    "description": "Resolve pre-existing world-map TypeScript runtime incompatibilities so the canonical targeted hostile attack test command runs without syntax/import loader failures in this repo environment.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F04-F01-ESC"
+    ],
+    "inputs": [
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+      "backend/src/modules/world_map/application/world-map-march-dispatch-service.ts",
+      "backend/src/modules/world_map/domain/",
+      "backend/src/modules/world_map/application/"
+    ],
+    "acceptance_criteria": [
+      "A canonical validation command for `world-map-hostile-attack-service.test.ts` executes without `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` and without `ERR_UNSUPPORTED_DIR_IMPORT`.",
+      "Any required import-path/syntax updates are limited to runtime compatibility and do not alter first-slice hostile gameplay behavior.",
+      "The selected command is documented in the work-item result for deterministic reuse."
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:21:14.869554+00:00",
+    "updated_at": "2026-02-27T11:26:15.984139+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Outbox updated with work item `RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01`, including the canonical validation command and a follow-up `proposed_work_items` entry.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "def5aac34e69859a47f400cce8e8294c5bc6ad97",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 293.14,
+    "started_at": "2026-02-27T11:21:20.191618+00:00",
+    "finished_at": "2026-02-27T11:26:13.339102+00:00"
   }
 ]
