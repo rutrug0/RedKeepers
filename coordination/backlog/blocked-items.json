@@ -811,43 +811,5 @@
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
     "assigned_agent": "tomas-grell"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0011-F02",
-    "title": "Seed objective-strip placeholder template rows for canonical and alias objective keys",
-    "description": "Add first-session objective template rows to narrative/content seeds so objective-strip labels are data-backed by canonical objective ids and deterministic compatibility aliases instead of hard-coded frontend fallback text.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "content",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0011-F01"
-    ],
-    "inputs": [
-      "docs/content/placeholder-narrative-seed-pack-v1.md",
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
-    ],
-    "acceptance_criteria": [
-      "Canonical objective placeholder template coverage exists for all six first-session objective ids with replaceable text",
-      "Each objective includes one compatibility alias key path for lookup-only resolution and aliases are not promoted as defaults",
-      "Objective placeholders remain strictly first-slice scope and add no out-of-scope mechanics or hero-specific copy"
-    ],
-    "validation_commands": [
-      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
-    ],
-    "status": "blocked",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:44:54.339624+00:00",
-    "updated_at": "2026-02-27T13:59:37.503182+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": "Note: `coordination/backlog/completed-items.json` and `coordination/backlog/work-items.json` were already modified in the working tree and were left untouched.",
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0011",
-    "assigned_agent": "nika-thorn"
   }
 ]

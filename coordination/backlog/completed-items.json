@@ -8592,5 +8592,80 @@
     "runtime_seconds": 103.19,
     "started_at": "2026-02-27T14:15:01.539088+00:00",
     "finished_at": "2026-02-27T14:16:44.725583+00:00"
+  },
+  {
+    "id": "RK-AUTO-STALL-0014",
+    "title": "Resolve queue dependency stall",
+    "description": "The daemon detected queued work items that are not dependency-ready due to unmet dependencies (blocked, cyclic, or otherwise unresolved). Review blocked items and dependency graph health, requeue/close obsolete items, and restore runnable work.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/blocked-items.json",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "At least one dependency-stalled queued item is made runnable or explicitly closed",
+      "Blocked/obsolete queue artifacts are documented or consolidated",
+      "Backlog no longer stalls immediately on next daemon run"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T14:29:57.267842+00:00",
+    "updated_at": "2026-02-27T14:34:00.600209+00:00",
+    "estimated_effort": "S",
+    "token_budget": 10000,
+    "result_summary": "Note: [coordination/backlog/completed-items.json](D:/RedKeepers/coordination/backlog/completed-items.json) was already modified in the working tree before this run and was left untouched.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "auto_generated": "queue_stall_recovery",
+    "stall_snapshot": [
+      {
+        "item_id": "RK-AUTO-BACKLOG-0011-F03",
+        "unmet_dependencies": [
+          "RK-AUTO-BACKLOG-0011-F02"
+        ],
+        "blocked_dependencies": [
+          "RK-AUTO-BACKLOG-0011-F02"
+        ]
+      },
+      {
+        "item_id": "RK-AUTO-BACKLOG-0011-F04",
+        "unmet_dependencies": [
+          "RK-AUTO-BACKLOG-0011-F03"
+        ],
+        "blocked_dependencies": []
+      },
+      {
+        "item_id": "RK-AUTO-BACKLOG-0011-F05",
+        "unmet_dependencies": [
+          "RK-AUTO-BACKLOG-0011-F03"
+        ],
+        "blocked_dependencies": []
+      },
+      {
+        "item_id": "RK-AUTO-BACKLOG-0011-F06",
+        "unmet_dependencies": [
+          "RK-AUTO-BACKLOG-0011-F04",
+          "RK-AUTO-BACKLOG-0011-F05"
+        ],
+        "blocked_dependencies": []
+      }
+    ],
+    "stall_fingerprint": "RK-AUTO-BACKLOG-0011-F03:unmet=RK-AUTO-BACKLOG-0011-F02:blocked=RK-AUTO-BACKLOG-0011-F02|RK-AUTO-BACKLOG-0011-F04:unmet=RK-AUTO-BACKLOG-0011-F03:blocked=|RK-AUTO-BACKLOG-0011-F05:unmet=RK-AUTO-BACKLOG-0011-F03:blocked=|RK-AUTO-BACKLOG-0011-F06:unmet=RK-AUTO-BACKLOG-0011-F04,RK-AUTO-BACKLOG-0011-F05:blocked=",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "a5a3c77ace66b551a2a7956f5046a0ee9b902ea2",
+    "resolved_by_agent": "mara-voss",
+    "resolved_by_role": "lead",
+    "runtime_seconds": 241.81,
+    "started_at": "2026-02-27T14:29:57.323765+00:00",
+    "finished_at": "2026-02-27T14:33:59.137363+00:00"
   }
 ]

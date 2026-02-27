@@ -1,382 +1,426 @@
 [
-  {
-    "timestamp_utc": "2026-02-25T15:17:40.5295958Z",
-    "agent_id": "nika-thorn",
-    "work_item_id": "RK-M1-0007",
-    "status": "done",
-    "summary": "Created an M1 placeholder naming bible and narrative seed pack with anti-derivative guardrails, civ intro copy, 12 starter settlement names, unit/building flavor labels, and 24 event feed templates keyed to v1 design IDs.",
-    "changed_files": [
-      "docs/content/naming-bible-v1.md",
-      "docs/content/placeholder-narrative-seed-pack-v1.md",
-      "agents/nika-thorn/outbox.json"
-    ],
-    "blockers": [],
-    "proposed_work_items": [
-      {
-        "title": "Wire placeholder narrative seed keys into client event feed mock state",
-        "owner_role": "frontend",
-        "milestone": "M1",
-        "priority": "medium",
-        "description": "Load a subset of `docs/content/placeholder-narrative-seed-pack-v1.md` templates into the client shell mock data so event feed rows and civ intro panels use stable content keys instead of hard-coded strings.",
-        "inputs": [
-          "client-web/app.js",
-          "docs/content/placeholder-narrative-seed-pack-v1.md"
-        ],
-        "acceptance_criteria": [
-          "Client mock state references stable `event.*` and `civ_intro.*` keys from the placeholder seed pack",
-          "At least one settlement action, unit training action, and scout/world-map action render feed text via templated string substitution",
-          "Implementation keeps placeholder text replaceable without changing UI component structure"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      },
-      {
-        "title": "Define machine-readable narrative seed format for content placeholders",
-        "owner_role": "backend",
-        "milestone": "M1",
-        "priority": "medium",
-        "description": "Create a JSON seed/schema for narrative placeholder strings (civ intros, settlement name pools, event templates) so client/backend can consume stable keys and tokenized templates without parsing markdown.",
-        "inputs": [
-          "docs/content/naming-bible-v1.md",
-          "docs/content/placeholder-narrative-seed-pack-v1.md",
-          "backend/src/app/config/seeds/"
-        ],
-        "acceptance_criteria": [
-          "Machine-readable content seed files include stable keys, scope flags, and tokenized templates for civ intros, settlement names, and event feed messages",
-          "Schema or validation notes define required fields (`key`, scope/status, related IDs/categories, template/tokens)",
-          "No first-slice mechanics are added; work is limited to data serialization and validation shape"
-        ],
-        "validation_commands": []
-      }
-    ]
-  },
-  {
-    "timestamp_utc": "2026-02-25T20:19:00Z",
-    "agent_id": "nika-thorn",
-    "work_item_id": "RK-M0-0010",
-    "status": "done",
-    "summary": "Added loop-feature namespaced placeholder copy keys for tick/build/train/scout outcomes in narrative event-feed seeds, with matching token fields, and documented the aliases in the markdown placeholder seed pack.",
-    "changed_files": [
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-      "docs/content/placeholder-narrative-seed-pack-v1.md",
-      "agents/nika-thorn/outbox.json"
-    ],
-    "blockers": [],
-    "proposed_work_items": [
-      {
-        "title": "Wire loop namespaced outcome keys into client key selection",
-        "owner_role": "frontend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Add support for `event.tick.*`, `event.build.*`, `event.train.*`, and `event.scout.*` keys in client shell/event panel lookups with fallback to existing module keys.",
-        "acceptance_criteria": [
-          "Client renders at least one `tick` outcome via a `event.tick.*` key",
-          "Client renders at least one `build`, `train`, and `scout` outcome via the new loop namespace keys",
-          "Existing module keys remain supported until full migration is complete"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      }
-    ]
-  },
-  {
-    "timestamp_utc": "2026-02-25T20:21:10.160723Z",
-    "agent_id": "nika-thorn",
-    "work_item_id": "RK-M0-0015",
-    "status": "done",
-    "summary": "Expanded first-slice placeholder event templates with additional tick/build/train/scout outcome variants, including failure-state variants aligned to existing command result payload fields.",
-    "changed_files": [
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-      "agents/nika-thorn/outbox.json"
-    ],
-    "blockers": [],
-    "proposed_work_items": [
-      {
-        "title": "Wire new loop outcome keys into event feed rendering pipeline",
-        "owner_role": "frontend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Map new `event.tick.*`, `event.build.*`, `event.train.*`, and `event.scout.*` keys to rendering tokens/strings in the client so both success and failure flow variants are visible in the event feed UI.",
-        "inputs": [
-          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-          "client-web/app.js"
-        ],
-        "acceptance_criteria": [
-          "At least one `event.tick.*` success and one failure template renders correctly in the feed",
-          "At least one `event.build.*` failure template renders with dynamic tokens for missing resources or cooldown",
-          "At least one `event.train.*` failure template renders with dynamic tokens for cooldown or invalid state",
-          "Scout outcomes remain backward-compatible with `event.scout.dispatched`, `event.scout.report_empty`, and `event.scout.report_hostile`"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      }
-    ]
-  },
-  {
-    "timestamp_utc": "2026-02-26T19:52:30.380940Z",
-    "agent_id": "nika-thorn",
-    "work_item_id": "RK-AUTO-BACKLOG-0004-F04",
-    "status": "done",
-    "summary": "Authored a hostile-loop placeholder copy pack with foreign settlement labels and 24 stable event-feed templates covering dispatch success/failure, march arrival, combat resolution, and retreat/defeat outcomes.",
-    "changed_files": [
-      "docs/content/placeholder-narrative-seed-pack-v1.md",
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-      "agents/nika-thorn/outbox.json"
-    ],
-    "blockers": [],
-    "proposed_work_items": [
-      {
-        "title": "Map hostile dispatch error codes to specific narrative content keys in client feed rendering",
-        "owner_role": "frontend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Update hostile attack UI adapters to map `source_target_not_foreign`, `max_active_marches_reached`, `path_blocked_impassable`, and `march_already_exists` to the new `event.world.hostile_dispatch_failed_*` keys instead of only using the generic failure template.",
-        "inputs": [
-          "client-web/app.js",
-          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
-        ],
-        "acceptance_criteria": [
-          "Each hostile dispatch failure error_code resolves to a deterministic content key in the `event.world.hostile_dispatch_failed_*` namespace",
-          "Event feed shows the mapped narrative copy with expected tokens per failure case",
-          "Generic `event.world.hostile_dispatch_failed` remains as fallback for unknown error codes"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      },
-      {
-        "title": "Adopt new hostile combat/retreat narrative keys in world-map hostile attack response payloads",
-        "owner_role": "backend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Extend hostile attack service/event payload selection so combat and retreat states can emit the newly seeded `event.combat.hostile_*` and `event.world.hostile_*` keys while keeping existing keys backward-compatible.",
-        "inputs": [
-          "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
-          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
-        ],
-        "acceptance_criteria": [
-          "Hostile attack resolved responses can emit at least one new `event.combat.hostile_*` key for combat outcomes",
-          "Retreat/defeat responses emit a deterministic `event.world.hostile_*` post-combat key when applicable",
-          "Existing keys (`event.world.march_started`, `event.world.march_returned`, `event.combat.placeholder_skirmish_*`) remain valid aliases during transition"
-        ],
-        "validation_commands": []
-      }
-    ]
-  },
-  {
-    "timestamp_utc": "2026-02-27T08:19:23.128224Z",
-    "agent_id": "nika-thorn",
-    "work_item_id": "RK-AUTO-BACKLOG-0005-F04",
-    "status": "done",
-    "summary": "Published a machine-readable first-slice content key manifest that whitelists canonical tick/build/train/scout/hostile loop keys, documents deterministic legacy alias mapping, and explicitly defers post-slice (including hero) templates from default first-slice seed usage.",
-    "changed_files": [
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-      "backend/src/app/config/seeds/v1/narrative/README.md",
-      "agents/nika-thorn/outbox.json"
-    ],
-    "blockers": [],
-    "proposed_work_items": [
-      {
-        "title": "Enforce first-slice narrative key whitelist in frontend event feed resolver",
-        "owner_role": "frontend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Load `first-slice-content-key-manifest.json` in client event feed key resolution so default rendering uses only canonical first-slice keys and only falls back to documented legacy aliases in deterministic order.",
-        "inputs": [
-          "client-web/app.js",
-          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
-        ],
-        "acceptance_criteria": [
-          "Default client event key selection is constrained to `default_first_slice_seed_usage.include_only_content_keys`",
-          "Legacy alias keys resolve only through `legacy_alias_mapping` with canonical-first ordering",
-          "Deferred keys in `deferred_post_slice_keys` are not directly selected in first-session UI flows"
-        ],
-        "validation_commands": [
-          "python tools/orchestrator.py status"
-        ]
-      },
-      {
-        "title": "Add backend contract test for first-slice narrative key manifest coverage",
-        "owner_role": "backend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Add a seed contract test that verifies manifest canonical keys exist in `event-feed-messages.json`, alias keys remain present for compatibility, and deferred seeded keys are excluded from default first-slice key selection logic.",
-        "inputs": [
-          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-          "backend/src/app/config/seeds/v1/narrative-seed-loaders.test.ts"
-        ],
-        "acceptance_criteria": [
-          "Every canonical key in `include_only_content_keys` exists in narrative event feed seeds",
-          "Every legacy key listed in `legacy_alias_mapping` exists in narrative event feed seeds",
-          "All seeded keys listed in `deferred_post_slice_keys` are absent from default first-slice key selection"
-        ],
-        "validation_commands": []
-      }
-    ]
-  },
-  {
-    "timestamp_utc": "2026-02-27T10:38:42.2359125Z",
-    "agent_id": "nika-thorn",
-    "work_item_id": "RK-AUTO-BACKLOG-0007-F04",
-    "status": "done",
-    "summary": "Aligned placeholder narrative templates to the first-slice token contract by synchronizing approved legacy alias templates/tokens with canonical keys, trimming ambiguous alias mappings, and regenerating manifest/template snapshot artifacts.",
-    "changed_files": [
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-narrative-template-snapshot.lock.json",
-      "docs/content/placeholder-narrative-seed-pack-v1.md",
-      "docs/design/first-slice-event-token-contract-matrix.md",
-      "client-web/app.js",
-      "client-web/first-slice-manifest-snapshot.js",
-      "agents/nika-thorn/outbox.json"
-    ],
-    "blockers": [],
-    "proposed_work_items": [
-      {
-        "title": "Align hostile attack runtime payload tokens with canonical dispatch contract",
-        "owner_role": "backend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Update hostile dispatch runtime payload token emission so canonical `event.world.hostile_dispatch_en_route` templates render from canonical token fields (`army_name`, `target_tile_label`, `eta_seconds`) without relying on legacy alias-era token shapes.",
-        "inputs": [
-          "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
-          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-          "docs/design/first-slice-event-token-contract-matrix.md"
-        ],
-        "acceptance_criteria": [
-          "Dispatch event payload includes `eta_seconds` token for `event.world.hostile_dispatch_en_route` in first-slice hostile flow",
-          "Runtime payload token names match canonical template token contract for dispatch events",
-          "Existing compatibility aliases remain optional lookup aids, not required for successful render token substitution"
-        ],
-        "validation_commands": [
-          "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
-        ]
-      }
-    ]
-  },
-  {
-    "timestamp_utc": "2026-02-27T11:48:21.991731Z",
-    "agent_id": "nika-thorn",
-    "work_item_id": "RK-AUTO-BACKLOG-0008-F03",
-    "status": "done",
-    "summary": "Validated hostile-loop placeholder narrative seed coverage against the locked hostile runtime token contract and added a snapshot-test guard that enforces canonical hostile token parity while keeping hostile aliases compatibility-only.",
-    "changed_files": [
-      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
-      "agents/nika-thorn/outbox.json"
-    ],
-    "blockers": [],
-    "proposed_work_items": []
-  },
-  {
-    "timestamp_utc": "2026-02-27T12:21:09.4259250Z",
-    "agent_id": "nika-thorn",
-    "work_item_id": "RK-AUTO-BACKLOG-0009-F02",
-    "status": "done",
-    "summary": "Validated that first-slice canonical loop-event seed rows (tick/build/train/scout/hostile) and token fields already match the migration matrix, with compatibility aliases present and excluded from default first-session canonical selection.",
-    "changed_files": [
-      "agents/nika-thorn/outbox.json"
-    ],
-    "blockers": [],
-    "proposed_work_items": [
-      {
-        "title": "Add full loop token-contract parity test for first-slice narrative matrix",
-        "owner_role": "backend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Extend seed contract coverage so tick/build/train/scout canonical token lists are validated against the first-slice matrix contract with the same strictness currently used for hostile keys.",
-        "inputs": [
-          "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
-          "docs/design/first-slice-event-token-contract-matrix.md",
-          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
-        ],
-        "acceptance_criteria": [
-          "Tick/build/train/scout canonical keys are asserted against expected required token arrays in automated tests",
-          "Compatibility alias keys remain present and explicitly excluded from default canonical selection checks",
-          "Test fails deterministically on canonical token drift for any first-slice loop key"
-        ],
-        "validation_commands": [
-          "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
-        ]
-      }
-    ]
-  },
-  {
-    "timestamp_utc": "2026-02-27T13:10:52.5402939Z",
-    "agent_id": "nika-thorn",
-    "work_item_id": "RK-AUTO-BACKLOG-0010-F02",
-    "status": "done",
-    "summary": "Added an objective-step narrative contract guard to enforce canonical success/failure placeholder coverage (including insufficient_resources, cooldown, invalid_target, and combat_loss families) and token parity against the canonical loop matrix plus hostile token contract.",
-    "changed_files": [
-      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
-      "agents/nika-thorn/outbox.json"
-    ],
-    "blockers": [],
-    "proposed_work_items": [
-      {
-        "title": "Expose first-session objective outcome key contract as machine-readable manifest data",
-        "owner_role": "backend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Add a structured objective-step outcome contract section to `first-slice-content-key-manifest.json` so objective success/failure key coverage is data-driven instead of test-local constants.",
-        "inputs": [
-          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-          "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
-          "docs/design/first-slice-event-token-contract-matrix.md"
-        ],
-        "acceptance_criteria": [
-          "Manifest includes objective-step success and negative canonical key lists for first-session loops",
-          "Negative-state family coverage includes insufficient_resources, cooldown, invalid_target, and combat_loss",
-          "Snapshot/seed contract tests read objective-step coverage from manifest instead of hard-coded test-only fixtures"
-        ],
-        "validation_commands": [
-          "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
-        ]
-      }
-    ]
-  },
-  {
-    "timestamp_utc": "2026-02-27T13:58:54.060Z",
-    "agent_id": "nika-thorn",
-    "work_item_id": "RK-AUTO-BACKLOG-0011-F02",
-    "status": "done",
-    "summary": "Seeded first-session objective-strip placeholder templates as canonical objective keys plus compatibility lookup-only aliases in narrative/content manifests, and added snapshot-test coverage for deterministic alias resolution.",
-    "changed_files": [
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-narrative-template-snapshot.lock.json",
-      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
-      "client-web/first-slice-manifest-snapshot.js",
-      "docs/content/placeholder-narrative-seed-pack-v1.md",
-      "agents/nika-thorn/outbox.json"
-    ],
-    "blockers": [],
-    "proposed_work_items": [
-      {
-        "title": "Remove hardcoded first-session objective-strip fallback labels from web client",
-        "owner_role": "frontend",
-        "milestone": "M0",
-        "priority": "medium",
-        "description": "Read objective strip label templates from the first-slice manifest snapshot data contract instead of relying on hardcoded `fallback_template` strings in `client-web/app.js`, while keeping deterministic alias lookup behavior.",
-        "inputs": [
-          "client-web/app.js",
-          "client-web/first-slice-manifest-snapshot.js",
-          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-          "backend/src/app/config/seeds/v1/narrative/first-slice-narrative-template-snapshot.lock.json"
-        ],
-        "acceptance_criteria": [
-          "Objective strip rows render from manifest-backed templates for all six `first_session.*` canonical objective IDs",
-          "Compatibility objective alias keys resolve through deterministic canonical-first lookup and remain non-default",
-          "Hardcoded objective-specific fallback copy in `client-web/app.js` is removed or reduced to a generic unknown-key fallback only"
-        ],
-        "validation_commands": [
-          "python tools/frontend_visual_smoke.py"
-        ]
-      }
-    ]
-  }
+    {
+        "timestamp_utc":  "2026-02-25T15:17:40.5295958Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-M1-0007",
+        "status":  "done",
+        "summary":  "Created an M1 placeholder naming bible and narrative seed pack with anti-derivative guardrails, civ intro copy, 12 starter settlement names, unit/building flavor labels, and 24 event feed templates keyed to v1 design IDs.",
+        "changed_files":  [
+                              "docs/content/naming-bible-v1.md",
+                              "docs/content/placeholder-narrative-seed-pack-v1.md",
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Wire placeholder narrative seed keys into client event feed mock state",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M1",
+                                        "priority":  "medium",
+                                        "description":  "Load a subset of `docs/content/placeholder-narrative-seed-pack-v1.md` templates into the client shell mock data so event feed rows and civ intro panels use stable content keys instead of hard-coded strings.",
+                                        "inputs":  [
+                                                       "client-web/app.js",
+                                                       "docs/content/placeholder-narrative-seed-pack-v1.md"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Client mock state references stable `event.*` and `civ_intro.*` keys from the placeholder seed pack",
+                                                                    "At least one settlement action, unit training action, and scout/world-map action render feed text via templated string substitution",
+                                                                    "Implementation keeps placeholder text replaceable without changing UI component structure"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    },
+                                    {
+                                        "title":  "Define machine-readable narrative seed format for content placeholders",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M1",
+                                        "priority":  "medium",
+                                        "description":  "Create a JSON seed/schema for narrative placeholder strings (civ intros, settlement name pools, event templates) so client/backend can consume stable keys and tokenized templates without parsing markdown.",
+                                        "inputs":  [
+                                                       "docs/content/naming-bible-v1.md",
+                                                       "docs/content/placeholder-narrative-seed-pack-v1.md",
+                                                       "backend/src/app/config/seeds/"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Machine-readable content seed files include stable keys, scope flags, and tokenized templates for civ intros, settlement names, and event feed messages",
+                                                                    "Schema or validation notes define required fields (`key`, scope/status, related IDs/categories, template/tokens)",
+                                                                    "No first-slice mechanics are added; work is limited to data serialization and validation shape"
+                                                                ],
+                                        "validation_commands":  [
+
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-25T20:19:00Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-M0-0010",
+        "status":  "done",
+        "summary":  "Added loop-feature namespaced placeholder copy keys for tick/build/train/scout outcomes in narrative event-feed seeds, with matching token fields, and documented the aliases in the markdown placeholder seed pack.",
+        "changed_files":  [
+                              "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+                              "docs/content/placeholder-narrative-seed-pack-v1.md",
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Wire loop namespaced outcome keys into client key selection",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Add support for `event.tick.*`, `event.build.*`, `event.train.*`, and `event.scout.*` keys in client shell/event panel lookups with fallback to existing module keys.",
+                                        "acceptance_criteria":  [
+                                                                    "Client renders at least one `tick` outcome via a `event.tick.*` key",
+                                                                    "Client renders at least one `build`, `train`, and `scout` outcome via the new loop namespace keys",
+                                                                    "Existing module keys remain supported until full migration is complete"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-25T20:21:10.160723Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-M0-0015",
+        "status":  "done",
+        "summary":  "Expanded first-slice placeholder event templates with additional tick/build/train/scout outcome variants, including failure-state variants aligned to existing command result payload fields.",
+        "changed_files":  [
+                              "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Wire new loop outcome keys into event feed rendering pipeline",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Map new `event.tick.*`, `event.build.*`, `event.train.*`, and `event.scout.*` keys to rendering tokens/strings in the client so both success and failure flow variants are visible in the event feed UI.",
+                                        "inputs":  [
+                                                       "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+                                                       "client-web/app.js"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "At least one `event.tick.*` success and one failure template renders correctly in the feed",
+                                                                    "At least one `event.build.*` failure template renders with dynamic tokens for missing resources or cooldown",
+                                                                    "At least one `event.train.*` failure template renders with dynamic tokens for cooldown or invalid state",
+                                                                    "Scout outcomes remain backward-compatible with `event.scout.dispatched`, `event.scout.report_empty`, and `event.scout.report_hostile`"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-26T19:52:30.380940Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-AUTO-BACKLOG-0004-F04",
+        "status":  "done",
+        "summary":  "Authored a hostile-loop placeholder copy pack with foreign settlement labels and 24 stable event-feed templates covering dispatch success/failure, march arrival, combat resolution, and retreat/defeat outcomes.",
+        "changed_files":  [
+                              "docs/content/placeholder-narrative-seed-pack-v1.md",
+                              "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Map hostile dispatch error codes to specific narrative content keys in client feed rendering",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Update hostile attack UI adapters to map `source_target_not_foreign`, `max_active_marches_reached`, `path_blocked_impassable`, and `march_already_exists` to the new `event.world.hostile_dispatch_failed_*` keys instead of only using the generic failure template.",
+                                        "inputs":  [
+                                                       "client-web/app.js",
+                                                       "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Each hostile dispatch failure error_code resolves to a deterministic content key in the `event.world.hostile_dispatch_failed_*` namespace",
+                                                                    "Event feed shows the mapped narrative copy with expected tokens per failure case",
+                                                                    "Generic `event.world.hostile_dispatch_failed` remains as fallback for unknown error codes"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    },
+                                    {
+                                        "title":  "Adopt new hostile combat/retreat narrative keys in world-map hostile attack response payloads",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Extend hostile attack service/event payload selection so combat and retreat states can emit the newly seeded `event.combat.hostile_*` and `event.world.hostile_*` keys while keeping existing keys backward-compatible.",
+                                        "inputs":  [
+                                                       "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+                                                       "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Hostile attack resolved responses can emit at least one new `event.combat.hostile_*` key for combat outcomes",
+                                                                    "Retreat/defeat responses emit a deterministic `event.world.hostile_*` post-combat key when applicable",
+                                                                    "Existing keys (`event.world.march_started`, `event.world.march_returned`, `event.combat.placeholder_skirmish_*`) remain valid aliases during transition"
+                                                                ],
+                                        "validation_commands":  [
+
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-27T08:19:23.128224Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-AUTO-BACKLOG-0005-F04",
+        "status":  "done",
+        "summary":  "Published a machine-readable first-slice content key manifest that whitelists canonical tick/build/train/scout/hostile loop keys, documents deterministic legacy alias mapping, and explicitly defers post-slice (including hero) templates from default first-slice seed usage.",
+        "changed_files":  [
+                              "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+                              "backend/src/app/config/seeds/v1/narrative/README.md",
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Enforce first-slice narrative key whitelist in frontend event feed resolver",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Load `first-slice-content-key-manifest.json` in client event feed key resolution so default rendering uses only canonical first-slice keys and only falls back to documented legacy aliases in deterministic order.",
+                                        "inputs":  [
+                                                       "client-web/app.js",
+                                                       "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Default client event key selection is constrained to `default_first_slice_seed_usage.include_only_content_keys`",
+                                                                    "Legacy alias keys resolve only through `legacy_alias_mapping` with canonical-first ordering",
+                                                                    "Deferred keys in `deferred_post_slice_keys` are not directly selected in first-session UI flows"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    },
+                                    {
+                                        "title":  "Add backend contract test for first-slice narrative key manifest coverage",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Add a seed contract test that verifies manifest canonical keys exist in `event-feed-messages.json`, alias keys remain present for compatibility, and deferred seeded keys are excluded from default first-slice key selection logic.",
+                                        "inputs":  [
+                                                       "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+                                                       "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+                                                       "backend/src/app/config/seeds/v1/narrative-seed-loaders.test.ts"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Every canonical key in `include_only_content_keys` exists in narrative event feed seeds",
+                                                                    "Every legacy key listed in `legacy_alias_mapping` exists in narrative event feed seeds",
+                                                                    "All seeded keys listed in `deferred_post_slice_keys` are absent from default first-slice key selection"
+                                                                ],
+                                        "validation_commands":  [
+
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-27T10:38:42.2359125Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-AUTO-BACKLOG-0007-F04",
+        "status":  "done",
+        "summary":  "Aligned placeholder narrative templates to the first-slice token contract by synchronizing approved legacy alias templates/tokens with canonical keys, trimming ambiguous alias mappings, and regenerating manifest/template snapshot artifacts.",
+        "changed_files":  [
+                              "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+                              "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+                              "backend/src/app/config/seeds/v1/narrative/first-slice-narrative-template-snapshot.lock.json",
+                              "docs/content/placeholder-narrative-seed-pack-v1.md",
+                              "docs/design/first-slice-event-token-contract-matrix.md",
+                              "client-web/app.js",
+                              "client-web/first-slice-manifest-snapshot.js",
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Align hostile attack runtime payload tokens with canonical dispatch contract",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Update hostile dispatch runtime payload token emission so canonical `event.world.hostile_dispatch_en_route` templates render from canonical token fields (`army_name`, `target_tile_label`, `eta_seconds`) without relying on legacy alias-era token shapes.",
+                                        "inputs":  [
+                                                       "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+                                                       "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+                                                       "docs/design/first-slice-event-token-contract-matrix.md"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Dispatch event payload includes `eta_seconds` token for `event.world.hostile_dispatch_en_route` in first-slice hostile flow",
+                                                                    "Runtime payload token names match canonical template token contract for dispatch events",
+                                                                    "Existing compatibility aliases remain optional lookup aids, not required for successful render token substitution"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-27T11:48:21.991731Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-AUTO-BACKLOG-0008-F03",
+        "status":  "done",
+        "summary":  "Validated hostile-loop placeholder narrative seed coverage against the locked hostile runtime token contract and added a snapshot-test guard that enforces canonical hostile token parity while keeping hostile aliases compatibility-only.",
+        "changed_files":  [
+                              "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-27T12:21:09.4259250Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-AUTO-BACKLOG-0009-F02",
+        "status":  "done",
+        "summary":  "Validated that first-slice canonical loop-event seed rows (tick/build/train/scout/hostile) and token fields already match the migration matrix, with compatibility aliases present and excluded from default first-session canonical selection.",
+        "changed_files":  [
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Add full loop token-contract parity test for first-slice narrative matrix",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Extend seed contract coverage so tick/build/train/scout canonical token lists are validated against the first-slice matrix contract with the same strictness currently used for hostile keys.",
+                                        "inputs":  [
+                                                       "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+                                                       "docs/design/first-slice-event-token-contract-matrix.md",
+                                                       "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+                                                       "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Tick/build/train/scout canonical keys are asserted against expected required token arrays in automated tests",
+                                                                    "Compatibility alias keys remain present and explicitly excluded from default canonical selection checks",
+                                                                    "Test fails deterministically on canonical token drift for any first-slice loop key"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-27T13:10:52.5402939Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-AUTO-BACKLOG-0010-F02",
+        "status":  "done",
+        "summary":  "Added an objective-step narrative contract guard to enforce canonical success/failure placeholder coverage (including insufficient_resources, cooldown, invalid_target, and combat_loss families) and token parity against the canonical loop matrix plus hostile token contract.",
+        "changed_files":  [
+                              "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Expose first-session objective outcome key contract as machine-readable manifest data",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Add a structured objective-step outcome contract section to `first-slice-content-key-manifest.json` so objective success/failure key coverage is data-driven instead of test-local constants.",
+                                        "inputs":  [
+                                                       "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+                                                       "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+                                                       "docs/design/first-slice-event-token-contract-matrix.md"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Manifest includes objective-step success and negative canonical key lists for first-session loops",
+                                                                    "Negative-state family coverage includes insufficient_resources, cooldown, invalid_target, and combat_loss",
+                                                                    "Snapshot/seed contract tests read objective-step coverage from manifest instead of hard-coded test-only fixtures"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-27T13:58:54.060Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-AUTO-BACKLOG-0011-F02",
+        "status":  "done",
+        "summary":  "Seeded first-session objective-strip placeholder templates as canonical objective keys plus compatibility lookup-only aliases in narrative/content manifests, and added snapshot-test coverage for deterministic alias resolution.",
+        "changed_files":  [
+                              "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+                              "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+                              "backend/src/app/config/seeds/v1/narrative/first-slice-narrative-template-snapshot.lock.json",
+                              "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+                              "client-web/first-slice-manifest-snapshot.js",
+                              "docs/content/placeholder-narrative-seed-pack-v1.md",
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Remove hardcoded first-session objective-strip fallback labels from web client",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Read objective strip label templates from the first-slice manifest snapshot data contract instead of relying on hardcoded `fallback_template` strings in `client-web/app.js`, while keeping deterministic alias lookup behavior.",
+                                        "inputs":  [
+                                                       "client-web/app.js",
+                                                       "client-web/first-slice-manifest-snapshot.js",
+                                                       "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+                                                       "backend/src/app/config/seeds/v1/narrative/first-slice-narrative-template-snapshot.lock.json"
+                                                   ],
+                                        "acceptance_criteria":  [
+                                                                    "Objective strip rows render from manifest-backed templates for all six `first_session.*` canonical objective IDs",
+                                                                    "Compatibility objective alias keys resolve through deterministic canonical-first lookup and remain non-default",
+                                                                    "Hardcoded objective-specific fallback copy in `client-web/app.js` is removed or reduced to a generic unknown-key fallback only"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/frontend_visual_smoke.py"
+                                                                ]
+                                    }
+                                ]
+    },
+    {
+        "timestamp_utc":  "2026-02-27T14:49:20.2758904Z",
+        "agent_id":  "nika-thorn",
+        "work_item_id":  "RK-AUTO-BACKLOG-0011-F02",
+        "status":  "done",
+        "summary":  "Verified first-session objective-strip canonical and compatibility alias placeholder seed coverage is present and passes snapshot contract validation without further content changes.",
+        "changed_files":  [
+                              "agents/nika-thorn/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "proposed_work_items":  [
+
+                                ]
+    }
 ]

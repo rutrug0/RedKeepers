@@ -156,72 +156,43 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0011"
   },
   {
-    "id": "RK-AUTO-STALL-0014",
-    "title": "Resolve queue dependency stall",
-    "description": "The daemon detected queued work items that are not dependency-ready due to unmet dependencies (blocked, cyclic, or otherwise unresolved). Review blocked items and dependency graph health, requeue/close obsolete items, and restore runnable work.",
+    "id": "RK-AUTO-BACKLOG-0011-F02",
+    "title": "Seed objective-strip placeholder template rows for canonical and alias objective keys",
+    "description": "Add first-session objective template rows to narrative/content seeds so objective-strip labels are data-backed by canonical objective ids and deterministic compatibility aliases instead of hard-coded frontend fallback text.",
     "milestone": "M0",
-    "type": "qa",
-    "priority": "high",
-    "owner_role": "lead",
-    "preferred_agent": "mara-voss",
-    "dependencies": [],
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0011-F01"
+    ],
     "inputs": [
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/blocked-items.json",
-      "coordination/runtime/run-history.jsonl"
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
     ],
     "acceptance_criteria": [
-      "At least one dependency-stalled queued item is made runnable or explicitly closed",
-      "Blocked/obsolete queue artifacts are documented or consolidated",
-      "Backlog no longer stalls immediately on next daemon run"
+      "Canonical objective placeholder template coverage exists for all six first-session objective ids with replaceable text",
+      "Each objective includes one compatibility alias key path for lookup-only resolution and aliases are not promoted as defaults",
+      "Objective placeholders remain strictly first-slice scope and add no out-of-scope mechanics or hero-specific copy"
     ],
     "validation_commands": [
-      "python tools/orchestrator.py status"
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
     ],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-27T14:29:57.267842+00:00",
-    "updated_at": "2026-02-27T14:33:59.168547+00:00",
+    "created_at": "2026-02-27T13:44:54.339624+00:00",
+    "updated_at": "2026-02-27T14:49:33.395568+00:00",
     "estimated_effort": "S",
-    "token_budget": 10000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "queue_stall_recovery",
-    "stall_snapshot": [
-      {
-        "item_id": "RK-AUTO-BACKLOG-0011-F03",
-        "unmet_dependencies": [
-          "RK-AUTO-BACKLOG-0011-F02"
-        ],
-        "blocked_dependencies": [
-          "RK-AUTO-BACKLOG-0011-F02"
-        ]
-      },
-      {
-        "item_id": "RK-AUTO-BACKLOG-0011-F04",
-        "unmet_dependencies": [
-          "RK-AUTO-BACKLOG-0011-F03"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-AUTO-BACKLOG-0011-F05",
-        "unmet_dependencies": [
-          "RK-AUTO-BACKLOG-0011-F03"
-        ],
-        "blocked_dependencies": []
-      },
-      {
-        "item_id": "RK-AUTO-BACKLOG-0011-F06",
-        "unmet_dependencies": [
-          "RK-AUTO-BACKLOG-0011-F04",
-          "RK-AUTO-BACKLOG-0011-F05"
-        ],
-        "blocked_dependencies": []
-      }
-    ],
-    "stall_fingerprint": "RK-AUTO-BACKLOG-0011-F03:unmet=RK-AUTO-BACKLOG-0011-F02:blocked=RK-AUTO-BACKLOG-0011-F02|RK-AUTO-BACKLOG-0011-F04:unmet=RK-AUTO-BACKLOG-0011-F03:blocked=|RK-AUTO-BACKLOG-0011-F05:unmet=RK-AUTO-BACKLOG-0011-F03:blocked=|RK-AUTO-BACKLOG-0011-F06:unmet=RK-AUTO-BACKLOG-0011-F04,RK-AUTO-BACKLOG-0011-F05:blocked=",
-    "assigned_agent": "mara-voss"
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0011",
+    "assigned_agent": "nika-thorn",
+    "last_unblocked_reason": "manual dependency recovery: non-actionable blocker requeued to clear queue stall",
+    "last_blocker_reason": "Note: `coordination/backlog/completed-items.json` and `coordination/backlog/work-items.json` were already modified in the working tree and were left untouched."
   }
 ]
