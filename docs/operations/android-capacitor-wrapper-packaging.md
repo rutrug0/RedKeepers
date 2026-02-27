@@ -29,7 +29,7 @@ cd ..
 Canonical reproducible script entry point (web artifact -> Android debug package):
 
 ```powershell
-scripts/wrapper_android_capacitor.ps1 -Mode package-debug -CleanWeb
+scripts/wrapper_android_capacitor.ps1 -Mode package -CleanWeb
 ```
 
 Canonical reproducible script entry point (web artifact -> Android release package):
@@ -55,6 +55,7 @@ python tools/android_capacitor_wrapper.py dev --clean-web
 Compatibility aliases:
 
 ```powershell
+scripts/wrapper_android_capacitor.ps1 -Mode package-debug -CleanWeb
 scripts/wrapper_android_capacitor.ps1 -Mode build-debug -CleanWeb
 scripts/wrapper_android_capacitor.ps1 -Mode build-release -CleanWeb
 ```

@@ -49,7 +49,7 @@ This repository is bootstrapped with the M0 orchestration foundation:
 ## Android Capacitor Wrapper Packaging (M0)
 
 - Standardized script entry point (recommended debug package):
-  - `scripts/wrapper_android_capacitor.ps1 -Mode package-debug -CleanWeb`
+  - `scripts/wrapper_android_capacitor.ps1 -Mode package -CleanWeb`
 - Standardized script entry point (recommended release package):
   - `scripts/wrapper_android_capacitor.ps1 -Mode package-release -CleanWeb`
 - Standardized dev entry point:

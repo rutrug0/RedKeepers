@@ -1,5 +1,5 @@
 param(
-  [ValidateSet("prepare", "sync", "dev", "package-debug", "package-release", "build-debug", "build-release")]
+  [ValidateSet("prepare", "sync", "dev", "package", "package-debug", "package-release", "build-debug", "build-release")]
   [string]$Mode = "prepare",
   [switch]$SkipSync,
   [switch]$SkipPrepare,
@@ -14,6 +14,7 @@ $repoRoot = Resolve-Path (Join-Path $scriptRoot "..")
 $wrapperToolPath = Join-Path $repoRoot "tools/android_capacitor_wrapper.py"
 
 $resolvedMode = switch ($Mode) {
+  "package" { "build-debug" }
   "package-debug" { "build-debug" }
   "package-release" { "build-release" }
   default { $Mode }
