@@ -1,46 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0011-F06",
-    "title": "Run release-blocking gate after objective-contract snapshot integration",
-    "description": "Execute the release gate after objective-contract snapshot and release-readiness artifact changes, publish PASS/FAIL evidence, and disposition the stale blocked release-gate artifact with explicit rationale.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0011-F04",
-      "RK-AUTO-BACKLOG-0011-F05"
-    ],
-    "inputs": [
-      "tools/first_slice_release_gate_runner.py",
-      "coordination/runtime/first-slice-release-gate/",
-      "docs/design/vertical-slice-done-v1.md",
-      "coordination/backlog/blocked-items.json"
-    ],
-    "acceptance_criteria": [
-      "Release-gate evidence records PASS/FAIL for mandatory stages and includes release-readiness checklist + known-issues artifact links",
-      "Blocked item `RK-AUTO-BACKLOG-0010-F06` is explicitly dispositioned as completed or superseded with a concrete rationale",
-      "Any failing mandatory stage produces owner_role-tagged blocker notes with exact failing command/output path"
-    ],
-    "validation_commands": [
-      "python tools/first_slice_release_gate_runner.py",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:44:54.339624+00:00",
-    "updated_at": "2026-02-27T15:12:00.945644+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0011",
-    "assigned_agent": "tomas-grell"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0012",
     "title": "Generate next backlog tranche",
     "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas. Prioritize fast cycle throughput: bias toward implementation tasks (backend/frontend/design/content/platform) and add dedicated QA/regression tasks only when risk is critical or release-blocking.",
@@ -67,15 +26,16 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T15:07:25.350323+00:00",
-    "updated_at": "2026-02-27T15:07:25.350323+00:00",
+    "updated_at": "2026-02-27T15:16:11.289934+00:00",
     "estimated_effort": "S",
     "token_budget": 12000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "backlog_refill"
+    "auto_generated": "backlog_refill",
+    "assigned_agent": "mara-voss"
   }
 ]

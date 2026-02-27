@@ -3409,5 +3409,178 @@
       "agents/mara-voss/outbox.json"
     ],
     "proposed_work_items": []
+  },
+  {
+    "ts": "2026-02-27T15:22:00Z",
+    "item_id": "RK-AUTO-BACKLOG-0012",
+    "status": "completed",
+    "summary": "Generated six queued M0 follow-up tasks focused on transport-backed first-session implementation across design/backend/content/frontend/platform, with one release-critical QA gate.",
+    "generated_follow_up_item_ids": [
+      "RK-AUTO-BACKLOG-0012-F01",
+      "RK-AUTO-BACKLOG-0012-F02",
+      "RK-AUTO-BACKLOG-0012-F03",
+      "RK-AUTO-BACKLOG-0012-F04",
+      "RK-AUTO-BACKLOG-0012-F05",
+      "RK-AUTO-BACKLOG-0012-F06"
+    ],
+    "files": [
+      "coordination/backlog/work-items.json",
+      "agents/mara-voss/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "id": "RK-AUTO-BACKLOG-0012-F01",
+        "title": "Lock first-session live transport action contract matrix",
+        "owner_role": "design",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [],
+        "inputs": [
+          "docs/design/first-vertical-slice.md",
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
+          "client-web/app.js"
+        ],
+        "description": "Define one implementation-ready contract table for first-session tick/build/train/scout/attack actions so backend HTTP host, frontend adapter wiring, and content templates share the same required request/response fields and canonical event keys.",
+        "acceptance_criteria": [
+          "Matrix documents canonical first-session actions in strict tick/build/train/scout/attack order with required request fields, success/failure statuses, and event-key mapping",
+          "Contract references existing first-slice route templates and keeps failure families scoped to insufficient_resources, cooldown, unavailable_tile, invalid_state, and deterministic hostile dispatch failures",
+          "Any mechanics outside first vertical slice (heroes/alliances/advanced PvP branches) are explicitly marked deferred and excluded from default contract rows"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0012-F02",
+        "title": "Expose deterministic first-slice settlement loop as local HTTP host",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0012-F01"
+        ],
+        "inputs": [
+          "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
+          "backend/src/modules/economy/api/settlement-tick-endpoint.ts",
+          "backend/src/modules/buildings/api/settlement-building-upgrade-endpoint.ts",
+          "backend/src/modules/units/api/settlement-unit-train-endpoint.ts",
+          "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.ts",
+          "backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.ts"
+        ],
+        "description": "Implement a lightweight backend host that serves the existing deterministic settlement loop transport routes over HTTP so client-web fetch mode can run the full first-session loop without custom browser injection.",
+        "acceptance_criteria": [
+          "A deterministic local HTTP host command is available and serves first-slice routes for tick, build upgrade, unit train, scout tile interact, hostile settlement attack, and march snapshot",
+          "HTTP responses preserve existing contract behavior (status + body) from local transport handlers, including deterministic failure code mapping",
+          "At least one targeted transport smoke check covers end-to-end HTTP invocation for one settlement action and one hostile map action"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0012-F03",
+        "title": "Backfill first-session narrative templates for transport-failure and cooldown paths",
+        "owner_role": "content",
+        "milestone": "M0",
+        "priority": "normal",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0012-F01"
+        ],
+        "inputs": [
+          "docs/content/placeholder-narrative-seed-pack-v1.md",
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+          "client-web/app.js"
+        ],
+        "description": "Expand first-slice narrative seed rows so transport-backed settlement and world-map actions have canonical placeholder templates for both success and deterministic failure states without relying on client hard-coded fallback text.",
+        "acceptance_criteria": [
+          "Canonical placeholder templates cover first-session action outcomes for success plus failure cases triggered in transport mode (insufficient_resources, cooldown, unavailable_tile, invalid_state, hostile dispatch failure)",
+          "Template token fields align with the first-session transport contract matrix and remain deterministic for frontend substitution",
+          "Content stays first-slice scoped and does not introduce post-slice hero/alliance or expanded PvP narrative branches"
+        ],
+        "validation_commands": [
+          "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0012-F04",
+        "title": "Default client shell to transport-backed first-session state with deterministic fallback",
+        "owner_role": "frontend",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0012-F02",
+          "RK-AUTO-BACKLOG-0012-F03"
+        ],
+        "inputs": [
+          "client-web/app.js",
+          "client-web/index.html",
+          "client-web/first-slice-bootstrap-payload.js",
+          "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts"
+        ],
+        "description": "Refactor client shell bootstrap so default populated mode is driven by transport-backed runtime actions/state, while preserving a deterministic offline fallback state when transport is unavailable.",
+        "acceptance_criteria": [
+          "Default first-session path renders settlement/map/feed from transport-backed runtime data without requiring manual mock-state toggles",
+          "When transport is unreachable, UI switches to one deterministic non-crashing fallback mode that surfaces a clear placeholder warning and keeps core controls responsive",
+          "Tick/build/train/scout/attack actions continue to map contract responses to canonical first-slice content keys and objective progression remains intact"
+        ],
+        "validation_commands": [
+          "python tools/rk_m0_0011_first_slice_loop_smoke.py"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0012-F05",
+        "title": "Add one-command local first-slice runtime launcher for backend + web shell",
+        "owner_role": "platform",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0012-F02",
+          "RK-AUTO-BACKLOG-0012-F04"
+        ],
+        "inputs": [
+          "launch-local-game.bat",
+          "scripts/",
+          "tools/",
+          "docs/operations/first-slice-release-gate.md"
+        ],
+        "description": "Create a reproducible launcher that starts the first-slice backend transport host and client-web shell together for local iteration and release-candidate prep without manual multi-terminal setup.",
+        "acceptance_criteria": [
+          "A single documented command starts backend transport host and client shell with deterministic defaults for first-session settlement/world identifiers",
+          "Launcher emits clear process URLs/status and exits non-zero when either lane fails to start",
+          "Runtime launch docs stay placeholder-art compliant and avoid adding post-slice packaging or production infrastructure scope"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0012-F06",
+        "title": "Run release-blocking gate for transport-backed first-slice candidate",
+        "owner_role": "qa",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0012-F05"
+        ],
+        "inputs": [
+          "tools/first_slice_release_gate_runner.py",
+          "coordination/runtime/first-slice-release-gate/",
+          "docs/design/vertical-slice-done-v1.md",
+          "docs/operations/first-slice-release-gate.md"
+        ],
+        "description": "Execute the first-slice release gate after transport-host/backend-client runtime integration, publish updated evidence artifacts, and record owner-tagged blockers if any mandatory gate fails.",
+        "acceptance_criteria": [
+          "Release-gate evidence is regenerated for the transport-backed candidate and includes playable, scope, quality, platform, and release-readiness outcomes",
+          "Any failing mandatory gate includes exact failing command, artifact path, and explicit owner_role blocker assignment",
+          "No additional non-critical QA-only follow-up tasks are created unless a release-blocking failure is observed"
+        ],
+        "validation_commands": [
+          "python tools/first_slice_release_gate_runner.py",
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

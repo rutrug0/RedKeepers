@@ -8850,5 +8850,52 @@
     "runtime_seconds": 417.92,
     "started_at": "2026-02-27T15:00:25.618318+00:00",
     "finished_at": "2026-02-27T15:07:23.532973+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0011-F06",
+    "title": "Run release-blocking gate after objective-contract snapshot integration",
+    "description": "Execute the release gate after objective-contract snapshot and release-readiness artifact changes, publish PASS/FAIL evidence, and disposition the stale blocked release-gate artifact with explicit rationale.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0011-F04",
+      "RK-AUTO-BACKLOG-0011-F05"
+    ],
+    "inputs": [
+      "tools/first_slice_release_gate_runner.py",
+      "coordination/runtime/first-slice-release-gate/",
+      "docs/design/vertical-slice-done-v1.md",
+      "coordination/backlog/blocked-items.json"
+    ],
+    "acceptance_criteria": [
+      "Release-gate evidence records PASS/FAIL for mandatory stages and includes release-readiness checklist + known-issues artifact links",
+      "Blocked item `RK-AUTO-BACKLOG-0010-F06` is explicitly dispositioned as completed or superseded with a concrete rationale",
+      "Any failing mandatory stage produces owner_role-tagged blocker notes with exact failing command/output path"
+    ],
+    "validation_commands": [
+      "python tools/first_slice_release_gate_runner.py",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:44:54.339624+00:00",
+    "updated_at": "2026-02-27T15:12:05.380839+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Note: `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` were already daemon-managed/dirty in this workspace and were not edited for this item.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0011",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "f0fbea0563ad62e8c5d5ad42beffaec3462a85ba",
+    "resolved_by_agent": "tomas-grell",
+    "resolved_by_role": "qa",
+    "runtime_seconds": 270.25,
+    "started_at": "2026-02-27T15:07:30.678812+00:00",
+    "finished_at": "2026-02-27T15:12:00.931469+00:00"
   }
 ]
