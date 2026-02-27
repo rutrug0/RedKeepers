@@ -69,11 +69,16 @@ type FirstSliceNegativeStateFamilyV1 =
   | "combat_loss";
 
 interface FirstSliceObjectiveStepOutcomeContractRowV1 {
-  readonly objective_id: string;
+  readonly canonical_objective_key: string;
   readonly loop_step: FirstSliceObjectiveLoopStepKeyV1;
-  readonly success_canonical_keys: readonly string[];
-  readonly negative_canonical_keys: readonly string[];
-  readonly required_negative_state_families: readonly FirstSliceNegativeStateFamilyV1[];
+  readonly required_all_canonical_keys: readonly string[];
+  readonly required_any_canonical_keys?: readonly string[];
+  readonly compatibility_alias_lookup_keys: Readonly<Record<string, readonly string[]>>;
+}
+
+interface FirstSliceObjectiveNegativeStateDiagnosticRowV1 {
+  readonly negative_state_family: FirstSliceNegativeStateFamilyV1;
+  readonly preserved_canonical_default_keys: readonly string[];
 }
 
 interface FirstSliceObjectiveCanonicalTokenContractRowV1 {
@@ -89,6 +94,7 @@ export interface FirstSliceContentKeyManifestV1 {
   readonly default_first_slice_seed_usage: FirstSliceDefaultSeedUsageV1;
   readonly loop_required_keys: FirstSliceLoopRequiredKeysV1;
   readonly objective_step_outcome_contract: readonly FirstSliceObjectiveStepOutcomeContractRowV1[];
+  readonly objective_negative_state_diagnostics: readonly FirstSliceObjectiveNegativeStateDiagnosticRowV1[];
   readonly compatibility_alias_only_keys: readonly string[];
   readonly legacy_alias_mapping: readonly FirstSliceLegacyAliasMappingRowV1[];
   readonly alias_lookup_contract: FirstSliceAliasLookupContractV1;
@@ -126,12 +132,20 @@ const FIRST_SLICE_OBJECTIVE_CANONICAL_TOKEN_CONTRACT_V1: readonly FirstSliceObje
     ],
   },
   {
+    canonical_key: "event.build.failure_cooldown",
+    required_tokens: ["building_id", "cooldown_ends_at"],
+  },
+  {
     canonical_key: "event.train.started",
     required_tokens: ["settlement_name", "quantity", "unit_label"],
   },
   {
     canonical_key: "event.train.completed",
     required_tokens: ["settlement_name", "quantity", "unit_label"],
+  },
+  {
+    canonical_key: "event.train.failure_insufficient_resources",
+    required_tokens: ["unit_id", "missing_resources_by_id", "required_cost_by_id"],
   },
   {
     canonical_key: "event.train.failure_cooldown",
@@ -176,6 +190,10 @@ const FIRST_SLICE_OBJECTIVE_CANONICAL_TOKEN_CONTRACT_V1: readonly FirstSliceObje
   {
     canonical_key: "event.combat.hostile_resolve_defender_win",
     required_tokens: ["army_name", "target_tile_label"],
+  },
+  {
+    canonical_key: "event.combat.hostile_resolve_tie_defender_holds",
+    required_tokens: ["target_tile_label"],
   },
   {
     canonical_key: "event.combat.hostile_loss_report",
@@ -421,6 +439,7 @@ export const createFirstSliceNarrativeTemplateSnapshotV1 = (input: {
   readonly narrative_seed_bundle: LoadNarrativeSeedBundleV1;
   readonly first_slice_content_key_manifest: FirstSliceContentKeyManifestV1;
   readonly objective_step_outcome_contract?: readonly FirstSliceObjectiveStepOutcomeContractRowV1[];
+  readonly objective_negative_state_diagnostics?: readonly FirstSliceObjectiveNegativeStateDiagnosticRowV1[];
   readonly objective_canonical_token_contract?: readonly FirstSliceObjectiveCanonicalTokenContractRowV1[];
 }): FirstSliceNarrativeTemplateSnapshotV1 => {
   const manifest = input.first_slice_content_key_manifest;
@@ -428,6 +447,8 @@ export const createFirstSliceNarrativeTemplateSnapshotV1 = (input: {
   const rowsByKey = createNarrativeRowsByKeyMap(eventFeed);
   const objectiveStepOutcomeContract = input.objective_step_outcome_contract
     ?? manifest.objective_step_outcome_contract;
+  const objectiveNegativeStateDiagnostics = input.objective_negative_state_diagnostics
+    ?? manifest.objective_negative_state_diagnostics;
   const objectiveCanonicalTokenContract = input.objective_canonical_token_contract
     ?? FIRST_SLICE_OBJECTIVE_CANONICAL_TOKEN_CONTRACT_V1;
 
@@ -442,6 +463,7 @@ export const createFirstSliceNarrativeTemplateSnapshotV1 = (input: {
     compatibilityAliasOnlyKeySet,
     rowsByKey,
     objectiveStepOutcomeContract,
+    objectiveNegativeStateDiagnostics,
     objectiveCanonicalTokenContract,
   });
 
@@ -652,6 +674,10 @@ export const parseFirstSliceContentKeyManifestV1 = (
     readUnknown(root, "objective_step_outcome_contract", "$"),
     "$.objective_step_outcome_contract",
   );
+  const objectiveNegativeStateDiagnostics = parseObjectiveNegativeStateDiagnosticsRows(
+    readUnknown(root, "objective_negative_state_diagnostics", "$"),
+    "$.objective_negative_state_diagnostics",
+  );
   const compatibilityAliasOnlyKeys = readContentKeyArray(
     root,
     "compatibility_alias_only_keys",
@@ -706,6 +732,7 @@ export const parseFirstSliceContentKeyManifestV1 = (
     },
     loop_required_keys: loopRequiredKeys,
     objective_step_outcome_contract: objectiveStepOutcomeContract,
+    objective_negative_state_diagnostics: objectiveNegativeStateDiagnostics,
     compatibility_alias_only_keys: compatibilityAliasOnlyKeys,
     legacy_alias_mapping: legacyAliasMapping,
     alias_lookup_contract: {
@@ -837,30 +864,76 @@ function parseObjectiveStepOutcomeContractRows(
 ): readonly FirstSliceObjectiveStepOutcomeContractRowV1[] {
   const rowsRaw = asArray(raw, path);
   const rows: FirstSliceObjectiveStepOutcomeContractRowV1[] = [];
-  const seenObjectiveIds = new Set<string>();
+  const seenObjectiveKeys = new Set<string>();
   const loopStepKeys = ["tick", "build", "train", "scout", "attack", "resolve"] as const;
+
+  for (let i = 0; i < rowsRaw.length; i += 1) {
+    const rowPath = `${path}[${i}]`;
+    const row = asRecord(rowsRaw[i], rowPath);
+    const canonicalObjectiveKey = readContentKey(row, "canonical_objective_key", rowPath);
+    if (seenObjectiveKeys.has(canonicalObjectiveKey)) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Duplicate objective_step_outcome_contract canonical_objective_key '${canonicalObjectiveKey}'.`,
+      );
+    }
+    seenObjectiveKeys.add(canonicalObjectiveKey);
+    rows.push({
+      canonical_objective_key: canonicalObjectiveKey,
+      loop_step: readEnum(row, "loop_step", rowPath, loopStepKeys),
+      required_all_canonical_keys: readContentKeyArray(row, "required_all_canonical_keys", rowPath),
+      required_any_canonical_keys: readOptionalContentKeyArray(row, "required_any_canonical_keys", rowPath),
+      compatibility_alias_lookup_keys: parseCompatibilityAliasLookupKeys(
+        readUnknown(row, "compatibility_alias_lookup_keys", rowPath),
+        `${rowPath}.compatibility_alias_lookup_keys`,
+      ),
+    });
+  }
+
+  return rows;
+}
+
+function parseCompatibilityAliasLookupKeys(
+  raw: unknown,
+  path: string,
+): Readonly<Record<string, readonly string[]>> {
+  const lookup = asRecord(raw, path);
+  const parsedLookup: Record<string, readonly string[]> = {};
+  for (const [canonicalKey, aliasKeysRaw] of Object.entries(lookup)) {
+    assertPattern(canonicalKey, CONTENT_KEY_PATTERN, path);
+    parsedLookup[canonicalKey] = readContentKeyArrayAllowEmpty(
+      { alias_keys: aliasKeysRaw },
+      "alias_keys",
+      `${path}.${canonicalKey}`,
+    );
+  }
+  return parsedLookup;
+}
+
+function parseObjectiveNegativeStateDiagnosticsRows(
+  raw: unknown,
+  path: string,
+): readonly FirstSliceObjectiveNegativeStateDiagnosticRowV1[] {
+  const rowsRaw = asArray(raw, path);
+  const rows: FirstSliceObjectiveNegativeStateDiagnosticRowV1[] = [];
+  const seenFamilies = new Set<FirstSliceNegativeStateFamilyV1>();
   const negativeStateFamilies = ["insufficient_resources", "cooldown", "invalid_target", "combat_loss"] as const;
 
   for (let i = 0; i < rowsRaw.length; i += 1) {
     const rowPath = `${path}[${i}]`;
     const row = asRecord(rowsRaw[i], rowPath);
-    const objectiveId = readContentKey(row, "objective_id", rowPath);
-    if (seenObjectiveIds.has(objectiveId)) {
+    const family = readEnum(row, "negative_state_family", rowPath, negativeStateFamilies);
+    if (seenFamilies.has(family)) {
       throw new FirstSliceNarrativeTemplateSnapshotValidationError(
-        `Duplicate objective_step_outcome_contract objective_id '${objectiveId}'.`,
+        `Duplicate objective_negative_state_diagnostics negative_state_family '${family}'.`,
       );
     }
-    seenObjectiveIds.add(objectiveId);
+    seenFamilies.add(family);
     rows.push({
-      objective_id: objectiveId,
-      loop_step: readEnum(row, "loop_step", rowPath, loopStepKeys),
-      success_canonical_keys: readContentKeyArray(row, "success_canonical_keys", rowPath),
-      negative_canonical_keys: readContentKeyArray(row, "negative_canonical_keys", rowPath),
-      required_negative_state_families: readEnumArray(
+      negative_state_family: family,
+      preserved_canonical_default_keys: readContentKeyArray(
         row,
-        "required_negative_state_families",
+        "preserved_canonical_default_keys",
         rowPath,
-        negativeStateFamilies,
       ),
     });
   }
@@ -948,6 +1021,7 @@ function validateFirstSliceObjectiveContractParityV1(input: {
   readonly compatibilityAliasOnlyKeySet: ReadonlySet<string>;
   readonly rowsByKey: ReadonlyMap<string, EventFeedMessagesSeedV1["rows"][number]>;
   readonly objectiveStepOutcomeContract: readonly FirstSliceObjectiveStepOutcomeContractRowV1[];
+  readonly objectiveNegativeStateDiagnostics: readonly FirstSliceObjectiveNegativeStateDiagnosticRowV1[];
   readonly objectiveCanonicalTokenContract: readonly FirstSliceObjectiveCanonicalTokenContractRowV1[];
 }): void {
   const requiredTokensByCanonicalKey = new Map<string, readonly string[]>();
@@ -960,121 +1034,168 @@ function validateFirstSliceObjectiveContractParityV1(input: {
     requiredTokensByCanonicalKey.set(row.canonical_key, row.required_tokens);
   }
 
-  for (const objectiveRow of input.objectiveStepOutcomeContract) {
-    if (objectiveRow.success_canonical_keys.length < 1) {
+  const validateCanonicalKey = (objectiveKey: string, canonicalKey: string): void => {
+    if (input.compatibilityAliasOnlyKeySet.has(canonicalKey)) {
       throw new FirstSliceNarrativeTemplateSnapshotValidationError(
-        `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '<none>': success_canonical_keys must include at least one key.`,
-      );
-    }
-    if (objectiveRow.negative_canonical_keys.length < 1) {
-      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
-        `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '<none>': negative_canonical_keys must include at least one key.`,
+        `Objective contract parity failure for objective '${objectiveKey}' key '${canonicalKey}': compatibility-only alias keys are lookup-only and cannot be objective canonical defaults.`,
+        {
+          details: {
+            canonical_objective_key: objectiveKey,
+            key: canonicalKey,
+          },
+        },
       );
     }
 
+    if (!input.manifestCanonicalKeySet.has(canonicalKey)) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Objective contract parity failure for objective '${objectiveKey}' key '${canonicalKey}': missing from default_first_slice_seed_usage.include_only_content_keys.`,
+        {
+          details: {
+            canonical_objective_key: objectiveKey,
+            key: canonicalKey,
+          },
+        },
+      );
+    }
+
+    const narrativeRow = input.rowsByKey.get(canonicalKey);
+    if (narrativeRow === undefined) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Objective contract parity failure for objective '${objectiveKey}' key '${canonicalKey}': missing from narrative event feed seed rows.`,
+        {
+          details: {
+            canonical_objective_key: objectiveKey,
+            key: canonicalKey,
+          },
+        },
+      );
+    }
+
+    const expectedTokens = requiredTokensByCanonicalKey.get(canonicalKey);
+    if (expectedTokens === undefined) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Objective contract parity failure for objective '${objectiveKey}' key '${canonicalKey}': missing required token contract row.`,
+        {
+          details: {
+            canonical_objective_key: objectiveKey,
+            key: canonicalKey,
+          },
+        },
+      );
+    }
+
+    const actualTokens = [...narrativeRow.tokens];
+    const actualTokenSet = new Set(actualTokens);
+    const expectedTokenSet = new Set(expectedTokens);
+    const missingTokens = toUniqueSorted(
+      expectedTokens.filter((token) => !actualTokenSet.has(token)),
+    );
+    const unexpectedTokens = toUniqueSorted(
+      actualTokens.filter((token) => !expectedTokenSet.has(token)),
+    );
+    const maxComparableLength = Math.min(expectedTokens.length, actualTokens.length);
+    let orderDriftIndex = -1;
+    for (let i = 0; i < maxComparableLength; i += 1) {
+      if (expectedTokens[i] !== actualTokens[i]) {
+        orderDriftIndex = i;
+        break;
+      }
+    }
+    const hasOrderDrift = orderDriftIndex >= 0;
+    if (missingTokens.length > 0 || unexpectedTokens.length > 0 || hasOrderDrift) {
+      const orderDriftSummary = hasOrderDrift
+        ? `, first_order_drift_index=${orderDriftIndex}`
+        : "";
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Objective contract parity failure for objective '${objectiveKey}' key '${canonicalKey}': token requirements mismatch; missing_tokens=[${missingTokens.join(", ")}], unexpected_tokens=[${unexpectedTokens.join(", ")}], expected_tokens=[${expectedTokens.join(", ")}], actual_tokens=[${actualTokens.join(", ")}]${orderDriftSummary}.`,
+        {
+          details: {
+            canonical_objective_key: objectiveKey,
+            key: canonicalKey,
+            missing_tokens: missingTokens,
+            unexpected_tokens: unexpectedTokens,
+            expected_tokens: expectedTokens,
+            actual_tokens: actualTokens,
+            first_order_drift_index: hasOrderDrift ? orderDriftIndex : undefined,
+          },
+        },
+      );
+    }
+  };
+
+  for (const objectiveRow of input.objectiveStepOutcomeContract) {
+    if (objectiveRow.required_all_canonical_keys.length < 1) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Objective contract parity failure for objective '${objectiveRow.canonical_objective_key}' key '<none>': required_all_canonical_keys must include at least one key.`,
+      );
+    }
+
+    const requiredAnyCanonicalKeys = objectiveRow.required_any_canonical_keys ?? [];
     const allObjectiveKeys = [
-      ...objectiveRow.success_canonical_keys,
-      ...objectiveRow.negative_canonical_keys,
+      ...objectiveRow.required_all_canonical_keys,
+      ...requiredAnyCanonicalKeys,
     ];
 
     const seenKeys = new Set<string>();
     for (const key of allObjectiveKeys) {
       if (seenKeys.has(key)) {
         throw new FirstSliceNarrativeTemplateSnapshotValidationError(
-          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${key}': duplicate key reference in success/negative canonical key lists.`,
+          `Objective contract parity failure for objective '${objectiveRow.canonical_objective_key}' key '${key}': duplicate key reference in required_all/required_any canonical key lists.`,
         );
       }
       seenKeys.add(key);
     }
 
+    const aliasLookupCanonicalKeys = Object.keys(
+      objectiveRow.compatibility_alias_lookup_keys,
+    );
+    const aliasLookupKeyDrift = toUniqueSorted([
+      ...aliasLookupCanonicalKeys.filter((key) => !seenKeys.has(key)),
+      ...allObjectiveKeys.filter((key) => !aliasLookupCanonicalKeys.includes(key)),
+    ]);
+    if (aliasLookupKeyDrift.length > 0) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Objective contract parity failure for objective '${objectiveRow.canonical_objective_key}' key '<compatibility_alias_lookup_keys>': map keys must exactly match required_all/required_any canonical keys; drift=[${aliasLookupKeyDrift.join(", ")}].`,
+      );
+    }
+
     for (const canonicalKey of allObjectiveKeys) {
-      if (input.compatibilityAliasOnlyKeySet.has(canonicalKey)) {
-        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
-          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${canonicalKey}': compatibility-only alias keys are lookup-only and cannot be objective canonical defaults.`,
-          {
-            details: {
-              objective_id: objectiveRow.objective_id,
-              key: canonicalKey,
-            },
-          },
-        );
-      }
-
-      if (!input.manifestCanonicalKeySet.has(canonicalKey)) {
-        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
-          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${canonicalKey}': missing from default_first_slice_seed_usage.include_only_content_keys.`,
-          {
-            details: {
-              objective_id: objectiveRow.objective_id,
-              key: canonicalKey,
-            },
-          },
-        );
-      }
-
-      const narrativeRow = input.rowsByKey.get(canonicalKey);
-      if (narrativeRow === undefined) {
-        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
-          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${canonicalKey}': missing from narrative event feed seed rows.`,
-          {
-            details: {
-              objective_id: objectiveRow.objective_id,
-              key: canonicalKey,
-            },
-          },
-        );
-      }
-
-      const expectedTokens = requiredTokensByCanonicalKey.get(canonicalKey);
-      if (expectedTokens === undefined) {
-        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
-          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${canonicalKey}': missing required token contract row.`,
-          {
-            details: {
-              objective_id: objectiveRow.objective_id,
-              key: canonicalKey,
-            },
-          },
-        );
-      }
-
-      const actualTokens = [...narrativeRow.tokens];
-      const actualTokenSet = new Set(actualTokens);
-      const expectedTokenSet = new Set(expectedTokens);
-      const missingTokens = toUniqueSorted(
-        expectedTokens.filter((token) => !actualTokenSet.has(token)),
-      );
-      const unexpectedTokens = toUniqueSorted(
-        actualTokens.filter((token) => !expectedTokenSet.has(token)),
-      );
-      const maxComparableLength = Math.min(expectedTokens.length, actualTokens.length);
-      let orderDriftIndex = -1;
-      for (let i = 0; i < maxComparableLength; i += 1) {
-        if (expectedTokens[i] !== actualTokens[i]) {
-          orderDriftIndex = i;
-          break;
+      validateCanonicalKey(objectiveRow.canonical_objective_key, canonicalKey);
+      const aliasKeys = objectiveRow.compatibility_alias_lookup_keys[canonicalKey] ?? [];
+      for (const aliasKey of aliasKeys) {
+        if (!input.compatibilityAliasOnlyKeySet.has(aliasKey)) {
+          throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+            `Objective contract parity failure for objective '${objectiveRow.canonical_objective_key}' key '${canonicalKey}': alias '${aliasKey}' must be compatibility-only lookup input.`,
+          );
+        }
+        if (input.manifestCanonicalKeySet.has(aliasKey)) {
+          throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+            `Objective contract parity failure for objective '${objectiveRow.canonical_objective_key}' key '${canonicalKey}': alias '${aliasKey}' must not be selected as canonical default key.`,
+          );
         }
       }
-      const hasOrderDrift = orderDriftIndex >= 0;
-      if (missingTokens.length > 0 || unexpectedTokens.length > 0 || hasOrderDrift) {
-        const orderDriftSummary = hasOrderDrift
-          ? `, first_order_drift_index=${orderDriftIndex}`
-          : "";
-        throw new FirstSliceNarrativeTemplateSnapshotValidationError(
-          `Objective contract parity failure for objective '${objectiveRow.objective_id}' key '${canonicalKey}': token requirements mismatch; missing_tokens=[${missingTokens.join(", ")}], unexpected_tokens=[${unexpectedTokens.join(", ")}], expected_tokens=[${expectedTokens.join(", ")}], actual_tokens=[${actualTokens.join(", ")}]${orderDriftSummary}.`,
-          {
-            details: {
-              objective_id: objectiveRow.objective_id,
-              key: canonicalKey,
-              missing_tokens: missingTokens,
-              unexpected_tokens: unexpectedTokens,
-              expected_tokens: expectedTokens,
-              actual_tokens: actualTokens,
-              first_order_drift_index: hasOrderDrift ? orderDriftIndex : undefined,
-            },
-          },
-        );
-      }
+    }
+  }
+
+  const requiredNegativeStateFamilies = new Set<FirstSliceNegativeStateFamilyV1>([
+    "insufficient_resources",
+    "cooldown",
+    "invalid_target",
+    "combat_loss",
+  ]);
+  const coveredNegativeStateFamilies = new Set<FirstSliceNegativeStateFamilyV1>();
+  for (const row of input.objectiveNegativeStateDiagnostics) {
+    coveredNegativeStateFamilies.add(row.negative_state_family);
+    for (const canonicalKey of row.preserved_canonical_default_keys) {
+      validateCanonicalKey(`negative_state_family:${row.negative_state_family}`, canonicalKey);
+    }
+  }
+  for (const requiredFamily of requiredNegativeStateFamilies) {
+    if (!coveredNegativeStateFamilies.has(requiredFamily)) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Objective diagnostics coverage failure: missing required negative_state_family '${requiredFamily}'.`,
+      );
     }
   }
 }
@@ -1173,6 +1294,38 @@ function readContentKeyArray(
     assertPattern(values[i], CONTENT_KEY_PATTERN, `${path}.${field}[${i}]`);
   }
   return values;
+}
+
+function readOptionalContentKeyArray(
+  obj: Record<string, unknown>,
+  field: string,
+  path: string,
+): readonly string[] | undefined {
+  if (!Object.prototype.hasOwnProperty.call(obj, field)) {
+    return undefined;
+  }
+  return readContentKeyArray(obj, field, path);
+}
+
+function readContentKeyArrayAllowEmpty(
+  obj: Record<string, unknown>,
+  field: string,
+  path: string,
+): readonly string[] {
+  const raw = asArray(readUnknown(obj, field, path), `${path}.${field}`);
+  const out: string[] = [];
+  for (let i = 0; i < raw.length; i += 1) {
+    const value = raw[i];
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Field '${path}.${field}[${i}]' must be a non-empty string (received ${describeType(value)}).`,
+      );
+    }
+    assertPattern(value, CONTENT_KEY_PATTERN, `${path}.${field}[${i}]`);
+    out.push(value);
+  }
+  ensureNoDuplicates(out, `${path}.${field}`);
+  return out;
 }
 
 function readTokenArray(

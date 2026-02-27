@@ -2777,8 +2777,7 @@
         ]
       }
     ]
-  }
-  ,
+  },
   {
     "ts": "2026-02-27T11:32:00.000000+00:00",
     "item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC",
@@ -3360,5 +3359,31 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-27T14:13:46.142872+00:00",
+    "item_id": "RK-AUTO-STALL-0013",
+    "status": "completed",
+    "summary": "Cleared dependency stall by promoting RK-AUTO-BACKLOG-0011-F02 from blocked to completed after successful scoped validation, making RK-AUTO-BACKLOG-0011-F03 dependency-ready.",
+    "queue_recovery": {
+      "consolidated_blocked_removed_ids": [
+        "RK-AUTO-BACKLOG-0011-F02"
+      ],
+      "made_dependency_ready_ids": [
+        "RK-AUTO-BACKLOG-0011-F03"
+      ],
+      "status_before": "queued=5 dependency_ready=1 running=1 blocked=23 completed=190",
+      "status_after": "queued=5 dependency_ready=2 running=0 blocked=22 completed=192"
+    },
+    "validation": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+      "python tools/orchestrator.py status"
+    ],
+    "files": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "agents/mara-voss/outbox.json"
+    ],
+    "proposed_work_items": []
   }
 ]

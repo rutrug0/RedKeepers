@@ -135,7 +135,13 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
         "event.world.hostile_defeat_force_shattered",
         "event.world.hostile_defeat_command_silent",
         "event.world.hostile_post_battle_return_started",
-        "event.world.hostile_post_battle_returned"
+        "event.world.hostile_post_battle_returned",
+        "first_session.tick.observe_income.v1",
+        "first_session.build.complete_first_upgrade.v1",
+        "first_session.train.complete_first_batch.v1",
+        "first_session.scout.confirm_hostile_target.v1",
+        "first_session.attack.dispatch_hostile_march.v1",
+        "first_session.resolve_hostile_outcome.v1"
       ]
     },
     "legacy_alias_mapping": [
@@ -233,6 +239,42 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
         "canonical_key": "event.combat.hostile_resolve_defender_win",
         "legacy_keys": [
           "event.combat.placeholder_skirmish_loss"
+        ]
+      },
+      {
+        "canonical_key": "first_session.tick.observe_income.v1",
+        "legacy_keys": [
+          "objective.first_session.tick.observe_income.v1"
+        ]
+      },
+      {
+        "canonical_key": "first_session.build.complete_first_upgrade.v1",
+        "legacy_keys": [
+          "objective.first_session.build.complete_first_upgrade.v1"
+        ]
+      },
+      {
+        "canonical_key": "first_session.train.complete_first_batch.v1",
+        "legacy_keys": [
+          "objective.first_session.train.complete_first_batch.v1"
+        ]
+      },
+      {
+        "canonical_key": "first_session.scout.confirm_hostile_target.v1",
+        "legacy_keys": [
+          "objective.first_session.scout.confirm_hostile_target.v1"
+        ]
+      },
+      {
+        "canonical_key": "first_session.attack.dispatch_hostile_march.v1",
+        "legacy_keys": [
+          "objective.first_session.attack.dispatch_hostile_march.v1"
+        ]
+      },
+      {
+        "canonical_key": "first_session.resolve_hostile_outcome.v1",
+        "legacy_keys": [
+          "objective.first_session.resolve_hostile_outcome.v1"
         ]
       }
     ],
@@ -801,6 +843,48 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
             "event.world.hostile_post_battle_returned",
             "event.world.march_returned"
           ]
+        },
+        {
+          "canonical_key": "first_session.tick.observe_income.v1",
+          "resolution_order": [
+            "first_session.tick.observe_income.v1",
+            "objective.first_session.tick.observe_income.v1"
+          ]
+        },
+        {
+          "canonical_key": "first_session.build.complete_first_upgrade.v1",
+          "resolution_order": [
+            "first_session.build.complete_first_upgrade.v1",
+            "objective.first_session.build.complete_first_upgrade.v1"
+          ]
+        },
+        {
+          "canonical_key": "first_session.train.complete_first_batch.v1",
+          "resolution_order": [
+            "first_session.train.complete_first_batch.v1",
+            "objective.first_session.train.complete_first_batch.v1"
+          ]
+        },
+        {
+          "canonical_key": "first_session.scout.confirm_hostile_target.v1",
+          "resolution_order": [
+            "first_session.scout.confirm_hostile_target.v1",
+            "objective.first_session.scout.confirm_hostile_target.v1"
+          ]
+        },
+        {
+          "canonical_key": "first_session.attack.dispatch_hostile_march.v1",
+          "resolution_order": [
+            "first_session.attack.dispatch_hostile_march.v1",
+            "objective.first_session.attack.dispatch_hostile_march.v1"
+          ]
+        },
+        {
+          "canonical_key": "first_session.resolve_hostile_outcome.v1",
+          "resolution_order": [
+            "first_session.resolve_hostile_outcome.v1",
+            "objective.first_session.resolve_hostile_outcome.v1"
+          ]
         }
       ],
       "templates_by_key": {
@@ -1285,6 +1369,54 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
             "target_tile_label",
             "hostile_force_estimate"
           ]
+        },
+        "first_session.attack.dispatch_hostile_march.v1": {
+          "template": "[PLACEHOLDER] Dispatch one hostile march toward the confirmed foreign settlement.",
+          "tokens": []
+        },
+        "first_session.build.complete_first_upgrade.v1": {
+          "template": "[PLACEHOLDER] Complete one building upgrade in the settlement panel.",
+          "tokens": []
+        },
+        "first_session.resolve_hostile_outcome.v1": {
+          "template": "[PLACEHOLDER] Resolve one hostile combat outcome and review losses.",
+          "tokens": []
+        },
+        "first_session.scout.confirm_hostile_target.v1": {
+          "template": "[PLACEHOLDER] Scout and confirm hostile activity on the target tile.",
+          "tokens": []
+        },
+        "first_session.tick.observe_income.v1": {
+          "template": "[PLACEHOLDER] Confirm passive income flow by running one settlement tick.",
+          "tokens": []
+        },
+        "first_session.train.complete_first_batch.v1": {
+          "template": "[PLACEHOLDER] Finish one unit training batch from the barracks queue.",
+          "tokens": []
+        },
+        "objective.first_session.attack.dispatch_hostile_march.v1": {
+          "template": "[PLACEHOLDER] Dispatch one hostile march toward the confirmed foreign settlement.",
+          "tokens": []
+        },
+        "objective.first_session.build.complete_first_upgrade.v1": {
+          "template": "[PLACEHOLDER] Complete one building upgrade in the settlement panel.",
+          "tokens": []
+        },
+        "objective.first_session.resolve_hostile_outcome.v1": {
+          "template": "[PLACEHOLDER] Resolve one hostile combat outcome and review losses.",
+          "tokens": []
+        },
+        "objective.first_session.scout.confirm_hostile_target.v1": {
+          "template": "[PLACEHOLDER] Scout and confirm hostile activity on the target tile.",
+          "tokens": []
+        },
+        "objective.first_session.tick.observe_income.v1": {
+          "template": "[PLACEHOLDER] Confirm passive income flow by running one settlement tick.",
+          "tokens": []
+        },
+        "objective.first_session.train.complete_first_batch.v1": {
+          "template": "[PLACEHOLDER] Finish one unit training batch from the barracks queue.",
+          "tokens": []
         }
       }
     }

@@ -1381,6 +1381,204 @@
       "tokens": [
         "settlement_name"
       ]
+    },
+    {
+      "key": "first_session.tick.observe_income.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "first_session_objective"
+      ],
+      "related_ids": [
+        "objective_id:first_session.tick.observe_income.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Confirm passive income flow by running one settlement tick.",
+      "tokens": [],
+      "notes": "First-session objective strip placeholder label. Replace copy without changing stable key."
+    },
+    {
+      "key": "objective.first_session.tick.observe_income.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "compatibility_alias_lookup_only"
+      ],
+      "related_ids": [
+        "objective_id:first_session.tick.observe_income.v1",
+        "alias_of:first_session.tick.observe_income.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Confirm passive income flow by running one settlement tick.",
+      "tokens": [],
+      "notes": "Compatibility alias lookup-only key for objective strip labels; do not select as canonical default."
+    },
+    {
+      "key": "first_session.build.complete_first_upgrade.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "first_session_objective"
+      ],
+      "related_ids": [
+        "objective_id:first_session.build.complete_first_upgrade.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Complete one building upgrade in the settlement panel.",
+      "tokens": [],
+      "notes": "First-session objective strip placeholder label. Replace copy without changing stable key."
+    },
+    {
+      "key": "objective.first_session.build.complete_first_upgrade.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "compatibility_alias_lookup_only"
+      ],
+      "related_ids": [
+        "objective_id:first_session.build.complete_first_upgrade.v1",
+        "alias_of:first_session.build.complete_first_upgrade.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Complete one building upgrade in the settlement panel.",
+      "tokens": [],
+      "notes": "Compatibility alias lookup-only key for objective strip labels; do not select as canonical default."
+    },
+    {
+      "key": "first_session.train.complete_first_batch.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "first_session_objective"
+      ],
+      "related_ids": [
+        "objective_id:first_session.train.complete_first_batch.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Finish one unit training batch from the barracks queue.",
+      "tokens": [],
+      "notes": "First-session objective strip placeholder label. Replace copy without changing stable key."
+    },
+    {
+      "key": "objective.first_session.train.complete_first_batch.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "compatibility_alias_lookup_only"
+      ],
+      "related_ids": [
+        "objective_id:first_session.train.complete_first_batch.v1",
+        "alias_of:first_session.train.complete_first_batch.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Finish one unit training batch from the barracks queue.",
+      "tokens": [],
+      "notes": "Compatibility alias lookup-only key for objective strip labels; do not select as canonical default."
+    },
+    {
+      "key": "first_session.scout.confirm_hostile_target.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "first_session_objective"
+      ],
+      "related_ids": [
+        "objective_id:first_session.scout.confirm_hostile_target.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Scout and confirm hostile activity on the target tile.",
+      "tokens": [],
+      "notes": "First-session objective strip placeholder label. Replace copy without changing stable key."
+    },
+    {
+      "key": "objective.first_session.scout.confirm_hostile_target.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "compatibility_alias_lookup_only"
+      ],
+      "related_ids": [
+        "objective_id:first_session.scout.confirm_hostile_target.v1",
+        "alias_of:first_session.scout.confirm_hostile_target.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Scout and confirm hostile activity on the target tile.",
+      "tokens": [],
+      "notes": "Compatibility alias lookup-only key for objective strip labels; do not select as canonical default."
+    },
+    {
+      "key": "first_session.attack.dispatch_hostile_march.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "first_session_objective"
+      ],
+      "related_ids": [
+        "objective_id:first_session.attack.dispatch_hostile_march.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Dispatch one hostile march toward the confirmed foreign settlement.",
+      "tokens": [],
+      "notes": "First-session objective strip placeholder label. Replace copy without changing stable key."
+    },
+    {
+      "key": "objective.first_session.attack.dispatch_hostile_march.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "compatibility_alias_lookup_only"
+      ],
+      "related_ids": [
+        "objective_id:first_session.attack.dispatch_hostile_march.v1",
+        "alias_of:first_session.attack.dispatch_hostile_march.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Dispatch one hostile march toward the confirmed foreign settlement.",
+      "tokens": [],
+      "notes": "Compatibility alias lookup-only key for objective strip labels; do not select as canonical default."
+    },
+    {
+      "key": "first_session.resolve_hostile_outcome.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "first_session_objective"
+      ],
+      "related_ids": [
+        "objective_id:first_session.resolve_hostile_outcome.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Resolve one hostile combat outcome and review losses.",
+      "tokens": [],
+      "notes": "First-session objective strip placeholder label. Replace copy without changing stable key."
+    },
+    {
+      "key": "objective.first_session.resolve_hostile_outcome.v1",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "objective_strip",
+        "compatibility_alias_lookup_only"
+      ],
+      "related_ids": [
+        "objective_id:first_session.resolve_hostile_outcome.v1",
+        "alias_of:first_session.resolve_hostile_outcome.v1"
+      ],
+      "event_category": "objective_strip",
+      "template": "[PLACEHOLDER] Resolve one hostile combat outcome and review losses.",
+      "tokens": [],
+      "notes": "Compatibility alias lookup-only key for objective strip labels; do not select as canonical default."
     }
   ]
 }

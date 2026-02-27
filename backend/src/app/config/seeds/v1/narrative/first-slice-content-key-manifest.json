@@ -66,7 +66,13 @@
       "event.world.hostile_defeat_force_shattered",
       "event.world.hostile_defeat_command_silent",
       "event.world.hostile_post_battle_return_started",
-      "event.world.hostile_post_battle_returned"
+      "event.world.hostile_post_battle_returned",
+      "first_session.tick.observe_income.v1",
+      "first_session.build.complete_first_upgrade.v1",
+      "first_session.train.complete_first_batch.v1",
+      "first_session.scout.confirm_hostile_target.v1",
+      "first_session.attack.dispatch_hostile_march.v1",
+      "first_session.resolve_hostile_outcome.v1"
     ]
   },
   "loop_required_keys": {
@@ -134,85 +140,130 @@
   },
   "objective_step_outcome_contract": [
     {
-      "objective_id": "first_session.tick.observe_income.v1",
+      "canonical_objective_key": "first_session.tick.observe_income.v1",
       "loop_step": "tick",
-      "success_canonical_keys": [
+      "required_all_canonical_keys": [
         "event.tick.passive_income",
         "event.tick.passive_gain_success"
       ],
-      "negative_canonical_keys": [
-        "event.tick.passive_gain_stalled"
-      ],
-      "required_negative_state_families": []
+      "compatibility_alias_lookup_keys": {
+        "event.tick.passive_income": [
+          "event.economy.tick_passive_income"
+        ],
+        "event.tick.passive_gain_success": []
+      }
     },
     {
-      "objective_id": "first_session.build.complete_first_upgrade.v1",
+      "canonical_objective_key": "first_session.build.complete_first_upgrade.v1",
       "loop_step": "build",
-      "success_canonical_keys": [
+      "required_all_canonical_keys": [
         "event.build.upgrade_started",
         "event.build.upgrade_completed"
       ],
-      "negative_canonical_keys": [
-        "event.build.failure_insufficient_resources"
-      ],
-      "required_negative_state_families": [
-        "insufficient_resources"
-      ]
+      "compatibility_alias_lookup_keys": {
+        "event.build.upgrade_started": [
+          "event.buildings.upgrade_started"
+        ],
+        "event.build.upgrade_completed": [
+          "event.buildings.upgrade_completed"
+        ]
+      }
     },
     {
-      "objective_id": "first_session.train.complete_first_batch.v1",
+      "canonical_objective_key": "first_session.train.complete_first_batch.v1",
       "loop_step": "train",
-      "success_canonical_keys": [
+      "required_all_canonical_keys": [
         "event.train.started",
         "event.train.completed"
       ],
-      "negative_canonical_keys": [
-        "event.train.failure_cooldown"
-      ],
-      "required_negative_state_families": [
-        "cooldown"
-      ]
+      "compatibility_alias_lookup_keys": {
+        "event.train.started": [
+          "event.units.training_started"
+        ],
+        "event.train.completed": [
+          "event.units.training_completed"
+        ]
+      }
     },
     {
-      "objective_id": "first_session.scout.confirm_hostile_target.v1",
+      "canonical_objective_key": "first_session.scout.confirm_hostile_target.v1",
       "loop_step": "scout",
-      "success_canonical_keys": [
+      "required_all_canonical_keys": [
         "event.scout.dispatched_success",
         "event.scout.return_hostile"
       ],
-      "negative_canonical_keys": [
-        "event.scout.return_empty"
-      ],
-      "required_negative_state_families": []
+      "compatibility_alias_lookup_keys": {
+        "event.scout.dispatched_success": [],
+        "event.scout.return_hostile": []
+      }
     },
     {
-      "objective_id": "first_session.attack.dispatch_hostile_march.v1",
+      "canonical_objective_key": "first_session.attack.dispatch_hostile_march.v1",
       "loop_step": "attack",
-      "success_canonical_keys": [
+      "required_all_canonical_keys": [
         "event.world.hostile_dispatch_accepted",
         "event.world.hostile_dispatch_en_route",
         "event.world.hostile_march_arrived_outer_works"
       ],
-      "negative_canonical_keys": [
-        "event.world.hostile_dispatch_target_required",
-        "event.world.hostile_dispatch_failed_source_target_not_foreign"
+      "compatibility_alias_lookup_keys": {
+        "event.world.hostile_dispatch_accepted": [],
+        "event.world.hostile_dispatch_en_route": [
+          "event.world.march_started"
+        ],
+        "event.world.hostile_march_arrived_outer_works": []
+      }
+    },
+    {
+      "canonical_objective_key": "first_session.resolve_hostile_outcome.v1",
+      "loop_step": "resolve",
+      "required_all_canonical_keys": [
+        "event.combat.hostile_loss_report"
       ],
-      "required_negative_state_families": [
-        "invalid_target"
+      "required_any_canonical_keys": [
+        "event.combat.hostile_resolve_attacker_win",
+        "event.combat.hostile_resolve_defender_win",
+        "event.combat.hostile_resolve_tie_defender_holds"
+      ],
+      "compatibility_alias_lookup_keys": {
+        "event.combat.hostile_loss_report": [],
+        "event.combat.hostile_resolve_attacker_win": [
+          "event.combat.placeholder_skirmish_win"
+        ],
+        "event.combat.hostile_resolve_defender_win": [
+          "event.combat.placeholder_skirmish_loss"
+        ],
+        "event.combat.hostile_resolve_tie_defender_holds": []
+      }
+    }
+  ],
+  "objective_negative_state_diagnostics": [
+    {
+      "negative_state_family": "insufficient_resources",
+      "preserved_canonical_default_keys": [
+        "event.build.failure_insufficient_resources",
+        "event.train.failure_insufficient_resources"
       ]
     },
     {
-      "objective_id": "first_session.resolve_hostile_outcome.v1",
-      "loop_step": "resolve",
-      "success_canonical_keys": [
-        "event.combat.hostile_resolve_attacker_win"
-      ],
-      "negative_canonical_keys": [
+      "negative_state_family": "cooldown",
+      "preserved_canonical_default_keys": [
+        "event.build.failure_cooldown",
+        "event.train.failure_cooldown"
+      ]
+    },
+    {
+      "negative_state_family": "invalid_target",
+      "preserved_canonical_default_keys": [
+        "event.world.hostile_dispatch_target_required",
+        "event.world.hostile_dispatch_failed_source_target_not_foreign"
+      ]
+    },
+    {
+      "negative_state_family": "combat_loss",
+      "preserved_canonical_default_keys": [
         "event.combat.hostile_resolve_defender_win",
+        "event.combat.hostile_resolve_tie_defender_holds",
         "event.combat.hostile_loss_report"
-      ],
-      "required_negative_state_families": [
-        "combat_loss"
       ]
     }
   ],
@@ -232,7 +283,13 @@
     "event.world.march_started",
     "event.world.march_returned",
     "event.combat.placeholder_skirmish_win",
-    "event.combat.placeholder_skirmish_loss"
+    "event.combat.placeholder_skirmish_loss",
+    "objective.first_session.tick.observe_income.v1",
+    "objective.first_session.build.complete_first_upgrade.v1",
+    "objective.first_session.train.complete_first_batch.v1",
+    "objective.first_session.scout.confirm_hostile_target.v1",
+    "objective.first_session.attack.dispatch_hostile_march.v1",
+    "objective.first_session.resolve_hostile_outcome.v1"
   ],
   "legacy_alias_mapping": [
     {
@@ -329,6 +386,42 @@
       "canonical_key": "event.combat.hostile_resolve_defender_win",
       "legacy_keys": [
         "event.combat.placeholder_skirmish_loss"
+      ]
+    },
+    {
+      "canonical_key": "first_session.tick.observe_income.v1",
+      "legacy_keys": [
+        "objective.first_session.tick.observe_income.v1"
+      ]
+    },
+    {
+      "canonical_key": "first_session.build.complete_first_upgrade.v1",
+      "legacy_keys": [
+        "objective.first_session.build.complete_first_upgrade.v1"
+      ]
+    },
+    {
+      "canonical_key": "first_session.train.complete_first_batch.v1",
+      "legacy_keys": [
+        "objective.first_session.train.complete_first_batch.v1"
+      ]
+    },
+    {
+      "canonical_key": "first_session.scout.confirm_hostile_target.v1",
+      "legacy_keys": [
+        "objective.first_session.scout.confirm_hostile_target.v1"
+      ]
+    },
+    {
+      "canonical_key": "first_session.attack.dispatch_hostile_march.v1",
+      "legacy_keys": [
+        "objective.first_session.attack.dispatch_hostile_march.v1"
+      ]
+    },
+    {
+      "canonical_key": "first_session.resolve_hostile_outcome.v1",
+      "legacy_keys": [
+        "objective.first_session.resolve_hostile_outcome.v1"
       ]
     }
   ],

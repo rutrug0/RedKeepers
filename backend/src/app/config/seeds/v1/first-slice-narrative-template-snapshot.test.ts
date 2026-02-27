@@ -446,6 +446,7 @@ test("first-session objective steps include canonical success/failure placeholde
   const canonicalSelectionSet = new Set(
     manifest.default_first_slice_seed_usage.include_only_content_keys,
   );
+  const compatibilityAliasOnlySet = new Set(manifest.compatibility_alias_only_keys);
   const requiredTokenMapByCanonicalKey = new Map<string, readonly string[]>();
   for (const row of firstSliceSettlementLoopRuntimeTokenMatrixContractV1) {
     requiredTokenMapByCanonicalKey.set(row.canonical_key, row.required_tokens);
@@ -464,49 +465,78 @@ test("first-session objective steps include canonical success/failure placeholde
 
   for (const objectiveRow of manifest.objective_step_outcome_contract) {
     assert.equal(
-      objectiveRow.success_canonical_keys.length > 0,
+      objectiveRow.required_all_canonical_keys.length > 0,
       true,
-      `Objective '${objectiveRow.objective_id}' must declare at least one canonical success key.`,
-    );
-    assert.equal(
-      objectiveRow.negative_canonical_keys.length > 0,
-      true,
-      `Objective '${objectiveRow.objective_id}' must declare at least one canonical negative key.`,
+      `Objective '${objectiveRow.canonical_objective_key}' must declare at least one canonical required-all key.`,
     );
 
+    const requiredAnyCanonicalKeys = objectiveRow.required_any_canonical_keys ?? [];
     const allObjectiveKeys = [
-      ...objectiveRow.success_canonical_keys,
-      ...objectiveRow.negative_canonical_keys,
+      ...objectiveRow.required_all_canonical_keys,
+      ...requiredAnyCanonicalKeys,
     ];
+    assert.deepEqual(
+      Object.keys(objectiveRow.compatibility_alias_lookup_keys).sort((left, right) =>
+        left.localeCompare(right)
+      ),
+      [...allObjectiveKeys].sort((left, right) => left.localeCompare(right)),
+      `Objective '${objectiveRow.canonical_objective_key}' compatibility_alias_lookup_keys must align to required_all/required_any keys.`,
+    );
 
     for (const canonicalKey of allObjectiveKeys) {
       const narrativeRow = rowsByKey.get(canonicalKey);
       assert.notEqual(
         narrativeRow,
         undefined,
-        `Objective '${objectiveRow.objective_id}' is missing canonical key '${canonicalKey}' in narrative seeds.`,
+        `Objective '${objectiveRow.canonical_objective_key}' is missing canonical key '${canonicalKey}' in narrative seeds.`,
       );
       assert.equal(
         canonicalSelectionSet.has(canonicalKey),
         true,
-        `Objective '${objectiveRow.objective_id}' canonical key '${canonicalKey}' must stay in default first-session canonical selection.`,
+        `Objective '${objectiveRow.canonical_objective_key}' canonical key '${canonicalKey}' must stay in default first-session canonical selection.`,
       );
 
       const expectedTokens = requiredTokenMapByCanonicalKey.get(canonicalKey);
       assert.notEqual(
         expectedTokens,
         undefined,
-        `Objective '${objectiveRow.objective_id}' canonical key '${canonicalKey}' is not present in the canonical token contract map.`,
+        `Objective '${objectiveRow.canonical_objective_key}' canonical key '${canonicalKey}' is not present in the canonical token contract map.`,
       );
       assert.deepEqual(
         narrativeRow!.tokens,
         expectedTokens!,
-        `Objective '${objectiveRow.objective_id}' token drift for canonical key '${canonicalKey}'.`,
+        `Objective '${objectiveRow.canonical_objective_key}' token drift for canonical key '${canonicalKey}'.`,
       );
-    }
 
-    for (const family of objectiveRow.required_negative_state_families) {
-      coveredNegativeStateFamilies.add(family);
+      const aliasLookupKeys = objectiveRow.compatibility_alias_lookup_keys[canonicalKey] ?? [];
+      for (const aliasKey of aliasLookupKeys) {
+        assert.equal(
+          compatibilityAliasOnlySet.has(aliasKey),
+          true,
+          `Objective '${objectiveRow.canonical_objective_key}' alias '${aliasKey}' must be lookup-only compatibility alias.`,
+        );
+        assert.equal(
+          canonicalSelectionSet.has(aliasKey),
+          false,
+          `Objective '${objectiveRow.canonical_objective_key}' alias '${aliasKey}' must not appear in canonical default selection.`,
+        );
+      }
+    }
+  }
+
+  for (const diagnosticsRow of manifest.objective_negative_state_diagnostics) {
+    coveredNegativeStateFamilies.add(diagnosticsRow.negative_state_family);
+    for (const canonicalKey of diagnosticsRow.preserved_canonical_default_keys) {
+      assert.equal(
+        canonicalSelectionSet.has(canonicalKey),
+        true,
+        `Negative-state family '${diagnosticsRow.negative_state_family}' key '${canonicalKey}' must stay canonical-default.`,
+      );
+      assert.notEqual(
+        rowsByKey.get(canonicalKey),
+        undefined,
+        `Negative-state family '${diagnosticsRow.negative_state_family}' key '${canonicalKey}' must exist in narrative seeds.`,
+      );
     }
   }
 
@@ -514,7 +544,109 @@ test("first-session objective steps include canonical success/failure placeholde
     assert.equal(
       coveredNegativeStateFamilies.has(requiredFamily),
       true,
-      `Missing required negative-state family coverage '${requiredFamily}' in first-session objective contract rows.`,
+      `Missing required negative-state family coverage '${requiredFamily}' in first-session objective diagnostics rows.`,
+    );
+  }
+});
+
+test("first-session objective strip placeholders include canonical and lookup-only alias template coverage", async () => {
+  const narrativeSeedBundle = await loadNarrativeSeedBundleV1(
+    defaultPaths.narrative_seed_paths,
+  );
+  const manifest = await loadFirstSliceContentKeyManifestV1(
+    defaultPaths.first_slice_content_key_manifest_path!,
+  );
+
+  const snapshot = createFirstSliceNarrativeTemplateSnapshotV1({
+    narrative_seed_bundle: narrativeSeedBundle,
+    first_slice_content_key_manifest: manifest,
+  });
+
+  const rowsByKey = new Map(
+    narrativeSeedBundle.event_feed_messages.rows.map((row) => [row.key, row] as const),
+  );
+  const canonicalSelectionSet = new Set(
+    manifest.default_first_slice_seed_usage.include_only_content_keys,
+  );
+  const compatibilityAliasOnlySet = new Set(manifest.compatibility_alias_only_keys);
+  const legacyAliasKeysByCanonicalKey = new Map(
+    manifest.legacy_alias_mapping.map((row) => [row.canonical_key, row.legacy_keys] as const),
+  );
+  const lookupResolutionOrderByCanonicalKey = new Map(
+    snapshot.default_first_session.lookup_resolution_order_by_canonical_key.map(
+      (row) => [row.canonical_key, row.resolution_order] as const,
+    ),
+  );
+
+  for (const objectiveRow of manifest.objective_step_outcome_contract) {
+    const canonicalObjectiveKey = objectiveRow.canonical_objective_key;
+    const expectedAliasKey = `objective.${canonicalObjectiveKey}`;
+    const canonicalTemplateRow = rowsByKey.get(canonicalObjectiveKey);
+    const aliasTemplateRow = rowsByKey.get(expectedAliasKey);
+
+    assert.notEqual(
+      canonicalTemplateRow,
+      undefined,
+      `Missing objective-strip canonical template key '${canonicalObjectiveKey}' in narrative seeds.`,
+    );
+    assert.equal(
+      canonicalSelectionSet.has(canonicalObjectiveKey),
+      true,
+      `Objective-strip canonical key '${canonicalObjectiveKey}' must stay in default first-session canonical selection.`,
+    );
+    assert.equal(
+      canonicalTemplateRow!.template.trim().length > 0,
+      true,
+      `Objective-strip canonical key '${canonicalObjectiveKey}' must include replaceable placeholder text.`,
+    );
+    assert.deepEqual(
+      canonicalTemplateRow!.tokens,
+      [],
+      `Objective-strip canonical key '${canonicalObjectiveKey}' should be a tokenless label placeholder.`,
+    );
+
+    const manifestAliasKeysForCanonical = legacyAliasKeysByCanonicalKey.get(canonicalObjectiveKey) ?? [];
+    assert.deepEqual(
+      manifestAliasKeysForCanonical,
+      [expectedAliasKey],
+      `Objective-strip alias mapping drift for canonical objective key '${canonicalObjectiveKey}'.`,
+    );
+    assert.equal(
+      compatibilityAliasOnlySet.has(expectedAliasKey),
+      true,
+      `Objective-strip alias key '${expectedAliasKey}' must be declared in compatibility_alias_only_keys.`,
+    );
+    assert.equal(
+      canonicalSelectionSet.has(expectedAliasKey),
+      false,
+      `Objective-strip alias key '${expectedAliasKey}' must remain lookup-only and excluded from canonical defaults.`,
+    );
+    assert.notEqual(
+      aliasTemplateRow,
+      undefined,
+      `Missing objective-strip alias template key '${expectedAliasKey}' in narrative seeds.`,
+    );
+    assert.equal(
+      aliasTemplateRow!.template.trim().length > 0,
+      true,
+      `Objective-strip alias key '${expectedAliasKey}' must include replaceable placeholder text.`,
+    );
+    assert.deepEqual(
+      aliasTemplateRow!.tokens,
+      [],
+      `Objective-strip alias key '${expectedAliasKey}' should be tokenless.`,
+    );
+
+    const lookupResolutionOrder = lookupResolutionOrderByCanonicalKey.get(canonicalObjectiveKey);
+    assert.notEqual(
+      lookupResolutionOrder,
+      undefined,
+      `Missing snapshot lookup_resolution_order row for objective-strip canonical key '${canonicalObjectiveKey}'.`,
+    );
+    assert.deepEqual(
+      lookupResolutionOrder!,
+      [canonicalObjectiveKey, expectedAliasKey],
+      `Objective-strip lookup resolution order drift for canonical key '${canonicalObjectiveKey}'.`,
     );
   }
 });
@@ -529,13 +661,18 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 fails when objective contract 
   const objectiveId = "first_session.tick.observe_income.v1";
   const outOfCanonicalSelectionKey = "event.world.gather_started";
   const driftedObjectiveContract = manifest.objective_step_outcome_contract.map((row) =>
-    row.objective_id === objectiveId
+    row.canonical_objective_key === objectiveId
       ? {
         ...row,
-        success_canonical_keys: [
+        required_all_canonical_keys: [
           outOfCanonicalSelectionKey,
-          ...row.success_canonical_keys.slice(1),
+          ...row.required_all_canonical_keys.slice(1),
         ],
+        compatibility_alias_lookup_keys: {
+          [outOfCanonicalSelectionKey]: [],
+          [row.required_all_canonical_keys[1]!]:
+            row.compatibility_alias_lookup_keys[row.required_all_canonical_keys[1]!] ?? [],
+        },
       }
       : row
   );
@@ -566,13 +703,18 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 fails when objective contract 
   const objectiveId = "first_session.tick.observe_income.v1";
   const compatibilityAliasKey = "event.economy.tick_passive_income";
   const driftedObjectiveContract = manifest.objective_step_outcome_contract.map((row) =>
-    row.objective_id === objectiveId
+    row.canonical_objective_key === objectiveId
       ? {
         ...row,
-        success_canonical_keys: [
+        required_all_canonical_keys: [
           compatibilityAliasKey,
-          ...row.success_canonical_keys.slice(1),
+          ...row.required_all_canonical_keys.slice(1),
         ],
+        compatibility_alias_lookup_keys: {
+          [compatibilityAliasKey]: [],
+          [row.required_all_canonical_keys[1]!]:
+            row.compatibility_alias_lookup_keys[row.required_all_canonical_keys[1]!] ?? [],
+        },
       }
       : row
   );
@@ -670,8 +812,8 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 fails on missing canonical key
   );
   const objectiveCanonicalKeys = new Set(
     manifest.objective_step_outcome_contract.flatMap((row) => [
-      ...row.success_canonical_keys,
-      ...row.negative_canonical_keys,
+      ...row.required_all_canonical_keys,
+      ...(row.required_any_canonical_keys ?? []),
     ]),
   );
   const canonicalToDrop = manifest.default_first_slice_seed_usage.include_only_content_keys
@@ -772,8 +914,11 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 fails when mapped legacy alias
     },
     (error) =>
       error instanceof FirstSliceNarrativeTemplateSnapshotValidationError
-      && error.message.includes("legacy_alias_mapping")
-      && error.message.includes(legacyAliasKey),
+      && error.message.includes(legacyAliasKey)
+      && (
+        error.message.includes("legacy_alias_mapping")
+        || error.message.includes("must not be selected as canonical default key")
+      ),
   );
 });
 

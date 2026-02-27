@@ -170,6 +170,25 @@ All templates below are explicit replaceable placeholder copy for the first-slic
 | `event.scout.report_empty` | `scout` | `unit_id:trail_scout` | `playable_now` | `Scout report from {target_tile_label}: no active host detected. The roads remain quiet for now.` |
 | `event.scout.report_hostile` | `scout` | `unit_id:trail_scout` | `playable_now` | `Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).` |
 
+## 4A. First-Session Objective Strip Placeholder Labels
+
+Objective strip labels are seeded as replaceable placeholders with stable canonical objective IDs plus compatibility lookup-only aliases.
+
+| key | event_category | related_ids | slice_status_scope | template |
+| --- | --- | --- | --- | --- |
+| `first_session.tick.observe_income.v1` | `objective_strip` | `objective_id:first_session.tick.observe_income.v1` | `playable_now` | `[PLACEHOLDER] Confirm passive income flow by running one settlement tick.` |
+| `objective.first_session.tick.observe_income.v1` | `objective_strip` | `objective_id:first_session.tick.observe_income.v1;alias_of:first_session.tick.observe_income.v1` | `playable_now` | `[PLACEHOLDER] Confirm passive income flow by running one settlement tick.` |
+| `first_session.build.complete_first_upgrade.v1` | `objective_strip` | `objective_id:first_session.build.complete_first_upgrade.v1` | `playable_now` | `[PLACEHOLDER] Complete one building upgrade in the settlement panel.` |
+| `objective.first_session.build.complete_first_upgrade.v1` | `objective_strip` | `objective_id:first_session.build.complete_first_upgrade.v1;alias_of:first_session.build.complete_first_upgrade.v1` | `playable_now` | `[PLACEHOLDER] Complete one building upgrade in the settlement panel.` |
+| `first_session.train.complete_first_batch.v1` | `objective_strip` | `objective_id:first_session.train.complete_first_batch.v1` | `playable_now` | `[PLACEHOLDER] Finish one unit training batch from the barracks queue.` |
+| `objective.first_session.train.complete_first_batch.v1` | `objective_strip` | `objective_id:first_session.train.complete_first_batch.v1;alias_of:first_session.train.complete_first_batch.v1` | `playable_now` | `[PLACEHOLDER] Finish one unit training batch from the barracks queue.` |
+| `first_session.scout.confirm_hostile_target.v1` | `objective_strip` | `objective_id:first_session.scout.confirm_hostile_target.v1` | `playable_now` | `[PLACEHOLDER] Scout and confirm hostile activity on the target tile.` |
+| `objective.first_session.scout.confirm_hostile_target.v1` | `objective_strip` | `objective_id:first_session.scout.confirm_hostile_target.v1;alias_of:first_session.scout.confirm_hostile_target.v1` | `playable_now` | `[PLACEHOLDER] Scout and confirm hostile activity on the target tile.` |
+| `first_session.attack.dispatch_hostile_march.v1` | `objective_strip` | `objective_id:first_session.attack.dispatch_hostile_march.v1` | `playable_now` | `[PLACEHOLDER] Dispatch one hostile march toward the confirmed foreign settlement.` |
+| `objective.first_session.attack.dispatch_hostile_march.v1` | `objective_strip` | `objective_id:first_session.attack.dispatch_hostile_march.v1;alias_of:first_session.attack.dispatch_hostile_march.v1` | `playable_now` | `[PLACEHOLDER] Dispatch one hostile march toward the confirmed foreign settlement.` |
+| `first_session.resolve_hostile_outcome.v1` | `objective_strip` | `objective_id:first_session.resolve_hostile_outcome.v1` | `playable_now` | `[PLACEHOLDER] Resolve one hostile combat outcome and review losses.` |
+| `objective.first_session.resolve_hostile_outcome.v1` | `objective_strip` | `objective_id:first_session.resolve_hostile_outcome.v1;alias_of:first_session.resolve_hostile_outcome.v1` | `playable_now` | `[PLACEHOLDER] Resolve one hostile combat outcome and review losses.` |
+
 ## 5. Integration Notes (M1)
 
 - Prioritize `playable_now` rows in the first slice UI/event feed.

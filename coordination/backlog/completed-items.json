@@ -8426,5 +8426,49 @@
     "runtime_seconds": 246.11,
     "started_at": "2026-02-27T13:44:59.577295+00:00",
     "finished_at": "2026-02-27T13:49:05.678459+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0011-F01",
+    "title": "Lock snapshot-ready first-session objective schema in the slice token matrix",
+    "description": "Extend the first-slice objective contract docs with a snapshot-ready schema (canonical objective ids, loop-step order, required gate key families, and compatibility alias policy) so backend/frontend/content consume one machine-targeted objective shape.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F02-F01"
+    ],
+    "inputs": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "docs/design/first-vertical-slice.md",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+    ],
+    "acceptance_criteria": [
+      "Matrix defines one explicit objective row schema with canonical key, loop_step, required_all canonical keys, optional required_any canonical keys, and compatibility alias lookup keys",
+      "Contract locks six in-scope canonical objective ids in tick/build/train/scout/attack/resolve order and marks post-slice objective families deferred",
+      "Objective gate key guidance references canonical-default first-slice keys only and preserves negative-state families (insufficient_resources, cooldown, invalid_target, combat_loss)"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:44:54.339624+00:00",
+    "updated_at": "2026-02-27T13:51:53.006197+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/rowan-hale/outbox.json](D:/RedKeepers/agents/rowan-hale/outbox.json:724)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0011",
+    "assigned_agent": "rowan-hale",
+    "commit_sha": "0c68827d5c065c488ceab544e66b4e057bd0fff1",
+    "resolved_by_agent": "rowan-hale",
+    "resolved_by_role": "design",
+    "runtime_seconds": 158.39,
+    "started_at": "2026-02-27T13:49:12.976920+00:00",
+    "finished_at": "2026-02-27T13:51:51.363546+00:00"
   }
 ]
