@@ -1,0 +1,22 @@
+command: "C:\Program Files\Inkscape\bin\python.exe" tools/orchestrator.py status
+exit_code: 0
+
+stdout:
+RedKeepers Daemon Status
+State: running
+Lock held: True
+Last updated (UTC): 2026-02-27T15:07:30.673424+00:00
+Active: RK-AUTO-BACKLOG-0011-F06 | Run release-blocking gate after objective-contract snapshot integration | tomas-grell (qa)
+Queue: queued=1 dependency_ready=1 running=1 blocked=22 completed=197
+Agent Utilization:
+  - mara-voss (lead): runs=41 done=39 fail=0 time=11144.5s load=57.57 | open: ready=1 waiting=0 running=0 total=1 | backlog: blocked=6 completed=46
+  - tomas-grell (qa): runs=26 done=16 fail=8 time=9722.7s load=36.2 | open: ready=0 waiting=0 running=1 total=1 | backlog: blocked=4 completed=22
+  - ilya-fen (backend): runs=46 done=44 fail=1 time=17674.5s load=73.96 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=2 completed=66
+  - juno-cairn (platform): runs=9 done=8 fail=0 time=2846.0s load=12.74 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=3 completed=10
+  - nika-thorn (content): runs=8 done=7 fail=0 time=2117.6s load=10.53 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=0 completed=10
+  - rowan-hale (design): runs=10 done=9 fail=0 time=1786.7s load=11.98 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=0 completed=17
+  - sera-kest (frontend): runs=28 done=21 fail=2 time=11576.4s load=41.29 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=7 completed=26
+Workload Buckets: ready=dependency-ready queued, waiting=queued with unmet dependencies.
+
+stderr:
+
