@@ -779,6 +779,38 @@
       ]
     },
     {
+      "key": "event.world.scout_unavailable_tile",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "world_map"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "world_map",
+      "template": "Scout dispatch to {target_tile_label} is denied: the tile is unavailable for this route.",
+      "tokens": [
+        "target_tile_label"
+      ]
+    },
+    {
+      "key": "event.scout.unavailable_tile",
+      "slice_status_scope": "playable_now",
+      "categories": [
+        "event_feed_message",
+        "scout"
+      ],
+      "related_ids": [
+        "unit_id:trail_scout"
+      ],
+      "event_category": "scout",
+      "template": "Scout dispatch to {target_tile_label} is denied: the tile is unavailable for this route.",
+      "tokens": [
+        "target_tile_label"
+      ]
+    },
+    {
       "key": "event.world.gather_started",
       "slice_status_scope": "data_stub_post_slice",
       "categories": [

@@ -112,6 +112,7 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
         "event.scout.dispatched_success",
         "event.scout.return_empty",
         "event.scout.return_hostile",
+        "event.scout.unavailable_tile",
         "event.world.hostile_foreign_settlement_spotted",
         "event.world.hostile_dispatch_target_required",
         "event.world.hostile_dispatch_accepted",
@@ -215,6 +216,12 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
         "canonical_key": "event.scout.report_hostile",
         "legacy_keys": [
           "event.world.scout_report_hostile"
+        ]
+      },
+      {
+        "canonical_key": "event.scout.unavailable_tile",
+        "legacy_keys": [
+          "event.world.scout_unavailable_tile"
         ]
       },
       {
@@ -804,6 +811,13 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
           ]
         },
         {
+          "canonical_key": "event.scout.unavailable_tile",
+          "resolution_order": [
+            "event.scout.unavailable_tile",
+            "event.world.scout_unavailable_tile"
+          ]
+        },
+        {
           "canonical_key": "event.world.hostile_foreign_settlement_spotted",
           "resolution_order": [
             "event.world.hostile_foreign_settlement_spotted"
@@ -1193,6 +1207,12 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
             "hostile_force_estimate"
           ]
         },
+        "event.scout.unavailable_tile": {
+          "template": "Scout dispatch to {target_tile_label} is denied: the tile is unavailable for this route.",
+          "tokens": [
+            "target_tile_label"
+          ]
+        },
         "event.tick.passive_gain_capped": {
           "template": "{settlement_name}: storage limits clipped this tick, and excess yield is marked as waste.",
           "tokens": [
@@ -1475,6 +1495,12 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
           "tokens": [
             "target_tile_label",
             "hostile_force_estimate"
+          ]
+        },
+        "event.world.scout_unavailable_tile": {
+          "template": "Scout dispatch to {target_tile_label} is denied: the tile is unavailable for this route.",
+          "tokens": [
+            "target_tile_label"
           ]
         },
         "first_session.attack.dispatch_hostile_march.v1": {

@@ -43,6 +43,7 @@
       "event.scout.dispatched_success",
       "event.scout.return_empty",
       "event.scout.return_hostile",
+      "event.scout.unavailable_tile",
       "event.world.hostile_foreign_settlement_spotted",
       "event.world.hostile_dispatch_target_required",
       "event.world.hostile_dispatch_accepted",
@@ -109,7 +110,8 @@
       "event.scout.report_hostile",
       "event.scout.dispatched_success",
       "event.scout.return_empty",
-      "event.scout.return_hostile"
+      "event.scout.return_hostile",
+      "event.scout.unavailable_tile"
     ],
     "hostile_dispatch_and_resolve": [
       "event.world.hostile_foreign_settlement_spotted",
@@ -280,6 +282,7 @@
     "event.world.scout_dispatched",
     "event.world.scout_report_empty",
     "event.world.scout_report_hostile",
+    "event.world.scout_unavailable_tile",
     "event.world.march_started",
     "event.world.march_returned",
     "event.combat.placeholder_skirmish_win",
@@ -362,6 +365,12 @@
       "canonical_key": "event.scout.report_hostile",
       "legacy_keys": [
         "event.world.scout_report_hostile"
+      ]
+    },
+    {
+      "canonical_key": "event.scout.unavailable_tile",
+      "legacy_keys": [
+        "event.world.scout_unavailable_tile"
       ]
     },
     {

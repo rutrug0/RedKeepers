@@ -114,6 +114,7 @@ These are replaceable text overlays for tooltips/cards. Do not replace stable ID
 | `event.world.scout_dispatched` | `world_map` | `unit_id:trail_scout` | `playable_now` | `{settlement_name}: scouts ride out toward {target_tile_label}.` |
 | `event.world.scout_report_empty` | `world_map` | `unit_id:trail_scout` | `playable_now` | `Scout report from {target_tile_label}: no active host detected. The roads remain quiet for now.` |
 | `event.world.scout_report_hostile` | `world_map` | `unit_id:trail_scout` | `playable_now` | `Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).` |
+| `event.world.scout_unavailable_tile` | `world_map` | `unit_id:trail_scout` | `playable_now` | `Scout dispatch to {target_tile_label} is denied: the tile is unavailable for this route.` |
 | `event.world.march_started` | `world_map` | `unit_id:*;building_id:rally_post` | `playable_now` | `{army_name} crosses killing ground toward {target_tile_label}. ETA {eta_seconds}s.` |
 | `event.world.march_returned` | `world_map` | `unit_id:*` | `playable_now` | `{army_name} returns to {settlement_name}; tally survivors and prepare the next war order.` |
 | `event.world.road_warden_speed_bonus` | `world_map` | `civ_id:cinder_throne_legates;modifier_key:army_move_speed_mult` | `playable_now` | `Road Wardens shorten the march. {army_name} gains speed on the route between owned settlements.` |
@@ -169,6 +170,7 @@ All templates below are explicit replaceable placeholder copy for the first-slic
 | `event.scout.dispatched` | `scout` | `unit_id:trail_scout` | `playable_now` | `{settlement_name}: scouts ride out toward {target_tile_label}.` |
 | `event.scout.report_empty` | `scout` | `unit_id:trail_scout` | `playable_now` | `Scout report from {target_tile_label}: no active host detected. The roads remain quiet for now.` |
 | `event.scout.report_hostile` | `scout` | `unit_id:trail_scout` | `playable_now` | `Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).` |
+| `event.scout.unavailable_tile` | `scout` | `unit_id:trail_scout` | `playable_now` | `Scout dispatch to {target_tile_label} is denied: the tile is unavailable for this route.` |
 
 ## 4A. First-Session Objective Strip Placeholder Labels
 

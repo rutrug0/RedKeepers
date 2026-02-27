@@ -8985,5 +8985,52 @@
     "runtime_seconds": 321.99,
     "started_at": "2026-02-27T15:16:17.949587+00:00",
     "finished_at": "2026-02-27T15:21:39.924450+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F02",
+    "title": "Expose deterministic first-slice settlement loop as local HTTP host",
+    "description": "Implement a lightweight backend host that serves the existing deterministic settlement loop transport routes over HTTP so client-web fetch mode can run the full first-session loop without custom browser injection.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F01"
+    ],
+    "inputs": [
+      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
+      "backend/src/modules/economy/api/settlement-tick-endpoint.ts",
+      "backend/src/modules/buildings/api/settlement-building-upgrade-endpoint.ts",
+      "backend/src/modules/units/api/settlement-unit-train-endpoint.ts",
+      "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.ts",
+      "backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.ts"
+    ],
+    "acceptance_criteria": [
+      "A deterministic local HTTP host command is available and serves first-slice routes for tick, build upgrade, unit train, scout tile interact, hostile settlement attack, and march snapshot",
+      "HTTP responses preserve existing contract behavior (status + body) from local transport handlers, including deterministic failure code mapping",
+      "At least one targeted transport smoke check covers end-to-end HTTP invocation for one settlement action and one hostile map action"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:32:46.974156+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "  - [completed-items.json](D:\\RedKeepers\\coordination\\backlog\\completed-items.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "d7789e0de067e9b8ce0893e84dc783b3d7a2facb",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 658.19,
+    "started_at": "2026-02-27T15:21:46.872333+00:00",
+    "finished_at": "2026-02-27T15:32:45.054635+00:00"
   }
 ]

@@ -1,46 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0012-F02",
-    "title": "Expose deterministic first-slice settlement loop as local HTTP host",
-    "description": "Implement a lightweight backend host that serves the existing deterministic settlement loop transport routes over HTTP so client-web fetch mode can run the full first-session loop without custom browser injection.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0012-F01"
-    ],
-    "inputs": [
-      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
-      "backend/src/modules/economy/api/settlement-tick-endpoint.ts",
-      "backend/src/modules/buildings/api/settlement-building-upgrade-endpoint.ts",
-      "backend/src/modules/units/api/settlement-unit-train-endpoint.ts",
-      "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.ts",
-      "backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.ts"
-    ],
-    "acceptance_criteria": [
-      "A deterministic local HTTP host command is available and serves first-slice routes for tick, build upgrade, unit train, scout tile interact, hostile settlement attack, and march snapshot",
-      "HTTP responses preserve existing contract behavior (status + body) from local transport handlers, including deterministic failure code mapping",
-      "At least one targeted transport smoke check covers end-to-end HTTP invocation for one settlement action and one hostile map action"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T15:16:12.686387+00:00",
-    "updated_at": "2026-02-27T15:32:45.108829+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0012-F03",
     "title": "Backfill first-session narrative templates for transport-failure and cooldown paths",
     "description": "Expand first-slice narrative seed rows so transport-backed settlement and world-map actions have canonical placeholder templates for both success and deterministic failure states without relying on client hard-coded fallback text.",
@@ -66,17 +25,18 @@
     "validation_commands": [
       "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T15:16:12.686387+00:00",
-    "updated_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:38:40.595359+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0012"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
+    "assigned_agent": "nika-thorn"
   },
   {
     "id": "RK-AUTO-BACKLOG-0012-F04",
@@ -268,5 +228,43 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0012-F01"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F02-F01",
+    "title": "Unblock direct Node execution for first-slice HTTP host transport dependency path",
+    "description": "Normalize the first-slice transport/host runtime chain for direct `node` execution by removing remaining directory imports and unsupported TypeScript syntax usage on the host dependency path so the new HTTP smoke test can run without environment-specific loader constraints.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F02"
+    ],
+    "inputs": [
+      "backend/src/app/transport/first-slice-settlement-loop-http-host.ts",
+      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
+      "backend/src/modules/world_map/api/*.ts",
+      "backend/src/modules/world_map/application/*.ts"
+    ],
+    "acceptance_criteria": [
+      "Running `node --test --test-concurrency=1 --test-isolation=none backend/src/app/transport/first-slice-settlement-loop-http-host.test.ts` succeeds in this repo with no `ERR_UNSUPPORTED_DIR_IMPORT`.",
+      "The same command succeeds with no `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` errors on loaded first-slice transport dependencies.",
+      "Gameplay/contract behavior for first-slice settlement/world-map handlers remains unchanged."
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/transport/first-slice-settlement-loop-http-host.test.ts"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:32:47.170302+00:00",
+    "updated_at": "2026-02-27T15:32:47.170302+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012-F02"
   }
 ]

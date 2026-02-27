@@ -211,6 +211,12 @@ const firstSliceSettlementLoopRuntimeTokenMatrixContractV1: readonly FirstSliceS
     required_tokens: ["target_tile_label", "hostile_force_estimate"],
     compatibility_alias_keys: [],
   },
+  {
+    loop_key: "scout",
+    canonical_key: "event.scout.unavailable_tile",
+    required_tokens: ["target_tile_label"],
+    compatibility_alias_keys: ["event.world.scout_unavailable_tile"],
+  },
 ];
 
 const loadFirstSliceHostileRuntimeTokenContractV1 = async (): Promise<FirstSliceHostileRuntimeTokenContractV1> =>
