@@ -68,3 +68,14 @@ This repository is bootstrapped with the M0 orchestration foundation:
   - `coordination/runtime/first-slice-release-gate/`
 - Runbook:
   - `docs/operations/first-slice-release-gate.md`
+
+## Local First-Slice Runtime Launcher (M0)
+
+- Single-command backend + web shell runtime launcher:
+  - `launch-local-game.bat`
+- Optional explicit ports:
+  - `launch-local-game.bat 8000 8787`
+- Launcher behavior:
+  - Refreshes `client-web/first-slice-manifest-snapshot.js` before startup.
+  - Starts backend transport host lane plus web-shell lane with same-origin proxying for first-slice transport routes.
+  - Prints lane status and deterministic first-session defaults (session settlement, hostile target settlement, world id) sourced from first-slice playable manifests.

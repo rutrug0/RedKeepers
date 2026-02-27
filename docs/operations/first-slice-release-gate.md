@@ -20,6 +20,29 @@ Optional output override:
 python tools/first_slice_release_gate_runner.py --output-dir coordination/runtime/first-slice-release-gate
 ```
 
+## Local Runtime Launcher (Backend + Web Shell)
+
+Single-command local runtime launcher for first-slice iteration and release-candidate prep:
+
+```powershell
+launch-local-game.bat
+```
+
+Optional explicit ports (`web-port` then `backend-port`):
+
+```powershell
+launch-local-game.bat 8000 8787
+```
+
+Launcher behavior:
+- Refreshes the first-slice frontend manifest snapshot before lane startup.
+- Starts backend transport host lane (`http://127.0.0.1:8787` by default).
+- Starts client-web shell lane (`http://127.0.0.1:8000` by default) with same-origin proxying for first-slice transport routes (`/settlements/*`, `/world-map/*`) to the backend lane.
+- Prints deterministic first-session defaults (`session_settlement_id`, `hostile_target_settlement_id`, `world_id`) sourced from `backend/src/app/config/seeds/v1/first-slice-playable-manifest.json`.
+- Exits non-zero if manifest refresh fails or either runtime lane fails to start.
+
+This launcher remains placeholder-art compliant and does not add production infrastructure scope.
+
 ## Deterministic Gate Order
 
 1. `playable`: `python tools/rk_m0_0011_first_slice_loop_smoke.py`

@@ -1,45 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0012-F04",
-    "title": "Default client shell to transport-backed first-session state with deterministic fallback",
-    "description": "Refactor client shell bootstrap so default populated mode is driven by transport-backed runtime actions/state, while preserving a deterministic offline fallback state when transport is unavailable.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0012-F02",
-      "RK-AUTO-BACKLOG-0012-F03"
-    ],
-    "inputs": [
-      "client-web/app.js",
-      "client-web/index.html",
-      "client-web/first-slice-bootstrap-payload.js",
-      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts"
-    ],
-    "acceptance_criteria": [
-      "Default first-session path renders settlement/map/feed from transport-backed runtime data without requiring manual mock-state toggles",
-      "When transport is unreachable, UI switches to one deterministic non-crashing fallback mode that surfaces a clear placeholder warning and keeps core controls responsive",
-      "Tick/build/train/scout/attack actions continue to map contract responses to canonical first-slice content keys and objective progression remains intact"
-    ],
-    "validation_commands": [
-      "python tools/rk_m0_0011_first_slice_loop_smoke.py"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T15:16:12.686387+00:00",
-    "updated_at": "2026-02-27T15:49:59.009407+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
-    "assigned_agent": "sera-kest"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0012-F05",
     "title": "Add one-command local first-slice runtime launcher for backend + web shell",
     "description": "Create a reproducible launcher that starts the first-slice backend transport host and client-web shell together for local iteration and release-candidate prep without manual multi-terminal setup.",
@@ -66,17 +26,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T15:16:12.686387+00:00",
-    "updated_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:55:47.382026+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0012"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
+    "assigned_agent": "juno-cairn"
   },
   {
     "id": "RK-AUTO-BACKLOG-0012-F06",
