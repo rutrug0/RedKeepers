@@ -1,5 +1,6 @@
 import {
   WORLD_MAP_HOSTILE_ATTACK_FLOW,
+  type WorldMapHostileDispatchEnRouteEventPayload,
   type WorldMapHostileAttackResolvedResponseDto,
 } from "../domain/world-map-hostile-attack-contract.ts";
 import type {
@@ -270,7 +271,7 @@ export class DeterministicWorldMapHostileAttackService
     const attackerUnitsRemaining = Math.max(0, attackerUnitsDispatched - attackerUnitsLost);
     const defenderGarrisonRemaining = Math.max(0, defenderStrength - defenderGarrisonLost);
 
-    const dispatchEvent = {
+    const dispatchEvent: WorldMapHostileDispatchEnRouteEventPayload = {
       payload_key: "dispatch_sent" as const,
       content_key: "event.world.hostile_dispatch_en_route",
       content_key_aliases: [WORLD_MAP_LEGACY_MARCH_STARTED_KEY],

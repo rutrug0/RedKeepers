@@ -72,6 +72,14 @@ test("POST /world-map/settlements/{targetSettlementId}/attack returns determinis
     response.events.map((event) => event.payload_key),
     ["dispatch_sent", "march_arrived", "combat_resolved"],
   );
+  assert.deepStrictEqual(
+    response.event_payloads.dispatch_sent.tokens,
+    {
+      army_name: "Raid Column",
+      target_tile_label: "Ruin Holdfast",
+      eta_seconds: "90",
+    },
+  );
   assert.equal(response.hero_attachment, null);
   assert.deepStrictEqual(response.hero_runtime_payloads, []);
 });

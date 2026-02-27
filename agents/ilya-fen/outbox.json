@@ -2368,4 +2368,33 @@
                                     }
                                 ]
     }
+,
+    {
+        "timestamp_utc":  "2026-02-27T11:39:28.3587634Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0007-F04-F01",
+        "status":  "done",
+        "summary":  "Hardened hostile dispatch payload contract typing to the canonical `event.world.hostile_dispatch_en_route` tokens (`army_name`, `target_tile_label`, `eta_seconds`) and added endpoint/transport assertions that verify canonical dispatch token emission independent of legacy alias lookup.",
+        "changed_files":  [
+                              "backend/src/modules/world_map/domain/world-map-hostile-attack-contract.ts",
+                              "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+                              "backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.test.ts",
+                              "backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+                                    "node --experimental-strip-types --check backend/src/modules/world_map/domain/world-map-hostile-attack-contract.ts backend/src/modules/world_map/application/world-map-hostile-attack-service.ts backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.test.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                                    "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "Required hostile attack service tests passed (9/9). Strip-types checks passed for all touched TypeScript files. Direct endpoint test execution remains blocked by pre-existing runtime compatibility gaps outside this item scope (`ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` parameter properties and `ERR_UNSUPPORTED_DIR_IMPORT` on world_map application barrel import)."
+                    },
+        "proposed_work_items":  [
+
+                                ]
+    }
 ]

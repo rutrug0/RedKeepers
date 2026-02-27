@@ -334,6 +334,14 @@ test("local first-slice transport serves deterministic hostile settlement attack
     response.body.event_payloads.dispatch_sent.content_key_aliases,
     ["event.world.march_started"],
   );
+  assert.deepStrictEqual(
+    response.body.event_payloads.dispatch_sent.tokens,
+    {
+      army_name: "Raid Column",
+      target_tile_label: "Ruin Holdfast",
+      eta_seconds: "90",
+    },
+  );
   assert.equal(
     response.body.event_payloads.march_arrived.content_key,
     "event.world.hostile_post_battle_returned",

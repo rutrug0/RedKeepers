@@ -19,12 +19,25 @@ export const WORLD_MAP_HOSTILE_ATTACK_HERO_RUNTIME_PAYLOAD_KEYS = [
 export type WorldMapHostileAttackHeroRuntimePayloadKey =
   (typeof WORLD_MAP_HOSTILE_ATTACK_HERO_RUNTIME_PAYLOAD_KEYS)[number];
 
-export interface WorldMapHostileAttackEventPayload {
+export interface WorldMapHostileAttackEventPayload<
+  Tokens extends Readonly<Record<string, string>> = Readonly<Record<string, string>>,
+> {
   readonly payload_key: WorldMapHostileAttackEventPayloadKey;
   readonly content_key: string;
   readonly content_key_aliases?: readonly string[];
   readonly occurred_at: Date;
-  readonly tokens: Readonly<Record<string, string>>;
+  readonly tokens: Tokens;
+}
+
+export interface WorldMapHostileDispatchEnRouteEventPayload
+  extends WorldMapHostileAttackEventPayload<{
+    readonly army_name: string;
+    readonly target_tile_label: string;
+    readonly eta_seconds: string;
+  }>
+{
+  readonly payload_key: "dispatch_sent";
+  readonly content_key: "event.world.hostile_dispatch_en_route";
 }
 
 export interface WorldMapHostileAttackHeroRuntimePayload {
@@ -62,7 +75,7 @@ export interface WorldMapHostileAttackResolvedResponseDto {
   readonly hero_attachment: WorldMapMarchDispatchHeroAttachmentDto | null;
   readonly hero_runtime_payloads: readonly WorldMapHostileAttackHeroRuntimePayload[];
   readonly event_payloads: {
-    readonly dispatch_sent: WorldMapHostileAttackEventPayload;
+    readonly dispatch_sent: WorldMapHostileDispatchEnRouteEventPayload;
     readonly march_arrived: WorldMapHostileAttackEventPayload;
     readonly combat_resolved: WorldMapHostileAttackEventPayload;
   };
