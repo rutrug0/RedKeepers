@@ -6564,5 +6564,52 @@
     "runtime_seconds": 237.62,
     "started_at": "2026-02-27T09:44:30.657485+00:00",
     "finished_at": "2026-02-27T09:48:28.295498+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F06",
+    "title": "Add critical golden-path smoke for full first-slice loop including attack resolve",
+    "description": "Add a release-blocking smoke path that verifies the full first-slice loop (tick, build, train, map interaction, hostile dispatch, deterministic combat resolve, event feed output) using scoped checks only.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F01",
+      "RK-AUTO-BACKLOG-0004-F02",
+      "RK-AUTO-BACKLOG-0004-F05"
+    ],
+    "inputs": [
+      "tests/",
+      "tools/",
+      "docs/design/vertical-slice-done-v1.md",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "A single scoped smoke command validates first-slice loop prerequisites through hostile attack resolve and fails when required loop stages are missing.",
+      "Smoke output records deterministic pass/fail evidence for each mandatory loop stage defined in vertical-slice done gate.",
+      "Validation remains scoped to critical release path and avoids broad unrelated full-suite execution."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:16:22.546990+00:00",
+    "updated_at": "2026-02-27T09:56:30.765485+00:00",
+    "estimated_effort": "M",
+    "token_budget": 11000,
+    "result_summary": "- I observed unrelated existing modifications in `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` and did not alter them.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "0c09f85d6d7f7bdde047b0e09d6f4e4328138504",
+    "resolved_by_agent": "tomas-grell",
+    "resolved_by_role": "qa",
+    "runtime_seconds": 471.44,
+    "started_at": "2026-02-27T09:48:37.640989+00:00",
+    "finished_at": "2026-02-27T09:56:29.076792+00:00"
   }
 ]

@@ -1,46 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0004-F06",
-    "title": "Add critical golden-path smoke for full first-slice loop including attack resolve",
-    "description": "Add a release-blocking smoke path that verifies the full first-slice loop (tick, build, train, map interaction, hostile dispatch, deterministic combat resolve, event feed output) using scoped checks only.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0004-F01",
-      "RK-AUTO-BACKLOG-0004-F02",
-      "RK-AUTO-BACKLOG-0004-F05"
-    ],
-    "inputs": [
-      "tests/",
-      "tools/",
-      "docs/design/vertical-slice-done-v1.md",
-      "docs/design/first-vertical-slice.md"
-    ],
-    "acceptance_criteria": [
-      "A single scoped smoke command validates first-slice loop prerequisites through hostile attack resolve and fails when required loop stages are missing.",
-      "Smoke output records deterministic pass/fail evidence for each mandatory loop stage defined in vertical-slice done gate.",
-      "Validation remains scoped to critical release path and avoids broad unrelated full-suite execution."
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-26T19:16:22.546990+00:00",
-    "updated_at": "2026-02-27T09:56:29.089080+00:00",
-    "estimated_effort": "M",
-    "token_budget": 11000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
-    "assigned_agent": "tomas-grell"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0005-F06",
     "title": "Run release-blocking slice gate evidence pass after manifest and wrapper hardening",
     "description": "Execute a critical release-path QA pass that captures evidence for playable/quality/platform gates after wrapper command hardening and manifest-bound backend/frontend integration are complete.",
@@ -68,16 +27,55 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-26T20:55:12.234856+00:00",
-    "updated_at": "2026-02-26T20:55:12.234856+00:00",
+    "updated_at": "2026-02-27T09:59:09.120820+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0005"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005",
+    "assigned_agent": "tomas-grell"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0006",
+    "title": "Generate next backlog tranche",
+    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas. Prioritize fast cycle throughput: bias toward implementation tasks (backend/frontend/design/content/platform) and add dedicated QA/regression tasks only when risk is critical or release-blocking.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-items.json",
+      "docs/design/first-vertical-slice.md",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "At least 3 new queued tasks are created or requeued",
+      "Each task has owner_role, dependencies, and acceptance criteria",
+      "Tasks reflect current project priorities and unblock progress",
+      "Generated tranche is implementation-heavy; non-critical QA/lead coordination tasks are minimized",
+      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T09:56:30.941495+00:00",
+    "updated_at": "2026-02-27T09:56:30.941495+00:00",
+    "estimated_effort": "S",
+    "token_budget": 12000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "auto_generated": "backlog_refill"
   }
 ]
