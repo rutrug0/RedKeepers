@@ -726,5 +726,23 @@
                                     "python tools/rk_m0_0011_first_slice_loop_smoke.py",
                                     "python tools/orchestrator.py status"
                                 ]
+    },
+    {
+        "ts":  "2026-02-27T12:56:24.3527283Z",
+        "item_id":  "RK-AUTO-BACKLOG-0009-F01-F01",
+        "status":  "completed",
+        "summary":  "Enforced migration-status-driven event key resolution so direct rendering accepts only canonical-default keys while compatibility-only aliases are lookup inputs that deterministically resolve to canonical defaults; added resolver coverage for alias cases across tick/build/train/scout/hostile flows.",
+        "files":  [
+                      "client-web/app.js",
+                      "client-android-capacitor/www/app.js",
+                      "tools/health_checks.py",
+                      "tests/test_hostile_runtime_token_contract_validation.py",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "node --check client-android-capacitor/www/app.js",
+                                    "python -m unittest tests.test_hostile_runtime_token_contract_validation"
+                                ]
     }
 ]

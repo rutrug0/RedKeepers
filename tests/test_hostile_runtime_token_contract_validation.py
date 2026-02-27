@@ -85,20 +85,31 @@ def _base_manifest_fixture() -> dict[str, object]:
     include_only_content_keys: list[str] = []
     for namespace in ("tick", "build", "train", "scout", "hostile_dispatch_and_resolve"):
         include_only_content_keys.extend(loop_required_keys[namespace])
+    compatibility_alias_only_keys = [
+        "event.economy.tick_passive_income",
+        "event.buildings.upgrade_started",
+        "event.units.training_started",
+        "event.world.scout_dispatched",
+        "event.world.march_started",
+        "event.combat.placeholder_skirmish_win",
+    ]
+    migration_key_status_by_key = {
+        key: "canonical-default" for key in include_only_content_keys
+    }
+    migration_key_status_by_key.update(
+        {
+            key: "compatibility-only"
+            for key in compatibility_alias_only_keys
+        }
+    )
 
     return {
         "default_first_slice_seed_usage": {
             "include_only_content_keys": include_only_content_keys
         },
         "loop_required_keys": loop_required_keys,
-        "compatibility_alias_only_keys": [
-            "event.economy.tick_passive_income",
-            "event.buildings.upgrade_started",
-            "event.units.training_started",
-            "event.world.scout_dispatched",
-            "event.world.march_started",
-            "event.combat.placeholder_skirmish_win",
-        ],
+        "compatibility_alias_only_keys": compatibility_alias_only_keys,
+        "migration_key_status_by_key": migration_key_status_by_key,
         "legacy_alias_mapping": [
             {
                 "canonical_key": "event.tick.passive_income",
@@ -241,6 +252,20 @@ def _hostile_contract_errors(errors: list[str]) -> list[str]:
     return [error for error in errors if "first-slice-hostile-runtime-token-contract drift:" in error]
 
 
+def _canonical_candidates_by_legacy_alias(
+    manifest: dict[str, object],
+) -> dict[str, list[str]]:
+    lookup: dict[str, list[str]] = {}
+    for row in manifest["legacy_alias_mapping"]:  # type: ignore[index]
+        canonical_key = str(row["canonical_key"])
+        for legacy_key in row["legacy_keys"]:  # type: ignore[index]
+            alias_key = str(legacy_key)
+            lookup.setdefault(alias_key, [])
+            if canonical_key not in lookup[alias_key]:
+                lookup[alias_key].append(canonical_key)
+    return lookup
+
+
 class HostileRuntimeTokenContractValidationTests(unittest.TestCase):
     def test_validate_environment_accepts_consistent_hostile_runtime_contract(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -305,7 +330,7 @@ class HostileRuntimeTokenContractValidationTests(unittest.TestCase):
         hostile_errors = _hostile_contract_errors(errors)
         self.assertTrue(
             any(
-                "compatibility alias key 'event.world.march_started'" in error
+                "event.world.march_started" in error
                 and "include_only_content_keys" in error
                 for error in hostile_errors
             )
@@ -419,6 +444,56 @@ class HostileRuntimeTokenContractValidationTests(unittest.TestCase):
                 and "event.economy.tick_passive_income" in error
                 and "missing_in_alias" in error
                 and "extra_in_alias" in error
+                for error in hostile_errors
+            )
+        )
+
+    def test_manifest_event_key_resolver_maps_aliases_to_canonical_default_across_all_first_slice_flows(self) -> None:
+        manifest = _base_manifest_fixture()
+        migration_key_status_by_key = manifest["migration_key_status_by_key"]  # type: ignore[index]
+        canonical_candidates_by_alias = _canonical_candidates_by_legacy_alias(manifest)
+
+        alias_to_expected_canonical = {
+            "event.economy.tick_passive_income": "event.tick.passive_income",
+            "event.buildings.upgrade_started": "event.build.upgrade_started",
+            "event.units.training_started": "event.train.started",
+            "event.world.scout_dispatched": "event.scout.dispatched",
+            "event.world.march_started": "event.world.hostile_dispatch_en_route",
+        }
+        for alias_key, expected_canonical_key in alias_to_expected_canonical.items():
+            resolved_key = health_checks._resolve_manifest_event_key_for_rendering(
+                content_key=alias_key,
+                migration_key_status_by_key=migration_key_status_by_key,
+                canonical_candidates_by_legacy_alias=canonical_candidates_by_alias,
+            )
+            self.assertEqual(
+                resolved_key,
+                expected_canonical_key,
+                f"Expected alias '{alias_key}' to resolve to '{expected_canonical_key}'.",
+            )
+
+    def test_validate_environment_reports_alias_with_non_compatibility_migration_status(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _write_required_daemon_files(root)
+
+            contract = _base_hostile_contract_fixture()
+            manifest = _base_manifest_fixture()
+            manifest["migration_key_status_by_key"]["event.world.scout_dispatched"] = "canonical-default"  # type: ignore[index]
+            event_feed = _base_event_feed_fixture()
+            _write_hostile_contract_inputs(root, contract=contract, manifest=manifest, event_feed=event_feed)
+
+            with (
+                mock.patch.object(health_checks, "codex_command_preflight_error", return_value=None),
+                mock.patch.object(health_checks, "codex_model_access_preflight_error", return_value=None),
+            ):
+                errors = health_checks.validate_environment(root)
+
+        hostile_errors = _hostile_contract_errors(errors)
+        self.assertTrue(
+            any(
+                "compatibility_alias_only_keys contains key(s) missing compatibility-only migration_key_status" in error
+                and "event.world.scout_dispatched" in error
                 for error in hostile_errors
             )
         )

@@ -279,6 +279,53 @@ def _read_string_list(value: Any, *, label: str) -> list[str]:
     return normalized
 
 
+MIGRATION_KEY_STATUS_CANONICAL_DEFAULT = "canonical-default"
+MIGRATION_KEY_STATUS_COMPATIBILITY_ONLY = "compatibility-only"
+MIGRATION_KEY_STATUS_ALLOWED = {
+    MIGRATION_KEY_STATUS_CANONICAL_DEFAULT,
+    MIGRATION_KEY_STATUS_COMPATIBILITY_ONLY,
+}
+
+
+def _build_migration_key_status_by_key(
+    *,
+    canonical_default_keys: list[str],
+    compatibility_alias_only_keys: list[str],
+) -> dict[str, str]:
+    status_by_key: dict[str, str] = {}
+    for key in canonical_default_keys:
+        status_by_key[key] = MIGRATION_KEY_STATUS_CANONICAL_DEFAULT
+    for key in compatibility_alias_only_keys:
+        if status_by_key.get(key) == MIGRATION_KEY_STATUS_CANONICAL_DEFAULT:
+            raise ValueError(
+                f"compatibility alias key '{key}' conflicts with canonical-default migration status."
+            )
+        status_by_key[key] = MIGRATION_KEY_STATUS_COMPATIBILITY_ONLY
+    return status_by_key
+
+
+def _resolve_manifest_event_key_for_rendering(
+    *,
+    content_key: str,
+    migration_key_status_by_key: dict[str, str],
+    canonical_candidates_by_legacy_alias: dict[str, list[str]],
+) -> str:
+    normalized_key = str(content_key).strip()
+    if len(normalized_key) < 1:
+        return ""
+
+    migration_status = migration_key_status_by_key.get(normalized_key)
+    if migration_status == MIGRATION_KEY_STATUS_CANONICAL_DEFAULT:
+        return normalized_key
+    if migration_status != MIGRATION_KEY_STATUS_COMPATIBILITY_ONLY:
+        return ""
+
+    for canonical_candidate in canonical_candidates_by_legacy_alias.get(normalized_key, []):
+        if migration_key_status_by_key.get(canonical_candidate) == MIGRATION_KEY_STATUS_CANONICAL_DEFAULT:
+            return canonical_candidate
+    return ""
+
+
 FIRST_SLICE_REQUIRED_LOOP_KEYS_BY_NAMESPACE: dict[str, tuple[str, ...]] = {
     "tick": (
         "event.tick.passive_income",
@@ -471,11 +518,33 @@ def _validate_first_slice_hostile_runtime_token_contract_drift(*, errors: list[s
             manifest.get("compatibility_alias_only_keys"),
             label="first-slice-content-key-manifest.compatibility_alias_only_keys",
         )
+        manifest_migration_key_status_raw = manifest.get("migration_key_status_by_key")
+        if manifest_migration_key_status_raw is None:
+            manifest_migration_key_status_by_key = _build_migration_key_status_by_key(
+                canonical_default_keys=manifest_default_canonical_keys,
+                compatibility_alias_only_keys=manifest_alias_only_keys,
+            )
+        else:
+            if not isinstance(manifest_migration_key_status_raw, dict):
+                raise ValueError("first-slice-content-key-manifest.migration_key_status_by_key must be an object.")
+            manifest_migration_key_status_by_key: dict[str, str] = {}
+            for raw_key, raw_status in manifest_migration_key_status_raw.items():
+                key = str(raw_key).strip()
+                if len(key) < 1:
+                    raise ValueError("first-slice-content-key-manifest.migration_key_status_by_key contains an empty key.")
+                status = str(raw_status).strip()
+                if status not in MIGRATION_KEY_STATUS_ALLOWED:
+                    raise ValueError(
+                        "first-slice-content-key-manifest.migration_key_status_by_key"
+                        f"['{key}'] must be one of {sorted(MIGRATION_KEY_STATUS_ALLOWED)}."
+                    )
+                manifest_migration_key_status_by_key[key] = status
 
         manifest_legacy_alias_mapping_raw = manifest.get("legacy_alias_mapping")
         if not isinstance(manifest_legacy_alias_mapping_raw, list):
             raise ValueError("first-slice-content-key-manifest.legacy_alias_mapping must be a list.")
         manifest_alias_map: dict[str, list[str]] = {}
+        manifest_canonical_candidates_by_legacy_alias: dict[str, list[str]] = {}
         for idx, row in enumerate(manifest_legacy_alias_mapping_raw):
             if not isinstance(row, dict):
                 raise ValueError(f"first-slice-content-key-manifest.legacy_alias_mapping[{idx}] must be an object.")
@@ -489,6 +558,11 @@ def _validate_first_slice_hostile_runtime_token_contract_drift(*, errors: list[s
                 label=f"first-slice-content-key-manifest.legacy_alias_mapping[{idx}].legacy_keys",
             )
             manifest_alias_map[canonical_key] = legacy_keys
+            for legacy_key in legacy_keys:
+                if legacy_key not in manifest_canonical_candidates_by_legacy_alias:
+                    manifest_canonical_candidates_by_legacy_alias[legacy_key] = []
+                if canonical_key not in manifest_canonical_candidates_by_legacy_alias[legacy_key]:
+                    manifest_canonical_candidates_by_legacy_alias[legacy_key].append(canonical_key)
 
         manifest_deferred_rows = manifest.get("deferred_post_slice_keys")
         if not isinstance(manifest_deferred_rows, list):
@@ -523,11 +597,42 @@ def _validate_first_slice_hostile_runtime_token_contract_drift(*, errors: list[s
         return
 
     manifest_hostile_required_set = set(manifest_hostile_loop_required_keys)
-    manifest_default_canonical_set = set(manifest_default_canonical_keys)
+    manifest_default_non_canonical_keys = sorted(
+        key
+        for key in manifest_default_canonical_keys
+        if manifest_migration_key_status_by_key.get(key) != MIGRATION_KEY_STATUS_CANONICAL_DEFAULT
+    )
+    if manifest_default_non_canonical_keys:
+        _append_hostile_contract_drift_error(
+            errors,
+            (
+                "default_first_slice_seed_usage.include_only_content_keys contains non canonical-default key(s): "
+                f"{manifest_default_non_canonical_keys}."
+            ),
+        )
+    manifest_default_canonical_set = {
+        key
+        for key in manifest_default_canonical_keys
+        if manifest_migration_key_status_by_key.get(key) == MIGRATION_KEY_STATUS_CANONICAL_DEFAULT
+    }
     runtime_canonical_set = set(runtime_canonical_keys)
     contract_alias_only_set = set(contract_alias_only_keys)
     manifest_alias_only_set = set(manifest_alias_only_keys)
     deferred_union = set(deferred_contract_keys).union(manifest_deferred_keys)
+
+    manifest_alias_keys_missing_compatibility_status = sorted(
+        key
+        for key in manifest_alias_only_keys
+        if manifest_migration_key_status_by_key.get(key) != MIGRATION_KEY_STATUS_COMPATIBILITY_ONLY
+    )
+    if manifest_alias_keys_missing_compatibility_status:
+        _append_hostile_contract_drift_error(
+            errors,
+            (
+                "compatibility_alias_only_keys contains key(s) missing compatibility-only migration_key_status: "
+                f"{manifest_alias_keys_missing_compatibility_status}."
+            ),
+        )
 
     for namespace, required_keys in FIRST_SLICE_REQUIRED_LOOP_KEYS_BY_NAMESPACE.items():
         manifest_namespace_keys = manifest_loop_keys_by_namespace.get(namespace, [])
@@ -570,7 +675,9 @@ def _validate_first_slice_hostile_runtime_token_contract_drift(*, errors: list[s
             )
 
         alias_keys_selected_as_loop_canonical = sorted(
-            key for key in manifest_namespace_keys if key in manifest_alias_only_set
+            key
+            for key in manifest_namespace_keys
+            if manifest_migration_key_status_by_key.get(key) == MIGRATION_KEY_STATUS_COMPATIBILITY_ONLY
         )
         if alias_keys_selected_as_loop_canonical:
             _append_hostile_contract_drift_error(
@@ -582,10 +689,77 @@ def _validate_first_slice_hostile_runtime_token_contract_drift(*, errors: list[s
                 ),
             )
 
+        non_canonical_default_migration_keys = sorted(
+            key
+            for key in manifest_namespace_keys
+            if manifest_migration_key_status_by_key.get(key) != MIGRATION_KEY_STATUS_CANONICAL_DEFAULT
+        )
+        if non_canonical_default_migration_keys:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    "loop_required_keys contains key(s) without canonical-default migration_key_status in "
+                    f"first-slice-content-key-manifest.loop_required_keys.{namespace}: "
+                    f"{non_canonical_default_migration_keys}."
+                ),
+            )
+
+        resolved_alias_example_count = 0
+        for canonical_key in manifest_namespace_keys:
+            for alias_key in manifest_alias_map.get(canonical_key, []):
+                if (
+                    manifest_migration_key_status_by_key.get(alias_key)
+                    != MIGRATION_KEY_STATUS_COMPATIBILITY_ONLY
+                ):
+                    continue
+                resolved_key = _resolve_manifest_event_key_for_rendering(
+                    content_key=alias_key,
+                    migration_key_status_by_key=manifest_migration_key_status_by_key,
+                    canonical_candidates_by_legacy_alias=manifest_canonical_candidates_by_legacy_alias,
+                )
+                if resolved_key != canonical_key:
+                    _append_hostile_contract_drift_error(
+                        errors,
+                        (
+                            "alias lookup failed deterministic canonical-default resolution for namespace "
+                            f"'{namespace}': alias '{alias_key}' resolved to '{resolved_key or '(empty)'}' "
+                            f"instead of '{canonical_key}'."
+                        ),
+                    )
+                resolved_alias_example_count += 1
+                break
+        if resolved_alias_example_count < 1:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    "missing compatibility alias fallback coverage in legacy_alias_mapping for namespace "
+                    f"'{namespace}'."
+                ),
+            )
+
     for canonical_key, legacy_alias_keys in manifest_alias_map.items():
+        if manifest_migration_key_status_by_key.get(canonical_key) != MIGRATION_KEY_STATUS_CANONICAL_DEFAULT:
+            _append_hostile_contract_drift_error(
+                errors,
+                (
+                    f"legacy_alias_mapping canonical key '{canonical_key}' must be tagged "
+                    "migration_key_status canonical-default."
+                ),
+            )
         if canonical_key in event_tokens_by_key:
             canonical_tokens = event_tokens_by_key[canonical_key]
             for alias_key in legacy_alias_keys:
+                if (
+                    manifest_migration_key_status_by_key.get(alias_key)
+                    != MIGRATION_KEY_STATUS_COMPATIBILITY_ONLY
+                ):
+                    _append_hostile_contract_drift_error(
+                        errors,
+                        (
+                            f"legacy_alias_mapping alias key '{alias_key}' for canonical '{canonical_key}' "
+                            "must be tagged migration_key_status compatibility-only."
+                        ),
+                    )
                 if alias_key not in event_tokens_by_key:
                     continue
                 alias_tokens = event_tokens_by_key[alias_key]

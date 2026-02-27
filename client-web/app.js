@@ -243,6 +243,18 @@
         );
       }
     }
+    const migrationKeyStatusByKey = {};
+    for (const canonicalDefaultKey of includeOnlyContentKeys) {
+      migrationKeyStatusByKey[canonicalDefaultKey] = "canonical-default";
+    }
+    for (const compatibilityAliasKey of compatibilityAliasOnlyEventKeys) {
+      if (migrationKeyStatusByKey[compatibilityAliasKey] === "canonical-default") {
+        throw new Error(
+          `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.legacy_alias_mapping compatibility alias key '${compatibilityAliasKey}' conflicts with canonical-default migration status`,
+        );
+      }
+      migrationKeyStatusByKey[compatibilityAliasKey] = "compatibility-only";
+    }
     const hostileRuntimeTokenContractRaw = contentKeyManifest.hostile_runtime_token_contract;
     if (!hostileRuntimeTokenContractRaw || typeof hostileRuntimeTokenContractRaw !== "object") {
       throw new Error(
@@ -609,6 +621,7 @@
         default_first_slice_seed_usage: Object.freeze({
           include_only_content_keys: Object.freeze(includeOnlyContentKeys),
         }),
+        migration_key_status_by_key: Object.freeze(migrationKeyStatusByKey),
         legacy_alias_mapping: Object.freeze(legacyAliasMapping),
         compatibility_alias_only_keys: Object.freeze(compatibilityAliasOnlyEventKeys),
         hostile_runtime_token_contract: Object.freeze({
@@ -740,9 +753,16 @@
   const firstSliceDeferredPostSliceEventContentKeySet = new Set(
     firstSliceDeferredPostSliceEventContentKeys,
   );
-  const firstSliceCompatibilityAliasOnlyEventKeySet = new Set(
-    firstSliceContentKeyManifestV1.compatibility_alias_only_keys,
-  );
+  const migrationKeyStatusCanonicalDefault = "canonical-default";
+  const migrationKeyStatusCompatibilityOnly = "compatibility-only";
+  const firstSliceMigrationKeyStatusByEventContentKey =
+    firstSliceContentKeyManifestV1.migration_key_status_by_key;
+  const getFirstSliceMigrationKeyStatus = (contentKey) =>
+    firstSliceMigrationKeyStatusByEventContentKey[String(contentKey || "").trim()] || "";
+  const isFirstSliceCanonicalDefaultMigrationEventKey = (contentKey) =>
+    getFirstSliceMigrationKeyStatus(contentKey) === migrationKeyStatusCanonicalDefault;
+  const isFirstSliceCompatibilityOnlyMigrationEventKey = (contentKey) =>
+    getFirstSliceMigrationKeyStatus(contentKey) === migrationKeyStatusCompatibilityOnly;
   const firstSliceCanonicalEventKeyCandidatesByLegacyAlias = Object.freeze(
     firstSliceContentKeyManifestV1.legacy_alias_mapping.reduce((lookup, row) => {
       for (const legacyKey of row.legacy_keys) {
@@ -1946,9 +1966,15 @@
   const isManifestAllowedCanonicalEventContentKey = (contentKey) =>
     firstSliceAllowedEventContentKeySet.has(contentKey)
     && !firstSliceDeferredPostSliceEventContentKeySet.has(contentKey);
+  const isManifestAllowedCanonicalDefaultEventContentKey = (contentKey) =>
+    isManifestAllowedCanonicalEventContentKey(contentKey)
+    && isFirstSliceCanonicalDefaultMigrationEventKey(contentKey);
   const resolveCanonicalFirstSliceEventKeyFromLegacyAlias = (legacyAliasKey) => {
     const normalizedLegacyAlias = normalizeManifestEventContentKey(legacyAliasKey);
     if (normalizedLegacyAlias.length < 1) {
+      return "";
+    }
+    if (!isFirstSliceCompatibilityOnlyMigrationEventKey(normalizedLegacyAlias)) {
       return "";
     }
     const canonicalCandidates =
@@ -1957,7 +1983,7 @@
       return "";
     }
     for (const canonicalCandidate of canonicalCandidates) {
-      if (isManifestAllowedCanonicalEventContentKey(canonicalCandidate)) {
+      if (isManifestAllowedCanonicalDefaultEventContentKey(canonicalCandidate)) {
         return canonicalCandidate;
       }
     }
@@ -1966,6 +1992,9 @@
   const resolveCanonicalHostileRuntimeEventKeyFromLegacyAlias = (legacyAliasKey) => {
     const normalizedLegacyAlias = normalizeManifestEventContentKey(legacyAliasKey);
     if (normalizedLegacyAlias.length < 1) {
+      return "";
+    }
+    if (!isFirstSliceCompatibilityOnlyMigrationEventKey(normalizedLegacyAlias)) {
       return "";
     }
     if (!firstSliceHostileRuntimeCompatibilityAliasOnlyKeySet.has(normalizedLegacyAlias)) {
@@ -1977,7 +2006,7 @@
       return "";
     }
     for (const canonicalCandidate of canonicalCandidates) {
-      if (isManifestAllowedCanonicalEventContentKey(canonicalCandidate)) {
+      if (isManifestAllowedCanonicalDefaultEventContentKey(canonicalCandidate)) {
         return canonicalCandidate;
       }
     }
@@ -1989,7 +2018,7 @@
       return "";
     }
     if (firstSliceHostileRuntimeCanonicalKeySet.has(normalizedContentKey)) {
-      return isManifestAllowedCanonicalEventContentKey(normalizedContentKey)
+      return isManifestAllowedCanonicalDefaultEventContentKey(normalizedContentKey)
         ? normalizedContentKey
         : "";
     }
@@ -2031,24 +2060,21 @@
     if (normalizedContentKey.length < 1) {
       return "";
     }
+    if (isManifestAllowedCanonicalDefaultEventContentKey(normalizedContentKey)) {
+      return normalizedContentKey;
+    }
+    if (!isFirstSliceCompatibilityOnlyMigrationEventKey(normalizedContentKey)) {
+      return resolveDeterministicFallbackEventContentKey(normalizedContentKey);
+    }
     const hostileCanonicalKey = resolveCanonicalHostileRuntimeEventKey(normalizedContentKey);
     if (hostileCanonicalKey.length > 0) {
       return hostileCanonicalKey;
     }
     const canonicalKeyFromLegacyAlias =
       resolveCanonicalFirstSliceEventKeyFromLegacyAlias(normalizedContentKey);
-    if (firstSliceCompatibilityAliasOnlyEventKeySet.has(normalizedContentKey)) {
-      return canonicalKeyFromLegacyAlias.length > 0
-        ? canonicalKeyFromLegacyAlias
-        : resolveDeterministicFallbackEventContentKey(normalizedContentKey);
-    }
-    if (isManifestAllowedCanonicalEventContentKey(normalizedContentKey)) {
-      return normalizedContentKey;
-    }
-    if (canonicalKeyFromLegacyAlias.length > 0) {
-      return canonicalKeyFromLegacyAlias;
-    }
-    return resolveDeterministicFallbackEventContentKey(normalizedContentKey);
+    return canonicalKeyFromLegacyAlias.length > 0
+      ? canonicalKeyFromLegacyAlias
+      : resolveDeterministicFallbackEventContentKey(normalizedContentKey);
   };
   const mapBackendEventKeyToClientKey = (contentKey) =>
     resolveManifestScopedEventContentKey(contentKey);
