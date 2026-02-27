@@ -215,18 +215,6 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
         ]
       },
       {
-        "canonical_key": "event.world.hostile_retreat_completed",
-        "legacy_keys": [
-          "event.world.march_returned"
-        ]
-      },
-      {
-        "canonical_key": "event.world.hostile_defeat_force_shattered",
-        "legacy_keys": [
-          "event.world.march_returned"
-        ]
-      },
-      {
         "canonical_key": "event.combat.hostile_resolve_attacker_win",
         "legacy_keys": [
           "event.combat.placeholder_skirmish_win"
@@ -234,12 +222,6 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
       },
       {
         "canonical_key": "event.combat.hostile_resolve_defender_win",
-        "legacy_keys": [
-          "event.combat.placeholder_skirmish_loss"
-        ]
-      },
-      {
-        "canonical_key": "event.combat.hostile_resolve_tie_defender_holds",
         "legacy_keys": [
           "event.combat.placeholder_skirmish_loss"
         ]

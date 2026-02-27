@@ -339,8 +339,7 @@
       {
         "canonical_key": "event.combat.hostile_resolve_tie_defender_holds",
         "resolution_order": [
-          "event.combat.hostile_resolve_tie_defender_holds",
-          "event.combat.placeholder_skirmish_loss"
+          "event.combat.hostile_resolve_tie_defender_holds"
         ]
       },
       {
@@ -376,15 +375,13 @@
       {
         "canonical_key": "event.world.hostile_retreat_completed",
         "resolution_order": [
-          "event.world.hostile_retreat_completed",
-          "event.world.march_returned"
+          "event.world.hostile_retreat_completed"
         ]
       },
       {
         "canonical_key": "event.world.hostile_defeat_force_shattered",
         "resolution_order": [
-          "event.world.hostile_defeat_force_shattered",
-          "event.world.march_returned"
+          "event.world.hostile_defeat_force_shattered"
         ]
       },
       {
@@ -545,11 +542,10 @@
       },
       "event.combat.placeholder_skirmish_loss": {
         "key": "event.combat.placeholder_skirmish_loss",
-        "template": "{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.",
+        "template": "{army_name} is repelled at {target_tile_label}; the walls hold through the slaughter.",
         "tokens": [
           "army_name",
-          "target_tile_label",
-          "settlement_name"
+          "target_tile_label"
         ]
       },
       "event.combat.placeholder_skirmish_win": {
@@ -920,20 +916,19 @@
       },
       "event.world.march_returned": {
         "key": "event.world.march_returned",
-        "template": "{army_name} returns to {settlement_name} with {haul_summary}.",
+        "template": "{army_name} returns to {settlement_name}; tally survivors and prepare the next war order.",
         "tokens": [
           "army_name",
-          "settlement_name",
-          "haul_summary"
+          "settlement_name"
         ]
       },
       "event.world.march_started": {
         "key": "event.world.march_started",
-        "template": "{army_name} marches from {origin_settlement_name} toward {target_tile_label}.",
+        "template": "{army_name} crosses killing ground toward {target_tile_label}. ETA {eta_seconds}s.",
         "tokens": [
           "army_name",
-          "origin_settlement_name",
-          "target_tile_label"
+          "target_tile_label",
+          "eta_seconds"
         ]
       },
       "event.world.scout_dispatched": {

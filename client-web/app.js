@@ -291,19 +291,19 @@
     "event.scout.unavailable_tile":
       "Scout dispatch to {target_tile_label} aborted: tile is unavailable for this route.",
     "event.world.march_started":
-      "{army_name} marches from {origin_settlement_name} toward {target_tile_label}.",
+      "{army_name} crosses killing ground toward {target_tile_label}. ETA {eta_seconds}s.",
     "event.world.march_returned":
-      "{army_name} returns to {settlement_name} with {haul_summary}.",
+      "{army_name} returns to {settlement_name}; tally survivors and prepare the next war order.",
     "event.combat.placeholder_skirmish_win":
       "{army_name} wins a brief skirmish near {target_tile_label}. Losses are light; survivors regroup for orders.",
     "event.combat.placeholder_skirmish_loss":
-      "{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.",
+      "{army_name} is repelled at {target_tile_label}; the walls hold through the slaughter.",
     "event.combat.placeholder_skirmish_attacker_win":
       "{army_name} wins a brief skirmish near {target_tile_label}. Losses are light; survivors regroup for orders.",
     "event.combat.placeholder_skirmish_defender_win":
-      "{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.",
+      "{army_name} is repelled at {target_tile_label}; the walls hold through the slaughter.",
     "event.combat.placeholder_skirmish_tie_defender_holds":
-      "{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.",
+      "{army_name} is repelled at {target_tile_label}; the walls hold through the slaughter.",
     "event.world.hostile_dispatch_target_required":
       "Select a foreign settlement tile before dispatching a hostile march.",
     "event.world.hostile_dispatch_failed":

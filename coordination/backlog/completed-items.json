@@ -6739,5 +6739,41 @@
     "runtime_seconds": 177.66,
     "started_at": "2026-02-27T10:15:40.806418+00:00",
     "finished_at": "2026-02-27T10:18:38.456748+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F01",
+    "title": "Add backend narrative template snapshot generator with first-slice lock validation",
+    "description": "Generate backend-owned narrative snapshot data from first-slice narrative seeds and enforce deterministic manifest lock validation for canonical and alias key coverage.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Deterministic snapshot artifact includes canonical first-slice keys and supported legacy aliases.",
+      "Validation fails on missing canonical keys or token mismatch drift.",
+      "Deferred post-slice keys remain excluded from default first-session coverage."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T10:15:35.546325+00:00",
+    "updated_at": "2026-02-27T10:32:18.629733+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/ilya-fen/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "b9f602e1bd66eefbd9a270b939bd18385d6bae0f",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 811.47,
+    "started_at": "2026-02-27T10:18:45.337691+00:00",
+    "finished_at": "2026-02-27T10:32:16.811327+00:00"
   }
 ]

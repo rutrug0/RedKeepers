@@ -114,11 +114,11 @@ These are replaceable text overlays for tooltips/cards. Do not replace stable ID
 | `event.world.scout_dispatched` | `world_map` | `unit_id:trail_scout` | `playable_now` | `{settlement_name}: scouts ride out toward {target_tile_label}.` |
 | `event.world.scout_report_empty` | `world_map` | `unit_id:trail_scout` | `playable_now` | `Scout report from {target_tile_label}: no active host detected. The roads remain quiet for now.` |
 | `event.world.scout_report_hostile` | `world_map` | `unit_id:trail_scout` | `playable_now` | `Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).` |
-| `event.world.march_started` | `world_map` | `unit_id:*;building_id:rally_post` | `playable_now` | `{army_name} marches from {origin_settlement_name} toward {target_tile_label}.` |
-| `event.world.march_returned` | `world_map` | `unit_id:*` | `playable_now` | `{army_name} returns to {settlement_name} with {haul_summary}.` |
+| `event.world.march_started` | `world_map` | `unit_id:*;building_id:rally_post` | `playable_now` | `{army_name} crosses killing ground toward {target_tile_label}. ETA {eta_seconds}s.` |
+| `event.world.march_returned` | `world_map` | `unit_id:*` | `playable_now` | `{army_name} returns to {settlement_name}; tally survivors and prepare the next war order.` |
 | `event.world.road_warden_speed_bonus` | `world_map` | `civ_id:cinder_throne_legates;modifier_key:army_move_speed_mult` | `playable_now` | `Road Wardens shorten the march. {army_name} gains speed on the route between owned settlements.` |
 | `event.combat.placeholder_skirmish_win` | `combat_placeholder` | `unit_id:*` | `playable_now` | `{army_name} wins a brief skirmish near {target_tile_label}. Losses are light; survivors regroup for orders.` |
-| `event.combat.placeholder_skirmish_loss` | `combat_placeholder` | `unit_id:*` | `playable_now` | `{army_name} is driven off near {target_tile_label}. Survivors fall back toward {settlement_name}.` |
+| `event.combat.placeholder_skirmish_loss` | `combat_placeholder` | `unit_id:*` | `playable_now` | `{army_name} is repelled at {target_tile_label}; the walls hold through the slaughter.` |
 | `event.settlement.new_settlement_founded` | `settlement` | `civ_id:{civ_id}` | `playable_now` | `A new holding is founded: {settlement_name}. Tents, stores, and watchfires are raised before dusk.` |
 | `event.settlement.name_assigned` | `settlement` | `category:starter_settlement_name_pool` | `playable_now` | `Surveyors record the new holding as {settlement_name}. The name enters the ledger.` |
 

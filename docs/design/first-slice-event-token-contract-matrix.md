@@ -118,11 +118,8 @@
 | `event.scout.report_hostile` | `event.world.scout_report_hostile` |
 | `event.world.hostile_dispatch_en_route` | `event.world.march_started` |
 | `event.world.hostile_post_battle_returned` | `event.world.march_returned` |
-| `event.world.hostile_retreat_completed` | `event.world.march_returned` |
-| `event.world.hostile_defeat_force_shattered` | `event.world.march_returned` |
 | `event.combat.hostile_resolve_attacker_win` | `event.combat.placeholder_skirmish_win` |
 | `event.combat.hostile_resolve_defender_win` | `event.combat.placeholder_skirmish_loss` |
-| `event.combat.hostile_resolve_tie_defender_holds` | `event.combat.placeholder_skirmish_loss` |
 
 ## Post-Slice Keys Excluded From Required Default Rendering Coverage
 

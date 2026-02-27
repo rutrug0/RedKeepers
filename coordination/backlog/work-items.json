@@ -1,35 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0007-F01",
-    "title": "Add backend narrative template snapshot generator with first-slice lock validation",
-    "description": "Generate backend-owned narrative snapshot data from first-slice narrative seeds and enforce deterministic manifest lock validation for canonical and alias key coverage.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Deterministic snapshot artifact includes canonical first-slice keys and supported legacy aliases.",
-      "Validation fails on missing canonical keys or token mismatch drift.",
-      "Deferred post-slice keys remain excluded from default first-session coverage."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T10:15:35.546325+00:00",
-    "updated_at": "2026-02-27T10:32:16.872211+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0007-F02",
     "title": "Replace client event template constants with generated snapshot consumption",
     "description": "Switch client event-feed template lookup to generated snapshot data and remove duplicate hard-coded maps while keeping deterministic fallback behavior.",
@@ -80,17 +50,18 @@
       "Deferred keys stay outside default first-session requirements."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T10:15:35.546325+00:00",
-    "updated_at": "2026-02-27T10:15:35.546325+00:00",
+    "updated_at": "2026-02-27T10:39:40.229019+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
+    "assigned_agent": "nika-thorn"
   },
   {
     "id": "RK-AUTO-BACKLOG-0007-F05",
