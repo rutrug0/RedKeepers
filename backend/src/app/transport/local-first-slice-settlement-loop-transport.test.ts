@@ -21,6 +21,10 @@ import {
   POST_WORLD_MAP_TILE_INTERACT_ROUTE,
 } from "../../modules/world_map";
 import {
+  createDefaultFirstSlicePlayableManifestFilePathsV1,
+  loadFirstSlicePlayableManifestV1,
+} from "../config/seeds/v1";
+import {
   createDeterministicFirstSliceSettlementLoopLocalRpcTransport,
 } from "./local-first-slice-settlement-loop-transport";
 
@@ -58,6 +62,63 @@ test("local first-slice transport exposes all settlement loop routes and serves 
   }
   assert.equal(response.body.flow, "settlement.tick_v1");
   assert.equal(response.body.status, "accepted");
+});
+
+test("local first-slice transport uses playable manifest bootstrap defaults for world runtime wiring", async () => {
+  const manifest = await loadFirstSlicePlayableManifestV1(
+    createDefaultFirstSlicePlayableManifestFilePathsV1().firstSlicePlayableManifest,
+  );
+  const customManifest = {
+    ...manifest,
+    canonical_playable_now: {
+      ...manifest.canonical_playable_now,
+      map_fixture_ids: {
+        ...manifest.canonical_playable_now.map_fixture_ids,
+        world_id: "world_beta",
+        world_seed: "seed_world_beta",
+      },
+    },
+  };
+  const transport = createDeterministicFirstSliceSettlementLoopLocalRpcTransport({
+    first_slice_playable_manifest: customManifest,
+  });
+
+  const lifecycleResponse = transport.invoke(POST_WORLD_MAP_LIFECYCLE_ADVANCE_ROUTE, {
+    path: {
+      worldId: "world_beta",
+    },
+    body: {
+      world_id: "world_beta",
+      flow_version: "v1",
+      observed_at: "2026-02-26T00:02:00.000Z",
+    },
+  });
+  assert.equal(lifecycleResponse.status_code, 200);
+  if (lifecycleResponse.status_code === 200) {
+    assert.equal(lifecycleResponse.body.status, "accepted");
+    assert.equal(lifecycleResponse.body.world_id, "world_beta");
+  }
+
+  const gatherStartResponse = transport.invoke(POST_WORLD_MAP_GATHER_MARCH_START_ROUTE, {
+    path: {
+      marchId: "march_manifest_world",
+    },
+    body: {
+      world_id: "world_beta",
+      world_seed: "seed_world_beta",
+      march_id: "march_manifest_world",
+      settlement_id: manifest.canonical_playable_now.primary_settlement.settlement_id,
+      node_id: "neutral_node_forage_1",
+      flow_version: "v1",
+      departed_at: "2026-02-26T19:00:00.000Z",
+      travel_seconds_per_leg: 30,
+      escort_strength: 0,
+    },
+  });
+  assert.equal(gatherStartResponse.status_code, 200);
+  if (gatherStartResponse.status_code === 200) {
+    assert.equal(gatherStartResponse.body.status, "accepted");
+  }
 });
 
 test("local first-slice transport serves deterministic world-map lifecycle transitions and archive summary", () => {

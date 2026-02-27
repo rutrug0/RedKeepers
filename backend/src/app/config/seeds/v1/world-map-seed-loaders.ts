@@ -1,5 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import {
+  type FirstSlicePlayableManifestV1,
+  assertFirstSlicePlayableManifestSupportsDeterministicHostileFixtureV1,
+  loadFirstSlicePlayableManifestV1,
+} from "./first-slice-playable-manifest-loaders";
 import type {
   WorldMapScoutInteractionOutcome,
   WorldMapScoutEventContentKey,
@@ -26,6 +31,7 @@ export type WorldMapScoutEventToken = "settlement_name" | "target_tile_label" | 
 export interface WorldMapTileSeedFilePathsV1 {
   readonly worldMapTiles: string;
   readonly worldMapScoutEventTokens: string;
+  readonly firstSlicePlayableManifest: string;
 }
 
 export interface WorldMapTileSnapshotSeedRow extends WorldMapTileSnapshot {}
@@ -55,6 +61,7 @@ export interface WorldMapScoutEventTokenSeedTableV1 {
 export interface WorldMapSeedBundleV1 {
   readonly world_map_tiles: WorldMapTileSeedTableV1;
   readonly world_map_scout_event_tokens: WorldMapScoutEventTokenSeedTableV1;
+  readonly first_slice_playable_manifest: FirstSlicePlayableManifestV1;
 }
 
 export class WorldMapSeedValidationError extends Error {
@@ -138,6 +145,10 @@ export const createDefaultWorldMapSeedFilePathsV1 = (
     repositoryRoot,
     "backend/src/app/config/seeds/v1/world-map-scout-event-token-fixtures.json",
   ),
+  firstSlicePlayableManifest: join(
+    repositoryRoot,
+    "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
+  ),
 });
 
 export const loadWorldMapTileSeedTableV1 = async (
@@ -155,13 +166,30 @@ export const loadWorldMapScoutEventTokenSeedTableV1 = async (
 export const loadWorldMapSeedBundleV1 = async (
   paths: WorldMapTileSeedFilePathsV1 = createDefaultWorldMapSeedFilePathsV1(),
   readJson: JsonFileReader = defaultJsonFileReader,
-): Promise<WorldMapSeedBundleV1> => ({
-  world_map_tiles: await loadWorldMapTileSeedTableV1(paths.worldMapTiles, readJson),
-  world_map_scout_event_tokens: await loadWorldMapScoutEventTokenSeedTableV1(
+): Promise<WorldMapSeedBundleV1> => {
+  const worldMapTiles = await loadWorldMapTileSeedTableV1(paths.worldMapTiles, readJson);
+  const worldMapScoutEventTokens = await loadWorldMapScoutEventTokenSeedTableV1(
     paths.worldMapScoutEventTokens,
     readJson,
-  ),
-});
+  );
+  const firstSlicePlayableManifest = await loadFirstSlicePlayableManifestV1(
+    paths.firstSlicePlayableManifest,
+    readJson,
+  );
+  assertFirstSlicePlayableManifestSupportsDeterministicHostileFixtureV1(
+    firstSlicePlayableManifest,
+  );
+  assertWorldMapSeedBundleMatchesPlayableManifestV1(
+    worldMapTiles,
+    firstSlicePlayableManifest,
+  );
+
+  return {
+    world_map_tiles: worldMapTiles,
+    world_map_scout_event_tokens: worldMapScoutEventTokens,
+    first_slice_playable_manifest: firstSlicePlayableManifest,
+  };
+};
 
 export const createWorldMapTileSnapshotKey = (
   settlementId: string,
@@ -217,6 +245,57 @@ export const parseWorldMapScoutEventTokenSeedTableV1 = (
     parseWorldMapScoutEventTokenSeedRow,
     (row) => row.outcome_code,
   );
+
+function assertWorldMapSeedBundleMatchesPlayableManifestV1(
+  worldMapTiles: WorldMapTileSeedTableV1,
+  manifest: FirstSlicePlayableManifestV1,
+): void {
+  const primarySettlementId = manifest.canonical_playable_now.primary_settlement.settlement_id;
+  const expectedTileIds = manifest.canonical_playable_now.map_fixture_ids.scout_tile_ids;
+  const rowsForPrimarySettlement = worldMapTiles.rows.filter(
+    (row) => row.settlement_id === primarySettlementId,
+  );
+
+  const actualTileIds = rowsForPrimarySettlement.map((row) => row.tile_id);
+  assertExactSetMatch(
+    "world_map_tiles.rows[*].tile_id",
+    actualTileIds,
+    expectedTileIds,
+  );
+
+  for (const row of worldMapTiles.rows) {
+    if (row.settlement_id !== primarySettlementId) {
+      throw new WorldMapSeedValidationError(
+        `Manifest scope drift: world_map_tiles includes out-of-slice settlement_id '${row.settlement_id}'.`,
+      );
+    }
+  }
+
+  const hasHostileHintTile = rowsForPrimarySettlement.some(
+    (row) => row.tile_state === "tile_state_hostile_hint",
+  );
+  if (!hasHostileHintTile) {
+    throw new WorldMapSeedValidationError(
+      "Manifest scope drift: world_map_tiles must include at least one tile_state_hostile_hint scout tile for first-slice hostile loop.",
+    );
+  }
+}
+
+function assertExactSetMatch(
+  label: string,
+  actual: readonly string[],
+  expected: readonly string[],
+): void {
+  const actualSet = new Set(actual);
+  const expectedSet = new Set(expected);
+  const missing = [...expectedSet].filter((id) => !actualSet.has(id));
+  const extra = [...actualSet].filter((id) => !expectedSet.has(id));
+  if (missing.length > 0 || extra.length > 0) {
+    throw new WorldMapSeedValidationError(
+      `Manifest scope drift in '${label}': missing [${missing.join(", ")}], extra [${extra.join(", ")}].`,
+    );
+  }
+}
 
 function parseSeedTableWithRows<TRow extends Record<string, unknown>>(
   raw: unknown,
@@ -503,4 +582,3 @@ function describeType(value: unknown): string {
   }
   return typeof value;
 }
-

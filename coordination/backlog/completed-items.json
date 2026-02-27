@@ -5914,5 +5914,48 @@
     "runtime_seconds": 467.03,
     "started_at": "2026-02-26T20:47:23.565627+00:00",
     "finished_at": "2026-02-26T20:55:10.608367+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F02",
+    "title": "Publish first-slice playable manifest lock for civ/profile/map fixtures",
+    "description": "Define a single implementation-facing manifest that locks first-slice playable scope (one civilization profile, one primary settlement, one foreign hostile fixture, limited resource/building/unit set) while explicitly tagging post-slice stubs.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F03"
+    ],
+    "inputs": [
+      "docs/design/first-vertical-slice.md",
+      "docs/design/v1-starter-data-tables.md",
+      "docs/design/m0-hostile-settlement-combat-fixtures.md",
+      "docs/design/first-slice-progression-target-matrix.md"
+    ],
+    "acceptance_criteria": [
+      "Manifest enumerates canonical in-slice IDs for civ, settlement, foreign hostile profile, resources, buildings, and units.",
+      "Manifest marks non-playable data as `stub_post_slice` and documents why it is excluded from default first-session flows.",
+      "Artifact is implementation-ready for backend/frontend/content consumption without requiring bespoke mechanics."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T20:55:12.234856+00:00",
+    "updated_at": "2026-02-26T20:59:07.417368+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "Note: `coordination/backlog/completed-items.json` and `coordination/backlog/work-items.json` were already modified in the working tree and were not changed by this task.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005",
+    "assigned_agent": "rowan-hale",
+    "commit_sha": "e5b272ac73e7abb14301a3bdc1a72bc3ffa23dea",
+    "resolved_by_agent": "rowan-hale",
+    "resolved_by_role": "design",
+    "runtime_seconds": 228.36,
+    "started_at": "2026-02-26T20:55:17.502430+00:00",
+    "finished_at": "2026-02-26T20:59:05.863304+00:00"
   }
 ]

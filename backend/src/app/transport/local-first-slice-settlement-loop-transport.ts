@@ -1,4 +1,10 @@
 import {
+  createDefaultFirstSlicePlayableManifestFilePathsV1,
+  createFirstSlicePlayableRuntimeBootstrapV1,
+  loadFirstSlicePlayableManifestV1Sync,
+  type FirstSlicePlayableManifestV1,
+} from "../config/seeds/v1";
+import {
   DeterministicFirstSliceBuildingUpgradeCommandHandler,
   type FirstSliceBuildingUpgradeCommandHandler,
   POST_SETTLEMENT_BUILDING_UPGRADE_ROUTE,
@@ -176,6 +182,7 @@ export interface FirstSliceSettlementLoopTransportHandlers {
 }
 
 export interface DeterministicFirstSliceSettlementLoopLocalRpcTransportOptions {
+  readonly first_slice_playable_manifest?: FirstSlicePlayableManifestV1;
   readonly projection_service?: SettlementResourceProjectionService;
   readonly settlement_resource_ledger_service?: SettlementResourceLedgerService;
   readonly economy_tick_state_repository?: FirstSliceEconomyTickStateRepository;
@@ -260,8 +267,20 @@ export const createFirstSliceSettlementLoopLocalRpcTransport = (
 export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
   options?: DeterministicFirstSliceSettlementLoopLocalRpcTransportOptions,
 ): FirstSliceSettlementLoopLocalRpcTransport => {
+  const firstSliceRuntimeBootstrap = createFirstSlicePlayableRuntimeBootstrapV1(
+    options?.first_slice_playable_manifest
+    ?? loadFirstSlicePlayableManifestV1Sync(
+      createDefaultFirstSlicePlayableManifestFilePathsV1().firstSlicePlayableManifest,
+    ),
+  );
+  const defaultWorldId = firstSliceRuntimeBootstrap.world.world_id;
+  const defaultWorldSeed = firstSliceRuntimeBootstrap.world.world_seed;
+  const defaultSettlementName = firstSliceRuntimeBootstrap.primary_settlement.settlement_name;
+
   const projectionService =
-    options?.projection_service ?? new DeterministicSettlementResourceProjectionService();
+    options?.projection_service ?? new DeterministicSettlementResourceProjectionService({
+      default_settlement_name: defaultSettlementName,
+    });
   const economyTickStateRepository =
     options?.economy_tick_state_repository
     ?? new InMemoryFirstSliceEconomyTickStateRepository();
@@ -277,7 +296,7 @@ export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
     options?.world_map_lifecycle_state_repository
     ?? new InMemoryWorldMapLifecycleStateRepository([
       {
-        world_id: DEFAULT_WORLD_ID,
+        world_id: defaultWorldId,
         world_revision: 0,
         lifecycle_state: "world_lifecycle_open",
         season_number: 1,
@@ -309,7 +328,7 @@ export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
       {
         march_state_repository: worldMapMarchStateRepository,
         max_active_marches: 2,
-        world_seed: DEFAULT_WORLD_SEED,
+        world_seed: defaultWorldSeed,
         map_size: 16,
       },
     );
@@ -338,7 +357,11 @@ export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
     || options?.world_map_neutral_node_spawn_input !== undefined
   ) {
     worldMapNeutralGatheringService.spawnNeutralNodes(
-      options?.world_map_neutral_node_spawn_input ?? DEFAULT_WORLD_MAP_NEUTRAL_NODE_SPAWN_INPUT,
+      options?.world_map_neutral_node_spawn_input
+      ?? createDefaultWorldMapNeutralNodeSpawnInput({
+        world_id: defaultWorldId,
+        world_seed: defaultWorldSeed,
+      }),
     );
   }
 
@@ -346,10 +369,14 @@ export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
     tick: new SettlementTickEndpointHandler(projectionService),
     building_upgrade: new SettlementBuildingUpgradeEndpointHandler(
       options?.building_upgrade_command_handler
-      ?? new DeterministicFirstSliceBuildingUpgradeCommandHandler(),
+      ?? new DeterministicFirstSliceBuildingUpgradeCommandHandler({
+        default_settlement_name: defaultSettlementName,
+      }),
     ),
     unit_train: new SettlementUnitTrainEndpointHandler(
-      options?.unit_train_command_handler ?? new DeterministicFirstSliceUnitTrainCommandHandler(),
+      options?.unit_train_command_handler ?? new DeterministicFirstSliceUnitTrainCommandHandler({
+        default_settlement_name: defaultSettlementName,
+      }),
     ),
     world_map_lifecycle_advance: new WorldMapLifecycleAdvanceEndpointHandler(
       worldMapLifecycleSchedulerService,
@@ -375,13 +402,13 @@ export const createDeterministicFirstSliceSettlementLoopLocalRpcTransport = (
   });
 };
 
-const DEFAULT_WORLD_ID = "world_alpha";
-const DEFAULT_WORLD_SEED = "seed_world_alpha";
 const DEFAULT_WORLD_SEASON_STARTED_AT_ISO = "2026-02-26T00:00:00.000Z";
-const DEFAULT_WORLD_MAP_NEUTRAL_NODE_SPAWN_INPUT: WorldMapNeutralNodeSpawnInput = {
-  world_id: DEFAULT_WORLD_ID,
-  world_seed: DEFAULT_WORLD_SEED,
-  map_size: 16,
+const DEFAULT_WORLD_MAP_MAP_SIZE = 16;
+const DEFAULT_WORLD_MAP_NEUTRAL_NODE_SPAWN_INPUT_TEMPLATE: Pick<
+  WorldMapNeutralNodeSpawnInput,
+  "map_size" | "spawn_table"
+> = {
+  map_size: DEFAULT_WORLD_MAP_MAP_SIZE,
   spawn_table: [
     {
       node_type: "neutral_node_forage",
@@ -452,5 +479,17 @@ function mapTransportFailure(
       code: "transport_handler_error",
       message: "Transport handler execution failed.",
     },
+  };
+}
+
+function createDefaultWorldMapNeutralNodeSpawnInput(input: {
+  readonly world_id: string;
+  readonly world_seed: string;
+}): WorldMapNeutralNodeSpawnInput {
+  return {
+    world_id: input.world_id,
+    world_seed: input.world_seed,
+    map_size: DEFAULT_WORLD_MAP_NEUTRAL_NODE_SPAWN_INPUT_TEMPLATE.map_size,
+    spawn_table: DEFAULT_WORLD_MAP_NEUTRAL_NODE_SPAWN_INPUT_TEMPLATE.spawn_table,
   };
 }

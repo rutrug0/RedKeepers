@@ -4,6 +4,11 @@ import {
   POST_SETTLEMENT_TICK_ROUTE,
 } from "../../modules/economy";
 import {
+  createDefaultFirstSlicePlayableManifestFilePathsV1,
+  createFirstSlicePlayableRuntimeBootstrapV1,
+  loadFirstSlicePlayableManifestV1Sync,
+} from "../config/seeds/v1";
+import {
   createDeterministicFirstSliceSettlementLoopLocalRpcTransport,
 } from "./local-first-slice-settlement-loop-transport";
 
@@ -18,13 +23,19 @@ export const runFirstSliceSettlementLoopTransportSmoke = (): Result<
   FirstSliceSettlementLoopTransportSmokeResult,
   AppError
 > => {
+  const runtimeBootstrap = createFirstSlicePlayableRuntimeBootstrapV1(
+    loadFirstSlicePlayableManifestV1Sync(
+      createDefaultFirstSlicePlayableManifestFilePathsV1().firstSlicePlayableManifest,
+    ),
+  );
+  const settlementId = runtimeBootstrap.primary_settlement.settlement_id;
   const transport = createDeterministicFirstSliceSettlementLoopLocalRpcTransport();
   const response = transport.invoke(POST_SETTLEMENT_TICK_ROUTE, {
     path: {
-      settlementId: "settlement_alpha",
+      settlementId,
     },
     body: {
-      settlement_id: "settlement_alpha",
+      settlement_id: settlementId,
       flow_version: "v1",
       tick_started_at: "2026-02-26T00:00:00.000Z",
       tick_ended_at: "2026-02-26T00:01:00.000Z",

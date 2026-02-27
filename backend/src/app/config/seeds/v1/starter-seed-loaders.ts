@@ -1,5 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import {
+  type FirstSlicePlayableManifestV1,
+  assertFirstSlicePlayableManifestSupportsDeterministicHostileFixtureV1,
+  loadFirstSlicePlayableManifestV1,
+} from "./first-slice-playable-manifest-loaders";
 
 export const STARTER_SEED_SCHEMA_VERSION_V1 = "rk-v1-starter-seed" as const;
 
@@ -276,11 +281,13 @@ export interface StarterSeedFilePathsV1 {
   readonly civilizationsActivation: string;
   readonly civilizationsGlobalModifiers: string;
   readonly firstSliceEnablement: string;
+  readonly firstSlicePlayableManifest: string;
 }
 
 export interface LoadStarterSeedsResultV1 {
   readonly seeds: StarterSeedBundleV1;
   readonly first_slice_enablement: FirstSliceEnablementConfigV1;
+  readonly first_slice_playable_manifest: FirstSlicePlayableManifestV1;
 }
 
 export class SeedValidationError extends Error {
@@ -412,6 +419,10 @@ export const createDefaultStarterSeedFilePathsV1 = (
     repositoryRoot,
     "backend/src/app/config/seeds/v1/first-slice-enablement.json",
   ),
+  firstSlicePlayableManifest: join(
+    repositoryRoot,
+    "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
+  ),
 });
 
 export const loadResourceDefinitionsSeedV1 = async (
@@ -522,12 +533,31 @@ export const loadStarterSeedBundleV1 = async (
 
   validateStarterSeedCrossReferencesV1(seeds);
 
+  const firstSliceEnablement = await loadFirstSliceEnablementConfigV1(
+    paths.firstSliceEnablement,
+    readJson,
+  );
+  const firstSlicePlayableManifest = await loadFirstSlicePlayableManifestV1(
+    paths.firstSlicePlayableManifest,
+    readJson,
+  );
+  assertFirstSlicePlayableManifestSupportsDeterministicHostileFixtureV1(
+    firstSlicePlayableManifest,
+  );
+  assertFirstSliceStarterEnablementAlignedWithPlayableManifestV1(
+    firstSliceEnablement,
+    firstSlicePlayableManifest,
+  );
+  applyFirstSliceFilteringV1(
+    seeds,
+    firstSliceEnablement,
+    firstSlicePlayableManifest,
+  );
+
   return {
     seeds,
-    first_slice_enablement: await loadFirstSliceEnablementConfigV1(
-      paths.firstSliceEnablement,
-      readJson,
-    ),
+    first_slice_enablement: firstSliceEnablement,
+    first_slice_playable_manifest: firstSlicePlayableManifest,
   };
 };
 
@@ -945,6 +975,7 @@ export const validateStarterSeedCrossReferencesV1 = (bundle: StarterSeedBundleV1
 export const applyFirstSliceFilteringV1 = (
   bundle: StarterSeedBundleV1,
   enablement: FirstSliceEnablementConfigV1,
+  playableManifest?: FirstSlicePlayableManifestV1,
 ): StarterSeedBundleV1 => {
   const visibleByDefault = createDefaultSliceVisibilityPredicate(enablement);
 
@@ -1009,7 +1040,7 @@ export const applyFirstSliceFilteringV1 = (
     },
   );
 
-  const filtered: StarterSeedBundleV1 = {
+  const filteredByEnablement: StarterSeedBundleV1 = {
     economy: {
       resource_definitions: filterKeyedTable(bundle.economy.resource_definitions, (row) =>
         allowSliceStatus(
@@ -1097,9 +1128,224 @@ export const applyFirstSliceFilteringV1 = (
     },
   };
 
+  const filtered =
+    playableManifest === undefined
+      ? filteredByEnablement
+      : applyFirstSlicePlayableManifestFilteringV1(
+        filteredByEnablement,
+        playableManifest,
+      );
+
   validateStarterSeedCrossReferencesV1(filtered);
+  if (playableManifest !== undefined) {
+    assertStarterSeedBundleMatchesPlayableManifestV1(filtered, playableManifest);
+  }
   return filtered;
 };
+
+function applyFirstSlicePlayableManifestFilteringV1(
+  bundle: StarterSeedBundleV1,
+  manifest: FirstSlicePlayableManifestV1,
+): StarterSeedBundleV1 {
+  const allowedResourceIds = new Set(manifest.canonical_playable_now.resources);
+  const allowedBuildingIds = new Set(manifest.canonical_playable_now.buildings);
+  const allowedUnitIds = new Set(manifest.canonical_playable_now.units);
+  const allowedCivilizationIds = new Set(
+    manifest.default_consumption_contract.backend.enable_only_civilization_ids,
+  );
+
+  const buildingLines = filterKeyedTable(bundle.buildings.building_lines, (row) =>
+    allowedBuildingIds.has(row.building_id),
+  );
+  const allowedBuildingFamilyIds = new Set(
+    Object.values(buildingLines.entries_by_id).map((row) => row.family_id),
+  );
+
+  const unitLines = filterKeyedTable(bundle.units.unit_lines, (row) =>
+    allowedUnitIds.has(row.unit_id),
+  );
+  const allowedUnitLineIds = new Set(Object.keys(unitLines.entries_by_id));
+
+  const unitVariants = filterKeyedTable(bundle.units.unit_variants, (row) =>
+    allowedCivilizationIds.has(row.civ_id) && allowedUnitLineIds.has(row.base_unit_id),
+  );
+  const allowedVariantIds = new Set(Object.keys(unitVariants.entries_by_id));
+
+  return {
+    economy: {
+      resource_definitions: filterKeyedTable(bundle.economy.resource_definitions, (row) =>
+        allowedResourceIds.has(row.resource_id),
+      ),
+    },
+    buildings: {
+      building_families: filterKeyedTable(bundle.buildings.building_families, (row) =>
+        allowedBuildingFamilyIds.has(row.family_id),
+      ),
+      building_lines: buildingLines,
+      building_effects: filterRowsTable(bundle.buildings.building_effects, (row) =>
+        allowedBuildingIds.has(row.building_id),
+      ),
+      building_activation_thresholds: filterRowsTable(
+        bundle.buildings.building_activation_thresholds,
+        (row) => allowedBuildingIds.has(row.building_id),
+      ),
+    },
+    units: {
+      unit_lines: unitLines,
+      unit_variants: unitVariants,
+      unit_variant_modifiers: filterRowsTable(
+        bundle.units.unit_variant_modifiers,
+        (row) => allowedVariantIds.has(row.variant_unit_id),
+      ),
+    },
+    civilizations: {
+      activation: filterKeyedTable(bundle.civilizations.activation, (row) =>
+        allowedCivilizationIds.has(row.civ_id),
+      ),
+      global_modifiers: filterRowsTable(bundle.civilizations.global_modifiers, (row) =>
+        allowedCivilizationIds.has(row.civ_id),
+      ),
+    },
+  };
+}
+
+function assertFirstSliceStarterEnablementAlignedWithPlayableManifestV1(
+  enablement: FirstSliceEnablementConfigV1,
+  manifest: FirstSlicePlayableManifestV1,
+): void {
+  assertExactSetMatch(
+    "first_slice_enablement.enabled_civilization_ids",
+    enablement.enabled_civilization_ids,
+    manifest.default_consumption_contract.backend.enable_only_civilization_ids,
+  );
+  assertExactSetMatch(
+    "first_slice_enablement.default_visibility.hide_slice_statuses",
+    enablement.default_visibility.hide_slice_statuses,
+    manifest.default_consumption_contract.backend.hide_by_source_slice_status,
+  );
+}
+
+function assertStarterSeedBundleMatchesPlayableManifestV1(
+  bundle: StarterSeedBundleV1,
+  manifest: FirstSlicePlayableManifestV1,
+): void {
+  assertExactSetMatch(
+    "economy.resource_definitions",
+    Object.keys(bundle.economy.resource_definitions.entries_by_id),
+    manifest.canonical_playable_now.resources,
+  );
+  assertExactSetMatch(
+    "buildings.building_lines",
+    Object.keys(bundle.buildings.building_lines.entries_by_id),
+    manifest.canonical_playable_now.buildings,
+  );
+  assertExactSetMatch(
+    "units.unit_lines",
+    Object.keys(bundle.units.unit_lines.entries_by_id),
+    manifest.canonical_playable_now.units,
+  );
+  assertExactSetMatch(
+    "civilizations.activation",
+    Object.keys(bundle.civilizations.activation.entries_by_id),
+    manifest.default_consumption_contract.backend.enable_only_civilization_ids,
+  );
+
+  const hiddenStatuses = new Set(
+    manifest.default_consumption_contract.backend.hide_by_source_slice_status,
+  );
+
+  assertNoHiddenStatuses(
+    "economy.resource_definitions",
+    Object.values(bundle.economy.resource_definitions.entries_by_id).map((row) => row.slice_status),
+    hiddenStatuses,
+  );
+  assertNoHiddenStatuses(
+    "buildings.building_lines",
+    Object.values(bundle.buildings.building_lines.entries_by_id).map((row) => row.slice_status),
+    hiddenStatuses,
+  );
+  assertNoHiddenStatuses(
+    "units.unit_lines",
+    Object.values(bundle.units.unit_lines.entries_by_id).map((row) => row.slice_status),
+    hiddenStatuses,
+  );
+
+  const stubIdsByDomain = new Map<string, Set<string>>();
+  for (const stub of manifest.stub_post_slice) {
+    if (!stubIdsByDomain.has(stub.domain)) {
+      stubIdsByDomain.set(stub.domain, new Set<string>());
+    }
+    stubIdsByDomain.get(stub.domain)?.add(stub.id);
+  }
+
+  assertMissingStubIds(
+    "buildings.building_lines",
+    Object.keys(bundle.buildings.building_lines.entries_by_id),
+    stubIdsByDomain.get("buildings"),
+  );
+  assertMissingStubIds(
+    "units.unit_lines",
+    Object.keys(bundle.units.unit_lines.entries_by_id),
+    stubIdsByDomain.get("units"),
+  );
+  assertMissingStubIds(
+    "units.unit_variants",
+    Object.keys(bundle.units.unit_variants.entries_by_id),
+    stubIdsByDomain.get("unit_variants"),
+  );
+  assertMissingStubIds(
+    "civilizations.activation",
+    Object.keys(bundle.civilizations.activation.entries_by_id),
+    stubIdsByDomain.get("civilizations"),
+  );
+}
+
+function assertNoHiddenStatuses(
+  label: string,
+  statuses: readonly SliceStatus[],
+  hiddenStatuses: ReadonlySet<FirstSlicePlayableManifestV1["default_consumption_contract"]["backend"]["hide_by_source_slice_status"][number]>,
+): void {
+  for (const status of statuses) {
+    if (hiddenStatuses.has(status)) {
+      throw new SeedValidationError(
+        `Manifest scope drift: '${label}' contains hidden slice_status '${status}'.`,
+      );
+    }
+  }
+}
+
+function assertMissingStubIds(
+  label: string,
+  ids: readonly string[],
+  stubIds: ReadonlySet<string> | undefined,
+): void {
+  if (stubIds === undefined || stubIds.size < 1) {
+    return;
+  }
+  for (const id of ids) {
+    if (stubIds.has(id)) {
+      throw new SeedValidationError(
+        `Manifest scope drift: '${label}' unexpectedly includes stub_post_slice id '${id}'.`,
+      );
+    }
+  }
+}
+
+function assertExactSetMatch(
+  label: string,
+  actual: readonly string[],
+  expected: readonly string[],
+): void {
+  const actualSet = new Set(actual);
+  const expectedSet = new Set(expected);
+  const missing = [...expectedSet].filter((id) => !actualSet.has(id));
+  const extra = [...actualSet].filter((id) => !expectedSet.has(id));
+  if (missing.length > 0 || extra.length > 0) {
+    throw new SeedValidationError(
+      `Manifest scope drift in '${label}': missing [${missing.join(", ")}], extra [${extra.join(", ")}].`,
+    );
+  }
+}
 
 function parseKeyedSeedTable<TEntry>(
   raw: unknown,

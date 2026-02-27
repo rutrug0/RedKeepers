@@ -3,6 +3,11 @@ import type {
   AppError,
   Result,
 } from "../shared";
+import {
+  createDefaultFirstSlicePlayableManifestFilePathsV1,
+  createFirstSlicePlayableRuntimeBootstrapV1,
+  loadFirstSlicePlayableManifestV1Sync,
+} from "./config/seeds/v1";
 import type {
   BackendModule,
   ModuleRegistrationContext,
@@ -21,8 +26,6 @@ import {
 import { join } from "node:path";
 
 const DEFAULT_TICK_INTERVAL_MS = 60_000;
-const DEFAULT_SETTLEMENT_ID = "settlement_alpha";
-const DEFAULT_SETTLEMENT_NAME = "Starter Settlement";
 const DEFAULT_SETTLEMENT_TICK_STATE_FILE_PATH = join(
   process.cwd(),
   "backend",
@@ -31,6 +34,11 @@ const DEFAULT_SETTLEMENT_TICK_STATE_FILE_PATH = join(
 );
 const MODULE_ID = "app.economy_tick_runner";
 const LIFECYCLE_HOOK_NAME = "app.economy_tick_runner.hook";
+const FIRST_SLICE_RUNTIME_BOOTSTRAP = createFirstSlicePlayableRuntimeBootstrapV1(
+  loadFirstSlicePlayableManifestV1Sync(
+    createDefaultFirstSlicePlayableManifestFilePathsV1().firstSlicePlayableManifest,
+  ),
+);
 
 export const SETTLEMENT_RESOURCE_PROJECTION_SERVICE_TOKEN: ServiceToken<SettlementResourceProjectionService> =
   {
@@ -96,11 +104,15 @@ const readLatestStateFromRepository = (
 export const createFirstSliceEconomyTickModule = (
   options?: FirstSliceEconomyTickModuleOptions,
 ): BackendModule => {
-    const settlementId = options?.settlementId?.trim() || DEFAULT_SETTLEMENT_ID;
-    const settlementName = options?.settlementName?.trim() || DEFAULT_SETTLEMENT_NAME;
-    const intervalMs = clampPositiveInteger(options?.tickIntervalMs ?? DEFAULT_TICK_INTERVAL_MS);
-    const storageFilePath = options?.tickStateStorageFilePath?.trim()
-      || DEFAULT_SETTLEMENT_TICK_STATE_FILE_PATH;
+  const settlementId =
+    options?.settlementId?.trim()
+    || FIRST_SLICE_RUNTIME_BOOTSTRAP.primary_settlement.settlement_id;
+  const settlementName =
+    options?.settlementName?.trim()
+    || FIRST_SLICE_RUNTIME_BOOTSTRAP.primary_settlement.settlement_name;
+  const intervalMs = clampPositiveInteger(options?.tickIntervalMs ?? DEFAULT_TICK_INTERVAL_MS);
+  const storageFilePath = options?.tickStateStorageFilePath?.trim()
+    || DEFAULT_SETTLEMENT_TICK_STATE_FILE_PATH;
 
   const projectionService = createSettlementResourceProjectionServiceFromStarterData({
     entries_by_id: {},

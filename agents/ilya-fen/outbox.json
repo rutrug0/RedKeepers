@@ -1976,4 +1976,47 @@
                                     }
                                 ]
     }
+,
+    {
+        "timestamp_utc":  "2026-02-27T08:17:41.2850703Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0005-F03",
+        "status":  "done",
+        "summary":  "Wired backend bootstrap defaults to the first-slice playable manifest by adding manifest-derived runtime bootstrap helpers (with scope-drift assertions), consuming them in local transport/tick/smoke paths, and adding tests that fail when first-slice bootstrap constraints drift.",
+        "changed_files":  [
+                              "backend/src/app/config/seeds/v1/first-slice-playable-manifest-loaders.ts",
+                              "backend/src/app/config/seeds/v1/first-slice-playable-manifest-loaders.test.ts",
+                              "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
+                              "backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                              "backend/src/app/transport/smoke.ts",
+                              "backend/src/app/economy-tick-runner.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --experimental-strip-types --check backend/src/app/config/seeds/v1/first-slice-playable-manifest-loaders.ts backend/src/app/config/seeds/v1/first-slice-playable-manifest-loaders.test.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.ts backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts backend/src/app/transport/smoke.ts backend/src/app/economy-tick-runner.ts",
+                                    "node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-playable-manifest-loaders.test.ts",
+                                    "node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/app/transport/local-first-slice-settlement-loop-transport.test.ts",
+                                    "python tools/orchestrator.py status"
+                                ],
+        "results":  {
+                        "validation_note":  "TypeScript strip-types checks passed for all touched files; new manifest bootstrap tests passed. Local transport test execution remains blocked in this environment by existing ESM directory-import limitations (`ERR_UNSUPPORTED_DIR_IMPORT`). `python tools/orchestrator.py status` succeeded."
+                    },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Align client bootstrap defaults with backend playable manifest IDs",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Replace hard-coded first-session settlement/hostile defaults in the client bootstrap adapter with a manifest-backed payload source so client route requests stay aligned with backend first-slice runtime scope locks.",
+                                        "acceptance_criteria":  [
+                                                                    "Client first-session bootstrap reads default settlement and hostile target IDs from a manifest-backed payload source instead of hard-coded literals.",
+                                                                    "Default world map attack/scout flows continue to work without introducing post-slice entities.",
+                                                                    "Any missing/invalid bootstrap payload path fails clearly and does not silently fall back to out-of-slice IDs."
+                                                                ]
+                                    }
+                                ]
+    }
 ]
