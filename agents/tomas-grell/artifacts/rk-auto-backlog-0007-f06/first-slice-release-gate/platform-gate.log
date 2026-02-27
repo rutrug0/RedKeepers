@@ -1,0 +1,9 @@
+command: "C:\Program Files\Inkscape\bin\python.exe" tools/platform_wrapper_prepare_smoke.py
+exit_code: 0
+
+stdout:
+STATUS: COMPLETED
+Wrapper prepare smoke passed for Steam Tauri and Android Capacitor entry scripts.
+
+stderr:
+

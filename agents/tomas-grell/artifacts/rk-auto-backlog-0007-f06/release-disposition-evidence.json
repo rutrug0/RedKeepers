@@ -1,0 +1,67 @@
+{
+    "item_id":  "RK-AUTO-BACKLOG-0007-F06",
+    "timestamp_utc":  "2026-02-27T11:01:03.7081824Z",
+    "release_gate_command":  "python tools/first_slice_release_gate_runner.py --output-dir agents/tomas-grell/artifacts/rk-auto-backlog-0007-f06/first-slice-release-gate",
+    "overall_status":  "PASS",
+    "criteria":  {
+                     "playable":  {
+                                      "status":  "PASS",
+                                      "evidence":  {
+                                                       "source":  "agents/tomas-grell/artifacts/rk-auto-backlog-0007-f06/first-slice-release-gate/release-gate-evidence.json",
+                                                       "summary":  "RK-M0-0011_SMOKE summary status=PASS pass=23 fail=0",
+                                                       "artifact_log":  "agents/tomas-grell/artifacts/rk-auto-backlog-0007-f06/first-slice-release-gate/playable-gate.log"
+                                                   }
+                                  },
+                     "scope":  {
+                                   "status":  "PASS",
+                                   "evidence":  {
+                                                    "source_of_truth":  "docs/design/first-vertical-slice.md",
+                                                    "critical_loop_stage_evidence":  [
+                                                                                         "stage_tick_progression PASS",
+                                                                                         "stage_build_upgrade PASS",
+                                                                                         "stage_unit_training PASS",
+                                                                                         "stage_map_interaction PASS",
+                                                                                         "stage_hostile_dispatch PASS",
+                                                                                         "stage_deterministic_combat_resolve PASS",
+                                                                                         "stage_event_feed_output PASS"
+                                                                                     ],
+                                                    "fallback_marker_scan":  "agents/tomas-grell/artifacts/rk-auto-backlog-0007-f06/fallback-marker-scan.log",
+                                                    "fallback_marker_scan_status":  "PASS"
+                                                }
+                               },
+                     "quality":  {
+                                     "status":  "PASS",
+                                     "evidence":  {
+                                                      "source":  "agents/tomas-grell/artifacts/rk-auto-backlog-0007-f06/first-slice-release-gate/release-gate-evidence.json",
+                                                      "summary":  "orchestrator status validation passed (exit 0)",
+                                                      "artifact_log":  "agents/tomas-grell/artifacts/rk-auto-backlog-0007-f06/first-slice-release-gate/quality-gate.log"
+                                                  }
+                                 },
+                     "platform":  {
+                                      "status":  "PASS",
+                                      "evidence":  {
+                                                       "source":  "agents/tomas-grell/artifacts/rk-auto-backlog-0007-f06/first-slice-release-gate/release-gate-evidence.json",
+                                                       "summary":  "wrapper prepare smoke passed for Steam Tauri and Android Capacitor",
+                                                       "artifact_log":  "agents/tomas-grell/artifacts/rk-auto-backlog-0007-f06/first-slice-release-gate/platform-gate.log"
+                                                   }
+                                  },
+                     "readiness":  {
+                                       "status":  "PASS",
+                                       "checklist":  {
+                                                         "slice_checklist_complete":  "PASS",
+                                                         "known_issues_logged":  "PASS",
+                                                         "local_reproduction_runbook":  "PASS"
+                                                     },
+                                       "known_issues":  [
+
+                                                        ],
+                                       "reproduction":  {
+                                                            "command":  "python tools/first_slice_release_gate_runner.py",
+                                                            "runbook":  "docs/operations/first-slice-release-gate.md"
+                                                        }
+                                   }
+                 },
+    "blocker_entries":  [
+
+                        ]
+}

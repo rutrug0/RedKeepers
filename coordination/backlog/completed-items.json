@@ -6891,5 +6891,46 @@
     "runtime_seconds": 333.73,
     "started_at": "2026-02-27T10:48:20.131894+00:00",
     "finished_at": "2026-02-27T10:53:53.861744+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F05-F01",
+    "title": "Fix failing `negative_insufficient_resources` playable smoke check for release-gate readiness",
+    "description": "Address the current RK-M0-0011 smoke regression where `negative_insufficient_resources` fails, so the new single-command release gate can pass for local candidate validation.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F05"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "`python tools/rk_m0_0011_first_slice_loop_smoke.py` exits 0 with `RK-M0-0011_SMOKE summary status=PASS`",
+      "`python tools/first_slice_release_gate_runner.py` reports overall `PASS` in `release-gate-evidence.json`",
+      "No placeholder/fallback token regressions are introduced in settlement build/train insufficient-resources event handling"
+    ],
+    "validation_commands": [
+      "python tools/rk_m0_0011_first_slice_loop_smoke.py",
+      "python tools/first_slice_release_gate_runner.py"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T10:53:55.500863+00:00",
+    "updated_at": "2026-02-27T10:56:56.159596+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/sera-kest/outbox.json](/D:/RedKeepers/agents/sera-kest/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "juno-cairn",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F05",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "bf0dd1eac38a5377ee0c38c475b22107603ad8c5",
+    "resolved_by_agent": "sera-kest",
+    "resolved_by_role": "frontend",
+    "runtime_seconds": 171.47,
+    "started_at": "2026-02-27T10:54:00.763840+00:00",
+    "finished_at": "2026-02-27T10:56:52.230930+00:00"
   }
 ]

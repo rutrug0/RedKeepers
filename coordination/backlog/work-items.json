@@ -18,17 +18,18 @@
       "Failures produce actionable blocker entries with owning role."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T10:15:35.546325+00:00",
-    "updated_at": "2026-02-27T10:15:35.546325+00:00",
+    "updated_at": "2026-02-27T11:02:06.036795+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
+    "assigned_agent": "tomas-grell"
   },
   {
     "id": "RK-AUTO-BACKLOG-0007-F03-F01",
@@ -102,40 +103,5 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "nika-thorn",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0007-F05-F01",
-    "title": "Fix failing `negative_insufficient_resources` playable smoke check for release-gate readiness",
-    "description": "Address the current RK-M0-0011 smoke regression where `negative_insufficient_resources` fails, so the new single-command release gate can pass for local candidate validation.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0007-F05"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "`python tools/rk_m0_0011_first_slice_loop_smoke.py` exits 0 with `RK-M0-0011_SMOKE summary status=PASS`",
-      "`python tools/first_slice_release_gate_runner.py` reports overall `PASS` in `release-gate-evidence.json`",
-      "No placeholder/fallback token regressions are introduced in settlement build/train insufficient-resources event handling"
-    ],
-    "validation_commands": [
-      "python tools/rk_m0_0011_first_slice_loop_smoke.py",
-      "python tools/first_slice_release_gate_runner.py"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T10:53:55.500863+00:00",
-    "updated_at": "2026-02-27T10:56:52.246655+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "juno-cairn",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F05",
-    "assigned_agent": "sera-kest"
   }
 ]
