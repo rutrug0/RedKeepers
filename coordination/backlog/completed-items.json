@@ -7447,5 +7447,49 @@
     "runtime_seconds": 384.22,
     "started_at": "2026-02-27T11:51:18.384107+00:00",
     "finished_at": "2026-02-27T11:57:42.597383+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0008-F05",
+    "title": "Add hostile token-contract stage to first-slice release gate runner",
+    "description": "Extend the single-command first-slice release gate to run a dedicated hostile token-contract validation stage and include its disposition in gate evidence output.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0008-F04"
+    ],
+    "inputs": [
+      "tools/first_slice_release_gate_runner.py",
+      "docs/operations/first-slice-release-gate.md",
+      "coordination/runtime/first-slice-release-gate/"
+    ],
+    "acceptance_criteria": [
+      "Release gate runner executes a hostile token-contract validation stage in deterministic order with existing playable/quality/platform stages",
+      "Gate evidence artifacts include explicit PASS/FAIL summary for hostile token-contract validation",
+      "Runner exits non-zero when hostile token-contract stage fails"
+    ],
+    "validation_commands": [
+      "python tools/first_slice_release_gate_runner.py"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:14:57.959507+00:00",
+    "updated_at": "2026-02-27T12:00:26.235874+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/juno-cairn/outbox.json](D:/RedKeepers/agents/juno-cairn/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008",
+    "assigned_agent": "juno-cairn",
+    "commit_sha": "b1056761266f80b3fd50e24f01e70e663918120d",
+    "resolved_by_agent": "juno-cairn",
+    "resolved_by_role": "platform",
+    "runtime_seconds": 152.45,
+    "started_at": "2026-02-27T11:57:49.694003+00:00",
+    "finished_at": "2026-02-27T12:00:22.143474+00:00"
   }
 ]

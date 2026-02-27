@@ -1,0 +1,51 @@
+{
+  "item_id": "RK-AUTO-BACKLOG-0008-F06",
+  "timestamp_utc": "2026-02-27T12:01:57.671394Z",
+  "release_gate_command": "python tools/first_slice_release_gate_runner.py --output-dir agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate",
+  "status_command": "python tools/orchestrator.py status",
+  "overall_status": "PASS",
+  "criteria": {
+    "playable": {
+      "status": "PASS",
+      "owner_role_if_failed": "backend",
+      "evidence": {
+        "source": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/release-gate-evidence.json",
+        "summary": "RK-M0-0011_SMOKE summary status=PASS pass=23 fail=0",
+        "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/playable-gate.log"
+      }
+    },
+    "quality": {
+      "status": "PASS",
+      "owner_role_if_failed": "qa",
+      "evidence": {
+        "source": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/release-gate-evidence.json",
+        "summary": "Workload Buckets: ready=dependency-ready queued, waiting=queued with unmet dependencies.",
+        "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/quality-gate.log"
+      }
+    },
+    "platform": {
+      "status": "PASS",
+      "owner_role_if_failed": "platform",
+      "evidence": {
+        "source": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/release-gate-evidence.json",
+        "summary": "Wrapper prepare smoke passed for Steam Tauri and Android Capacitor entry scripts.",
+        "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/platform-gate.log"
+      }
+    },
+    "hostile_token_contract": {
+      "status": "PASS",
+      "owner_role_if_failed": "backend",
+      "evidence": {
+        "source": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/release-gate-evidence.json",
+        "summary": "hostile runtime token contract: D:\\RedKeepers\\backend\\src\\app\\config\\seeds\\v1\\narrative\\first-slice-hostile-runtime-token-contract.json",
+        "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/hostile-token-contract-gate.log"
+      }
+    }
+  },
+  "evidence_links": {
+    "runner_evidence_json": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/release-gate-evidence.json",
+    "runner_evidence_md": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/release-gate-evidence.md",
+    "orchestrator_status_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/orchestrator-status.log"
+  },
+  "blocker_entries": []
+}

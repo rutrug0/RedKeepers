@@ -1,0 +1,13 @@
+command: "C:\Program Files\Inkscape\bin\python.exe" tools/generate_first_slice_frontend_manifest_snapshot.py --output coordination/runtime/first-slice-release-gate/hostile-token-contract-snapshot.js
+exit_code: 0
+
+stdout:
+STATUS: COMPLETED
+Generated first-slice frontend manifest snapshot: D:\RedKeepers\coordination\runtime\first-slice-release-gate\hostile-token-contract-snapshot.js
+playable manifest: D:\RedKeepers\backend\src\app\config\seeds\v1\first-slice-playable-manifest.json
+content-key manifest: D:\RedKeepers\backend\src\app\config\seeds\v1\narrative\first-slice-content-key-manifest.json
+narrative template snapshot: D:\RedKeepers\backend\src\app\config\seeds\v1\narrative\first-slice-narrative-template-snapshot.lock.json
+hostile runtime token contract: D:\RedKeepers\backend\src\app\config\seeds\v1\narrative\first-slice-hostile-runtime-token-contract.json
+
+stderr:
+

@@ -833,5 +833,35 @@
       "agents/tomas-grell/artifacts/rk-auto-backlog-0007-f06/release-disposition-evidence.md",
       "agents/tomas-grell/outbox.json"
     ]
+  },
+  {
+    "ts": "2026-02-27T12:02:16.738093Z",
+    "item_id": "RK-AUTO-BACKLOG-0008-F06",
+    "status": "completed",
+    "summary": "Executed the release-blocking first-slice gate with hostile token-contract stage and published per-stage PASS evidence plus disposition links for daemon operators; no stage failures/blockers in this run.",
+    "checks": [
+      "python tools/first_slice_release_gate_runner.py (pass; summary status=PASS)",
+      "python tools/first_slice_release_gate_runner.py --output-dir agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate (pass; playable/quality/platform/hostile_token_contract all PASS)",
+      "python tools/orchestrator.py status (pass)"
+    ],
+    "changed_files": [
+      "coordination/runtime/first-slice-release-gate/playable-gate.log",
+      "coordination/runtime/first-slice-release-gate/quality-gate.log",
+      "coordination/runtime/first-slice-release-gate/platform-gate.log",
+      "coordination/runtime/first-slice-release-gate/hostile-token-contract-gate.log",
+      "coordination/runtime/first-slice-release-gate/hostile-token-contract-snapshot.js",
+      "coordination/runtime/first-slice-release-gate/release-gate-evidence.json",
+      "coordination/runtime/first-slice-release-gate/release-gate-evidence.md",
+      "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/playable-gate.log",
+      "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/quality-gate.log",
+      "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/platform-gate.log",
+      "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/hostile-token-contract-gate.log",
+      "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/release-gate-evidence.json",
+      "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/first-slice-release-gate/release-gate-evidence.md",
+      "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/orchestrator-status.log",
+      "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/release-disposition-evidence.json",
+      "agents/tomas-grell/artifacts/rk-auto-backlog-0008-f06/release-disposition-evidence.md",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]
