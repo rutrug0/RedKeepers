@@ -1,11 +1,18 @@
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PLAYABLE_MANIFEST_FILE = Path("backend/src/app/config/seeds/v1/first-slice-playable-manifest.json")
+CONTENT_KEY_MANIFEST_FILE = Path(
+    "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+)
+FRONTEND_MANIFEST_SNAPSHOT_FILE = Path("client-web/first-slice-manifest-snapshot.js")
+FRONTEND_MANIFEST_SNAPSHOT_GLOBAL = "__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__"
 
 ROUTE_BINDINGS = (
     {
@@ -98,9 +105,58 @@ def _missing_tokens(text: str, tokens: tuple[str, ...]) -> list[str]:
     return [token for token in tokens if token not in text]
 
 
+def _extract_frontend_manifest_snapshot_payload(snapshot_js_text: str) -> dict[str, object]:
+    pattern = re.compile(
+        rf"window\.{re.escape(FRONTEND_MANIFEST_SNAPSHOT_GLOBAL)}\s*=\s*Object\.freeze\((?P<payload>\{{.*\}})\);",
+        flags=re.DOTALL,
+    )
+    match = pattern.search(snapshot_js_text)
+    if not match:
+        raise ValueError("missing generated frontend manifest snapshot global payload")
+    raw_payload = match.group("payload")
+    parsed = json.loads(raw_payload)
+    if not isinstance(parsed, dict):
+        raise ValueError("generated frontend manifest snapshot payload must be an object")
+    return parsed
+
+
+def _get_nested(payload: dict[str, object], path: tuple[str, ...]) -> object:
+    current: object = payload
+    for key in path:
+        if not isinstance(current, dict):
+            raise ValueError(f"invalid snapshot path `{'.'.join(path)}`")
+        if key not in current:
+            raise ValueError(f"missing snapshot path `{'.'.join(path)}`")
+        current = current[key]
+    return current
+
+
+def _to_string_list(value: object, *, label: str) -> list[str]:
+    if not isinstance(value, list):
+        raise ValueError(f"{label} must be an array")
+    out: list[str] = []
+    for idx, entry in enumerate(value):
+        text = str(entry).strip()
+        if len(text) < 1:
+            raise ValueError(f"{label}[{idx}] must be a non-empty string")
+        out.append(text)
+    return out
+
+
+def _set_diff_detail(actual: list[str], expected: list[str]) -> str:
+    actual_set = set(actual)
+    expected_set = set(expected)
+    missing = sorted(expected_set - actual_set)
+    extra = sorted(actual_set - expected_set)
+    return f"missing={missing} extra={extra}"
+
+
 def run_smoke(root: Path = ROOT) -> list[SmokeCheckResult]:
     app_js_path = root / "client-web" / "app.js"
     transport_test_path = root / "backend" / "src" / "app" / "transport" / "local-first-slice-settlement-loop-transport.test.ts"
+    playable_manifest_path = root / PLAYABLE_MANIFEST_FILE
+    content_key_manifest_path = root / CONTENT_KEY_MANIFEST_FILE
+    frontend_manifest_snapshot_path = root / FRONTEND_MANIFEST_SNAPSHOT_FILE
 
     try:
         app_js = _read_text(app_js_path)
@@ -236,6 +292,108 @@ def run_smoke(root: Path = ROOT) -> list[SmokeCheckResult]:
             ),
         ),
     )
+
+    try:
+        playable_manifest = json.loads(_read_text(playable_manifest_path))
+        content_key_manifest = json.loads(_read_text(content_key_manifest_path))
+        frontend_snapshot_payload = _extract_frontend_manifest_snapshot_payload(
+            _read_text(frontend_manifest_snapshot_path)
+        )
+
+        playable_manifest_id = str(playable_manifest.get("manifest_id", "")).strip()
+        content_key_manifest_id = str(content_key_manifest.get("manifest_id", "")).strip()
+        snapshot_playable_manifest_id = str(
+            _get_nested(frontend_snapshot_payload, ("source_manifests", "playable", "manifest_id"))
+        ).strip()
+        snapshot_content_key_manifest_id = str(
+            _get_nested(frontend_snapshot_payload, ("source_manifests", "content_keys", "manifest_id"))
+        ).strip()
+
+        manifest_ids_match = (
+            playable_manifest_id == snapshot_playable_manifest_id
+            and content_key_manifest_id == snapshot_content_key_manifest_id
+        )
+        manifest_id_detail = (
+            f"playable={snapshot_playable_manifest_id}, content_keys={snapshot_content_key_manifest_id}"
+            if manifest_ids_match
+            else (
+                "snapshot/backend manifest id drift: "
+                f"playable backend='{playable_manifest_id}' snapshot='{snapshot_playable_manifest_id}', "
+                f"content_keys backend='{content_key_manifest_id}' snapshot='{snapshot_content_key_manifest_id}'"
+            )
+        )
+        results.append(
+            SmokeCheckResult(
+                check_id="frontend_manifest_snapshot_manifest_ids",
+                ok=manifest_ids_match,
+                detail=manifest_id_detail,
+            )
+        )
+
+        backend_frontend_defaults = _get_nested(
+            playable_manifest,
+            ("default_consumption_contract", "frontend"),
+        )
+        snapshot_frontend_defaults = _get_nested(
+            frontend_snapshot_payload,
+            ("playable", "default_consumption_contract", "frontend"),
+        )
+        if not isinstance(backend_frontend_defaults, dict):
+            raise ValueError("playable manifest default frontend contract must be an object")
+        if not isinstance(snapshot_frontend_defaults, dict):
+            raise ValueError("snapshot default frontend contract must be an object")
+        defaults_match = (
+            str(snapshot_frontend_defaults.get("default_session_entry_settlement_id", "")).strip()
+            == str(backend_frontend_defaults.get("default_session_entry_settlement_id", "")).strip()
+            and str(snapshot_frontend_defaults.get("default_hostile_target_settlement_id", "")).strip()
+            == str(backend_frontend_defaults.get("default_hostile_target_settlement_id", "")).strip()
+        )
+        results.append(
+            SmokeCheckResult(
+                check_id="frontend_manifest_snapshot_settlement_defaults",
+                ok=defaults_match,
+                detail=(
+                    "snapshot settlement defaults match playable manifest"
+                    if defaults_match
+                    else "snapshot settlement defaults diverge from playable manifest defaults"
+                ),
+            )
+        )
+
+        backend_allowlist = _to_string_list(
+            _get_nested(
+                content_key_manifest,
+                ("default_first_slice_seed_usage", "include_only_content_keys"),
+            ),
+            label="content manifest include_only_content_keys",
+        )
+        snapshot_allowlist = _to_string_list(
+            _get_nested(
+                frontend_snapshot_payload,
+                ("content_keys", "default_first_slice_seed_usage", "include_only_content_keys"),
+            ),
+            label="snapshot include_only_content_keys",
+        )
+        allowlist_matches = backend_allowlist == snapshot_allowlist
+        results.append(
+            SmokeCheckResult(
+                check_id="frontend_manifest_snapshot_content_allowlist",
+                ok=allowlist_matches,
+                detail=(
+                    f"allowlist_count={len(snapshot_allowlist)}"
+                    if allowlist_matches
+                    else _set_diff_detail(snapshot_allowlist, backend_allowlist)
+                ),
+            )
+        )
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        results.append(
+            SmokeCheckResult(
+                check_id="frontend_manifest_snapshot_integrity",
+                ok=False,
+                detail=str(exc),
+            )
+        )
 
     return results
 

@@ -64,6 +64,50 @@ def _write_fixture(root: Path) -> None:
             'flow_version: "v1"\n'
             'flow_version: "v1"\n'
         ),
+        "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json": (
+            "{\n"
+            '  "manifest_id": "first_slice_playable_manifest_lock_v1",\n'
+            '  "default_consumption_contract": {\n'
+            '    "frontend": {\n'
+            '      "default_session_entry_settlement_id": "settlement_alpha",\n'
+            '      "default_hostile_target_settlement_id": "settlement_hostile"\n'
+            "    }\n"
+            "  }\n"
+            "}\n"
+        ),
+        "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json": (
+            "{\n"
+            '  "manifest_id": "first_slice_content_key_manifest_v1",\n'
+            '  "default_first_slice_seed_usage": {\n'
+            '    "include_only_content_keys": ["event.tick.passive_income", "event.build.success"]\n'
+            "  }\n"
+            "}\n"
+        ),
+        "client-web/first-slice-manifest-snapshot.js": (
+            "window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({\n"
+            '  "source_manifests": {\n'
+            '    "playable": {\n'
+            '      "manifest_id": "first_slice_playable_manifest_lock_v1"\n'
+            "    },\n"
+            '    "content_keys": {\n'
+            '      "manifest_id": "first_slice_content_key_manifest_v1"\n'
+            "    }\n"
+            "  },\n"
+            '  "playable": {\n'
+            '    "default_consumption_contract": {\n'
+            '      "frontend": {\n'
+            '        "default_session_entry_settlement_id": "settlement_alpha",\n'
+            '        "default_hostile_target_settlement_id": "settlement_hostile"\n'
+            "      }\n"
+            "    }\n"
+            "  },\n"
+            '  "content_keys": {\n'
+            '    "default_first_slice_seed_usage": {\n'
+            '      "include_only_content_keys": ["event.tick.passive_income", "event.build.success"]\n'
+            "    }\n"
+            "  }\n"
+            "});\n"
+        ),
     }
 
     for rel_path, content in fixture_files.items():
@@ -89,7 +133,10 @@ class RKM00011FirstSliceLoopSmokeTests(unittest.TestCase):
         self.assertIn("RK-M0-0011_SMOKE check=scout_touchpoint status=PASS", text)
         self.assertIn("RK-M0-0011_SMOKE check=negative_insufficient_resources status=PASS", text)
         self.assertIn("RK-M0-0011_SMOKE check=negative_unavailable_state status=PASS", text)
-        self.assertIn("RK-M0-0011_SMOKE summary status=PASS pass=7 fail=0", text)
+        self.assertIn("RK-M0-0011_SMOKE check=frontend_manifest_snapshot_manifest_ids status=PASS", text)
+        self.assertIn("RK-M0-0011_SMOKE check=frontend_manifest_snapshot_settlement_defaults status=PASS", text)
+        self.assertIn("RK-M0-0011_SMOKE check=frontend_manifest_snapshot_content_allowlist status=PASS", text)
+        self.assertIn("RK-M0-0011_SMOKE summary status=PASS pass=10 fail=0", text)
 
     def test_main_fails_when_unavailable_tile_assertion_is_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -109,7 +156,28 @@ class RKM00011FirstSliceLoopSmokeTests(unittest.TestCase):
         self.assertEqual(rc, 1)
         text = out.getvalue()
         self.assertIn("RK-M0-0011_SMOKE check=negative_unavailable_state status=FAIL", text)
-        self.assertIn("RK-M0-0011_SMOKE summary status=FAIL pass=6 fail=1", text)
+        self.assertIn("RK-M0-0011_SMOKE summary status=FAIL pass=9 fail=1", text)
+
+    def test_main_fails_when_frontend_snapshot_manifest_id_drifts(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _write_fixture(root)
+            snapshot_path = root / "client-web" / "first-slice-manifest-snapshot.js"
+            snapshot_path.write_text(
+                snapshot_path.read_text(encoding="utf-8").replace(
+                    "first_slice_content_key_manifest_v1",
+                    "first_slice_content_key_manifest_v1_drift",
+                ),
+                encoding="utf-8",
+            )
+            out = io.StringIO()
+            with mock.patch.object(smoke, "ROOT", root), redirect_stdout(out):
+                rc = smoke.main()
+
+        self.assertEqual(rc, 1)
+        text = out.getvalue()
+        self.assertIn("RK-M0-0011_SMOKE check=frontend_manifest_snapshot_manifest_ids status=FAIL", text)
+        self.assertIn("RK-M0-0011_SMOKE summary status=FAIL pass=9 fail=1", text)
 
 
 if __name__ == "__main__":

@@ -67,6 +67,168 @@
   };
   const firstSliceBootstrapPayloadSourceV1 =
     readManifestBackedFirstSliceBootstrapPayloadSource();
+  const firstSliceManifestSnapshotSourceGlobalPath =
+    "window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__";
+  const readManifestBackedFirstSliceManifestSnapshotSource = () => {
+    const snapshotRoot = window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__;
+    if (!snapshotRoot || typeof snapshotRoot !== "object") {
+      throw new Error(
+        `Missing manifest-backed frontend snapshot at ${firstSliceManifestSnapshotSourceGlobalPath}.`,
+      );
+    }
+
+    const sourceManifests = snapshotRoot.source_manifests;
+    if (!sourceManifests || typeof sourceManifests !== "object") {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.source_manifests`,
+      );
+    }
+    const playableManifest = snapshotRoot.playable;
+    if (!playableManifest || typeof playableManifest !== "object") {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.playable`,
+      );
+    }
+    const contentKeyManifest = snapshotRoot.content_keys;
+    if (!contentKeyManifest || typeof contentKeyManifest !== "object") {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys`,
+      );
+    }
+
+    const readSourceManifest = (sourceManifestKey) => {
+      const sourceManifest = sourceManifests[sourceManifestKey];
+      if (!sourceManifest || typeof sourceManifest !== "object") {
+        throw new Error(
+          `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.source_manifests.${sourceManifestKey}`,
+        );
+      }
+      const sourceManifestPath = String(sourceManifest.path || "").trim();
+      if (sourceManifestPath.length < 1) {
+        throw new Error(
+          `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.source_manifests.${sourceManifestKey}.path`,
+        );
+      }
+      const sourceManifestId = String(sourceManifest.manifest_id || "").trim();
+      if (!stableIdPattern.test(sourceManifestId)) {
+        throw new Error(
+          `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.source_manifests.${sourceManifestKey}.manifest_id`,
+        );
+      }
+      return {
+        path: sourceManifestPath,
+        manifest_id: sourceManifestId,
+      };
+    };
+
+    const playableSourceManifest = readSourceManifest("playable");
+    const contentKeySourceManifest = readSourceManifest("content_keys");
+    const canonicalPlayableNow = playableManifest.canonical_playable_now;
+    if (!canonicalPlayableNow || typeof canonicalPlayableNow !== "object") {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.playable.canonical_playable_now`,
+      );
+    }
+
+    const playableFrontendDefaults =
+      playableManifest.default_consumption_contract?.frontend;
+    if (!playableFrontendDefaults || typeof playableFrontendDefaults !== "object") {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.playable.default_consumption_contract.frontend`,
+      );
+    }
+
+    const contentKeyDefaults =
+      contentKeyManifest.default_first_slice_seed_usage;
+    if (!contentKeyDefaults || typeof contentKeyDefaults !== "object") {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_slice_seed_usage`,
+      );
+    }
+    const includeOnlyContentKeysRaw = contentKeyDefaults.include_only_content_keys;
+    if (!Array.isArray(includeOnlyContentKeysRaw) || includeOnlyContentKeysRaw.length < 1) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_slice_seed_usage.include_only_content_keys`,
+      );
+    }
+    const includeOnlyContentKeys = includeOnlyContentKeysRaw.map((keyValue) => {
+      const normalized = String(keyValue || "").trim();
+      if (normalized.length < 1) {
+        throw new Error(
+          `Invalid snapshot key in ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_slice_seed_usage.include_only_content_keys`,
+        );
+      }
+      return normalized;
+    });
+
+    const legacyAliasMappingRaw = contentKeyManifest.legacy_alias_mapping;
+    if (!Array.isArray(legacyAliasMappingRaw)) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.legacy_alias_mapping`,
+      );
+    }
+    const legacyAliasMapping = legacyAliasMappingRaw.map((row, rowIndex) => {
+      if (!row || typeof row !== "object") {
+        throw new Error(
+          `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.legacy_alias_mapping[${rowIndex}]`,
+        );
+      }
+      const canonicalKey = String(row.canonical_key || "").trim();
+      if (canonicalKey.length < 1) {
+        throw new Error(
+          `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.legacy_alias_mapping[${rowIndex}].canonical_key`,
+        );
+      }
+      if (!Array.isArray(row.legacy_keys)) {
+        throw new Error(
+          `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.legacy_alias_mapping[${rowIndex}].legacy_keys`,
+        );
+      }
+      const legacyKeys = row.legacy_keys.map((legacyKey, legacyIndex) => {
+        const normalizedLegacyKey = String(legacyKey || "").trim();
+        if (normalizedLegacyKey.length < 1) {
+          throw new Error(
+            `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.legacy_alias_mapping[${rowIndex}].legacy_keys[${legacyIndex}]`,
+          );
+        }
+        return normalizedLegacyKey;
+      });
+      return Object.freeze({
+        canonical_key: canonicalKey,
+        legacy_keys: Object.freeze(legacyKeys),
+      });
+    });
+
+    return Object.freeze({
+      source_manifests: Object.freeze({
+        playable: Object.freeze(playableSourceManifest),
+        content_keys: Object.freeze(contentKeySourceManifest),
+      }),
+      playable_manifest: Object.freeze({
+        manifest_id: playableSourceManifest.manifest_id,
+        canonical_playable_now: canonicalPlayableNow,
+        default_consumption_contract: Object.freeze({
+          frontend: Object.freeze({
+            default_session_entry_settlement_id: String(
+              playableFrontendDefaults.default_session_entry_settlement_id || "",
+            ).trim(),
+            default_hostile_target_settlement_id: String(
+              playableFrontendDefaults.default_hostile_target_settlement_id || "",
+            ).trim(),
+          }),
+        }),
+      }),
+      content_key_manifest: Object.freeze({
+        manifest_id: contentKeySourceManifest.manifest_id,
+        default_first_slice_seed_usage: Object.freeze({
+          include_only_content_keys: Object.freeze(includeOnlyContentKeys),
+        }),
+        legacy_alias_mapping: Object.freeze(legacyAliasMapping),
+      }),
+    });
+  };
+  const firstSliceManifestSnapshotSourceV1 =
+    readManifestBackedFirstSliceManifestSnapshotSource();
   const placeholderNarrativeSeedTemplates = Object.freeze({
     "civ_intro.cinder_throne_legates":
       "The Cinder Throne Legates hold the frontier by ash, ration, and decree. Their magistrates build roads before monuments, and their branded levies turn every settlement into a hard post that is costly to break.",
@@ -171,140 +333,25 @@
     "event.settlement.name_assigned":
       "Surveyors record the new holding as {settlement_name}. The name enters the ledger.",
   });
-  const firstSlicePlayableManifestV1 = Object.freeze({
-    manifest_id: "first_slice_playable_manifest_lock_v1",
-    canonical_playable_now: {
-      civilization_profile_id: "cinder_throne_legates",
-      primary_settlement: {
-        settlement_id: "settlement_alpha",
-        settlement_name: "Cinderwatch Hold",
-      },
-      foreign_hostile_profile: {
-        profile_id: "foreign_settlement_profile_v1_ruin_holdfast",
-        settlement_id: "settlement_hostile",
-        settlement_name: "Ruin Holdfast",
-        target_tile_label: "Ruin Holdfast",
-        map_coordinate: {
-          x: 2,
-          y: 1,
-        },
-        defender_garrison_strength: 40,
-      },
-      resources: ["food", "wood", "stone", "iron"],
-      buildings: [
-        "grain_plot",
-        "timber_camp",
-        "stone_quarry",
-        "iron_pit",
-        "barracks",
-        "rally_post",
-      ],
-      units: ["watch_levy", "bow_crew", "trail_scout", "light_raider"],
-    },
-    default_consumption_contract: {
-      frontend: {
-        default_session_entry_settlement_id:
-          firstSliceBootstrapPayloadSourceV1.default_session_entry_settlement_id,
-        default_hostile_target_settlement_id:
-          firstSliceBootstrapPayloadSourceV1.default_hostile_target_settlement_id,
-      },
-    },
-  });
-  const firstSliceContentKeyManifestV1 = Object.freeze({
-    default_first_slice_seed_usage: Object.freeze({
-      include_only_content_keys: [
-      "event.tick.passive_income",
-      "event.tick.storage_near_cap",
-      "event.tick.producer_unlocked_hint",
-      "event.tick.passive_gain_success",
-      "event.tick.passive_gain_reasoned",
-      "event.tick.passive_gain_stalled",
-      "event.tick.passive_gain_capped",
-      "event.build.upgrade_started",
-      "event.build.upgrade_completed",
-      "event.build.queue_blocked_resources",
-      "event.build.success",
-      "event.build.failure_insufficient_resources",
-      "event.build.failure_cooldown",
-      "event.build.failure_invalid_state",
-      "event.train.started",
-      "event.train.completed",
-      "event.train.queue_full",
-      "event.train.success",
-      "event.train.failure_insufficient_resources",
-      "event.train.failure_cooldown",
-      "event.train.failure_invalid_state",
-      "event.scout.dispatched",
-      "event.scout.report_empty",
-      "event.scout.report_hostile",
-      "event.scout.dispatched_success",
-      "event.scout.return_empty",
-      "event.scout.return_hostile",
-      "event.world.hostile_foreign_settlement_spotted",
-      "event.world.hostile_dispatch_target_required",
-      "event.world.hostile_dispatch_accepted",
-      "event.world.hostile_dispatch_en_route",
-      "event.world.hostile_dispatch_failed",
-      "event.world.hostile_dispatch_failed_source_target_not_foreign",
-      "event.world.hostile_dispatch_failed_max_active_marches_reached",
-      "event.world.hostile_dispatch_failed_path_blocked_impassable",
-      "event.world.hostile_dispatch_failed_march_already_exists",
-      "event.world.hostile_march_arrived_outer_works",
-      "event.world.hostile_march_arrived_gate_contested",
-      "event.combat.hostile_resolve_attacker_win",
-      "event.combat.hostile_resolve_defender_win",
-      "event.combat.hostile_resolve_tie_defender_holds",
-      "event.combat.hostile_loss_report",
-      "event.combat.hostile_garrison_broken",
-      "event.combat.hostile_counterfire_heavy",
-      "event.world.hostile_retreat_ordered",
-      "event.world.hostile_retreat_in_motion",
-      "event.world.hostile_retreat_completed",
-      "event.world.hostile_defeat_force_shattered",
-      "event.world.hostile_defeat_command_silent",
-      "event.world.hostile_post_battle_return_started",
-      "event.world.hostile_post_battle_returned",
-      ],
-    }),
-    legacy_alias_mapping: [
-      { canonical_key: "event.tick.passive_income", legacy_keys: ["event.economy.tick_passive_income"] },
-      { canonical_key: "event.tick.storage_near_cap", legacy_keys: ["event.economy.storage_near_cap"] },
-      { canonical_key: "event.tick.producer_unlocked_hint", legacy_keys: ["event.economy.producer_unlocked_hint"] },
-      { canonical_key: "event.build.upgrade_started", legacy_keys: ["event.buildings.upgrade_started"] },
-      { canonical_key: "event.build.upgrade_completed", legacy_keys: ["event.buildings.upgrade_completed"] },
-      { canonical_key: "event.build.queue_blocked_resources", legacy_keys: ["event.buildings.queue_blocked_resources"] },
-      { canonical_key: "event.train.started", legacy_keys: ["event.units.training_started"] },
-      { canonical_key: "event.train.completed", legacy_keys: ["event.units.training_completed"] },
-      { canonical_key: "event.train.queue_full", legacy_keys: ["event.units.training_queue_full"] },
-      { canonical_key: "event.scout.dispatched", legacy_keys: ["event.world.scout_dispatched"] },
-      { canonical_key: "event.scout.report_empty", legacy_keys: ["event.world.scout_report_empty"] },
-      { canonical_key: "event.scout.report_hostile", legacy_keys: ["event.world.scout_report_hostile"] },
-      { canonical_key: "event.world.hostile_dispatch_en_route", legacy_keys: ["event.world.march_started"] },
-      { canonical_key: "event.world.hostile_post_battle_returned", legacy_keys: ["event.world.march_returned"] },
-      { canonical_key: "event.world.hostile_retreat_completed", legacy_keys: ["event.world.march_returned"] },
-      { canonical_key: "event.world.hostile_defeat_force_shattered", legacy_keys: ["event.world.march_returned"] },
-      { canonical_key: "event.combat.hostile_resolve_attacker_win", legacy_keys: ["event.combat.placeholder_skirmish_win"] },
-      { canonical_key: "event.combat.hostile_resolve_defender_win", legacy_keys: ["event.combat.placeholder_skirmish_loss"] },
-      { canonical_key: "event.combat.hostile_resolve_tie_defender_holds", legacy_keys: ["event.combat.placeholder_skirmish_loss"] },
-    ],
-    deferred_post_slice_keys: [
-      { key: "event.world.gather_started" },
-      { key: "event.world.gather_completed" },
-      { key: "event.world.ambush_triggered" },
-      { key: "event.world.ambush_resolved" },
-      { key: "event.hero.assigned" },
-      { key: "event.hero.unassigned" },
-      { key: "event.hero.ability_activated" },
-      { key: "event.hero.cooldown_complete" },
-    ],
-  });
+  const firstSlicePlayableManifestV1 =
+    firstSliceManifestSnapshotSourceV1.playable_manifest;
+  const firstSliceContentKeyManifestV1 =
+    firstSliceManifestSnapshotSourceV1.content_key_manifest;
+  const firstSliceDeferredPostSliceEventContentKeys = Object.freeze([
+    "event.world.gather_started",
+    "event.world.gather_completed",
+    "event.world.ambush_triggered",
+    "event.world.ambush_resolved",
+    "event.hero.assigned",
+    "event.hero.unassigned",
+    "event.hero.ability_activated",
+    "event.hero.cooldown_complete",
+  ]);
   const firstSliceAllowedEventContentKeySet = new Set(
     firstSliceContentKeyManifestV1.default_first_slice_seed_usage.include_only_content_keys,
   );
   const firstSliceDeferredPostSliceEventContentKeySet = new Set(
-    firstSliceContentKeyManifestV1.deferred_post_slice_keys
-      .map((entry) => String(entry?.key || "").trim())
-      .filter((key) => key.length > 0),
+    firstSliceDeferredPostSliceEventContentKeys,
   );
   const firstSliceCanonicalEventKeyCandidatesByLegacyAlias = Object.freeze(
     firstSliceContentKeyManifestV1.legacy_alias_mapping.reduce((lookup, row) => {
@@ -506,7 +553,7 @@
               { unit: "Light Raider", count: 12 },
             ],
             civIntro: {
-              civId: "cinder_throne_legates",
+              civId: firstSlicePlayableDefaults.civilization_profile_id,
               displayName: "Cinder Throne Legates",
               contentKey: "civ_intro.cinder_throne_legates",
             },
@@ -519,7 +566,7 @@
             queueHint: "No build upgrades queued.",
             garrisonHint: "No stationed unit entries.",
             civIntro: {
-              civId: "cinder_throne_legates",
+              civId: firstSlicePlayableDefaults.civilization_profile_id,
               displayName: "Cinder Throne Legates",
               contentKey: "civ_intro.cinder_throne_legates",
             },

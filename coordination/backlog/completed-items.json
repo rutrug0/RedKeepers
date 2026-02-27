@@ -6262,5 +6262,47 @@
     "runtime_seconds": 351.75,
     "started_at": "2026-02-27T08:57:16.031854+00:00",
     "finished_at": "2026-02-27T09:03:07.788736+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F04-F02",
+    "title": "Add backend contract test for first-slice narrative key manifest coverage",
+    "description": "Add a seed contract test that verifies manifest canonical keys exist in `event-feed-messages.json`, alias keys remain present for compatibility, and deferred seeded keys are excluded from default first-slice key selection logic.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F04"
+    ],
+    "inputs": [
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "backend/src/app/config/seeds/v1/narrative-seed-loaders.test.ts"
+    ],
+    "acceptance_criteria": [
+      "Every canonical key in `include_only_content_keys` exists in narrative event feed seeds",
+      "Every legacy key listed in `legacy_alias_mapping` exists in narrative event feed seeds",
+      "All seeded keys listed in `deferred_post_slice_keys` are absent from default first-slice key selection"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T08:23:36.747917+00:00",
+    "updated_at": "2026-02-27T09:06:38.596807+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/ilya-fen/outbox.json](D:/RedKeepers/agents/ilya-fen/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F04",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "604c0e3cc210cd3d8dc7d8ac33218316ebd17fd9",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 202.02,
+    "started_at": "2026-02-27T09:03:14.919806+00:00",
+    "finished_at": "2026-02-27T09:06:36.930075+00:00"
   }
 ]
