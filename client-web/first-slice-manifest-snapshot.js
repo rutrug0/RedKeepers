@@ -278,6 +278,113 @@ window.__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__ = Object.freeze({
         ]
       }
     ],
+    "first_session_objective_contract": {
+      "rows": [
+        {
+          "canonical_objective_key": "first_session.tick.observe_income.v1",
+          "loop_step": "tick",
+          "required_all_canonical_keys": [
+            "event.tick.passive_income",
+            "event.tick.passive_gain_success"
+          ],
+          "compatibility_alias_lookup_keys": {
+            "event.tick.passive_income": [
+              "event.economy.tick_passive_income"
+            ],
+            "event.tick.passive_gain_success": []
+          }
+        },
+        {
+          "canonical_objective_key": "first_session.build.complete_first_upgrade.v1",
+          "loop_step": "build",
+          "required_all_canonical_keys": [
+            "event.build.upgrade_started",
+            "event.build.upgrade_completed"
+          ],
+          "compatibility_alias_lookup_keys": {
+            "event.build.upgrade_started": [
+              "event.buildings.upgrade_started"
+            ],
+            "event.build.upgrade_completed": [
+              "event.buildings.upgrade_completed"
+            ]
+          }
+        },
+        {
+          "canonical_objective_key": "first_session.train.complete_first_batch.v1",
+          "loop_step": "train",
+          "required_all_canonical_keys": [
+            "event.train.started",
+            "event.train.completed"
+          ],
+          "compatibility_alias_lookup_keys": {
+            "event.train.started": [
+              "event.units.training_started"
+            ],
+            "event.train.completed": [
+              "event.units.training_completed"
+            ]
+          }
+        },
+        {
+          "canonical_objective_key": "first_session.scout.confirm_hostile_target.v1",
+          "loop_step": "scout",
+          "required_all_canonical_keys": [
+            "event.scout.dispatched_success",
+            "event.scout.return_hostile"
+          ],
+          "compatibility_alias_lookup_keys": {
+            "event.scout.dispatched_success": [],
+            "event.scout.return_hostile": []
+          }
+        },
+        {
+          "canonical_objective_key": "first_session.attack.dispatch_hostile_march.v1",
+          "loop_step": "attack",
+          "required_all_canonical_keys": [
+            "event.world.hostile_dispatch_accepted",
+            "event.world.hostile_dispatch_en_route",
+            "event.world.hostile_march_arrived_outer_works"
+          ],
+          "compatibility_alias_lookup_keys": {
+            "event.world.hostile_dispatch_accepted": [],
+            "event.world.hostile_dispatch_en_route": [
+              "event.world.march_started"
+            ],
+            "event.world.hostile_march_arrived_outer_works": []
+          }
+        },
+        {
+          "canonical_objective_key": "first_session.resolve_hostile_outcome.v1",
+          "loop_step": "resolve",
+          "required_all_canonical_keys": [
+            "event.combat.hostile_loss_report"
+          ],
+          "compatibility_alias_lookup_keys": {
+            "event.combat.hostile_loss_report": [],
+            "event.combat.hostile_resolve_attacker_win": [
+              "event.combat.placeholder_skirmish_win"
+            ],
+            "event.combat.hostile_resolve_defender_win": [
+              "event.combat.placeholder_skirmish_loss"
+            ],
+            "event.combat.hostile_resolve_tie_defender_holds": []
+          },
+          "required_any_canonical_keys": [
+            "event.combat.hostile_resolve_attacker_win",
+            "event.combat.hostile_resolve_defender_win",
+            "event.combat.hostile_resolve_tie_defender_holds"
+          ]
+        }
+      ],
+      "alias_lookup_contract": {
+        "deterministic_resolution_order": [
+          "canonical_key",
+          "legacy_keys_in_declared_order"
+        ],
+        "direct_default_selection_excludes_legacy_alias_only_keys": true
+      }
+    },
     "hostile_runtime_token_contract": {
       "contract_id": "first_slice_hostile_runtime_token_contract_v1",
       "scope_contract": {

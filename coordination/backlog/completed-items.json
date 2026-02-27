@@ -8667,5 +8667,51 @@
     "runtime_seconds": 241.81,
     "started_at": "2026-02-27T14:29:57.323765+00:00",
     "finished_at": "2026-02-27T14:33:59.137363+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0011-F02",
+    "title": "Seed objective-strip placeholder template rows for canonical and alias objective keys",
+    "description": "Add first-session objective template rows to narrative/content seeds so objective-strip labels are data-backed by canonical objective ids and deterministic compatibility aliases instead of hard-coded frontend fallback text.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0011-F01"
+    ],
+    "inputs": [
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+    ],
+    "acceptance_criteria": [
+      "Canonical objective placeholder template coverage exists for all six first-session objective ids with replaceable text",
+      "Each objective includes one compatibility alias key path for lookup-only resolution and aliases are not promoted as defaults",
+      "Objective placeholders remain strictly first-slice scope and add no out-of-scope mechanics or hero-specific copy"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:44:54.339624+00:00",
+    "updated_at": "2026-02-27T14:49:34.795474+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Appended this run entry in [agents/nika-thorn/outbox.json](D:/RedKeepers/agents/nika-thorn/outbox.json).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0011",
+    "assigned_agent": "nika-thorn",
+    "last_unblocked_reason": "manual dependency recovery: non-actionable blocker requeued to clear queue stall",
+    "last_blocker_reason": "Note: `coordination/backlog/completed-items.json` and `coordination/backlog/work-items.json` were already modified in the working tree and were left untouched.",
+    "commit_sha": "4c4f2ff161950d2045ea920eb7336e472063e1ad",
+    "resolved_by_agent": "nika-thorn",
+    "resolved_by_role": "content",
+    "runtime_seconds": 73.78,
+    "started_at": "2026-02-27T14:48:19.572022+00:00",
+    "finished_at": "2026-02-27T14:49:33.347706+00:00"
   }
 ]

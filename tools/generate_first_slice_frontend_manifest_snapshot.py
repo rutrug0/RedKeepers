@@ -45,6 +45,18 @@ HOSTILE_RUNTIME_TOKEN_CONTRACT_PATH = (
 )
 DEFAULT_OUTPUT_PATH = ROOT / "client-web" / "first-slice-manifest-snapshot.js"
 SNAPSHOT_GLOBAL_NAME = "__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__"
+OBJECTIVE_STEP_ORDER: tuple[str, ...] = (
+    "tick",
+    "build",
+    "train",
+    "scout",
+    "attack",
+    "resolve",
+)
+OBJECTIVE_STEP_ORDER_INDEX: dict[str, int] = {
+    step: idx for idx, step in enumerate(OBJECTIVE_STEP_ORDER)
+}
+ALIAS_LOOKUP_RESOLUTION_ORDER = ["canonical_key", "legacy_keys_in_declared_order"]
 
 
 def _resolve_repo_relative_path(raw_path: str) -> Path:
@@ -136,6 +148,138 @@ def _to_lookup_resolution_rows(values: list[Any], *, label: str) -> list[dict[st
     return rows
 
 
+def _to_objective_step_outcome_contract_rows(
+    values: list[Any], *, label: str
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    seen_objective_ids: set[str] = set()
+    seen_loop_steps: set[str] = set()
+    previous_step_index = -1
+
+    for idx, raw_row in enumerate(values):
+        if not isinstance(raw_row, dict):
+            raise ValueError(f"{label}[{idx}] must be an object.")
+
+        canonical_objective_key = _read_required_string(
+            raw_row,
+            "canonical_objective_key",
+            label=f"{label}[{idx}]",
+        )
+        if canonical_objective_key in seen_objective_ids:
+            raise ValueError(
+                f"{label}[{idx}] canonical_objective_key '{canonical_objective_key}' is duplicated."
+            )
+        seen_objective_ids.add(canonical_objective_key)
+
+        loop_step = _read_required_string(
+            raw_row,
+            "loop_step",
+            label=f"{label}[{idx}]",
+        )
+        step_index = OBJECTIVE_STEP_ORDER_INDEX.get(loop_step)
+        if step_index is None:
+            raise ValueError(
+                f"{label}[{idx}] loop_step '{loop_step}' is invalid. "
+                f"Expected one of: {', '.join(OBJECTIVE_STEP_ORDER)}."
+            )
+        if loop_step in seen_loop_steps:
+            raise ValueError(f"{label}[{idx}] loop_step '{loop_step}' is duplicated.")
+        if step_index < previous_step_index:
+            previous_step = OBJECTIVE_STEP_ORDER[previous_step_index]
+            raise ValueError(
+                f"{label}[{idx}] loop_step '{loop_step}' is out of order. "
+                f"Expected order: {list(OBJECTIVE_STEP_ORDER)} and a step at or after '{previous_step}'."
+            )
+
+        seen_loop_steps.add(loop_step)
+        previous_step_index = step_index
+
+        required_all_canonical_keys = _to_string_list(
+            _read_required_array(raw_row, "required_all_canonical_keys", label=f"{label}[{idx}]"),
+            label=f"{label}[{idx}].required_all_canonical_keys",
+        )
+        if len(required_all_canonical_keys) < 1:
+            raise ValueError(
+                f"{label}[{idx}] required_all_canonical_keys must include at least one canonical key."
+            )
+
+        required_any_raw = raw_row.get("required_any_canonical_keys", [])
+        if not isinstance(required_any_raw, list):
+            raise ValueError(
+                f"{label}[{idx}] required_any_canonical_keys must be an array when provided."
+            )
+        required_any_canonical_keys = _to_string_list(
+            required_any_raw,
+            label=f"{label}[{idx}].required_any_canonical_keys",
+        )
+        include_required_any = "required_any_canonical_keys" in raw_row
+
+        all_canonical_keys = [
+            *required_all_canonical_keys,
+            *required_any_canonical_keys,
+        ]
+        seen_keys: set[str] = set()
+        duplicated_keys: list[str] = []
+        for key in all_canonical_keys:
+            if key in seen_keys and key not in duplicated_keys:
+                duplicated_keys.append(key)
+            seen_keys.add(key)
+        if len(duplicated_keys) > 0:
+            raise ValueError(
+                f"{label}[{idx}] required_all_canonical_keys/required_any_canonical_keys "
+                f"contains duplicate canonical key(s): {duplicated_keys}."
+            )
+
+        alias_lookup_keys = _read_required_object(
+            raw_row,
+            "compatibility_alias_lookup_keys",
+            label=f"{label}[{idx}]",
+        )
+        normalized_alias_lookup_keys: dict[str, list[str]] = {}
+        for raw_key, raw_aliases in alias_lookup_keys.items():
+            canonical_key = str(raw_key).strip()
+            if len(canonical_key) < 1:
+                raise ValueError(
+                    f"{label}[{idx}].compatibility_alias_lookup_keys contains an empty canonical key entry."
+                )
+            if not isinstance(raw_aliases, list):
+                raise ValueError(
+                    f"{label}[{idx}].compatibility_alias_lookup_keys['{canonical_key}'] must be an array."
+                )
+            normalized_alias_lookup_keys[canonical_key] = _to_string_list(
+                raw_aliases,
+                label=(
+                    f"{label}[{idx}].compatibility_alias_lookup_keys"
+                    f"['{canonical_key}']"
+                ),
+            )
+
+        drift_keys = sorted(
+            set(normalized_alias_lookup_keys.keys()).symmetric_difference(
+                set(all_canonical_keys)
+            )
+        )
+        if len(drift_keys) > 0:
+            raise ValueError(
+                f"{label}[{idx}] compatibility_alias_lookup_keys keys must exactly match "
+                f"required_all/required_any canonical keys; drift={drift_keys}."
+            )
+
+        row_payload: dict[str, Any] = {
+            "canonical_objective_key": canonical_objective_key,
+            "loop_step": loop_step,
+            "required_all_canonical_keys": required_all_canonical_keys,
+            "compatibility_alias_lookup_keys": {
+                key: normalized_alias_lookup_keys[key] for key in all_canonical_keys
+            },
+        }
+        if include_required_any:
+            row_payload["required_any_canonical_keys"] = required_any_canonical_keys
+        rows.append(row_payload)
+
+    return rows
+
+
 def _to_templates_by_key(values: dict[str, Any], *, label: str) -> dict[str, dict[str, Any]]:
     templates: dict[str, dict[str, Any]] = {}
     for key, raw_row in values.items():
@@ -198,6 +342,99 @@ def _to_hostile_runtime_required_key_rows(
             }
         )
     return rows
+
+
+def _to_alias_lookup_contract_row(value: dict[str, Any], *, label: str) -> dict[str, Any]:
+    deterministic_resolution_order = _to_string_list(
+        _read_required_array(value, "deterministic_resolution_order", label=label),
+        label=f"{label}.deterministic_resolution_order",
+    )
+    if deterministic_resolution_order != ALIAS_LOOKUP_RESOLUTION_ORDER:
+        raise ValueError(
+            f"{label}.deterministic_resolution_order must equal {ALIAS_LOOKUP_RESOLUTION_ORDER}; "
+            f"received {deterministic_resolution_order}."
+        )
+
+    excludes_alias_only_keys = _read_required_bool(
+        value,
+        "direct_default_selection_excludes_legacy_alias_only_keys",
+        label=label,
+    )
+    if not excludes_alias_only_keys:
+        raise ValueError(
+            f"{label}.direct_default_selection_excludes_legacy_alias_only_keys must be true."
+        )
+
+    return {
+        "deterministic_resolution_order": deterministic_resolution_order,
+        "direct_default_selection_excludes_legacy_alias_only_keys": excludes_alias_only_keys,
+    }
+
+
+def _validate_objective_contract_alias_and_default_selection_policy(
+    objective_contract_rows: list[dict[str, Any]],
+    *,
+    include_only_content_key_set: set[str],
+    compatibility_alias_only_key_set: set[str],
+    legacy_alias_mapping_rows: list[dict[str, Any]],
+) -> None:
+    legacy_alias_keys_by_canonical_key: dict[str, list[str]] = {}
+    for row in legacy_alias_mapping_rows:
+        canonical_key = str(row["canonical_key"])
+        alias_rows = row["legacy_keys"]
+        if canonical_key not in legacy_alias_keys_by_canonical_key:
+            legacy_alias_keys_by_canonical_key[canonical_key] = []
+        for alias_key in alias_rows:
+            if alias_key not in legacy_alias_keys_by_canonical_key[canonical_key]:
+                legacy_alias_keys_by_canonical_key[canonical_key].append(alias_key)
+
+    for idx, objective_row in enumerate(objective_contract_rows):
+        canonical_objective_key = str(objective_row["canonical_objective_key"])
+        required_all_canonical_keys = objective_row["required_all_canonical_keys"]
+        required_any_canonical_keys = objective_row.get("required_any_canonical_keys", [])
+        all_canonical_keys = [
+            *required_all_canonical_keys,
+            *required_any_canonical_keys,
+        ]
+        alias_lookup_keys = objective_row["compatibility_alias_lookup_keys"]
+
+        for canonical_key in all_canonical_keys:
+            if canonical_key in compatibility_alias_only_key_set:
+                raise ValueError(
+                    "objective_step_outcome_contract "
+                    f"objective '{canonical_objective_key}' canonical key '{canonical_key}' is "
+                    "compatibility-only and cannot be selected as canonical default key."
+                )
+            if canonical_key not in include_only_content_key_set:
+                raise ValueError(
+                    "objective_step_outcome_contract "
+                    f"objective '{canonical_objective_key}' canonical key '{canonical_key}' "
+                    "must be included in default_first_slice_seed_usage.include_only_content_keys."
+                )
+
+            declared_legacy_aliases = legacy_alias_keys_by_canonical_key.get(canonical_key, [])
+            compatibility_aliases_for_key = alias_lookup_keys.get(canonical_key, [])
+            if compatibility_aliases_for_key != declared_legacy_aliases:
+                raise ValueError(
+                    "objective_step_outcome_contract "
+                    f"objective '{canonical_objective_key}' canonical key '{canonical_key}' "
+                    "alias lookup policy drift; expected aliases "
+                    f"{declared_legacy_aliases}, received {compatibility_aliases_for_key}."
+                )
+
+            for alias_key in compatibility_aliases_for_key:
+                if alias_key not in compatibility_alias_only_key_set:
+                    raise ValueError(
+                        "objective_step_outcome_contract "
+                        f"objective '{canonical_objective_key}' canonical key '{canonical_key}' alias "
+                        f"'{alias_key}' must be declared in compatibility_alias_only_keys."
+                    )
+                if alias_key in include_only_content_key_set:
+                    raise ValueError(
+                        "objective_step_outcome_contract "
+                        f"objective '{canonical_objective_key}' canonical key '{canonical_key}' alias "
+                        f"'{alias_key}' must remain lookup-only and excluded from default canonical selection."
+                    )
 
 
 def _build_snapshot_payload(
@@ -308,6 +545,26 @@ def _build_snapshot_payload(
         ),
         label="legacy_alias_mapping",
     )
+    objective_step_outcome_contract = _to_objective_step_outcome_contract_rows(
+        _read_required_array(
+            content_key_manifest,
+            "objective_step_outcome_contract",
+            label="first-slice-content-key-manifest.json",
+        ),
+        label="objective_step_outcome_contract",
+    )
+    if len(objective_step_outcome_contract) < 1:
+        raise ValueError(
+            "first-slice-content-key-manifest.json.objective_step_outcome_contract must contain at least one row."
+        )
+    alias_lookup_contract = _to_alias_lookup_contract_row(
+        _read_required_object(
+            content_key_manifest,
+            "alias_lookup_contract",
+            label="first-slice-content-key-manifest.json",
+        ),
+        label="first-slice-content-key-manifest.json.alias_lookup_contract",
+    )
     hostile_required_runtime_keys = _to_hostile_runtime_required_key_rows(
         _read_required_array(
             hostile_runtime_token_contract,
@@ -358,6 +615,22 @@ def _build_snapshot_payload(
     )
 
     include_only_content_key_set = set(include_only_content_keys)
+    compatibility_alias_only_keys = _to_string_list(
+        _read_required_array(
+            content_key_manifest,
+            "compatibility_alias_only_keys",
+            label="first-slice-content-key-manifest.json",
+        ),
+        label="compatibility_alias_only_keys",
+    )
+    compatibility_alias_only_key_set = set(compatibility_alias_only_keys)
+    _validate_objective_contract_alias_and_default_selection_policy(
+        objective_step_outcome_contract,
+        include_only_content_key_set=include_only_content_key_set,
+        compatibility_alias_only_key_set=compatibility_alias_only_key_set,
+        legacy_alias_mapping_rows=legacy_alias_mapping,
+    )
+
     declared_hostile_aliases = {
         alias
         for row in hostile_required_runtime_keys
@@ -507,6 +780,10 @@ def _build_snapshot_payload(
                 "include_only_content_keys": include_only_content_keys,
             },
             "legacy_alias_mapping": legacy_alias_mapping,
+            "first_session_objective_contract": {
+                "rows": objective_step_outcome_contract,
+                "alias_lookup_contract": alias_lookup_contract,
+            },
             "hostile_runtime_token_contract": {
                 "contract_id": hostile_contract_id,
                 "scope_contract": {
