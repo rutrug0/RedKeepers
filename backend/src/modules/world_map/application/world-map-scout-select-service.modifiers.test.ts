@@ -4,10 +4,10 @@ import { test } from "node:test";
 import {
   HeroRuntimeActionModifierSource,
   SharedActionModifierAggregationService,
-} from "../../heroes/application";
-import { InMemoryHeroRuntimePersistenceRepository } from "../../heroes/infra";
-import { InMemoryWorldMapTileStateRepository } from "../infra";
-import { DeterministicWorldMapScoutSelectService } from "./world-map-scout-select-service";
+} from "../../heroes/application/shared-action-modifier-aggregation.ts";
+import { InMemoryHeroRuntimePersistenceRepository } from "../../heroes/infra/in-memory-hero-runtime-persistence-repository.ts";
+import { InMemoryWorldMapTileStateRepository } from "../infra/in-memory-world-map-tile-state-repository.ts";
+import { DeterministicWorldMapScoutSelectService } from "./world-map-scout-select-service.ts";
 
 test("scout resolver uses shared numeric modifier aggregation and lifecycle path for hero runtime instances", () => {
   const heroRuntimeRepository = new InMemoryHeroRuntimePersistenceRepository({

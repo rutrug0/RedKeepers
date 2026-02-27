@@ -4,25 +4,25 @@ import { test } from "node:test";
 import {
   HeroRuntimeActionModifierSource,
   SharedActionModifierAggregationService,
-} from "../../heroes/application";
-import { InMemoryHeroRuntimePersistenceRepository } from "../../heroes/infra";
-import { DeterministicWorldMapScoutSelectService } from "../application";
+} from "../../heroes/application/shared-action-modifier-aggregation.ts";
+import { InMemoryHeroRuntimePersistenceRepository } from "../../heroes/infra/in-memory-hero-runtime-persistence-repository.ts";
+import { DeterministicWorldMapScoutSelectService } from "../application/world-map-scout-select-service.ts";
 import {
   WORLD_MAP_SCOUT_INTERACTION_OUTCOMES,
   WORLD_MAP_TILE_STATES,
-} from "../domain";
-import { InMemoryWorldMapTileStateRepository } from "../infra";
+} from "../domain/world-map-scout-contract.ts";
+import { InMemoryWorldMapTileStateRepository } from "../infra/in-memory-world-map-tile-state-repository.ts";
 import {
   createWorldMapTileSnapshotKey,
   hydrateWorldMapTileStateRepositoryFromSeedRows,
   indexWorldMapTileSnapshotsBySettlementAndTileId,
   loadWorldMapSeedBundleV1,
-} from "../../../app/config/seeds/v1/world-map-seed-loaders";
+} from "../../../app/config/seeds/v1/world-map-seed-loaders.ts";
 import {
   WorldMapTileInteractEndpointHandler,
   WorldMapTileInteractOperationError,
   WorldMapTileInteractValidationError,
-} from "./world-map-tile-interact-endpoint";
+} from "./world-map-tile-interact-endpoint.ts";
 
 test("POST /world-map/tiles/{tileId}/interact returns scout_dispatched response for unknown tiles", () => {
   const repository = new InMemoryWorldMapTileStateRepository();

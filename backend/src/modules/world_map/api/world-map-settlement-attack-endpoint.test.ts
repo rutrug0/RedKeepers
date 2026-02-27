@@ -1,7 +1,7 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
-import type { HeroAssignmentContextOwnershipReadRepositories } from "../../heroes/ports";
+import type { HeroAssignmentContextOwnershipReadRepositories } from "../../heroes/ports/hero-runtime-persistence-repository.ts";
 import { InMemoryHeroRuntimePersistenceRepository } from "../../heroes/infra/in-memory-hero-runtime-persistence-repository.ts";
 import {
   DeterministicWorldMapHostileAttackService,

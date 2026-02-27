@@ -1,8 +1,9 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
-import { InMemoryWorldMapGatherMarchStateRepository, InMemoryWorldMapNeutralNodeStateRepository } from "../infra";
-import { DeterministicWorldMapNeutralGatheringService, WorldMapNeutralNodeDepletedError } from "./world-map-neutral-gathering-service";
+import { InMemoryWorldMapGatherMarchStateRepository } from "../infra/in-memory-world-map-gather-march-state-repository.ts";
+import { InMemoryWorldMapNeutralNodeStateRepository } from "../infra/in-memory-world-map-neutral-node-state-repository.ts";
+import { DeterministicWorldMapNeutralGatheringService, WorldMapNeutralNodeDepletedError } from "./world-map-neutral-gathering-service.ts";
 
 test("neutral node spawn table stays deterministic and idempotent for a fixed seed", () => {
   const nodeRepository = new InMemoryWorldMapNeutralNodeStateRepository();

@@ -2397,4 +2397,37 @@
 
                                 ]
     }
+,
+    {
+        "timestamp_utc":  "2026-02-27T12:08:50.7320306Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01-F01",
+        "status":  "done",
+        "summary":  "Normalized remaining world-map API/application test imports away from directory/barrel specifiers to explicit `.ts` file paths (including `../application`, `../infra`, `../../heroes/infra`, and `../../heroes/ports`) for direct Node test compatibility without changing gameplay assertions.",
+        "changed_files":  [
+                              "backend/src/modules/world_map/api/world-map-gather-march-poll-endpoint.test.ts",
+                              "backend/src/modules/world_map/api/world-map-gather-march-start-endpoint.test.ts",
+                              "backend/src/modules/world_map/api/world-map-lifecycle-advance-endpoint.test.ts",
+                              "backend/src/modules/world_map/api/world-map-march-snapshot-endpoint.test.ts",
+                              "backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.test.ts",
+                              "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.test.ts",
+                              "backend/src/modules/world_map/application/world-map-lifecycle-scheduler-service.test.ts",
+                              "backend/src/modules/world_map/application/world-map-march-snapshot-service.test.ts",
+                              "backend/src/modules/world_map/application/world-map-neutral-gathering-service.test.ts",
+                              "backend/src/modules/world_map/application/world-map-scout-select-service.modifiers.test.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --test --test-isolation=none backend/src/modules/world_map/application/world-map-march-snapshot-service.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "Direct node test execution passed (4/4) outside hostile and march-dispatch targets with no `ERR_UNSUPPORTED_DIR_IMPORT`."
+                    },
+        "proposed_work_items":  [
+
+                                ]
+    }
 ]

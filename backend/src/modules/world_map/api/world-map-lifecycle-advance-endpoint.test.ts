@@ -4,12 +4,12 @@ import { test } from "node:test";
 import {
   DeterministicWorldMapLifecycleSchedulerService,
   WorldMapLifecycleNotFoundError,
-} from "../application";
-import { InMemoryWorldMapLifecycleStateRepository } from "../infra";
+} from "../application/world-map-lifecycle-scheduler-service.ts";
+import { InMemoryWorldMapLifecycleStateRepository } from "../infra/in-memory-world-map-lifecycle-state-repository.ts";
 import {
   WorldMapLifecycleAdvanceEndpointHandler,
   WorldMapLifecycleAdvanceValidationError,
-} from "./world-map-lifecycle-advance-endpoint";
+} from "./world-map-lifecycle-advance-endpoint.ts";
 
 test("POST /world-map/worlds/{worldId}/lifecycle/advance returns deterministic lifecycle transition events and archive summary", () => {
   const repository = new InMemoryWorldMapLifecycleStateRepository([

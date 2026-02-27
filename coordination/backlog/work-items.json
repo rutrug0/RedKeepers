@@ -1,44 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0008-F06",
-    "title": "Run release-blocking hostile token-contract gate and publish evidence",
-    "description": "Execute the updated first-slice release gate (including hostile token-contract stage) and publish disposition evidence with owner-tagged blockers for any failing stage.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0008-F05"
-    ],
-    "inputs": [
-      "tools/first_slice_release_gate_runner.py",
-      "coordination/runtime/first-slice-release-gate/",
-      "docs/design/vertical-slice-done-v1.md"
-    ],
-    "acceptance_criteria": [
-      "Gate run records PASS/FAIL for playable, quality, platform, and hostile token-contract stages in evidence artifacts",
-      "Any failing stage is documented with actionable blocker ownership rather than generic failure text",
-      "Evidence links and disposition summary are published in the run result for daemon operators"
-    ],
-    "validation_commands": [
-      "python tools/first_slice_release_gate_runner.py",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T11:14:57.959507+00:00",
-    "updated_at": "2026-02-27T12:03:23.802850+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0008",
-    "assigned_agent": "tomas-grell"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01-F01",
     "title": "Normalize remaining world-map test files away from barrel and directory imports",
     "description": "Apply explicit file `.ts` specifiers across the remaining world-map `*.test.ts` targets that still import from directories/barrels (`../application`, `../infra`, `../../heroes/infra`, `../../heroes/ports`) so direct `node --test` execution does not depend on loader-specific resolution behavior.",
@@ -57,17 +18,18 @@
       "No assertions or gameplay logic are changed in those test files."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T11:35:34.354685+00:00",
-    "updated_at": "2026-02-27T11:35:34.354685+00:00",
+    "updated_at": "2026-02-27T12:09:31.613942+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01-F01",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-AUTO-BACKLOG-0008-F01-F01",

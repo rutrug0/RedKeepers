@@ -1,9 +1,9 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
-import { InMemoryHeroRuntimePersistenceRepository } from "../../heroes/infra";
-import { InMemoryWorldMapMarchStateRepository } from "../infra";
-import { DeterministicWorldMapMarchSnapshotService } from "./world-map-march-snapshot-service";
+import { InMemoryHeroRuntimePersistenceRepository } from "../../heroes/infra/in-memory-hero-runtime-persistence-repository.ts";
+import { InMemoryWorldMapMarchStateRepository } from "../infra/in-memory-world-map-march-state-repository.ts";
+import { DeterministicWorldMapMarchSnapshotService } from "./world-map-march-snapshot-service.ts";
 
 test("march snapshot service emits stable near-realtime snapshot ids within one interval bucket", () => {
   const repository = new InMemoryWorldMapMarchStateRepository([

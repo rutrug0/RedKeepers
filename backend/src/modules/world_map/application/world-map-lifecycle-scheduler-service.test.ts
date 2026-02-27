@@ -1,8 +1,8 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
-import { InMemoryWorldMapLifecycleStateRepository } from "../infra";
-import { DeterministicWorldMapLifecycleSchedulerService } from "./world-map-lifecycle-scheduler-service";
+import { InMemoryWorldMapLifecycleStateRepository } from "../infra/in-memory-world-map-lifecycle-state-repository.ts";
+import { DeterministicWorldMapLifecycleSchedulerService } from "./world-map-lifecycle-scheduler-service.ts";
 
 test("lifecycle scheduler keeps world open before deterministic lock timestamp", () => {
   const repository = new InMemoryWorldMapLifecycleStateRepository([
@@ -153,4 +153,3 @@ test("lifecycle scheduler stays archived between archive and reset cutoffs", () 
     "2026-01-08T00:15:00.000Z",
   );
 });
-

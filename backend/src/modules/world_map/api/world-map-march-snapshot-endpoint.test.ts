@@ -4,12 +4,12 @@ import { test } from "node:test";
 import {
   DeterministicWorldMapMarchSnapshotService,
   WorldMapMarchNotFoundError,
-} from "../application";
-import { InMemoryWorldMapMarchStateRepository } from "../infra";
+} from "../application/world-map-march-snapshot-service.ts";
+import { InMemoryWorldMapMarchStateRepository } from "../infra/in-memory-world-map-march-state-repository.ts";
 import {
   WorldMapMarchSnapshotEndpointHandler,
   WorldMapMarchSnapshotValidationError,
-} from "./world-map-march-snapshot-endpoint";
+} from "./world-map-march-snapshot-endpoint.ts";
 
 test("POST /world-map/marches/{marchId}/snapshot returns interpolation-ready authoritative snapshot payload", () => {
   const repository = new InMemoryWorldMapMarchStateRepository([

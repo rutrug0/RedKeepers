@@ -1,12 +1,10 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
-import { DeterministicWorldMapNeutralGatheringService } from "../application";
-import {
-  InMemoryWorldMapGatherMarchStateRepository,
-  InMemoryWorldMapNeutralNodeStateRepository,
-} from "../infra";
-import { WorldMapGatherMarchPollEndpointHandler } from "./world-map-gather-march-poll-endpoint";
+import { DeterministicWorldMapNeutralGatheringService } from "../application/world-map-neutral-gathering-service.ts";
+import { InMemoryWorldMapGatherMarchStateRepository } from "../infra/in-memory-world-map-gather-march-state-repository.ts";
+import { InMemoryWorldMapNeutralNodeStateRepository } from "../infra/in-memory-world-map-neutral-node-state-repository.ts";
+import { WorldMapGatherMarchPollEndpointHandler } from "./world-map-gather-march-poll-endpoint.ts";
 
 test("POST /world-map/gather-marches/{marchId}/poll returns deterministic gather and ambush resolution payload", () => {
   const nodeRepository = new InMemoryWorldMapNeutralNodeStateRepository();
