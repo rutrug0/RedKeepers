@@ -7934,5 +7934,47 @@
     "runtime_seconds": 220.14,
     "started_at": "2026-02-27T12:44:40.991713+00:00",
     "finished_at": "2026-02-27T12:48:21.133330+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0009-F01-F01",
+    "title": "Enforce canonical-default preference in event feed key resolver",
+    "description": "Update the event key resolution path to consume `migration_key_status` semantics so default rendering uses only canonical-default keys and compatibility-only aliases are accepted only as fallback lookup inputs.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0009-F01"
+    ],
+    "inputs": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+      "client-web/src"
+    ],
+    "acceptance_criteria": [
+      "Direct default rendering selection ignores all keys tagged compatibility-only",
+      "Alias payloads resolve deterministically to their canonical-default key for rendering",
+      "Resolver tests cover at least one alias case in each flow: tick, build, train, scout, hostile_dispatch_and_resolve"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T12:18:59.902677+00:00",
+    "updated_at": "2026-02-27T12:57:41.693725+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` were already changing via daemon activity during the run; I did not edit those files.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0009-F01",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "3d0eb896b3b739b7a930ddd4d4ac7d5e0bd734fd",
+    "resolved_by_agent": "sera-kest",
+    "resolved_by_role": "frontend",
+    "runtime_seconds": 549.64,
+    "started_at": "2026-02-27T12:48:30.580975+00:00",
+    "finished_at": "2026-02-27T12:57:40.226754+00:00"
   }
 ]
