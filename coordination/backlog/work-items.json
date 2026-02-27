@@ -1,44 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0010-F01",
-    "title": "Define first-session objective contract for the playable slice loop",
-    "description": "Document one canonical first-session objective sequence (tick/build/train/scout/attack/resolve) mapped to canonical-default event keys and required token fields so backend/frontend/content share the same in-slice progression contract.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "design",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0009-F02-F01"
-    ],
-    "inputs": [
-      "docs/design/first-vertical-slice.md",
-      "docs/design/first-slice-event-token-contract-matrix.md",
-      "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
-    ],
-    "acceptance_criteria": [
-      "A first-session objective table exists with ordered steps for tick/build/train/scout/attack/resolve and stable objective identifiers",
-      "Each objective step references canonical-default content keys and required runtime token names from the first-slice matrix",
-      "Post-slice mechanics (heroes/ambush/gather branches) are explicitly marked deferred and excluded from required objective coverage"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:02:20.591961+00:00",
-    "updated_at": "2026-02-27T13:08:06.590901+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
-    "assigned_agent": "rowan-hale"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0010-F02",
     "title": "Align narrative placeholder rows to first-session objective outcomes",
     "description": "Update first-slice narrative seed rows so each objective step has canonical success/failure placeholder coverage (including key negative states) with token fields aligned to the objective contract and loop token matrix.",
@@ -64,17 +25,18 @@
     "validation_commands": [
       "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T13:02:20.591961+00:00",
-    "updated_at": "2026-02-27T13:02:20.592470+00:00",
+    "updated_at": "2026-02-27T13:11:31.208438+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
+    "assigned_agent": "nika-thorn"
   },
   {
     "id": "RK-AUTO-BACKLOG-0010-F03",
@@ -232,5 +194,40 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010-F01-F01",
+    "title": "Wire first-session objective tracker to canonical objective IDs and key gates",
+    "description": "Implement first-session objective progress tracking using the six contract IDs and canonical key gates so UI progression state advances only on the documented `tick/build/train/scout/attack/resolve` event sequence.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F01"
+    ],
+    "inputs": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+      "client-web/src"
+    ],
+    "acceptance_criteria": [
+      "Objective tracker uses the exact six stable objective IDs from the design contract",
+      "Progression gates use canonical-default key names only, with compatibility aliases resolved upstream",
+      "Deferred hero/ambush/gather keys do not advance first-session objective completion"
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:08:08.643609+00:00",
+    "updated_at": "2026-02-27T13:08:08.643609+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "rowan-hale",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010-F01"
   }
 ]
