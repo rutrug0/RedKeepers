@@ -647,5 +647,40 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-27T12:17:42.9994554Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-AUTO-BACKLOG-0009-F01",
+    "status": "done",
+    "summary": "Extended the first-slice event token contract doc with one canonical namespace migration matrix spanning tick/build/train/scout/hostile keys, explicitly tagging each runtime key as canonical-default or compatibility-only and locking alias rows out of default rendering paths.",
+    "changed_files": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Enforce canonical-default preference in event feed key resolver",
+        "owner_role": "frontend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Update the event key resolution path to consume `migration_key_status` semantics so default rendering uses only canonical-default keys and compatibility-only aliases are accepted only as fallback lookup inputs.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0009-F01"
+        ],
+        "inputs": [
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+          "client-web/src"
+        ],
+        "acceptance_criteria": [
+          "Direct default rendering selection ignores all keys tagged compatibility-only",
+          "Alias payloads resolve deterministically to their canonical-default key for rendering",
+          "Resolver tests cover at least one alias case in each flow: tick, build, train, scout, hostile_dispatch_and_resolve"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]

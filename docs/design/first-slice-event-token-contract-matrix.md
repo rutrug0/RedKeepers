@@ -19,6 +19,7 @@
 
 - `canonical_key` entries below are the required default coverage set for first-slice rendering.
 - `required_tokens` is authoritative from narrative seed `tokens`; `(none)` means literal placeholder text with no token substitution required.
+- `migration_key_status` has only two allowed values: `canonical-default` and `compatibility-only`.
 - Legacy aliases are compatibility-only lookup inputs and must not be selected as primary default keys.
 - `deferred_post_slice_keys` are explicitly excluded from required default rendering coverage.
 
@@ -100,26 +101,80 @@
 | `event.world.hostile_post_battle_return_started` | `army_name, settlement_name` |
 | `event.world.hostile_post_battle_returned` | `army_name, settlement_name` |
 
-## Legacy Alias -> Canonical Mapping (Explicit)
+## Canonical Namespace Migration Matrix (Default + Compatibility)
 
-| canonical_key | legacy_alias_keys |
-| --- | --- |
-| `event.tick.passive_income` | `event.economy.tick_passive_income` |
-| `event.tick.storage_near_cap` | `event.economy.storage_near_cap` |
-| `event.tick.producer_unlocked_hint` | `event.economy.producer_unlocked_hint` |
-| `event.build.upgrade_started` | `event.buildings.upgrade_started` |
-| `event.build.upgrade_completed` | `event.buildings.upgrade_completed` |
-| `event.build.queue_blocked_resources` | `event.buildings.queue_blocked_resources` |
-| `event.train.started` | `event.units.training_started` |
-| `event.train.completed` | `event.units.training_completed` |
-| `event.train.queue_full` | `event.units.training_queue_full` |
-| `event.scout.dispatched` | `event.world.scout_dispatched` |
-| `event.scout.report_empty` | `event.world.scout_report_empty` |
-| `event.scout.report_hostile` | `event.world.scout_report_hostile` |
-| `event.world.hostile_dispatch_en_route` | `event.world.march_started` |
-| `event.world.hostile_post_battle_returned` | `event.world.march_returned` |
-| `event.combat.hostile_resolve_attacker_win` | `event.combat.placeholder_skirmish_win` |
-| `event.combat.hostile_resolve_defender_win` | `event.combat.placeholder_skirmish_loss` |
+- This is the canonical migration matrix for first-slice runtime keys across `tick`, `build`, `train`, `scout`, and `hostile_dispatch_and_resolve`.
+- Backend/frontend/content must treat this table as the single source of truth for namespace migration and default rendering eligibility.
+
+| flow | runtime_key | migration_key_status | canonical_default_key | default_render_eligible | approved_compatibility_aliases |
+| --- | --- | --- | --- | --- | --- |
+| `tick` | `event.tick.passive_income` | `canonical-default` | `event.tick.passive_income` | `yes` | `event.economy.tick_passive_income` |
+| `tick` | `event.economy.tick_passive_income` | `compatibility-only` | `event.tick.passive_income` | `no` | `(n/a)` |
+| `tick` | `event.tick.storage_near_cap` | `canonical-default` | `event.tick.storage_near_cap` | `yes` | `event.economy.storage_near_cap` |
+| `tick` | `event.economy.storage_near_cap` | `compatibility-only` | `event.tick.storage_near_cap` | `no` | `(n/a)` |
+| `tick` | `event.tick.producer_unlocked_hint` | `canonical-default` | `event.tick.producer_unlocked_hint` | `yes` | `event.economy.producer_unlocked_hint` |
+| `tick` | `event.economy.producer_unlocked_hint` | `compatibility-only` | `event.tick.producer_unlocked_hint` | `no` | `(n/a)` |
+| `tick` | `event.tick.passive_gain_success` | `canonical-default` | `event.tick.passive_gain_success` | `yes` | `(none)` |
+| `tick` | `event.tick.passive_gain_reasoned` | `canonical-default` | `event.tick.passive_gain_reasoned` | `yes` | `(none)` |
+| `tick` | `event.tick.passive_gain_stalled` | `canonical-default` | `event.tick.passive_gain_stalled` | `yes` | `(none)` |
+| `tick` | `event.tick.passive_gain_capped` | `canonical-default` | `event.tick.passive_gain_capped` | `yes` | `(none)` |
+| `build` | `event.build.upgrade_started` | `canonical-default` | `event.build.upgrade_started` | `yes` | `event.buildings.upgrade_started` |
+| `build` | `event.buildings.upgrade_started` | `compatibility-only` | `event.build.upgrade_started` | `no` | `(n/a)` |
+| `build` | `event.build.upgrade_completed` | `canonical-default` | `event.build.upgrade_completed` | `yes` | `event.buildings.upgrade_completed` |
+| `build` | `event.buildings.upgrade_completed` | `compatibility-only` | `event.build.upgrade_completed` | `no` | `(n/a)` |
+| `build` | `event.build.queue_blocked_resources` | `canonical-default` | `event.build.queue_blocked_resources` | `yes` | `event.buildings.queue_blocked_resources` |
+| `build` | `event.buildings.queue_blocked_resources` | `compatibility-only` | `event.build.queue_blocked_resources` | `no` | `(n/a)` |
+| `build` | `event.build.success` | `canonical-default` | `event.build.success` | `yes` | `(none)` |
+| `build` | `event.build.failure_insufficient_resources` | `canonical-default` | `event.build.failure_insufficient_resources` | `yes` | `(none)` |
+| `build` | `event.build.failure_cooldown` | `canonical-default` | `event.build.failure_cooldown` | `yes` | `(none)` |
+| `build` | `event.build.failure_invalid_state` | `canonical-default` | `event.build.failure_invalid_state` | `yes` | `(none)` |
+| `train` | `event.train.started` | `canonical-default` | `event.train.started` | `yes` | `event.units.training_started` |
+| `train` | `event.units.training_started` | `compatibility-only` | `event.train.started` | `no` | `(n/a)` |
+| `train` | `event.train.completed` | `canonical-default` | `event.train.completed` | `yes` | `event.units.training_completed` |
+| `train` | `event.units.training_completed` | `compatibility-only` | `event.train.completed` | `no` | `(n/a)` |
+| `train` | `event.train.queue_full` | `canonical-default` | `event.train.queue_full` | `yes` | `event.units.training_queue_full` |
+| `train` | `event.units.training_queue_full` | `compatibility-only` | `event.train.queue_full` | `no` | `(n/a)` |
+| `train` | `event.train.success` | `canonical-default` | `event.train.success` | `yes` | `(none)` |
+| `train` | `event.train.failure_insufficient_resources` | `canonical-default` | `event.train.failure_insufficient_resources` | `yes` | `(none)` |
+| `train` | `event.train.failure_cooldown` | `canonical-default` | `event.train.failure_cooldown` | `yes` | `(none)` |
+| `train` | `event.train.failure_invalid_state` | `canonical-default` | `event.train.failure_invalid_state` | `yes` | `(none)` |
+| `scout` | `event.scout.dispatched` | `canonical-default` | `event.scout.dispatched` | `yes` | `event.world.scout_dispatched` |
+| `scout` | `event.world.scout_dispatched` | `compatibility-only` | `event.scout.dispatched` | `no` | `(n/a)` |
+| `scout` | `event.scout.report_empty` | `canonical-default` | `event.scout.report_empty` | `yes` | `event.world.scout_report_empty` |
+| `scout` | `event.world.scout_report_empty` | `compatibility-only` | `event.scout.report_empty` | `no` | `(n/a)` |
+| `scout` | `event.scout.report_hostile` | `canonical-default` | `event.scout.report_hostile` | `yes` | `event.world.scout_report_hostile` |
+| `scout` | `event.world.scout_report_hostile` | `compatibility-only` | `event.scout.report_hostile` | `no` | `(n/a)` |
+| `scout` | `event.scout.dispatched_success` | `canonical-default` | `event.scout.dispatched_success` | `yes` | `(none)` |
+| `scout` | `event.scout.return_empty` | `canonical-default` | `event.scout.return_empty` | `yes` | `(none)` |
+| `scout` | `event.scout.return_hostile` | `canonical-default` | `event.scout.return_hostile` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_foreign_settlement_spotted` | `canonical-default` | `event.world.hostile_foreign_settlement_spotted` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_dispatch_target_required` | `canonical-default` | `event.world.hostile_dispatch_target_required` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_dispatch_accepted` | `canonical-default` | `event.world.hostile_dispatch_accepted` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_dispatch_en_route` | `canonical-default` | `event.world.hostile_dispatch_en_route` | `yes` | `event.world.march_started` |
+| `hostile_dispatch_and_resolve` | `event.world.march_started` | `compatibility-only` | `event.world.hostile_dispatch_en_route` | `no` | `(n/a)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_dispatch_failed` | `canonical-default` | `event.world.hostile_dispatch_failed` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_dispatch_failed_source_target_not_foreign` | `canonical-default` | `event.world.hostile_dispatch_failed_source_target_not_foreign` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_dispatch_failed_max_active_marches_reached` | `canonical-default` | `event.world.hostile_dispatch_failed_max_active_marches_reached` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_dispatch_failed_path_blocked_impassable` | `canonical-default` | `event.world.hostile_dispatch_failed_path_blocked_impassable` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_dispatch_failed_march_already_exists` | `canonical-default` | `event.world.hostile_dispatch_failed_march_already_exists` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_march_arrived_outer_works` | `canonical-default` | `event.world.hostile_march_arrived_outer_works` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_march_arrived_gate_contested` | `canonical-default` | `event.world.hostile_march_arrived_gate_contested` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.combat.hostile_resolve_attacker_win` | `canonical-default` | `event.combat.hostile_resolve_attacker_win` | `yes` | `event.combat.placeholder_skirmish_win` |
+| `hostile_dispatch_and_resolve` | `event.combat.placeholder_skirmish_win` | `compatibility-only` | `event.combat.hostile_resolve_attacker_win` | `no` | `(n/a)` |
+| `hostile_dispatch_and_resolve` | `event.combat.hostile_resolve_defender_win` | `canonical-default` | `event.combat.hostile_resolve_defender_win` | `yes` | `event.combat.placeholder_skirmish_loss` |
+| `hostile_dispatch_and_resolve` | `event.combat.placeholder_skirmish_loss` | `compatibility-only` | `event.combat.hostile_resolve_defender_win` | `no` | `(n/a)` |
+| `hostile_dispatch_and_resolve` | `event.combat.hostile_resolve_tie_defender_holds` | `canonical-default` | `event.combat.hostile_resolve_tie_defender_holds` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.combat.hostile_loss_report` | `canonical-default` | `event.combat.hostile_loss_report` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.combat.hostile_garrison_broken` | `canonical-default` | `event.combat.hostile_garrison_broken` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.combat.hostile_counterfire_heavy` | `canonical-default` | `event.combat.hostile_counterfire_heavy` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_retreat_ordered` | `canonical-default` | `event.world.hostile_retreat_ordered` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_retreat_in_motion` | `canonical-default` | `event.world.hostile_retreat_in_motion` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_retreat_completed` | `canonical-default` | `event.world.hostile_retreat_completed` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_defeat_force_shattered` | `canonical-default` | `event.world.hostile_defeat_force_shattered` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_defeat_command_silent` | `canonical-default` | `event.world.hostile_defeat_command_silent` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_post_battle_return_started` | `canonical-default` | `event.world.hostile_post_battle_return_started` | `yes` | `(none)` |
+| `hostile_dispatch_and_resolve` | `event.world.hostile_post_battle_returned` | `canonical-default` | `event.world.hostile_post_battle_returned` | `yes` | `event.world.march_returned` |
+| `hostile_dispatch_and_resolve` | `event.world.march_returned` | `compatibility-only` | `event.world.hostile_post_battle_returned` | `no` | `(n/a)` |
 
 ## Post-Slice Keys Excluded From Required Default Rendering Coverage
 
