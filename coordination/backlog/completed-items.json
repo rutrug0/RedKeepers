@@ -9169,5 +9169,51 @@
     "runtime_seconds": 341.72,
     "started_at": "2026-02-27T15:50:05.618498+00:00",
     "finished_at": "2026-02-27T15:55:47.329539+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F06",
+    "title": "Run release-blocking gate for transport-backed first-slice candidate",
+    "description": "Execute the first-slice release gate after transport-host/backend-client runtime integration, publish updated evidence artifacts, and record owner-tagged blockers if any mandatory gate fails.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F05"
+    ],
+    "inputs": [
+      "tools/first_slice_release_gate_runner.py",
+      "coordination/runtime/first-slice-release-gate/",
+      "docs/design/vertical-slice-done-v1.md",
+      "docs/operations/first-slice-release-gate.md"
+    ],
+    "acceptance_criteria": [
+      "Release-gate evidence is regenerated for the transport-backed candidate and includes playable, scope, quality, platform, and release-readiness outcomes",
+      "Any failing mandatory gate includes exact failing command, artifact path, and explicit owner_role blocker assignment",
+      "No additional non-critical QA-only follow-up tasks are created unless a release-blocking failure is observed"
+    ],
+    "validation_commands": [
+      "python tools/first_slice_release_gate_runner.py",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:59:08.379267+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "  - [coordination/runtime/first-slice-release-gate](D:/RedKeepers/coordination/runtime/first-slice-release-gate)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "21957e938eff45ff1ccc7049d50a398ca6ef5d85",
+    "resolved_by_agent": "tomas-grell",
+    "resolved_by_role": "qa",
+    "runtime_seconds": 189.81,
+    "started_at": "2026-02-27T15:55:54.194552+00:00",
+    "finished_at": "2026-02-27T15:59:04.014311+00:00"
   }
 ]

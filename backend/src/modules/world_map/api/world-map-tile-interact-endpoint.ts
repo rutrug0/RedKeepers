@@ -48,7 +48,8 @@ export interface PostWorldMapTileInteractUnavailableTileContractResponseDto {
   readonly tile_state: "tile_state_unknown";
   readonly tile_revision: 0;
   readonly event: {
-    readonly content_key: "event.world.scout_unavailable_tile";
+    readonly content_key: "event.scout.unavailable_tile";
+    readonly content_key_aliases: readonly ["event.world.scout_unavailable_tile"];
     readonly tokens: {
       readonly target_tile_label: string;
     };
@@ -67,6 +68,12 @@ type WorldMapTileInteractValidationErrorCode =
   | "flow_version_not_supported";
 
 export type WorldMapTileInteractOperationErrorCode = "unavailable_tile";
+
+const SCOUT_UNAVAILABLE_TILE_CANONICAL_CONTENT_KEY =
+  "event.scout.unavailable_tile" as const;
+const SCOUT_UNAVAILABLE_TILE_COMPATIBILITY_ALIAS_KEYS = [
+  "event.world.scout_unavailable_tile",
+] as const;
 
 export class WorldMapTileInteractValidationError extends Error {
   readonly status_code = 400;
@@ -208,7 +215,8 @@ export class WorldMapTileInteractEndpointHandler {
           tile_state: "tile_state_unknown",
           tile_revision: 0,
           event: {
-            content_key: "event.world.scout_unavailable_tile",
+            content_key: SCOUT_UNAVAILABLE_TILE_CANONICAL_CONTENT_KEY,
+            content_key_aliases: SCOUT_UNAVAILABLE_TILE_COMPATIBILITY_ALIAS_KEYS,
             tokens: {
               target_tile_label: `Frontier Tile ${tileId}`,
             },

@@ -338,7 +338,10 @@ test("POST /world-map/tiles/{tileId}/interact contract adapter returns unavailab
   }
   assert.equal(response.error_code, "unavailable_tile");
   assert.equal(response.flow, "world_map.scout_select_v1");
-  assert.equal(response.event.content_key, "event.world.scout_unavailable_tile");
+  assert.equal(response.event.content_key, "event.scout.unavailable_tile");
+  assert.deepStrictEqual(response.event.content_key_aliases, [
+    "event.world.scout_unavailable_tile",
+  ]);
 });
 
 test("POST /world-map/tiles/{tileId}/interact contract adapter returns accepted scout response for available tile", () => {

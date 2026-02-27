@@ -2437,5 +2437,28 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-27T16:02:27.6505183Z",
+    "agent_id": "ilya-fen",
+    "work_item_id": "RK-AUTO-BACKLOG-0012-F01-F01",
+    "status": "done",
+    "summary": "Aligned scout unavailable-tile failure routing to canonical key policy by emitting canonical `event.scout.unavailable_tile` with declared compatibility alias metadata, updating endpoint contract tests, and removing frontend fallback/key-cache ambiguity via canonical-first scout failure normalization.",
+    "changed_files": [
+      "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.ts",
+      "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.test.ts",
+      "client-web/app.js",
+      "agents/ilya-fen/outbox.json"
+    ],
+    "blockers": [],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/api/world-map-tile-interact-endpoint.test.ts",
+      "node --experimental-strip-types --check backend/src/modules/world_map/api/world-map-tile-interact-endpoint.ts backend/src/modules/world_map/api/world-map-tile-interact-endpoint.test.ts",
+      "python tools/orchestrator.py status"
+    ],
+    "results": {
+      "validation_note": "Strip-types checks passed for touched backend endpoint files and orchestrator status passed with this item active. Direct node test execution remains blocked by pre-existing TypeScript runtime limitations outside this item scope (`ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` in heroes shared-action-modifier dependency path)."
+    },
+    "proposed_work_items": []
   }
 ]

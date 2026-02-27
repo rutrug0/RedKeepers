@@ -4058,10 +4058,11 @@
       };
     }
 
-    const contentKey =
+    const unresolvedContentKey =
       typeof unavailableTileEntry.contentKey === "string" && unavailableTileEntry.contentKey.trim().length > 0
         ? unavailableTileEntry.contentKey
         : "event.scout.unavailable_tile";
+    const contentKey = mapBackendEventKeyToClientKey(unresolvedContentKey);
     const fallbackTokens = {
       settlement_name: settlementActionRuntime.settlement_name,
       target_tile_label: resolveSelectedWorldMapTileLabel(tileId),
@@ -4331,7 +4332,7 @@
   const applyScoutActionResult = (response) => {
     const isFailure = response?.status === "failed";
     const fallbackBackendContentKey = isFailure
-      ? "event.world.scout_unavailable_tile"
+      ? "event.scout.unavailable_tile"
       : "event.scout.dispatched";
     const backendContentKey = response?.event?.content_key || fallbackBackendContentKey;
     const contentKey = mapBackendEventKeyToClientKey(backendContentKey);

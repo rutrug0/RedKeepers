@@ -1,45 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0012-F06",
-    "title": "Run release-blocking gate for transport-backed first-slice candidate",
-    "description": "Execute the first-slice release gate after transport-host/backend-client runtime integration, publish updated evidence artifacts, and record owner-tagged blockers if any mandatory gate fails.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0012-F05"
-    ],
-    "inputs": [
-      "tools/first_slice_release_gate_runner.py",
-      "coordination/runtime/first-slice-release-gate/",
-      "docs/design/vertical-slice-done-v1.md",
-      "docs/operations/first-slice-release-gate.md"
-    ],
-    "acceptance_criteria": [
-      "Release-gate evidence is regenerated for the transport-backed candidate and includes playable, scope, quality, platform, and release-readiness outcomes",
-      "Any failing mandatory gate includes exact failing command, artifact path, and explicit owner_role blocker assignment",
-      "No additional non-critical QA-only follow-up tasks are created unless a release-blocking failure is observed"
-    ],
-    "validation_commands": [
-      "python tools/first_slice_release_gate_runner.py",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T15:16:12.686387+00:00",
-    "updated_at": "2026-02-27T15:59:04.073779+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
-    "assigned_agent": "tomas-grell"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0012-F01-F01",
     "title": "Align scout unavailable-tile failure key with first-slice manifest canonical key policy",
     "description": "Resolve the current transport-only scout unavailable key mismatch by adding an explicit canonical/alias mapping path for unavailable-tile scout failures so endpoint responses, manifest include lists, and frontend key resolution use one deterministic key family.",
@@ -66,17 +26,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T15:21:41.648959+00:00",
-    "updated_at": "2026-02-27T15:21:41.648959+00:00",
+    "updated_at": "2026-02-27T16:03:10.233218+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0012-F01"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012-F01",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-AUTO-BACKLOG-0012-F01-F02",
