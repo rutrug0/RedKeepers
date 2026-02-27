@@ -108,6 +108,231 @@
     "event.settlement.name_assigned":
       "Surveyors record the new holding as {settlement_name}. The name enters the ledger.",
   });
+  const firstSlicePlayableManifestV1 = Object.freeze({
+    manifest_id: "first_slice_playable_manifest_lock_v1",
+    canonical_playable_now: {
+      civilization_profile_id: "cinder_throne_legates",
+      primary_settlement: {
+        settlement_id: "settlement_alpha",
+        settlement_name: "Cinderwatch Hold",
+      },
+      foreign_hostile_profile: {
+        profile_id: "foreign_settlement_profile_v1_ruin_holdfast",
+        settlement_id: "settlement_hostile",
+        settlement_name: "Ruin Holdfast",
+        target_tile_label: "Ruin Holdfast",
+        map_coordinate: {
+          x: 2,
+          y: 1,
+        },
+        defender_garrison_strength: 40,
+      },
+      resources: ["food", "wood", "stone", "iron"],
+      buildings: [
+        "grain_plot",
+        "timber_camp",
+        "stone_quarry",
+        "iron_pit",
+        "barracks",
+        "rally_post",
+      ],
+      units: ["watch_levy", "bow_crew", "trail_scout", "light_raider"],
+    },
+    default_consumption_contract: {
+      frontend: {
+        default_session_entry_settlement_id: "settlement_alpha",
+        default_hostile_target_settlement_id: "settlement_hostile",
+      },
+    },
+  });
+  const firstSliceContentKeyManifestV1 = Object.freeze({
+    include_only_content_keys: [
+      "event.tick.passive_income",
+      "event.tick.storage_near_cap",
+      "event.tick.producer_unlocked_hint",
+      "event.tick.passive_gain_success",
+      "event.tick.passive_gain_reasoned",
+      "event.tick.passive_gain_stalled",
+      "event.tick.passive_gain_capped",
+      "event.build.upgrade_started",
+      "event.build.upgrade_completed",
+      "event.build.queue_blocked_resources",
+      "event.build.success",
+      "event.build.failure_insufficient_resources",
+      "event.build.failure_cooldown",
+      "event.build.failure_invalid_state",
+      "event.train.started",
+      "event.train.completed",
+      "event.train.queue_full",
+      "event.train.success",
+      "event.train.failure_insufficient_resources",
+      "event.train.failure_cooldown",
+      "event.train.failure_invalid_state",
+      "event.scout.dispatched",
+      "event.scout.report_empty",
+      "event.scout.report_hostile",
+      "event.scout.dispatched_success",
+      "event.scout.return_empty",
+      "event.scout.return_hostile",
+      "event.world.hostile_foreign_settlement_spotted",
+      "event.world.hostile_dispatch_target_required",
+      "event.world.hostile_dispatch_accepted",
+      "event.world.hostile_dispatch_en_route",
+      "event.world.hostile_dispatch_failed",
+      "event.world.hostile_dispatch_failed_source_target_not_foreign",
+      "event.world.hostile_dispatch_failed_max_active_marches_reached",
+      "event.world.hostile_dispatch_failed_path_blocked_impassable",
+      "event.world.hostile_dispatch_failed_march_already_exists",
+      "event.world.hostile_march_arrived_outer_works",
+      "event.world.hostile_march_arrived_gate_contested",
+      "event.combat.hostile_resolve_attacker_win",
+      "event.combat.hostile_resolve_defender_win",
+      "event.combat.hostile_resolve_tie_defender_holds",
+      "event.combat.hostile_loss_report",
+      "event.combat.hostile_garrison_broken",
+      "event.combat.hostile_counterfire_heavy",
+      "event.world.hostile_retreat_ordered",
+      "event.world.hostile_retreat_in_motion",
+      "event.world.hostile_retreat_completed",
+      "event.world.hostile_defeat_force_shattered",
+      "event.world.hostile_defeat_command_silent",
+      "event.world.hostile_post_battle_return_started",
+      "event.world.hostile_post_battle_returned",
+    ],
+    legacy_alias_mapping: [
+      { canonical_key: "event.tick.passive_income", legacy_keys: ["event.economy.tick_passive_income"] },
+      { canonical_key: "event.tick.storage_near_cap", legacy_keys: ["event.economy.storage_near_cap"] },
+      { canonical_key: "event.tick.producer_unlocked_hint", legacy_keys: ["event.economy.producer_unlocked_hint"] },
+      { canonical_key: "event.build.upgrade_started", legacy_keys: ["event.buildings.upgrade_started"] },
+      { canonical_key: "event.build.upgrade_completed", legacy_keys: ["event.buildings.upgrade_completed"] },
+      { canonical_key: "event.build.queue_blocked_resources", legacy_keys: ["event.buildings.queue_blocked_resources"] },
+      { canonical_key: "event.train.started", legacy_keys: ["event.units.training_started"] },
+      { canonical_key: "event.train.completed", legacy_keys: ["event.units.training_completed"] },
+      { canonical_key: "event.train.queue_full", legacy_keys: ["event.units.training_queue_full"] },
+      { canonical_key: "event.scout.dispatched", legacy_keys: ["event.world.scout_dispatched"] },
+      { canonical_key: "event.scout.report_empty", legacy_keys: ["event.world.scout_report_empty"] },
+      { canonical_key: "event.scout.report_hostile", legacy_keys: ["event.world.scout_report_hostile"] },
+      { canonical_key: "event.world.hostile_dispatch_en_route", legacy_keys: ["event.world.march_started"] },
+      { canonical_key: "event.world.hostile_post_battle_returned", legacy_keys: ["event.world.march_returned"] },
+      { canonical_key: "event.world.hostile_retreat_completed", legacy_keys: ["event.world.march_returned"] },
+      { canonical_key: "event.world.hostile_defeat_force_shattered", legacy_keys: ["event.world.march_returned"] },
+      { canonical_key: "event.combat.hostile_resolve_attacker_win", legacy_keys: ["event.combat.placeholder_skirmish_win"] },
+      { canonical_key: "event.combat.hostile_resolve_defender_win", legacy_keys: ["event.combat.placeholder_skirmish_loss"] },
+      { canonical_key: "event.combat.hostile_resolve_tie_defender_holds", legacy_keys: ["event.combat.placeholder_skirmish_loss"] },
+    ],
+  });
+  const firstSliceAllowedEventContentKeySet = new Set(
+    firstSliceContentKeyManifestV1.include_only_content_keys,
+  );
+  const firstSliceCanonicalEventKeyByLegacyAlias = Object.freeze(
+    firstSliceContentKeyManifestV1.legacy_alias_mapping.reduce((lookup, row) => {
+      for (const legacyKey of row.legacy_keys) {
+        lookup[legacyKey] = row.canonical_key;
+      }
+      return lookup;
+    }, {}),
+  );
+  const firstSliceLegacyAliasKeysByCanonicalEventKey = Object.freeze(
+    firstSliceContentKeyManifestV1.legacy_alias_mapping.reduce((lookup, row) => {
+      lookup[row.canonical_key] = [...row.legacy_keys];
+      return lookup;
+    }, {}),
+  );
+  const firstSliceDeterministicFallbackEventContentKey = "event.world.hostile_dispatch_failed";
+  const firstSliceLocalProfileStorageKey = "rk:first_slice:local_player_profile_v1";
+  const stableIdPattern = /^[a-z0-9]+(?:_[a-z0-9]+)*$/;
+  const firstSlicePlayableDefaults = firstSlicePlayableManifestV1.canonical_playable_now;
+  const firstSlicePrimarySettlement = firstSlicePlayableDefaults.primary_settlement;
+  const firstSliceForeignHostileProfile = firstSlicePlayableDefaults.foreign_hostile_profile;
+  const firstSliceHomeMarkerId = "marker_home_settlement";
+  const firstSliceHostileMarkerId = "marker_hostile_target";
+  const firstSliceHomeTileId = "tile_0000_0000";
+  const firstSliceHostileTileId = "tile_0002_0001";
+  const normalizeStableIdToken = (value, fallback) => {
+    const normalized = String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+    if (normalized.length > 0 && stableIdPattern.test(normalized)) {
+      return normalized;
+    }
+    return fallback;
+  };
+  const createLocalPlayerProfileSeed = () => {
+    const timestampSeed = Date.now().toString(36);
+    const randomSeed = Math.random().toString(36).slice(2, 10);
+    const composedSeed = normalizeStableIdToken(`${timestampSeed}_${randomSeed}`, "seed_local_profile");
+    return `local_profile_${composedSeed}`;
+  };
+  const createDefaultStableLocalProfile = () => {
+    const profileId = createLocalPlayerProfileSeed();
+    const isoNow = new Date().toISOString();
+    return {
+      schema_version: "rk-v1-local-player-profile",
+      profile_id: profileId,
+      player_id: `player_${profileId}`,
+      created_at: isoNow,
+      last_seen_at: isoNow,
+    };
+  };
+  const readStableLocalProfileFromStorage = () => {
+    try {
+      const raw = window.localStorage.getItem(firstSliceLocalProfileStorageKey);
+      if (!raw) {
+        return null;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") {
+        return null;
+      }
+
+      const profileId = normalizeStableIdToken(parsed.profile_id, "");
+      const playerId = normalizeStableIdToken(parsed.player_id, "");
+      if (profileId.length < 1 || playerId.length < 1) {
+        return null;
+      }
+
+      return {
+        schema_version: "rk-v1-local-player-profile",
+        profile_id: profileId,
+        player_id: playerId,
+        created_at: typeof parsed.created_at === "string" ? parsed.created_at : new Date().toISOString(),
+        last_seen_at: typeof parsed.last_seen_at === "string" ? parsed.last_seen_at : new Date().toISOString(),
+      };
+    } catch {
+      return null;
+    }
+  };
+  const persistStableLocalProfile = (profile) => {
+    if (!profile) {
+      return;
+    }
+    try {
+      window.localStorage.setItem(
+        firstSliceLocalProfileStorageKey,
+        JSON.stringify(profile),
+      );
+    } catch {
+      // Ignore storage persistence failures in restricted browser contexts.
+    }
+  };
+  const resolveStableLocalProfile = () => {
+    const existing = readStableLocalProfileFromStorage();
+    if (existing) {
+      const hydrated = {
+        ...existing,
+        last_seen_at: new Date().toISOString(),
+      };
+      persistStableLocalProfile(hydrated);
+      return hydrated;
+    }
+    const seeded = createDefaultStableLocalProfile();
+    persistStableLocalProfile(seeded);
+    return seeded;
+  };
+  const stableLocalProfile = resolveStableLocalProfile();
 
   const mockClientShellState = {
     panelModes: {
@@ -117,7 +342,7 @@
     },
     panels: {
       settlement: {
-        title: "Cinderwatch Hold",
+        title: firstSlicePrimarySettlement.settlement_name,
         stateOptions: ["loading", "populated", "empty", "error"],
         scenarios: {
           loading: {
@@ -134,15 +359,15 @@
               { label: "Grain", value: 1860, fill: 78 },
             ],
             buildQueue: [
-              { icon: "B1", label: "Granary Upgrade (Lv. 6)", progress: 45, eta: "08:14" },
-              { icon: "B2", label: "Palisade Repair", progress: 12, eta: "19:30" },
-              { icon: "B3", label: "Barracks Expansion (Lv. 4)", progress: 0, eta: "Queued" },
+              { icon: "B1", label: "Grain Plot Upgrade (Lv. 6)", progress: 45, eta: "08:14" },
+              { icon: "B2", label: "Timber Camp Upgrade (Lv. 4)", progress: 12, eta: "19:30" },
+              { icon: "B3", label: "Rally Post Upgrade (Lv. 2)", progress: 0, eta: "Queued" },
             ],
             garrison: [
-              { unit: "Levy Spear", count: 120 },
-              { unit: "Road Wardens", count: 48 },
-              { unit: "Slingers", count: 64 },
-              { unit: "Scout Riders", count: 12 },
+              { unit: "Watch Levy", count: 120 },
+              { unit: "Bow Crew", count: 48 },
+              { unit: "Trail Scout", count: 64 },
+              { unit: "Light Raider", count: 12 },
             ],
             civIntro: {
               civId: "cinder_throne_legates",
@@ -188,53 +413,44 @@
             },
             legend: [
               { kind: "settlement", label: "Your Settlements" },
-              { kind: "allied", label: "Friendly / Allied" },
               { kind: "hostile", label: "Hostile / Points of Interest" },
             ],
             actions: [
               "Send Scouts (placeholder)",
-              "Plan Route (placeholder)",
-              "Set Rally Marker (placeholder)",
+              "Inspect Tile (placeholder)",
             ],
           },
           populated: {
             coords: "412 / 198",
             region: "Black Reed March",
-            selected_tile_id: "tile_0000_0000",
-            selected_marker_id: "marker_home_settlement",
+            selected_tile_id: firstSliceHomeTileId,
+            selected_marker_id: firstSliceHomeMarkerId,
             markers: [
               {
-                marker_id: "marker_home_settlement",
+                marker_id: firstSliceHomeMarkerId,
                 className: "settlement",
-                label: "Cinderwatch Hold",
+                label: firstSlicePrimarySettlement.settlement_name,
                 selected: true,
-                tile_id: "tile_0000_0000",
-                tile_label: "Cinderwatch Hold",
+                tile_id: firstSliceHomeTileId,
+                tile_label: firstSlicePrimarySettlement.settlement_name,
                 target_kind: "home_settlement",
-                settlement_id: "settlement_alpha",
+                settlement_id: firstSlicePrimarySettlement.settlement_id,
                 coords: { x: 0, y: 0 },
               },
               {
-                marker_id: "marker_allied_camp",
-                className: "allied",
-                label: "Roadwarden Camp",
-                selected: false,
-                tile_id: "tile_0001_0001",
-                tile_label: "Roadwarden Camp",
-                target_kind: "friendly_placeholder",
-                coords: { x: 1, y: 1 },
-              },
-              {
-                marker_id: "marker_hostile_ruin_holdfast",
+                marker_id: firstSliceHostileMarkerId,
                 className: "hostile",
-                label: "Ruin Holdfast",
+                label: firstSliceForeignHostileProfile.settlement_name,
                 selected: false,
-                tile_id: "tile_0002_0001",
-                tile_label: "Ruin Holdfast",
+                tile_id: firstSliceHostileTileId,
+                tile_label: firstSliceForeignHostileProfile.target_tile_label,
                 target_kind: "hostile_settlement",
-                settlement_id: "settlement_hostile",
-                defender_garrison_strength: 40,
-                coords: { x: 2, y: 1 },
+                settlement_id: firstSliceForeignHostileProfile.settlement_id,
+                defender_garrison_strength: firstSliceForeignHostileProfile.defender_garrison_strength,
+                coords: {
+                  x: firstSliceForeignHostileProfile.map_coordinate.x,
+                  y: firstSliceForeignHostileProfile.map_coordinate.y,
+                },
               },
             ],
             routes: [
@@ -248,14 +464,12 @@
             },
             legend: [
               { kind: "settlement", label: "Your Settlements" },
-              { kind: "allied", label: "Friendly / Allied" },
               { kind: "hostile", label: "Hostile / Points of Interest" },
             ],
             actions: [
               "Send Scouts (placeholder)",
               "Dispatch Hostile March",
-              "Plan Route (placeholder)",
-              "Set Rally Marker (placeholder)",
+              "Inspect Tile (placeholder)",
             ],
           },
           empty: {
@@ -268,13 +482,11 @@
             },
             legend: [
               { kind: "settlement", label: "Your Settlements" },
-              { kind: "allied", label: "Friendly / Allied" },
               { kind: "hostile", label: "Hostile / Points of Interest" },
             ],
             actions: [
               "Send Scouts (placeholder)",
-              "Queue Survey (placeholder)",
-              "Drop Rally Marker (placeholder)",
+              "Inspect Tile (placeholder)",
             ],
             emptySummary:
               "No marker or route placeholders are active in this map scenario.",
@@ -290,10 +502,9 @@
             },
             legend: [
               { kind: "settlement", label: "Your Settlements" },
-              { kind: "allied", label: "Friendly / Allied" },
               { kind: "hostile", label: "Hostile / Points of Interest" },
             ],
-            actions: ["Retry Sync (placeholder)", "Open Diagnostics (placeholder)"],
+            actions: ["Retry Sync (placeholder)"],
             errorCode: "MAP_STREAM_OFFLINE",
             emptySummary:
               "World map placeholder stream failed to load. Map interactions stay disabled in this mock error state.",
@@ -318,7 +529,7 @@
               {
                 contentKey: "event.tick.passive_gain_success",
                 tokens: {
-                  settlement_name: "Cinderwatch Hold",
+                  settlement_name: firstSlicePrimarySettlement.settlement_name,
                   duration_ms: 250,
                 },
                 meta: "2m ago | Economy | Tick",
@@ -327,7 +538,7 @@
               {
                 contentKey: "event.tick.passive_gain_stalled",
                 tokens: {
-                  settlement_name: "Cinderwatch Hold",
+                  settlement_name: firstSlicePrimarySettlement.settlement_name,
                   duration_ms: 240,
                 },
                 meta: "6m ago | Economy | Tick",
@@ -336,8 +547,8 @@
               {
                 contentKey: "event.build.success",
                 tokens: {
-                  settlement_name: "Cinderwatch Hold",
-                  building_label: "Granary Upgrade",
+                  settlement_name: firstSlicePrimarySettlement.settlement_name,
+                  building_label: "Grain Plot Upgrade",
                   from_level: 5,
                   to_level: 6,
                 },
@@ -347,7 +558,7 @@
               {
                 contentKey: "event.build.failure_insufficient_resources",
                 tokens: {
-                  building_id: "granary",
+                  building_id: "grain_plot",
                   missing_resources_by_id: "Wood: 4, Stone: 2",
                   required_cost_by_id: "Wood: 12, Stone: 5",
                   available_stock_by_id: "Wood: 8, Stone: 3",
@@ -358,7 +569,7 @@
               {
                 contentKey: "event.train.failure_cooldown",
                 tokens: {
-                  unit_id: "road_wardens",
+                  unit_id: "watch_levy",
                   queue_available_at: "08:42",
                   cooldown_remaining_ms: 4200,
                 },
@@ -385,7 +596,7 @@
               {
                 contentKey: "event.scout.dispatched",
                 tokens: {
-                  settlement_name: "Cinderwatch Hold",
+                  settlement_name: firstSlicePrimarySettlement.settlement_name,
                   target_tile_label: "Black Reed March",
                 },
                 meta: "25m ago | World | Scout loop",
@@ -394,26 +605,26 @@
               {
                 contentKey: "event.train.success",
                 tokens: {
-                  settlement_name: "Cinderwatch Hold",
+                  settlement_name: firstSlicePrimarySettlement.settlement_name,
                   quantity: 12,
-                  unit_label: "Road Wardens",
+                  unit_label: "Watch Levy",
                 },
                 meta: "31m ago | Military | Train loop",
                 priority: "normal",
               },
               {
-                contentKey: "event.units.upkeep_reduced_garrison",
+                contentKey: "event.world.hostile_dispatch_target_required",
                 tokens: {
-                  settlement_name: "Cinderwatch Hold",
+                  target_tile_label: firstSliceForeignHostileProfile.target_tile_label,
                 },
-                meta: "29m ago | Military | Legacy module key support",
+                meta: "29m ago | World | Hostile loop",
                 priority: "normal",
               },
             ],
             queuedNotifications: [
-              "Raid warning banner slot",
-              "Alliance message drawer slot",
-              "Tutorial prompt slot",
+              "Build completion banner slot",
+              "Scout report card slot",
+              "Hostile dispatch outcome slot",
             ],
           },
           empty: {
@@ -455,27 +666,30 @@
     },
   };
 
-  const firstSliceResourceIds = Object.freeze(["food", "wood", "stone", "iron"]);
+  const firstSliceResourceIds = Object.freeze([...firstSlicePlayableDefaults.resources]);
+  const firstSlicePlayableUnitIdSet = new Set(firstSlicePlayableDefaults.units);
   const settlementResourceCardOrder = Object.freeze([
     { resourceId: "wood", label: "Timber" },
     { resourceId: "stone", label: "Stone" },
     { resourceId: "iron", label: "Iron" },
     { resourceId: "food", label: "Grain" },
-  ]);
+  ].filter((entry) => firstSliceResourceIds.includes(entry.resourceId)));
   const settlementGarrisonOrder = Object.freeze([
     { unitId: "watch_levy", label: "Watch Levy" },
-    { unitId: "road_wardens", label: "Road Wardens" },
-    { unitId: "slingers", label: "Slingers" },
-    { unitId: "scout_riders", label: "Scout Riders" },
-  ]);
+    { unitId: "bow_crew", label: "Bow Crew" },
+    { unitId: "trail_scout", label: "Trail Scout" },
+    { unitId: "light_raider", label: "Light Raider" },
+  ].filter((entry) => firstSlicePlayableUnitIdSet.has(entry.unitId)));
   const populatedSettlementScenario = mockClientShellState.panels.settlement.scenarios.populated;
   const defaultBuildQueueEntries = (populatedSettlementScenario.buildQueue || []).map((item) => ({
     ...item,
   }));
 
   const settlementActionRuntime = {
-    settlement_id: "settlement_alpha",
-    settlement_name: "Cinderwatch Hold",
+    settlement_id: firstSlicePrimarySettlement.settlement_id,
+    settlement_name: firstSlicePrimarySettlement.settlement_name,
+    player_id: stableLocalProfile.player_id,
+    profile_id: stableLocalProfile.profile_id,
     resource_stock_by_id: {
       food: 1860,
       wood: 1240,
@@ -499,9 +713,9 @@
     },
     garrison_count_by_unit_id: {
       watch_levy: 120,
-      road_wardens: 48,
-      slingers: 64,
-      scout_riders: 12,
+      bow_crew: 48,
+      trail_scout: 64,
+      light_raider: 12,
     },
     build_queue_entries: defaultBuildQueueEntries,
     action_outcome_mode: "success",
@@ -576,8 +790,8 @@
       ability_id: "ability_rotwrit_veil",
       ability_name: "Rotwrit Veil",
       cooldown_s: 28_800,
-      readiness_state: "on_cooldown",
-      cooldown_ends_at: new Date(Date.now() + 9 * 60_000).toISOString(),
+      readiness_state: "ready",
+      cooldown_ends_at: null,
       modifier_deltas: Object.freeze([
         "scout_visibility_radius +1 (next scout)",
         "ambush_chance_mult x1.10 (first contact)",
@@ -587,17 +801,18 @@
   ]);
   const worldMapActionRuntime = {
     pending_action: null,
-    selected_marker_id: "marker_home_settlement",
+    selected_marker_id: firstSliceHomeMarkerId,
     next_march_sequence: 1,
     hostile_dispatch_outcome: null,
     unavailable_scout_tile_by_id: {},
-    player_id: "player_alpha",
-    completed_attacks: 1,
-    completed_scouts: 1,
+    player_id: stableLocalProfile.player_id,
+    profile_id: stableLocalProfile.profile_id,
+    completed_attacks: 0,
+    completed_scouts: 0,
     hero_unlock_progress: {
-      settlement_level: 4,
-      barracks_level: 2,
-      tutorial_dependency_complete: true,
+      settlement_level: 1,
+      barracks_level: 1,
+      tutorial_dependency_complete: false,
     },
     hero_dispatch: {
       selected_hero_id: null,
@@ -969,6 +1184,7 @@
           body: {
             settlement_id: input.settlement_id,
             flow_version: "v1",
+            player_id: input.player_id,
             tick_started_at: requestedAtIso,
             tick_ended_at: tickEndedAtIso,
             settlement_name: input.settlement_name,
@@ -995,6 +1211,7 @@
             settlement_id: input.settlement_id,
             building_id: input.building_id,
             flow_version: "v1",
+            player_id: input.player_id,
             current_level: Number(input.current_level) || 0,
             requested_at: requestedAtIso,
             settlement_name: input.settlement_name,
@@ -1021,6 +1238,7 @@
             settlement_id: input.settlement_id,
             unit_id: input.unit_id,
             flow_version: "v1",
+            player_id: input.player_id,
             quantity: Number(input.quantity) || 0,
             requested_at: requestedAtIso,
             barracks_level: Number(input.barracks_level) || 0,
@@ -1207,6 +1425,67 @@
 
     return normalizeHostileAttackEventKeyAlias(mappedContentKey);
   };
+  const resolveDeterministicFallbackEventContentKey = (contentKey) => {
+    const normalizedContentKey = String(contentKey || "").trim();
+    if (
+      normalizedContentKey.startsWith("event.tick.")
+      || normalizedContentKey.startsWith("event.economy.")
+    ) {
+      return "event.tick.passive_gain_reasoned";
+    }
+    if (
+      normalizedContentKey.startsWith("event.build.")
+      || normalizedContentKey.startsWith("event.buildings.")
+    ) {
+      return "event.build.failure_invalid_state";
+    }
+    if (
+      normalizedContentKey.startsWith("event.train.")
+      || normalizedContentKey.startsWith("event.units.")
+    ) {
+      return "event.train.failure_invalid_state";
+    }
+    if (
+      normalizedContentKey.startsWith("event.scout.")
+      || normalizedContentKey.startsWith("event.world.scout_")
+    ) {
+      return "event.scout.report_empty";
+    }
+    if (normalizedContentKey.startsWith("event.combat.")) {
+      return "event.combat.hostile_resolve_defender_win";
+    }
+    return firstSliceDeterministicFallbackEventContentKey;
+  };
+  const resolveManifestScopedEventContentKey = (contentKey) => {
+    const normalizedContentKey = String(contentKey || "").trim();
+    if (normalizedContentKey.length < 1) {
+      return "";
+    }
+
+    const candidates = [];
+    const addCandidate = (candidate) => {
+      const normalized = String(candidate || "").trim();
+      if (normalized.length > 0 && !candidates.includes(normalized)) {
+        candidates.push(normalized);
+      }
+    };
+
+    addCandidate(normalizedContentKey);
+    addCandidate(mapBackendEventKeyToClientKey(normalizedContentKey));
+    addCandidate(normalizeHostileAttackEventKeyAlias(normalizedContentKey));
+
+    for (const candidate of candidates) {
+      const canonicalCandidate = firstSliceCanonicalEventKeyByLegacyAlias[candidate] || candidate;
+      if (firstSliceAllowedEventContentKeySet.has(canonicalCandidate)) {
+        return canonicalCandidate;
+      }
+      if (firstSliceAllowedEventContentKeySet.has(candidate)) {
+        return candidate;
+      }
+    }
+
+    return resolveDeterministicFallbackEventContentKey(normalizedContentKey);
+  };
   const hostileDispatchFailureContentKeyByCode = Object.freeze({
     source_target_not_foreign: "event.world.hostile_dispatch_failed_source_target_not_foreign",
     max_active_marches_reached: "event.world.hostile_dispatch_failed_max_active_marches_reached",
@@ -1229,7 +1508,10 @@
       return "";
     }
 
-    const normalizedContentKey = normalizeHostileAttackEventKeyAlias(contentKey);
+    const scopedContentKey = String(contentKey).startsWith("event.")
+      ? resolveManifestScopedEventContentKey(contentKey)
+      : String(contentKey).trim();
+    const normalizedContentKey = normalizeHostileAttackEventKeyAlias(scopedContentKey);
     const candidates = [];
     const addCandidate = (candidate) => {
       if (candidate && !candidates.includes(candidate)) {
@@ -1238,7 +1520,15 @@
     };
 
     addCandidate(normalizedContentKey);
+    addCandidate(scopedContentKey);
     addCandidate(contentKey);
+    const canonicalFromScoped =
+      firstSliceCanonicalEventKeyByLegacyAlias[scopedContentKey] || scopedContentKey;
+    addCandidate(canonicalFromScoped);
+    const legacyAliases = firstSliceLegacyAliasKeysByCanonicalEventKey[canonicalFromScoped] || [];
+    for (const legacyAlias of legacyAliases) {
+      addCandidate(legacyAlias);
+    }
 
     if (normalizedContentKey.startsWith("event.buildings.")) {
       addCandidate(normalizedContentKey.replace("event.buildings.", "event.build."));
@@ -1270,10 +1560,37 @@
     return candidates.find((key) => placeholderNarrativeSeedTemplates[key]);
   };
   const getNarrativeText = (contentKey, tokens) => {
-    const template = getNarrativeTemplateWithFallback(contentKey);
+    const effectiveContentKey = String(contentKey || "").startsWith("event.")
+      ? resolveManifestScopedEventContentKey(contentKey)
+      : contentKey;
+    const template = getNarrativeTemplateWithFallback(effectiveContentKey);
 
     if (!template) {
-      return contentKey ? `[Missing placeholder template: ${contentKey}]` : "";
+      if (
+        String(effectiveContentKey || "").startsWith("event.")
+        && effectiveContentKey.length > 0
+      ) {
+        const templateFallbackKey = resolveDeterministicFallbackEventContentKey(
+          effectiveContentKey,
+        );
+        if (templateFallbackKey === effectiveContentKey) {
+          return effectiveContentKey
+            ? `[Missing placeholder template: ${effectiveContentKey}]`
+            : "";
+        }
+        const fallbackTemplate = getNarrativeTemplateWithFallback(
+          templateFallbackKey,
+        );
+        if (fallbackTemplate) {
+          return fillTemplateTokens(fallbackTemplate, {
+            ...buildDeterministicFallbackTokens(templateFallbackKey, effectiveContentKey),
+            ...(tokens || {}),
+          });
+        }
+      }
+      return effectiveContentKey
+        ? `[Missing placeholder template: ${effectiveContentKey}]`
+        : "";
     }
 
     return fillTemplateTokens(template, tokens);
@@ -1392,11 +1709,68 @@
     worldMapActionRuntime.selected_marker_id = String(markerId).trim();
     syncWorldMapScenarioFromRuntime();
   };
+  const buildDeterministicFallbackTokens = (fallbackContentKey, sourceContentKey) => {
+    if (fallbackContentKey === "event.tick.passive_gain_reasoned") {
+      return {
+        settlement_name: settlementActionRuntime.settlement_name,
+        duration_ms: 0,
+        reason_codes: `fallback_for:${sourceContentKey || "unknown"}`,
+      };
+    }
+    if (fallbackContentKey === "event.build.failure_invalid_state") {
+      return {
+        building_id: "grain_plot",
+        settlement_name: settlementActionRuntime.settlement_name,
+        invalid_reason: `fallback_for:${sourceContentKey || "unknown"}`,
+      };
+    }
+    if (fallbackContentKey === "event.train.failure_invalid_state") {
+      return {
+        unit_id: "watch_levy",
+        settlement_name: settlementActionRuntime.settlement_name,
+        invalid_reason: `fallback_for:${sourceContentKey || "unknown"}`,
+      };
+    }
+    if (fallbackContentKey === "event.scout.report_empty") {
+      return {
+        target_tile_label: firstSliceForeignHostileProfile.target_tile_label,
+      };
+    }
+    if (fallbackContentKey === "event.combat.hostile_resolve_defender_win") {
+      return {
+        army_name: firstSliceWorldMapHostileDispatchFixture.army_name,
+        target_tile_label: firstSliceForeignHostileProfile.target_tile_label,
+      };
+    }
+    return {
+      error_code: "content_key_missing",
+      target_tile_label: firstSliceForeignHostileProfile.target_tile_label,
+      message: `Fallback narrative key applied for '${sourceContentKey}'.`,
+    };
+  };
 
   const appendEventFeedEntry = (entry) => {
     const eventScenario = getPopulatedEventScenario();
     const existing = Array.isArray(eventScenario.events) ? eventScenario.events : [];
-    eventScenario.events = [entry, ...existing].slice(0, 20);
+    const rawContentKey = String(entry?.contentKey || "").trim();
+    const scopedContentKey = rawContentKey.startsWith("event.")
+      ? resolveManifestScopedEventContentKey(rawContentKey)
+      : rawContentKey;
+    const usedFallbackContentKey =
+      rawContentKey.startsWith("event.")
+      && scopedContentKey !== rawContentKey;
+    const fallbackTokens = usedFallbackContentKey
+      ? buildDeterministicFallbackTokens(scopedContentKey, rawContentKey)
+      : {};
+    const normalizedEntry = {
+      ...entry,
+      contentKey: scopedContentKey,
+      tokens: {
+        ...fallbackTokens,
+        ...(entry?.tokens || {}),
+      },
+    };
+    eventScenario.events = [normalizedEntry, ...existing].slice(0, 20);
   };
   const formatEventMetaTimestamp = (instantValue) => {
     const parsed = parseIsoInstant(instantValue);
@@ -1743,7 +2117,7 @@
     if (selectedMarker && typeof selectedMarker.tile_id === "string" && selectedMarker.tile_id.trim().length > 0) {
       return selectedMarker.tile_id.trim();
     }
-    return "tile_0000_0000";
+    return firstSliceHomeTileId;
   };
 
   const resolveSelectedWorldMapTileLabel = (tileId) => {
@@ -2036,7 +2410,9 @@
 
   const applyHostileDispatchActionResult = (response, context) => {
     const targetTileLabel = context?.target_tile_label || "Hostile Settlement";
-    const targetSettlementId = context?.target_settlement_id || "settlement_hostile";
+    const targetSettlementId =
+      context?.target_settlement_id
+      || firstSlicePlayableManifestV1.default_consumption_contract.frontend.default_hostile_target_settlement_id;
     const isFailedContract = response?.status === "failed";
     if (isFailedContract) {
       const failureErrorCode = response?.error_code || response?.failure_code || "hostile_dispatch_failed";
@@ -2168,6 +2544,7 @@
         const response = await firstSliceClientContractAdapter.tickSettlementCommand({
           settlement_id: settlementActionRuntime.settlement_id,
           settlement_name: settlementActionRuntime.settlement_name,
+          player_id: settlementActionRuntime.player_id,
           requested_at: requestedAt,
           duration_ms: tickDurationMs,
           resource_stock_by_id: settlementActionRuntime.resource_stock_by_id,
@@ -2190,6 +2567,7 @@
         const response = await firstSliceClientContractAdapter.buildUpgradeCommand({
           settlement_id: settlementActionRuntime.settlement_id,
           settlement_name: settlementActionRuntime.settlement_name,
+          player_id: settlementActionRuntime.player_id,
           building_id: "grain_plot",
           current_level: settlementActionRuntime.building_level_by_id.grain_plot || 0,
           requested_at: requestedAt,
@@ -2204,6 +2582,7 @@
         const response = await firstSliceClientContractAdapter.trainUnitCommand({
           settlement_id: settlementActionRuntime.settlement_id,
           settlement_name: settlementActionRuntime.settlement_name,
+          player_id: settlementActionRuntime.player_id,
           unit_id: "watch_levy",
           quantity: 4,
           requested_at: requestedAt,
@@ -2252,14 +2631,14 @@
     const targetSettlementId =
       typeof selectedMarker?.settlement_id === "string" && selectedMarker.settlement_id.trim().length > 0
         ? selectedMarker.settlement_id.trim()
-        : "settlement_hostile";
+        : firstSlicePlayableManifestV1.default_consumption_contract.frontend.default_hostile_target_settlement_id;
     const targetSettlementName =
       typeof selectedMarker?.label === "string" && selectedMarker.label.trim().length > 0
         ? selectedMarker.label.trim()
         : targetTileLabel;
     const targetCoords = {
-      x: normalizeMapCoordinate(selectedMarker?.coords?.x, 2),
-      y: normalizeMapCoordinate(selectedMarker?.coords?.y, 1),
+      x: normalizeMapCoordinate(selectedMarker?.coords?.x, firstSliceForeignHostileProfile.map_coordinate.x),
+      y: normalizeMapCoordinate(selectedMarker?.coords?.y, firstSliceForeignHostileProfile.map_coordinate.y),
     };
     const marchId = `march_attack_${String(worldMapActionRuntime.next_march_sequence).padStart(4, "0")}`;
     const heroDispatchContext = actionType === "attack"
@@ -2278,6 +2657,7 @@
           settlement_id: settlementActionRuntime.settlement_id,
           settlement_name: settlementActionRuntime.settlement_name,
           tile_id: tileId,
+          player_id: worldMapActionRuntime.player_id,
         });
         applyScoutActionResult(response);
         return;
@@ -2300,7 +2680,7 @@
         departed_at: new Date(),
         seconds_per_tile: firstSliceWorldMapHostileDispatchFixture.seconds_per_tile,
         army_name: firstSliceWorldMapHostileDispatchFixture.army_name,
-        player_id: heroDispatchContext ? worldMapActionRuntime.player_id : undefined,
+        player_id: worldMapActionRuntime.player_id,
         hero_id: heroDispatchContext?.hero_id,
         hero_target_scope: heroDispatchContext?.assignment_context_type,
         hero_assignment_context_id: heroDispatchContext?.assignment_context_id,
@@ -3293,11 +3673,14 @@
     const events = (scenario.events || [])
       .map((item) => {
         const priorityClass = priorityClassByValue[item.priority] || "";
-        const title = item.contentKey
-          ? getNarrativeText(item.contentKey, item.tokens)
+        const resolvedContentKey = item.contentKey
+          ? resolveManifestScopedEventContentKey(item.contentKey)
+          : "";
+        const title = resolvedContentKey
+          ? getNarrativeText(resolvedContentKey, item.tokens)
           : item.title || "[Missing event title]";
         return `
-          <li class="event-item${priorityClass}"${item.contentKey ? ` data-content-key="${escapeHtml(item.contentKey)}"` : ""}>
+          <li class="event-item${priorityClass}"${resolvedContentKey ? ` data-content-key="${escapeHtml(resolvedContentKey)}"` : ""}>
             <p class="event-item__title">${escapeHtml(title)}</p>
             <p class="event-item__meta">${escapeHtml(item.meta)}</p>
           </li>

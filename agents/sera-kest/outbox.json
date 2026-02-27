@@ -593,5 +593,37 @@
                                     "node --check client-web/app.js",
                                     "python -m unittest tests.test_rk_m0_0011_first_slice_loop_smoke tests.test_frontend_visual_smoke"
                                 ]
+    },
+    {
+        "ts":  "2026-02-27T08:38:24.7493295Z",
+        "item_id":  "RK-AUTO-BACKLOG-0005-F05",
+        "status":  "completed",
+        "summary":  "Bound client-shell first-session defaults to first-slice playable/content manifest constraints, persisted a stable local player profile id in browser storage, reused that id across settlement/world-map contract payloads, and enforced deterministic event-feed manifest-key fallback for missing/unscoped content keys.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "python tools/rk_m0_0011_first_slice_loop_smoke.py",
+                                    "python tools/orchestrator.py status"
+                                ],
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Generate shared frontend manifest snapshot for client-web bootstrap",
+                                        "owner_role":  "platform",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Add a deterministic build/runtime artifact that exports first-slice playable/content manifest subsets for the web client so manifest defaults are consumed from one generated source instead of duplicated inline constants.",
+                                        "acceptance_criteria":  [
+                                                                    "A generated manifest snapshot artifact exists for client-web bootstrap and is sourced from backend `first-slice-playable-manifest.json` and `first-slice-content-key-manifest.json`",
+                                                                    "client-web consumes the generated snapshot for settlement/map default ids and event content-key allowlists without hard-coded manifest copies in `app.js`",
+                                                                    "A smoke check fails when generated snapshot and backend manifest ids diverge"
+                                                                ],
+                                        "validation_commands":  [
+                                                                    "python tools/orchestrator.py status"
+                                                                ]
+                                    }
+                                ]
     }
 ]

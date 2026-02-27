@@ -6047,5 +6047,51 @@
     "runtime_seconds": 252.06,
     "started_at": "2026-02-27T08:19:23.128731+00:00",
     "finished_at": "2026-02-27T08:23:35.191746+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F01",
+    "title": "Requeue platform wrapper command-path hardening with deterministic script-smoke coverage",
+    "description": "Recover from the non-actionable block on RK-AUTO-BACKLOG-0004-F05 by re-running platform wrapper command-path hardening and adding lightweight prepare-mode smoke checks for Steam and Android wrapper entry scripts.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-PLATFORM-0001"
+    ],
+    "inputs": [
+      "scripts/",
+      "client-steam-tauri/",
+      "client-android-capacitor/",
+      "docs/operations/steam-tauri-wrapper-packaging.md",
+      "docs/operations/android-capacitor-wrapper-packaging.md"
+    ],
+    "acceptance_criteria": [
+      "Canonical wrapper entry points remain `scripts/wrapper_steam_tauri.ps1` and `scripts/wrapper_android_capacitor.ps1` with deterministic prepare/dev/package modes.",
+      "Automated checks invoke both wrapper scripts in prepare mode and fail on command-path or prerequisite drift.",
+      "Wrapper metadata and assets stay placeholder-only and first-slice compatible."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T20:55:12.234856+00:00",
+    "updated_at": "2026-02-27T08:30:03.433923+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` were also dirty in the working tree (daemon-managed state); they were not edited for this task.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005",
+    "assigned_agent": "juno-cairn",
+    "commit_sha": "e9d86ea5fff36d549f44ab526c3d6896b00238dd",
+    "resolved_by_agent": "juno-cairn",
+    "resolved_by_role": "platform",
+    "runtime_seconds": 379.03,
+    "started_at": "2026-02-27T08:23:41.958392+00:00",
+    "finished_at": "2026-02-27T08:30:00.991582+00:00"
   }
 ]
