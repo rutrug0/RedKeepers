@@ -1,0 +1,59 @@
+{
+  "item_id": "RK-AUTO-BACKLOG-0010-F06",
+  "timestamp_utc": "2026-02-27T13:31:15.296926Z",
+  "release_gate_command": "python tools/first_slice_release_gate_runner.py",
+  "status_command": "python tools/orchestrator.py status",
+  "overall_status": "PASS",
+  "criteria": {
+    "playable": {
+      "status": "PASS",
+      "owner_role_if_failed": "backend",
+      "evidence": {
+        "source": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/release-gate-evidence.json",
+        "summary": "RK-M0-0011_SMOKE summary status=PASS pass=23 fail=0",
+        "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/playable-gate.log",
+        "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/rk_m0_0011_first_slice_loop_smoke.py",
+        "exit_code": 0
+      }
+    },
+    "quality": {
+      "status": "PASS",
+      "owner_role_if_failed": "qa",
+      "evidence": {
+        "source": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/release-gate-evidence.json",
+        "summary": "Workload Buckets: ready=dependency-ready queued, waiting=queued with unmet dependencies.",
+        "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/quality-gate.log",
+        "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/orchestrator.py status",
+        "exit_code": 0
+      }
+    },
+    "platform": {
+      "status": "PASS",
+      "owner_role_if_failed": "platform",
+      "evidence": {
+        "source": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/release-gate-evidence.json",
+        "summary": "Wrapper prepare smoke passed for first-slice manifest snapshot + Steam Tauri + Android Capacitor prepare lanes.",
+        "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/platform-gate.log",
+        "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/platform_wrapper_prepare_smoke.py",
+        "exit_code": 0
+      }
+    },
+    "hostile_token_contract": {
+      "status": "PASS",
+      "owner_role_if_failed": "backend",
+      "evidence": {
+        "source": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/release-gate-evidence.json",
+        "summary": "hostile runtime token contract: D:\\RedKeepers\\backend\\src\\app\\config\\seeds\\v1\\narrative\\first-slice-hostile-runtime-token-contract.json",
+        "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/hostile-token-contract-gate.log",
+        "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/generate_first_slice_frontend_manifest_snapshot.py --output coordination/runtime/first-slice-release-gate/hostile-token-contract-snapshot.js",
+        "exit_code": 0
+      }
+    }
+  },
+  "evidence_links": {
+    "runner_evidence_json": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/release-gate-evidence.json",
+    "runner_evidence_md": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/release-gate-evidence.md",
+    "orchestrator_status_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/orchestrator-status.log"
+  },
+  "blocker_entries": []
+}

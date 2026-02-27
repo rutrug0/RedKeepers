@@ -1,84 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0010-F04",
-    "title": "Render first-session objective strip in client shell from canonical keys",
-    "description": "Implement a lightweight objective strip in the web client that displays step progression for the first-session loop using canonical objective keys and existing action outcomes without introducing new mechanics.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0010-F01",
-      "RK-AUTO-BACKLOG-0010-F03"
-    ],
-    "inputs": [
-      "client-web/app.js",
-      "client-web/first-slice-manifest-snapshot.js",
-      "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
-      "docs/design/first-vertical-slice.md"
-    ],
-    "acceptance_criteria": [
-      "Client shell shows an ordered first-session objective strip for tick/build/train/scout/attack/resolve steps with clear active/completed states",
-      "Objective rendering resolves canonical-default keys and does not promote compatibility-only aliases for default display",
-      "When expected objective template data is missing, UI falls back to deterministic placeholder text and keeps the loop interactive"
-    ],
-    "validation_commands": [
-      "python tools/rk_m0_0011_first_slice_loop_smoke.py"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:02:20.592470+00:00",
-    "updated_at": "2026-02-27T13:29:24.070386+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
-    "assigned_agent": "sera-kest"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0010-F06",
-    "title": "Run release-blocking first-slice gate after objective-contract tranche",
-    "description": "Execute the release gate after objective-contract design/content/backend/frontend/platform changes and publish PASS/FAIL evidence with owner-tagged blockers for any failing mandatory stage.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "qa",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0010-F04",
-      "RK-AUTO-BACKLOG-0010-F05"
-    ],
-    "inputs": [
-      "tools/first_slice_release_gate_runner.py",
-      "coordination/runtime/first-slice-release-gate/",
-      "docs/design/vertical-slice-done-v1.md"
-    ],
-    "acceptance_criteria": [
-      "Gate evidence records PASS/FAIL for playable, quality, platform, and hostile_token_contract stages after tranche updates",
-      "Any failing mandatory stage includes exact failing command and explicit owner_role blocker assignment",
-      "No additional non-critical QA-only tasks are generated unless a release-blocking failure is observed"
-    ],
-    "validation_commands": [
-      "python tools/first_slice_release_gate_runner.py",
-      "python tools/orchestrator.py status"
-    ],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:02:20.592470+00:00",
-    "updated_at": "2026-02-27T13:02:20.592470+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0010-F01-F01",
     "title": "Wire first-session objective tracker to canonical objective IDs and key gates",
     "description": "Implement first-session objective progress tracking using the six contract IDs and canonical key gates so UI progression state advances only on the documented `tick/build/train/scout/attack/resolve` event sequence.",
@@ -101,17 +22,18 @@
       "Deferred hero/ambush/gather keys do not advance first-session objective completion"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T13:08:08.643609+00:00",
-    "updated_at": "2026-02-27T13:08:08.643609+00:00",
+    "updated_at": "2026-02-27T13:39:23.862601+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010-F01"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010-F01",
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-AUTO-BACKLOG-0010-F02-F01",

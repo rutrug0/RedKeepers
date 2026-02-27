@@ -1,0 +1,12 @@
+command: "C:\Program Files\Inkscape\bin\python.exe" tools/platform_wrapper_prepare_smoke.py
+exit_code: 0
+
+stdout:
+PLATFORM_WRAPPER_PREP stage=frontend_manifest_snapshot status=PASS exit_code=0
+PLATFORM_WRAPPER_PREP stage=steam_tauri_prepare status=PASS exit_code=0
+PLATFORM_WRAPPER_PREP stage=android_capacitor_prepare status=PASS exit_code=0
+STATUS: COMPLETED
+Wrapper prepare smoke passed for first-slice manifest snapshot + Steam Tauri + Android Capacitor prepare lanes.
+
+stderr:
+

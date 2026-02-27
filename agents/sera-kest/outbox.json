@@ -760,5 +760,19 @@
                                     "node --check client-web/app.js",
                                     "python tools/rk_m0_0011_first_slice_loop_smoke.py"
                                 ]
+    },
+    {
+        "ts":  "2026-02-27T13:38:37.4083920Z",
+        "item_id":  "RK-AUTO-BACKLOG-0010-F01-F01",
+        "status":  "completed",
+        "summary":  "Reworked first-session objective progression to advance strictly by canonical-default gate keys in the documented tick/build/train/scout/attack/resolve order, with exact six stable objective IDs enforced at runtime, compatibility aliases resolved upstream, and deferred hero/ambush/gather keys excluded from completion gating.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "python tools/rk_m0_0011_first_slice_loop_smoke.py"
+                                ]
     }
 ]

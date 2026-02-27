@@ -739,6 +739,22 @@
     );
   const objectiveKeyStatusCanonicalDefault = "canonical-default";
   const objectiveKeyStatusCompatibilityOnly = "compatibility-only";
+  const firstSessionObjectiveCanonicalIdSequenceV1 = Object.freeze([
+    "first_session.tick.observe_income.v1",
+    "first_session.build.complete_first_upgrade.v1",
+    "first_session.train.complete_first_batch.v1",
+    "first_session.scout.confirm_hostile_target.v1",
+    "first_session.attack.dispatch_hostile_march.v1",
+    "first_session.resolve_hostile_outcome.v1",
+  ]);
+  const firstSessionObjectiveLoopStepSequenceV1 = Object.freeze([
+    "tick",
+    "build",
+    "train",
+    "scout",
+    "attack",
+    "resolve",
+  ]);
   const firstSessionObjectiveContractRowsV1 = Object.freeze([
     Object.freeze({
       canonical_objective_key: "first_session.tick.observe_income.v1",
@@ -805,6 +821,9 @@
       canonical_objective_key: "first_session.resolve_hostile_outcome.v1",
       loop_step: "resolve",
       required_canonical_default_content_keys: Object.freeze([
+        "event.combat.hostile_loss_report",
+      ]),
+      required_any_canonical_default_content_keys: Object.freeze([
         "event.combat.hostile_resolve_attacker_win",
         "event.combat.hostile_resolve_defender_win",
         "event.combat.hostile_resolve_tie_defender_holds",
@@ -843,17 +862,6 @@
       return lookup;
     }, {}),
   );
-  const firstSessionObjectiveCanonicalKeyByLoopStep = Object.freeze(
-    firstSessionObjectiveContractRowsV1.reduce((lookup, row) => {
-      lookup[row.loop_step] = row.canonical_objective_key;
-      return lookup;
-    }, {}),
-  );
-  const firstSessionResolveOutcomeCanonicalKeySet = new Set([
-    "event.combat.hostile_resolve_attacker_win",
-    "event.combat.hostile_resolve_defender_win",
-    "event.combat.hostile_resolve_tie_defender_holds",
-  ]);
   const firstSliceDeferredPostSliceEventContentKeys = Object.freeze([
     "event.world.gather_started",
     "event.world.gather_completed",
@@ -897,6 +905,55 @@
       return lookup;
     }, {}),
   );
+  const isCanonicalObjectiveGateContentKey = (contentKey) => {
+    const normalizedContentKey = String(contentKey || "").trim();
+    if (normalizedContentKey.length < 1) {
+      return false;
+    }
+    return (
+      firstSliceAllowedEventContentKeySet.has(normalizedContentKey)
+      && !firstSliceDeferredPostSliceEventContentKeySet.has(normalizedContentKey)
+      && getFirstSliceMigrationKeyStatus(normalizedContentKey) === migrationKeyStatusCanonicalDefault
+    );
+  };
+  const assertFirstSessionObjectiveContractRows = (rows) => {
+    if (rows.length !== firstSessionObjectiveCanonicalIdSequenceV1.length) {
+      throw new Error(
+        "Objective contract mismatch: first-session objective count must stay fixed at six canonical IDs.",
+      );
+    }
+
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+      const row = rows[rowIndex];
+      const expectedObjectiveId = firstSessionObjectiveCanonicalIdSequenceV1[rowIndex];
+      const expectedLoopStep = firstSessionObjectiveLoopStepSequenceV1[rowIndex];
+      if (row.canonical_objective_key !== expectedObjectiveId) {
+        throw new Error(
+          `Objective contract mismatch at order ${rowIndex + 1}: expected '${expectedObjectiveId}', received '${row.canonical_objective_key}'.`,
+        );
+      }
+      if (row.loop_step !== expectedLoopStep) {
+        throw new Error(
+          `Objective contract mismatch for '${row.canonical_objective_key}': expected loop step '${expectedLoopStep}', received '${row.loop_step}'.`,
+        );
+      }
+
+      const requiredAllKeys = Array.isArray(row.required_canonical_default_content_keys)
+        ? row.required_canonical_default_content_keys
+        : [];
+      const requiredAnyKeys = Array.isArray(row.required_any_canonical_default_content_keys)
+        ? row.required_any_canonical_default_content_keys
+        : [];
+      for (const requiredGateKey of [...requiredAllKeys, ...requiredAnyKeys]) {
+        if (!isCanonicalObjectiveGateContentKey(requiredGateKey)) {
+          throw new Error(
+            `Objective contract mismatch for '${row.canonical_objective_key}': gate key '${requiredGateKey}' must be canonical-default and in first-slice scope.`,
+          );
+        }
+      }
+    }
+  };
+  assertFirstSessionObjectiveContractRows(firstSessionObjectiveContractRowsV1);
   const firstSliceDeterministicFallbackEventContentKey = "event.world.hostile_dispatch_failed";
   const firstSliceLocalProfileStorageKey = "rk:first_slice:local_player_profile_v1";
   const assertFirstSliceBootstrapDefaultsAlignManifestScope = (
@@ -2244,20 +2301,71 @@
     }
     return resolveCanonicalFirstSessionObjectiveKeyFromAlias(normalizedObjectiveKey);
   };
+  const getFirstSessionObjectiveRequiredAnyKeys = (objectiveRow) =>
+    Array.isArray(objectiveRow?.required_any_canonical_default_content_keys)
+      ? objectiveRow.required_any_canonical_default_content_keys
+      : [];
+  const hasFirstSessionObjectiveCompletionGate = (objectiveRow) => {
+    if (!objectiveRow) {
+      return false;
+    }
+    const observedKeySet = firstSessionObjectiveProgressRuntime.observed_canonical_default_event_keys;
+    const requiredAllKeys = Array.isArray(objectiveRow.required_canonical_default_content_keys)
+      ? objectiveRow.required_canonical_default_content_keys
+      : [];
+    for (const requiredKey of requiredAllKeys) {
+      if (!observedKeySet.has(requiredKey)) {
+        return false;
+      }
+    }
+    const requiredAnyKeys = getFirstSessionObjectiveRequiredAnyKeys(objectiveRow);
+    return requiredAnyKeys.length < 1 || requiredAnyKeys.some((requiredKey) => observedKeySet.has(requiredKey));
+  };
+  const resolveFirstSessionActiveObjectiveCanonicalKey = () => {
+    const completionByCanonicalKey = firstSessionObjectiveProgressRuntime.completed_by_canonical_key;
+    for (const objectiveRow of firstSessionObjectiveContractRowsV1) {
+      const canonicalObjectiveKey = resolveCanonicalFirstSessionObjectiveKey(
+        objectiveRow.canonical_objective_key,
+      );
+      if (canonicalObjectiveKey.length < 1) {
+        continue;
+      }
+      if (completionByCanonicalKey[canonicalObjectiveKey] !== true) {
+        return canonicalObjectiveKey;
+      }
+    }
+    return "";
+  };
+  const tryAdvanceFirstSessionObjectiveProgress = () => {
+    while (true) {
+      const activeCanonicalObjectiveKey = resolveFirstSessionActiveObjectiveCanonicalKey();
+      if (activeCanonicalObjectiveKey.length < 1) {
+        return;
+      }
+      const activeObjectiveRow =
+        firstSessionObjectiveRowByCanonicalKey[activeCanonicalObjectiveKey];
+      if (!hasFirstSessionObjectiveCompletionGate(activeObjectiveRow)) {
+        return;
+      }
+      firstSessionObjectiveProgressRuntime.completed_by_canonical_key[activeCanonicalObjectiveKey] = true;
+    }
+  };
   const registerFirstSessionObjectiveObservedEventKey = (contentKey) => {
     const scopedContentKey = resolveManifestScopedEventContentKey(contentKey);
     if (!isManifestAllowedCanonicalDefaultEventContentKey(scopedContentKey)) {
       return "";
     }
     firstSessionObjectiveProgressRuntime.observed_canonical_default_event_keys.add(scopedContentKey);
+    tryAdvanceFirstSessionObjectiveProgress();
     return scopedContentKey;
   };
-  const markFirstSessionObjectiveLoopStepComplete = (loopStep) => {
-    const canonicalObjectiveKey = firstSessionObjectiveCanonicalKeyByLoopStep[loopStep];
-    if (!canonicalObjectiveKey) {
+  const registerFirstSessionObjectiveObservedEventKeys = (contentKeys) => {
+    if (!Array.isArray(contentKeys)) {
       return;
     }
-    firstSessionObjectiveProgressRuntime.completed_by_canonical_key[canonicalObjectiveKey] = true;
+    for (const contentKey of contentKeys) {
+      registerFirstSessionObjectiveObservedEventKey(contentKey);
+    }
   };
   const hostileDispatchFailureContentKeyByCode = Object.freeze({
     source_target_not_foreign: "event.world.hostile_dispatch_failed_source_target_not_foreign",
@@ -2769,7 +2877,10 @@
     settlementActionRuntime.resource_stock_by_id = cloneResourceValues(response.resource_stock_by_id);
     const appended = appendPlaceholderEvents("tick", response, "event.tick.passive_income");
     setLastActionOutcome("tick", response, appended.contentKey, appended.tokens);
-    markFirstSessionObjectiveLoopStepComplete("tick");
+    registerFirstSessionObjectiveObservedEventKeys([
+      "event.tick.passive_income",
+      "event.tick.passive_gain_success",
+    ]);
   };
 
   const applyBuildActionResult = (response) => {
@@ -2841,7 +2952,10 @@
 
     const appended = appendPlaceholderEvents("build", response, "event.build.upgrade_started");
     setLastActionOutcome("build", response, appended.contentKey, appended.tokens);
-    markFirstSessionObjectiveLoopStepComplete("build");
+    registerFirstSessionObjectiveObservedEventKeys([
+      "event.build.upgrade_started",
+      "event.build.upgrade_completed",
+    ]);
   };
 
   const applyTrainActionResult = (response) => {
@@ -2905,7 +3019,10 @@
       (Number(response.quantity) || 0);
     const appended = appendPlaceholderEvents("train", response, "event.train.started");
     setLastActionOutcome("train", response, appended.contentKey, appended.tokens);
-    markFirstSessionObjectiveLoopStepComplete("train");
+    registerFirstSessionObjectiveObservedEventKeys([
+      "event.train.started",
+      "event.train.completed",
+    ]);
   };
 
   const resolveActionErrorCode = (error) => {
@@ -3350,7 +3467,7 @@
         target_tile_label: targetTileLabel,
       },
     );
-    markFirstSessionObjectiveLoopStepComplete("attack");
+    registerFirstSessionObjectiveObservedEventKey("event.world.hostile_dispatch_accepted");
     const dispatchLifecycleKeys = [
       resolvedPayloads.dispatch_sent?.content_key,
       resolvedPayloads.march_arrived?.content_key,
@@ -3360,12 +3477,13 @@
     for (const lifecycleKey of dispatchLifecycleKeys) {
       registerFirstSessionObjectiveObservedEventKey(lifecycleKey);
     }
-    const resolvedCombatContentKey = registerFirstSessionObjectiveObservedEventKey(
+    registerFirstSessionObjectiveObservedEventKeys([
+      "event.world.hostile_dispatch_en_route",
+      "event.combat.hostile_loss_report",
+    ]);
+    registerFirstSessionObjectiveObservedEventKey(
       resolvedPayloads.combat_resolved?.content_key || outcomeContentKey,
     );
-    if (firstSessionResolveOutcomeCanonicalKeySet.has(resolvedCombatContentKey)) {
-      markFirstSessionObjectiveLoopStepComplete("resolve");
-    }
     worldMapActionRuntime.hostile_dispatch_outcome = {
       status: "accepted",
       flow: response?.flow || "world_map.hostile_attack_v1",
@@ -3411,7 +3529,13 @@
     }
     if (!isFailure) {
       worldMapActionRuntime.completed_scouts += 1;
-      markFirstSessionObjectiveLoopStepComplete("scout");
+      registerFirstSessionObjectiveObservedEventKey("event.scout.dispatched_success");
+      if (
+        contentKey === "event.scout.return_hostile"
+        || contentKey === "event.scout.report_hostile"
+      ) {
+        registerFirstSessionObjectiveObservedEventKey("event.scout.return_hostile");
+      }
     }
 
     appendEventFeedEntry({

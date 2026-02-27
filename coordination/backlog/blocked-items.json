@@ -771,5 +771,45 @@
     "escalation_target": "Mara Voss",
     "auto_generated": "backlog_refill",
     "assigned_agent": "mara-voss"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010-F06",
+    "title": "Run release-blocking first-slice gate after objective-contract tranche",
+    "description": "Execute the release gate after objective-contract design/content/backend/frontend/platform changes and publish PASS/FAIL evidence with owner-tagged blockers for any failing mandatory stage.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F04",
+      "RK-AUTO-BACKLOG-0010-F05"
+    ],
+    "inputs": [
+      "tools/first_slice_release_gate_runner.py",
+      "coordination/runtime/first-slice-release-gate/",
+      "docs/design/vertical-slice-done-v1.md"
+    ],
+    "acceptance_criteria": [
+      "Gate evidence records PASS/FAIL for playable, quality, platform, and hostile_token_contract stages after tranche updates",
+      "Any failing mandatory stage includes exact failing command and explicit owner_role blocker assignment",
+      "No additional non-critical QA-only tasks are generated unless a release-blocking failure is observed"
+    ],
+    "validation_commands": [
+      "python tools/first_slice_release_gate_runner.py",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "blocked",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:02:20.592470+00:00",
+    "updated_at": "2026-02-27T13:32:29.441998+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": "- Updated runtime gate outputs under `coordination/runtime/first-slice-release-gate/`",
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
+    "assigned_agent": "tomas-grell"
   }
 ]

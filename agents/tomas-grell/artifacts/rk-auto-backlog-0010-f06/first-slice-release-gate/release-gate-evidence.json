@@ -1,0 +1,60 @@
+{
+  "timestamp_utc": "2026-02-27T13:30:50.140509Z",
+  "overall_status": "PASS",
+  "executed_commands": [
+    {
+      "order": 1,
+      "gate_id": "playable",
+      "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/rk_m0_0011_first_slice_loop_smoke.py"
+    },
+    {
+      "order": 2,
+      "gate_id": "quality",
+      "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/orchestrator.py status"
+    },
+    {
+      "order": 3,
+      "gate_id": "platform",
+      "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/platform_wrapper_prepare_smoke.py"
+    },
+    {
+      "order": 4,
+      "gate_id": "hostile_token_contract",
+      "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/generate_first_slice_frontend_manifest_snapshot.py --output coordination/runtime/first-slice-release-gate/hostile-token-contract-snapshot.js"
+    }
+  ],
+  "gates": [
+    {
+      "gate_id": "playable",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/rk_m0_0011_first_slice_loop_smoke.py",
+      "summary": "RK-M0-0011_SMOKE summary status=PASS pass=23 fail=0",
+      "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/playable-gate.log"
+    },
+    {
+      "gate_id": "quality",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/orchestrator.py status",
+      "summary": "Workload Buckets: ready=dependency-ready queued, waiting=queued with unmet dependencies.",
+      "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/quality-gate.log"
+    },
+    {
+      "gate_id": "platform",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/platform_wrapper_prepare_smoke.py",
+      "summary": "Wrapper prepare smoke passed for first-slice manifest snapshot + Steam Tauri + Android Capacitor prepare lanes.",
+      "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/platform-gate.log"
+    },
+    {
+      "gate_id": "hostile_token_contract",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": "\"C:\\Program Files\\Inkscape\\bin\\python.exe\" tools/generate_first_slice_frontend_manifest_snapshot.py --output coordination/runtime/first-slice-release-gate/hostile-token-contract-snapshot.js",
+      "summary": "hostile runtime token contract: D:\\RedKeepers\\backend\\src\\app\\config\\seeds\\v1\\narrative\\first-slice-hostile-runtime-token-contract.json",
+      "artifact_log": "agents/tomas-grell/artifacts/rk-auto-backlog-0010-f06/first-slice-release-gate/hostile-token-contract-gate.log"
+    }
+  ]
+}
