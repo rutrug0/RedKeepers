@@ -6775,5 +6775,43 @@
     "runtime_seconds": 811.47,
     "started_at": "2026-02-27T10:18:45.337691+00:00",
     "finished_at": "2026-02-27T10:32:16.811327+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F04",
+    "title": "Align placeholder narrative templates with first-slice token contract",
+    "description": "Update placeholder narrative seed copy so canonical and approved alias keys follow the token contract without expanding first-slice mechanics.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F03"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Canonical loop templates match required token sets.",
+      "Legacy alias templates remain synchronized to canonical requirements.",
+      "Deferred keys stay outside default first-session requirements."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T10:15:35.546325+00:00",
+    "updated_at": "2026-02-27T10:39:42.194849+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/narrative-seed-loaders.test.ts backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts` passed (12/12).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
+    "assigned_agent": "nika-thorn",
+    "commit_sha": "e29d356dda88f918fa1087c1053a690388693f6d",
+    "resolved_by_agent": "nika-thorn",
+    "resolved_by_role": "content",
+    "runtime_seconds": 436.23,
+    "started_at": "2026-02-27T10:32:23.892570+00:00",
+    "finished_at": "2026-02-27T10:39:40.132719+00:00"
   }
 ]

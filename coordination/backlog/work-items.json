@@ -19,41 +19,10 @@
       "Critical loop path emits no missing-template fallback markers."
     ],
     "validation_commands": [],
-    "status": "queued",
-    "retry_count": 0,
-    "created_at": "2026-02-27T10:15:35.546325+00:00",
-    "updated_at": "2026-02-27T10:15:35.546325+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0007"
-  },
-  {
-    "id": "RK-AUTO-BACKLOG-0007-F04",
-    "title": "Align placeholder narrative templates with first-slice token contract",
-    "description": "Update placeholder narrative seed copy so canonical and approved alias keys follow the token contract without expanding first-slice mechanics.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "content",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0007-F03"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Canonical loop templates match required token sets.",
-      "Legacy alias templates remain synchronized to canonical requirements.",
-      "Deferred keys stay outside default first-session requirements."
-    ],
-    "validation_commands": [],
     "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T10:15:35.546325+00:00",
-    "updated_at": "2026-02-27T10:39:40.229019+00:00",
+    "updated_at": "2026-02-27T10:48:13.447242+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
@@ -61,7 +30,7 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0007",
-    "assigned_agent": "nika-thorn"
+    "assigned_agent": "sera-kest"
   },
   {
     "id": "RK-AUTO-BACKLOG-0007-F05",
@@ -161,5 +130,42 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "rowan-hale",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F03"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F04-F01",
+    "title": "Align hostile attack runtime payload tokens with canonical dispatch contract",
+    "description": "Update hostile dispatch runtime payload token emission so canonical `event.world.hostile_dispatch_en_route` templates render from canonical token fields (`army_name`, `target_tile_label`, `eta_seconds`) without relying on legacy alias-era token shapes.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F04"
+    ],
+    "inputs": [
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "docs/design/first-slice-event-token-contract-matrix.md"
+    ],
+    "acceptance_criteria": [
+      "Dispatch event payload includes `eta_seconds` token for `event.world.hostile_dispatch_en_route` in first-slice hostile flow",
+      "Runtime payload token names match canonical template token contract for dispatch events",
+      "Existing compatibility aliases remain optional lookup aids, not required for successful render token substitution"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T10:39:42.386023+00:00",
+    "updated_at": "2026-02-27T10:39:42.386023+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04"
   }
 ]

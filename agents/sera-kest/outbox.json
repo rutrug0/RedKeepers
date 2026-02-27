@@ -656,5 +656,27 @@
                                     "node --check client-web/app.js",
                                     "python tools/orchestrator.py status"
                                 ]
+    },
+    {
+        "ts":  "2026-02-27T10:39:47.6766640Z",
+        "item_id":  "RK-AUTO-BACKLOG-0007-F02",
+        "status":  "completed",
+        "summary":  "Replaced hard-coded client event template constants with generated first-session narrative snapshot consumption, wiring deterministic canonical+legacy alias template lookup from the manifest snapshot and keeping only non-manifest local fallback templates.",
+        "files":  [
+                      "tools/generate_first_slice_frontend_manifest_snapshot.py",
+                      "client-web/first-slice-manifest-snapshot.js",
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "python tools/generate_first_slice_frontend_manifest_snapshot.py",
+                                    "node --check client-web/app.js",
+                                    "python -m py_compile tools/generate_first_slice_frontend_manifest_snapshot.py",
+                                    "python -m unittest tests.test_frontend_visual_smoke",
+                                    "python tools/rk_m0_0011_first_slice_loop_smoke.py"
+                                ],
+        "results":  {
+                        "validation_note":  "Frontend visual smoke unit tests passed (14/14). `rk_m0_0011_first_slice_loop_smoke.py` still reports an existing `negative_insufficient_resources` token assertion failure outside this template-snapshot client scope."
+                    }
     }
 ]

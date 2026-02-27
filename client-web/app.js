@@ -198,6 +198,141 @@
         legacy_keys: Object.freeze(legacyKeys),
       });
     });
+    const defaultFirstSessionNarrativeTemplatesRaw =
+      contentKeyManifest.default_first_session_narrative_templates;
+    if (
+      !defaultFirstSessionNarrativeTemplatesRaw
+      || typeof defaultFirstSessionNarrativeTemplatesRaw !== "object"
+    ) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates`,
+      );
+    }
+    const defaultFirstSessionNarrativeTemplateSnapshotId = String(
+      defaultFirstSessionNarrativeTemplatesRaw.snapshot_id || "",
+    ).trim();
+    if (!stableIdPattern.test(defaultFirstSessionNarrativeTemplateSnapshotId)) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.snapshot_id`,
+      );
+    }
+    const defaultFirstSessionNarrativeTemplateManifestId = String(
+      defaultFirstSessionNarrativeTemplatesRaw.manifest_id || "",
+    ).trim();
+    if (defaultFirstSessionNarrativeTemplateManifestId !== contentKeySourceManifest.manifest_id) {
+      throw new Error(
+        `Snapshot manifest mismatch: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.manifest_id`,
+      );
+    }
+    const defaultFirstSessionTemplatesByKeyRaw =
+      defaultFirstSessionNarrativeTemplatesRaw.templates_by_key;
+    if (
+      !defaultFirstSessionTemplatesByKeyRaw
+      || typeof defaultFirstSessionTemplatesByKeyRaw !== "object"
+      || Array.isArray(defaultFirstSessionTemplatesByKeyRaw)
+    ) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.templates_by_key`,
+      );
+    }
+    const defaultFirstSessionTemplatesByKeyEntries = Object.entries(
+      defaultFirstSessionTemplatesByKeyRaw,
+    );
+    if (defaultFirstSessionTemplatesByKeyEntries.length < 1) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.templates_by_key`,
+      );
+    }
+    const defaultFirstSessionTemplatesByKey = defaultFirstSessionTemplatesByKeyEntries.reduce(
+      (lookup, [rawTemplateKey, rawTemplateRow]) => {
+        const templateKey = String(rawTemplateKey || "").trim();
+        if (templateKey.length < 1) {
+          throw new Error(
+            `Invalid snapshot key in ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.templates_by_key`,
+          );
+        }
+        if (!rawTemplateRow || typeof rawTemplateRow !== "object") {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.templates_by_key.${templateKey}`,
+          );
+        }
+        const template = String(rawTemplateRow.template || "").trim();
+        if (template.length < 1) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.templates_by_key.${templateKey}.template`,
+          );
+        }
+        if (!Array.isArray(rawTemplateRow.tokens)) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.templates_by_key.${templateKey}.tokens`,
+          );
+        }
+        const tokens = rawTemplateRow.tokens.map((token, tokenIndex) => {
+          const normalizedToken = String(token || "").trim();
+          if (normalizedToken.length < 1) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.templates_by_key.${templateKey}.tokens[${tokenIndex}]`,
+            );
+          }
+          return normalizedToken;
+        });
+        lookup[templateKey] = Object.freeze({
+          template,
+          tokens: Object.freeze(tokens),
+        });
+        return lookup;
+      },
+      {},
+    );
+    const defaultFirstSessionLookupResolutionByCanonicalKeyRaw =
+      defaultFirstSessionNarrativeTemplatesRaw.lookup_resolution_order_by_canonical_key;
+    if (!Array.isArray(defaultFirstSessionLookupResolutionByCanonicalKeyRaw)) {
+      throw new Error(
+        `Invalid snapshot path: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.lookup_resolution_order_by_canonical_key`,
+      );
+    }
+    const defaultFirstSessionLookupResolutionByCanonicalKey =
+      defaultFirstSessionLookupResolutionByCanonicalKeyRaw.map((row, rowIndex) => {
+        if (!row || typeof row !== "object") {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.lookup_resolution_order_by_canonical_key[${rowIndex}]`,
+          );
+        }
+        const canonicalKey = String(row.canonical_key || "").trim();
+        if (canonicalKey.length < 1) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.lookup_resolution_order_by_canonical_key[${rowIndex}].canonical_key`,
+          );
+        }
+        if (!Array.isArray(row.resolution_order) || row.resolution_order.length < 1) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.lookup_resolution_order_by_canonical_key[${rowIndex}].resolution_order`,
+          );
+        }
+        const resolutionOrder = row.resolution_order.map((lookupKey, lookupIndex) => {
+          const normalizedLookupKey = String(lookupKey || "").trim();
+          if (normalizedLookupKey.length < 1) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.lookup_resolution_order_by_canonical_key[${rowIndex}].resolution_order[${lookupIndex}]`,
+            );
+          }
+          if (!defaultFirstSessionTemplatesByKey[normalizedLookupKey]) {
+            throw new Error(
+              `Invalid snapshot key: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.lookup_resolution_order_by_canonical_key[${rowIndex}].resolution_order[${lookupIndex}] is missing in templates_by_key`,
+            );
+          }
+          return normalizedLookupKey;
+        });
+        if (resolutionOrder[0] !== canonicalKey) {
+          throw new Error(
+            `Invalid snapshot row: ${firstSliceManifestSnapshotSourceGlobalPath}.content_keys.default_first_session_narrative_templates.lookup_resolution_order_by_canonical_key[${rowIndex}] must start with canonical_key`,
+          );
+        }
+        return Object.freeze({
+          canonical_key: canonicalKey,
+          resolution_order: Object.freeze(resolutionOrder),
+        });
+      });
 
     return Object.freeze({
       source_manifests: Object.freeze({
@@ -224,98 +359,34 @@
           include_only_content_keys: Object.freeze(includeOnlyContentKeys),
         }),
         legacy_alias_mapping: Object.freeze(legacyAliasMapping),
+        default_first_session_narrative_templates: Object.freeze({
+          snapshot_id: defaultFirstSessionNarrativeTemplateSnapshotId,
+          manifest_id: defaultFirstSessionNarrativeTemplateManifestId,
+          lookup_resolution_order_by_canonical_key: Object.freeze(
+            defaultFirstSessionLookupResolutionByCanonicalKey,
+          ),
+          templates_by_key: Object.freeze(defaultFirstSessionTemplatesByKey),
+        }),
       }),
     });
   };
   const firstSliceManifestSnapshotSourceV1 =
     readManifestBackedFirstSliceManifestSnapshotSource();
-  const placeholderNarrativeSeedTemplates = Object.freeze({
+  const localNarrativeFallbackTemplates = Object.freeze({
     "civ_intro.cinder_throne_legates":
       "The Cinder Throne Legates hold the frontier by ash, ration, and decree. Their magistrates build roads before monuments, and their branded levies turn every settlement into a hard post that is costly to break.",
-    "event.tick.passive_income":
-      "{settlement_name} stores rise: +{food_gain} Food, +{wood_gain} Wood, +{stone_gain} Stone, +{iron_gain} Iron.",
-    "event.tick.passive_gain_success":
-      "{settlement_name}: the harvest cycle clears after {duration_ms}ms, and stores are restocked without incident.",
-    "event.tick.passive_gain_reasoned":
-      "{settlement_name}: tick logic resolved with {reason_codes} over {duration_ms}ms.",
-    "event.tick.passive_gain_stalled":
-      "{settlement_name}: this {duration_ms}ms tick produced no gain; the ledger held steady under poor harvest timing.",
-    "event.tick.passive_gain_capped":
-      "{settlement_name}: storage limits clipped this tick, and excess yield is marked as waste.",
-    "event.buildings.upgrade_started":
-      "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
-    "event.build.upgrade_started":
-      "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
-    "event.build.upgrade_completed":
-      "{settlement_name}: {building_label} reaches Lv.{new_level}. Crews return to regular duty.",
-    "event.build.success":
-      "{settlement_name}: work begins on {building_label} (Lv.{from_level} -> Lv.{to_level}).",
-    "event.build.failure_insufficient_resources":
-      "{building_id}: upgrade halted. Missing stores {missing_resources_by_id}; needed {required_cost_by_id}, on hand {available_stock_by_id}.",
-    "event.build.failure_cooldown":
-      "{building_id}: work crews are still turning to complete prior orders; new orders resume at {cooldown_ends_at}.",
-    "event.build.failure_invalid_state":
-      "{building_id}: command rejected while the builder's ledger reports {invalid_reason}.",
-    "event.units.training_started":
-      "{settlement_name}: training begins for {quantity} {unit_label}.",
-    "event.train.started":
-      "{settlement_name}: training begins for {quantity} {unit_label}.",
-    "event.train.completed":
-      "{settlement_name}: {quantity} {unit_label} report ready for orders.",
-    "event.train.success":
-      "{settlement_name}: training begins for {quantity} {unit_label}.",
-    "event.train.failure_insufficient_resources":
-      "{unit_id}: muster delayed; missing resources {missing_resources_by_id} against required {required_cost_by_id}.",
-    "event.train.failure_cooldown":
-      "{unit_id}: barracks queue is locked until {queue_available_at}, {cooldown_remaining_ms}ms remaining.",
-    "event.train.failure_invalid_state":
-      "{unit_id}: muster rejected as state contract reads {invalid_reason}.",
     "event.units.upkeep_reduced_garrison":
       "{settlement_name}: garrison ration discipline reduces stationed troop upkeep.",
-    "event.scout.dispatched_success":
-      "{settlement_name}: scouts ride out toward {target_tile_label} and report on first contact within the cycle.",
-    "event.scout.dispatched":
-      "{settlement_name}: scouts ride out toward {target_tile_label}.",
-    "event.scout.report_empty":
-      "Scout report from {target_tile_label}: no active host detected. The roads remain quiet for now.",
-    "event.world.scout_report_hostile":
-      "Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).",
-    "event.scout.report_hostile":
-      "Scout report from {target_tile_label}: hostile movement sighted ({hostile_force_estimate}).",
-    "event.scout.return_empty":
-      "Scouting returns to quiet from {target_tile_label}; no active host disturbed the roads.",
-    "event.scout.return_hostile":
-      "Scouts from {target_tile_label} report hostile movement ({hostile_force_estimate}); garrisons should tighten watch.",
     "event.world.scout_unavailable_tile":
       "Scout dispatch to {target_tile_label} aborted: tile is unavailable for this route.",
     "event.scout.unavailable_tile":
       "Scout dispatch to {target_tile_label} aborted: tile is unavailable for this route.",
-    "event.world.march_started":
-      "{army_name} crosses killing ground toward {target_tile_label}. ETA {eta_seconds}s.",
-    "event.world.march_returned":
-      "{army_name} returns to {settlement_name}; tally survivors and prepare the next war order.",
-    "event.combat.placeholder_skirmish_win":
-      "{army_name} wins a brief skirmish near {target_tile_label}. Losses are light; survivors regroup for orders.",
-    "event.combat.placeholder_skirmish_loss":
-      "{army_name} is repelled at {target_tile_label}; the walls hold through the slaughter.",
     "event.combat.placeholder_skirmish_attacker_win":
       "{army_name} wins a brief skirmish near {target_tile_label}. Losses are light; survivors regroup for orders.",
     "event.combat.placeholder_skirmish_defender_win":
       "{army_name} is repelled at {target_tile_label}; the walls hold through the slaughter.",
     "event.combat.placeholder_skirmish_tie_defender_holds":
       "{army_name} is repelled at {target_tile_label}; the walls hold through the slaughter.",
-    "event.world.hostile_dispatch_target_required":
-      "Select a foreign settlement tile before dispatching a hostile march.",
-    "event.world.hostile_dispatch_failed":
-      "Hostile march dispatch failed ({error_code}) near {target_tile_label}: {message}",
-    "event.world.hostile_dispatch_failed_source_target_not_foreign":
-      "Dispatch denied: {source_settlement_name} cannot declare hostile action against its own banner.",
-    "event.world.hostile_dispatch_failed_max_active_marches_reached":
-      "Dispatch denied: {source_settlement_name} has no free march slot; active columns must resolve first.",
-    "event.world.hostile_dispatch_failed_path_blocked_impassable":
-      "Dispatch denied: route to {target_tile_label} breaks on impassable ground.",
-    "event.world.hostile_dispatch_failed_march_already_exists":
-      "Dispatch denied: march id {march_id} already carries a standing war order.",
     "event.world.hostile_dispatch_failed_feature_not_in_slice":
       "Dispatch denied: hero march attachment remains disabled until post-slice feature gates pass.",
     "event.world.hostile_dispatch_failed_hero_unavailable":
@@ -337,6 +408,18 @@
     firstSliceManifestSnapshotSourceV1.playable_manifest;
   const firstSliceContentKeyManifestV1 =
     firstSliceManifestSnapshotSourceV1.content_key_manifest;
+  const firstSliceDefaultFirstSessionNarrativeTemplatesV1 =
+    firstSliceContentKeyManifestV1.default_first_session_narrative_templates;
+  const firstSliceNarrativeTemplateRowsByContentKey =
+    firstSliceDefaultFirstSessionNarrativeTemplatesV1.templates_by_key;
+  const firstSliceNarrativeTemplateLookupResolutionOrderByCanonicalEventKey =
+    Object.freeze(
+      firstSliceDefaultFirstSessionNarrativeTemplatesV1.lookup_resolution_order_by_canonical_key
+        .reduce((lookup, row) => {
+          lookup[row.canonical_key] = [...row.resolution_order];
+          return lookup;
+        }, {}),
+    );
   const firstSliceDeferredPostSliceEventContentKeys = Object.freeze([
     "event.world.gather_started",
     "event.world.gather_completed",
@@ -367,12 +450,6 @@
           lookup[normalizedLegacyKey].push(row.canonical_key);
         }
       }
-      return lookup;
-    }, {}),
-  );
-  const firstSliceLegacyAliasKeysByCanonicalEventKey = Object.freeze(
-    firstSliceContentKeyManifestV1.legacy_alias_mapping.reduce((lookup, row) => {
-      lookup[row.canonical_key] = [...row.legacy_keys];
       return lookup;
     }, {}),
   );
@@ -1644,6 +1721,18 @@
     }
     return hostileDispatchFailureContentKeyByCode[normalizedErrorCode] || "event.world.hostile_dispatch_failed";
   };
+  const getNarrativeTemplateByContentKey = (contentKey) => {
+    const normalizedContentKey = String(contentKey || "").trim();
+    if (normalizedContentKey.length < 1) {
+      return "";
+    }
+    const manifestTemplateRow =
+      firstSliceNarrativeTemplateRowsByContentKey[normalizedContentKey];
+    if (manifestTemplateRow && typeof manifestTemplateRow.template === "string") {
+      return manifestTemplateRow.template;
+    }
+    return localNarrativeFallbackTemplates[normalizedContentKey] || "";
+  };
   const getNarrativeTemplateWithFallback = (contentKey) => {
     if (!contentKey) {
       return "";
@@ -1652,8 +1741,12 @@
     if (normalizedContentKey.length < 1) {
       return "";
     }
+    const directTemplate = getNarrativeTemplateByContentKey(normalizedContentKey);
+    if (directTemplate) {
+      return directTemplate;
+    }
     if (!normalizedContentKey.startsWith("event.")) {
-      return placeholderNarrativeSeedTemplates[normalizedContentKey] || "";
+      return "";
     }
     const scopedContentKey = resolveManifestScopedEventContentKey(normalizedContentKey);
     const canonicalScopedContentKey = isManifestAllowedCanonicalEventContentKey(scopedContentKey)
@@ -1666,16 +1759,22 @@
         candidates.push(normalizedCandidate);
       }
     };
-
-    addCandidate(canonicalScopedContentKey || scopedContentKey);
-    const legacyAliases = firstSliceLegacyAliasKeysByCanonicalEventKey[
-      canonicalScopedContentKey || scopedContentKey
-    ] || [];
-    for (const legacyAlias of legacyAliases) {
-      addCandidate(legacyAlias);
+    const deterministicResolutionOrder =
+      firstSliceNarrativeTemplateLookupResolutionOrderByCanonicalEventKey[
+        canonicalScopedContentKey || scopedContentKey
+      ] || [];
+    for (const lookupKey of deterministicResolutionOrder) {
+      addCandidate(lookupKey);
     }
-
-    return candidates.find((key) => placeholderNarrativeSeedTemplates[key]);
+    addCandidate(canonicalScopedContentKey || scopedContentKey);
+    addCandidate(normalizedContentKey);
+    for (const candidateKey of candidates) {
+      const candidateTemplate = getNarrativeTemplateByContentKey(candidateKey);
+      if (candidateTemplate) {
+        return candidateTemplate;
+      }
+    }
+    return "";
   };
   const getNarrativeText = (contentKey, tokens) => {
     const effectiveContentKey = String(contentKey || "").startsWith("event.")

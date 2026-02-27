@@ -21,6 +21,17 @@ CONTENT_KEY_MANIFEST_PATH = (
     / "narrative"
     / "first-slice-content-key-manifest.json"
 )
+NARRATIVE_TEMPLATE_SNAPSHOT_LOCK_PATH = (
+    ROOT
+    / "backend"
+    / "src"
+    / "app"
+    / "config"
+    / "seeds"
+    / "v1"
+    / "narrative"
+    / "first-slice-narrative-template-snapshot.lock.json"
+)
 DEFAULT_OUTPUT_PATH = ROOT / "client-web" / "first-slice-manifest-snapshot.js"
 SNAPSHOT_GLOBAL_NAME = "__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__"
 
@@ -91,9 +102,53 @@ def _to_legacy_alias_mapping_rows(values: list[Any], *, label: str) -> list[dict
     return rows
 
 
+def _to_lookup_resolution_rows(values: list[Any], *, label: str) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for idx, raw_row in enumerate(values):
+        if not isinstance(raw_row, dict):
+            raise ValueError(f"{label}[{idx}] must be an object.")
+        canonical_key = _read_required_string(raw_row, "canonical_key", label=f"{label}[{idx}]")
+        resolution_order = _to_string_list(
+            _read_required_array(raw_row, "resolution_order", label=f"{label}[{idx}]"),
+            label=f"{label}[{idx}].resolution_order",
+        )
+        if resolution_order[0] != canonical_key:
+            raise ValueError(
+                f"{label}[{idx}] resolution_order must start with canonical_key '{canonical_key}'."
+            )
+        rows.append(
+            {
+                "canonical_key": canonical_key,
+                "resolution_order": resolution_order,
+            }
+        )
+    return rows
+
+
+def _to_templates_by_key(values: dict[str, Any], *, label: str) -> dict[str, dict[str, Any]]:
+    templates: dict[str, dict[str, Any]] = {}
+    for key, raw_row in values.items():
+        normalized_key = str(key).strip()
+        if len(normalized_key) < 1:
+            raise ValueError(f"{label} contains an empty key entry.")
+        if not isinstance(raw_row, dict):
+            raise ValueError(f"{label}.{normalized_key} must be an object.")
+        template = _read_required_string(raw_row, "template", label=f"{label}.{normalized_key}")
+        tokens = _to_string_list(
+            _read_required_array(raw_row, "tokens", label=f"{label}.{normalized_key}"),
+            label=f"{label}.{normalized_key}.tokens",
+        )
+        templates[normalized_key] = {
+            "template": template,
+            "tokens": tokens,
+        }
+    return templates
+
+
 def _build_snapshot_payload(
     playable_manifest: dict[str, Any],
     content_key_manifest: dict[str, Any],
+    narrative_template_snapshot: dict[str, Any],
 ) -> dict[str, Any]:
     playable_manifest_id = _read_required_string(
         playable_manifest,
@@ -104,6 +159,41 @@ def _build_snapshot_payload(
         content_key_manifest,
         "manifest_id",
         label="first-slice-content-key-manifest.json",
+    )
+    narrative_snapshot_id = _read_required_string(
+        narrative_template_snapshot,
+        "snapshot_id",
+        label="first-slice-narrative-template-snapshot.lock.json",
+    )
+    narrative_snapshot_manifest_id = _read_required_string(
+        narrative_template_snapshot,
+        "manifest_id",
+        label="first-slice-narrative-template-snapshot.lock.json",
+    )
+    if narrative_snapshot_manifest_id != content_key_manifest_id:
+        raise ValueError(
+            "Narrative template snapshot manifest_id does not match first-slice-content-key-manifest.json manifest_id."
+        )
+    narrative_default_first_session = _read_required_object(
+        narrative_template_snapshot,
+        "default_first_session",
+        label="first-slice-narrative-template-snapshot.lock.json",
+    )
+    narrative_lookup_rows = _to_lookup_resolution_rows(
+        _read_required_array(
+            narrative_default_first_session,
+            "lookup_resolution_order_by_canonical_key",
+            label="first-slice-narrative-template-snapshot.lock.json.default_first_session",
+        ),
+        label="lookup_resolution_order_by_canonical_key",
+    )
+    narrative_templates_by_key = _to_templates_by_key(
+        _read_required_object(
+            narrative_default_first_session,
+            "templates_by_key",
+            label="first-slice-narrative-template-snapshot.lock.json.default_first_session",
+        ),
+        label="templates_by_key",
     )
 
     canonical_playable_now = _read_required_object(
@@ -173,6 +263,11 @@ def _build_snapshot_payload(
             "content_keys": {
                 "path": "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
                 "manifest_id": content_key_manifest_id,
+            },
+            "narrative_templates": {
+                "path": "backend/src/app/config/seeds/v1/narrative/first-slice-narrative-template-snapshot.lock.json",
+                "manifest_id": narrative_snapshot_manifest_id,
+                "snapshot_id": narrative_snapshot_id,
             },
         },
         "playable": {
@@ -281,6 +376,12 @@ def _build_snapshot_payload(
                 "include_only_content_keys": include_only_content_keys,
             },
             "legacy_alias_mapping": legacy_alias_mapping,
+            "default_first_session_narrative_templates": {
+                "snapshot_id": narrative_snapshot_id,
+                "manifest_id": narrative_snapshot_manifest_id,
+                "lookup_resolution_order_by_canonical_key": narrative_lookup_rows,
+                "templates_by_key": narrative_templates_by_key,
+            },
         },
     }
 
@@ -315,7 +416,12 @@ def main() -> int:
         output_path = _resolve_repo_relative_path(args.output)
         playable_manifest = _read_json_file(PLAYABLE_MANIFEST_PATH)
         content_key_manifest = _read_json_file(CONTENT_KEY_MANIFEST_PATH)
-        payload = _build_snapshot_payload(playable_manifest, content_key_manifest)
+        narrative_template_snapshot = _read_json_file(NARRATIVE_TEMPLATE_SNAPSHOT_LOCK_PATH)
+        payload = _build_snapshot_payload(
+            playable_manifest,
+            content_key_manifest,
+            narrative_template_snapshot,
+        )
         _write_snapshot_js(payload, output_path)
     except (ValueError, json.JSONDecodeError, OSError) as exc:
         print(f"STATUS: BLOCKED\n{exc}")
@@ -325,7 +431,8 @@ def main() -> int:
         "STATUS: COMPLETED\n"
         f"Generated first-slice frontend manifest snapshot: {output_path}\n"
         f"playable manifest: {PLAYABLE_MANIFEST_PATH}\n"
-        f"content-key manifest: {CONTENT_KEY_MANIFEST_PATH}"
+        f"content-key manifest: {CONTENT_KEY_MANIFEST_PATH}\n"
+        f"narrative template snapshot: {NARRATIVE_TEMPLATE_SNAPSHOT_LOCK_PATH}"
     )
     return 0
 
