@@ -13,6 +13,7 @@ CONTENT_KEY_MANIFEST_FILE = Path(
 )
 FRONTEND_MANIFEST_SNAPSHOT_FILE = Path("client-web/first-slice-manifest-snapshot.js")
 FRONTEND_MANIFEST_SNAPSHOT_GLOBAL = "__RK_FIRST_SLICE_MANIFEST_SNAPSHOT_V1__"
+CLIENT_SHELL_FILE = Path("client-web/index.html")
 
 ROUTE_BINDINGS = (
     {
@@ -59,6 +60,49 @@ ROUTE_BINDINGS = (
             'if (actionType === "scout")',
         ),
     },
+    {
+        "check_id": "attack_touchpoint",
+        "client_route_key": "world_map_settlement_attack",
+        "backend_const_name": "POST_WORLD_MAP_SETTLEMENT_ATTACK_ROUTE",
+        "backend_route_file": Path("backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.ts"),
+        "required_client_tokens": (
+            'data-worldmap-adapter-action="attack"',
+            "dispatchHostileSettlementAttackCommand: async",
+            '(actionType !== "scout" && actionType !== "attack")',
+            "applyHostileDispatchActionResult(response",
+        ),
+    },
+)
+
+MANDATORY_STAGE_BINDINGS = (
+    {
+        "check_id": "stage_tick_progression",
+        "required_check_ids": ("tick_touchpoint",),
+    },
+    {
+        "check_id": "stage_build_upgrade",
+        "required_check_ids": ("upgrade_touchpoint",),
+    },
+    {
+        "check_id": "stage_unit_training",
+        "required_check_ids": ("train_touchpoint",),
+    },
+    {
+        "check_id": "stage_map_interaction",
+        "required_check_ids": ("scout_touchpoint",),
+    },
+    {
+        "check_id": "stage_hostile_dispatch",
+        "required_check_ids": ("attack_touchpoint", "foreign_hostile_profile_present"),
+    },
+    {
+        "check_id": "stage_deterministic_combat_resolve",
+        "required_check_ids": ("hostile_dispatch_deterministic_contract",),
+    },
+    {
+        "check_id": "stage_event_feed_output",
+        "required_check_ids": ("client_shell_panels", "hostile_dispatch_event_feed_binding"),
+    },
 )
 
 
@@ -96,7 +140,7 @@ def _extract_client_transport_routes(app_text: str) -> dict[str, str]:
     body = object_match.group("body")
     pairs = re.findall(r"([a-z_]+)\s*:\s*\"([^\"]+)\"", body)
     routes = {key: value for key, value in pairs}
-    if len(routes) < 4:
+    if len(routes) < 5:
         raise ValueError("client transport route map is incomplete")
     return routes
 
@@ -151,8 +195,33 @@ def _set_diff_detail(actual: list[str], expected: list[str]) -> str:
     return f"missing={missing} extra={extra}"
 
 
+def _build_stage_result(
+    stage_check_id: str,
+    required_check_ids: tuple[str, ...],
+    evidence_by_check_id: dict[str, SmokeCheckResult],
+) -> SmokeCheckResult:
+    missing_evidence = [check_id for check_id in required_check_ids if check_id not in evidence_by_check_id]
+    failing_evidence = [
+        check_id
+        for check_id in required_check_ids
+        if check_id in evidence_by_check_id and not evidence_by_check_id[check_id].ok
+    ]
+    ok = len(missing_evidence) < 1 and len(failing_evidence) < 1
+    detail = (
+        f"evidence={list(required_check_ids)}"
+        if ok
+        else f"missing_evidence={missing_evidence} failing_evidence={failing_evidence}"
+    )
+    return SmokeCheckResult(
+        check_id=stage_check_id,
+        ok=ok,
+        detail=detail,
+    )
+
+
 def run_smoke(root: Path = ROOT) -> list[SmokeCheckResult]:
     app_js_path = root / "client-web" / "app.js"
+    client_shell_path = root / CLIENT_SHELL_FILE
     transport_test_path = root / "backend" / "src" / "app" / "transport" / "local-first-slice-settlement-loop-transport.test.ts"
     playable_manifest_path = root / PLAYABLE_MANIFEST_FILE
     content_key_manifest_path = root / CONTENT_KEY_MANIFEST_FILE
@@ -160,6 +229,7 @@ def run_smoke(root: Path = ROOT) -> list[SmokeCheckResult]:
 
     try:
         app_js = _read_text(app_js_path)
+        client_shell_html = _read_text(client_shell_path)
         transport_test = _read_text(transport_test_path)
         client_routes = _extract_client_transport_routes(app_js)
     except (OSError, ValueError) as exc:
@@ -172,6 +242,25 @@ def run_smoke(root: Path = ROOT) -> list[SmokeCheckResult]:
         ]
 
     results: list[SmokeCheckResult] = []
+
+    client_shell_tokens = (
+        'id="settlement-panel"',
+        'id="worldmap-panel"',
+        'id="event-feed-panel"',
+        'id="event-feed-panel-content"',
+    )
+    missing_client_shell_tokens = _missing_tokens(client_shell_html, client_shell_tokens)
+    results.append(
+        SmokeCheckResult(
+            check_id="client_shell_panels",
+            ok=not missing_client_shell_tokens,
+            detail=(
+                "client shell settlement/map/event-feed panels are present"
+                if not missing_client_shell_tokens
+                else f"missing shell token(s): {', '.join(missing_client_shell_tokens)}"
+            ),
+        ),
+    )
 
     for binding in ROUTE_BINDINGS:
         route_file = root / binding["backend_route_file"]
@@ -280,15 +369,64 @@ def run_smoke(root: Path = ROOT) -> list[SmokeCheckResult]:
         ),
     )
 
-    deterministic_ok = app_js.count('flow_version: "v1"') >= 4
+    deterministic_ok = app_js.count('flow_version: "v1"') >= 6
     results.append(
         SmokeCheckResult(
             check_id="deterministic_placeholder_contract",
             ok=deterministic_ok,
             detail=(
-                "flow_version v1 placeholder contracts are deterministic across tick/build/train/scout"
+                "flow_version v1 placeholder contracts are deterministic across tick/build/train/scout/attack/snapshot"
                 if deterministic_ok
-                else 'expected at least four `flow_version: "v1"` contract stubs in client adapter'
+                else 'expected at least six `flow_version: "v1"` contract stubs in client adapter'
+            ),
+        ),
+    )
+
+    hostile_dispatch_contract_tokens = (
+        'test("local first-slice transport serves deterministic hostile settlement attack contracts", () => {',
+        'assert.equal(response.body.flow, "world_map.hostile_attack_v1");',
+        '["dispatch_sent", "march_arrived", "combat_resolved"],',
+        '"event.combat.hostile_resolve_attacker_win",',
+        "assert.equal(response.body.losses.attacker_units_lost, 2);",
+        "assert.equal(response.body.losses.defender_garrison_lost, 40);",
+    )
+    missing_hostile_dispatch_contract_tokens = _missing_tokens(
+        transport_test,
+        hostile_dispatch_contract_tokens,
+    )
+    results.append(
+        SmokeCheckResult(
+            check_id="hostile_dispatch_deterministic_contract",
+            ok=not missing_hostile_dispatch_contract_tokens,
+            detail=(
+                "transport hostile attack contract asserts deterministic dispatch/combat-resolve payloads"
+                if not missing_hostile_dispatch_contract_tokens
+                else (
+                    "missing transport deterministic hostile contract token(s): "
+                    f"{', '.join(missing_hostile_dispatch_contract_tokens)}"
+                )
+            ),
+        ),
+    )
+
+    hostile_event_feed_tokens = (
+        "const appendHostileDispatchLifecycleEvents = (response) => {",
+        "const contentKey = mapBackendEventKeyToClientKey(event.content_key);",
+        "appendHostileDispatchLifecycleEvents(response);",
+        'priority: event.payload_key === "combat_resolved" ? "high" : "normal",',
+    )
+    missing_hostile_event_feed_tokens = _missing_tokens(app_js, hostile_event_feed_tokens)
+    results.append(
+        SmokeCheckResult(
+            check_id="hostile_dispatch_event_feed_binding",
+            ok=not missing_hostile_event_feed_tokens,
+            detail=(
+                "client hostile dispatch lifecycle events are bridged into event feed output"
+                if not missing_hostile_event_feed_tokens
+                else (
+                    "missing hostile event-feed binding token(s): "
+                    f"{', '.join(missing_hostile_event_feed_tokens)}"
+                )
             ),
         ),
     )
@@ -386,6 +524,78 @@ def run_smoke(root: Path = ROOT) -> list[SmokeCheckResult]:
                 ),
             )
         )
+
+        required_hostile_content_keys = (
+            "event.world.hostile_dispatch_en_route",
+            "event.world.hostile_post_battle_returned",
+            "event.combat.hostile_resolve_attacker_win",
+            "event.combat.hostile_resolve_defender_win",
+            "event.combat.hostile_resolve_tie_defender_holds",
+        )
+        missing_required_hostile_content_keys = [
+            content_key
+            for content_key in required_hostile_content_keys
+            if content_key not in backend_allowlist
+        ]
+        results.append(
+            SmokeCheckResult(
+                check_id="hostile_loop_content_keys",
+                ok=not missing_required_hostile_content_keys,
+                detail=(
+                    f"required_hostile_content_keys={list(required_hostile_content_keys)}"
+                    if not missing_required_hostile_content_keys
+                    else (
+                        "missing required hostile loop content key(s): "
+                        f"{missing_required_hostile_content_keys}"
+                    )
+                ),
+            )
+        )
+
+        foreign_hostile_profile = _get_nested(
+            frontend_snapshot_payload,
+            ("playable", "canonical_playable_now", "foreign_hostile_profile"),
+        )
+        primary_settlement_id = str(
+            _get_nested(
+                frontend_snapshot_payload,
+                ("playable", "canonical_playable_now", "primary_settlement", "settlement_id"),
+            )
+        ).strip()
+        if not isinstance(foreign_hostile_profile, dict):
+            raise ValueError("snapshot foreign_hostile_profile must be an object")
+        foreign_settlement_id = str(foreign_hostile_profile.get("settlement_id", "")).strip()
+        foreign_profile_id = str(foreign_hostile_profile.get("profile_id", "")).strip()
+        target_tile_label = str(foreign_hostile_profile.get("target_tile_label", "")).strip()
+        map_coordinate = foreign_hostile_profile.get("map_coordinate")
+        has_map_coordinate = (
+            isinstance(map_coordinate, dict)
+            and isinstance(map_coordinate.get("x"), (int, float))
+            and isinstance(map_coordinate.get("y"), (int, float))
+        )
+        foreign_profile_ok = (
+            len(foreign_profile_id) > 0
+            and len(foreign_settlement_id) > 0
+            and len(target_tile_label) > 0
+            and foreign_settlement_id != primary_settlement_id
+            and has_map_coordinate
+        )
+        results.append(
+            SmokeCheckResult(
+                check_id="foreign_hostile_profile_present",
+                ok=foreign_profile_ok,
+                detail=(
+                    f"profile_id={foreign_profile_id}, settlement_id={foreign_settlement_id}, tile={target_tile_label}"
+                    if foreign_profile_ok
+                    else (
+                        "invalid foreign hostile profile fixture in snapshot: "
+                        f"profile_id='{foreign_profile_id}', settlement_id='{foreign_settlement_id}', "
+                        f"primary_settlement_id='{primary_settlement_id}', target_tile_label='{target_tile_label}', "
+                        f"has_map_coordinate={has_map_coordinate}"
+                    )
+                ),
+            )
+        )
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         results.append(
             SmokeCheckResult(
@@ -393,6 +603,16 @@ def run_smoke(root: Path = ROOT) -> list[SmokeCheckResult]:
                 ok=False,
                 detail=str(exc),
             )
+        )
+
+    evidence_by_check_id = {result.check_id: result for result in results}
+    for stage_binding in MANDATORY_STAGE_BINDINGS:
+        results.append(
+            _build_stage_result(
+                stage_binding["check_id"],
+                stage_binding["required_check_ids"],
+                evidence_by_check_id,
+            ),
         )
 
     return results

@@ -773,5 +773,21 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-27T09:55:31.7510419Z",
+    "item_id": "RK-AUTO-BACKLOG-0004-F06",
+    "status": "completed",
+    "summary": "Expanded the scoped first-slice golden-path smoke to include hostile dispatch/resolve/event-feed stage gating with deterministic per-stage PASS/FAIL evidence and release-blocking failure behavior when required stage evidence is missing.",
+    "checks": [
+      "python -m unittest tests.test_rk_m0_0011_first_slice_loop_smoke -v (pass)",
+      "python tools/rk_m0_0011_first_slice_loop_smoke.py (pass; RK-M0-0011_SMOKE summary status=PASS pass=23 fail=0)",
+      "python tools/orchestrator.py status (pass)"
+    ],
+    "changed_files": [
+      "tools/rk_m0_0011_first_slice_loop_smoke.py",
+      "tests/test_rk_m0_0011_first_slice_loop_smoke.py",
+      "agents/tomas-grell/outbox.json"
+    ]
   }
 ]

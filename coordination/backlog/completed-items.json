@@ -6516,5 +6516,53 @@
     "runtime_seconds": 132.23,
     "started_at": "2026-02-27T09:25:32.799204+00:00",
     "finished_at": "2026-02-27T09:27:45.043687+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0004-F05",
+    "title": "Standardize Steam/Android wrapper run-build scripts for slice candidate artifact",
+    "description": "Harden platform/release lane by adding deterministic script entry points that package the current web slice artifact into existing Tauri (Steam lane scaffold) and Capacitor (Android lane scaffold) wrappers with placeholder metadata and reproducible local commands.",
+    "milestone": "M0",
+    "type": "infra",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-PLATFORM-0001"
+    ],
+    "inputs": [
+      "client-steam-tauri/",
+      "client-android-capacitor/",
+      "scripts/",
+      "docs/design/vertical-slice-done-v1.md",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "Platform scripts provide one reproducible command path for web->Steam wrapper and web->Android wrapper packaging in local/dev environment.",
+      "Wrapper metadata/assets remain explicitly placeholder-only with no final-art dependency.",
+      "Run/build docs are updated with prerequisites and expected output artifact locations for both wrapper lanes."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T19:16:22.546990+00:00",
+    "updated_at": "2026-02-27T09:48:32.353151+00:00",
+    "estimated_effort": "S",
+    "token_budget": 9000,
+    "result_summary": "- I did not modify pre-existing daemon/backlog state files already dirty in git (`coordination/backlog/*.json`).",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0004",
+    "assigned_agent": "juno-cairn",
+    "last_unblocked_reason": "manual dependency recovery: dependency-ready blocked item requeued to clear queue stall",
+    "last_blocker_reason": "Note: daemon-managed backlog files were already changing during runtime (`coordination/backlog/work-items.json`, `coordination/backlog/completed-items.json`); I did not edit them for this task.",
+    "commit_sha": "2f3c234801278e36e79d779e7197772d60e12e51",
+    "resolved_by_agent": "juno-cairn",
+    "resolved_by_role": "platform",
+    "runtime_seconds": 237.62,
+    "started_at": "2026-02-27T09:44:30.657485+00:00",
+    "finished_at": "2026-02-27T09:48:28.295498+00:00"
   }
 ]
