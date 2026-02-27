@@ -6093,5 +6093,51 @@
     "runtime_seconds": 379.03,
     "started_at": "2026-02-27T08:23:41.958392+00:00",
     "finished_at": "2026-02-27T08:30:00.991582+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F05",
+    "title": "Bind client shell defaults to playable/data manifests and stable local profile",
+    "description": "Update client shell defaults to consume first-slice manifests, persist a stable local player profile identifier, and keep first-session settlement/map/event flows limited to in-slice actions and content keys.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F03",
+      "RK-AUTO-BACKLOG-0005-F04",
+      "RK-AUTO-BACKLOG-0004-F02"
+    ],
+    "inputs": [
+      "client-web/",
+      "docs/design/first-vertical-slice.md",
+      "docs/design/vertical-slice-done-v1.md"
+    ],
+    "acceptance_criteria": [
+      "Client establishes one stable local player identity/profile for dev runtime and reuses it across settlement/map interaction payloads.",
+      "Event feed rendering resolves against first-slice manifest keys with deterministic fallback when a key is missing.",
+      "Default first-session UI states avoid out-of-scope actions and keep placeholder-only presentation."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T20:55:12.234856+00:00",
+    "updated_at": "2026-02-27T08:41:38.641824+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- Running orchestrator status touched daemon-managed backlog files (`coordination/backlog/completed-items.json`, `coordination/backlog/work-items.json`); I did not edit those manually.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "450c2c9607f7c5e638c988e2b5a9fab55e8d1083",
+    "resolved_by_agent": "sera-kest",
+    "resolved_by_role": "frontend",
+    "runtime_seconds": 688.47,
+    "started_at": "2026-02-27T08:30:08.694035+00:00",
+    "finished_at": "2026-02-27T08:41:37.167059+00:00"
   }
 ]

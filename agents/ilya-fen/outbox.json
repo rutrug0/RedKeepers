@@ -2019,4 +2019,42 @@
                                     }
                                 ]
     }
+,
+    {
+        "timestamp_utc":  "2026-02-27T08:50:15.7662283Z",
+        "agent_id":  "ilya-fen",
+        "work_item_id":  "RK-AUTO-BACKLOG-0005-F02-F01",
+        "status":  "done",
+        "summary":  "Added a first-slice runtime manifest-lock validator that cross-checks active civ/resource/building/unit IDs plus default transport primary/hostile fixture IDs against `canonical_playable_now`, with explicit missing/extra mismatch reporting for CI diagnostics.",
+        "changed_files":  [
+                              "backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.ts",
+                              "backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.test.ts",
+                              "backend/src/app/config/seeds/v1/index.ts",
+                              "agents/ilya-fen/outbox.json"
+                          ],
+        "blockers":  [
+
+                     ],
+        "validation_commands":  [
+                                    "node --experimental-strip-types --check backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.ts backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.test.ts backend/src/app/config/seeds/v1/index.ts",
+                                    "node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.test.ts"
+                                ],
+        "results":  {
+                        "validation_note":  "TypeScript strip-types checks passed for all touched files. Node strip-types test execution is blocked by existing repository ESM TypeScript import-resolution constraints (`ERR_MODULE_NOT_FOUND` for extensionless `.ts` specifiers in existing seed loader modules)."
+                    },
+        "proposed_work_items":  [
+                                    {
+                                        "title":  "Normalize backend seed-loader TypeScript ESM specifiers for strip-types test execution",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M0",
+                                        "priority":  "medium",
+                                        "description":  "Unblock direct `node --experimental-strip-types --test` execution for seed loader tests by standardizing local TypeScript import specifiers (or introducing a tested loader runtime shim) so module resolution is deterministic without ad-hoc flags.",
+                                        "acceptance_criteria":  [
+                                                                    "Seed loader test files under `backend/src/app/config/seeds/v1` run via `node --experimental-strip-types --test` without `ERR_MODULE_NOT_FOUND`.",
+                                                                    "No functional behavior changes in seed parsing/filtering outputs; only import/runtime compatibility updates.",
+                                                                    "Validation command(s) are documented in the updated outbox entry for reproducibility."
+                                                                ]
+                                    }
+                                ]
+    }
 ]
