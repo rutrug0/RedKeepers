@@ -2,7 +2,7 @@ import type {
   WorldMapMarchCombatOutcome,
   WorldMapMarchMapCoordinate,
   WorldMapMarchState,
-} from "../domain";
+} from "../domain/world-map-march-snapshot-contract.ts";
 
 export interface WorldMapMarchHeroAttachmentRuntimeState {
   readonly player_id: string;

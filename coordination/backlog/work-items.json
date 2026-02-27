@@ -225,34 +225,79 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0008"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC",
-    "title": "Escalation: Align hostile attack runtime payload tokens with canonical dispatch contract",
-    "description": "Investigate repeated failure for item RK-AUTO-BACKLOG-0007-F04-F01. Reason: retry threshold exceeded",
+    "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F01",
+    "title": "Normalize world-map TypeScript runtime compatibility for direct Node test execution",
+    "description": "Resolve pre-existing world-map TypeScript runtime incompatibilities so the canonical targeted hostile attack test command runs without syntax/import loader failures in this repo environment.",
     "milestone": "M0",
-    "type": "qa",
+    "type": "feature",
     "priority": "high",
-    "owner_role": "lead",
+    "owner_role": "backend",
     "preferred_agent": null,
-    "dependencies": [],
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0007-F04-F01-ESC"
+    ],
     "inputs": [
-      "coordination/state/run-history.jsonl",
-      "coordination/backlog/work-items.json"
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+      "backend/src/modules/world_map/application/world-map-march-dispatch-service.ts",
+      "backend/src/modules/world_map/domain/",
+      "backend/src/modules/world_map/application/"
     ],
     "acceptance_criteria": [
-      "Root cause identified",
-      "Follow-up work items created or item unblocked"
+      "A canonical validation command for `world-map-hostile-attack-service.test.ts` executes without `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` and without `ERR_UNSUPPORTED_DIR_IMPORT`.",
+      "Any required import-path/syntax updates are limited to runtime compatibility and do not alter first-slice hostile gameplay behavior.",
+      "The selected command is documented in the work-item result for deterministic reuse."
     ],
-    "validation_commands": [],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts"
+    ],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-27T11:18:40.646889+00:00",
-    "updated_at": "2026-02-27T11:21:12.886218+00:00",
+    "created_at": "2026-02-27T11:21:14.869554+00:00",
+    "updated_at": "2026-02-27T11:26:13.400812+00:00",
     "estimated_effort": "S",
-    "token_budget": 6000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "source_item_id": "RK-AUTO-BACKLOG-0007-F04-F01",
-    "assigned_agent": "mara-voss"
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC",
+    "assigned_agent": "ilya-fen"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC-F02",
+    "title": "Replay and close hostile dispatch canonical-token alignment after runtime compatibility fix",
+    "description": "Re-apply/verify canonical hostile dispatch payload token emission (`army_name`, `target_tile_label`, `eta_seconds`) and close the blocked source item once runtime-compatible validation is available.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.ts",
+      "backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "coordination/backlog/blocked-items.json"
+    ],
+    "acceptance_criteria": [
+      "Dispatch runtime payload for `event.world.hostile_dispatch_en_route` includes canonical token fields required by first-slice contract.",
+      "Targeted hostile attack service test assertions cover canonical dispatch token shape and pass under the stabilized runtime command.",
+      "Blocked source item `RK-AUTO-BACKLOG-0007-F04-F01` is resolved (completed or cleanly superseded) to unblock dependent work."
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/modules/world_map/application/world-map-hostile-attack-service.test.ts",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:21:14.869554+00:00",
+    "updated_at": "2026-02-27T11:21:20.167845+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC"
   }
 ]

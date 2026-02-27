@@ -2,7 +2,7 @@ import type {
   WorldMapMarchStateRepository,
   WorldMapMarchHeroAttachmentRuntimeState,
   WorldMapMarchRuntimeState,
-} from "../ports";
+} from "../ports/world-map-march-state-repository.ts";
 
 export class InMemoryWorldMapMarchStateRepository
   implements WorldMapMarchStateRepository

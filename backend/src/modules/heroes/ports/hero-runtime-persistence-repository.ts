@@ -1,4 +1,4 @@
-import type { Instant } from "../../../shared";
+import type { Instant } from "../../../shared/index.ts";
 
 export type HeroUnlockState = "locked" | "unlocked";
 export type HeroReadinessState = "ready" | "on_cooldown";

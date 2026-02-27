@@ -1,25 +1,33 @@
-import type {
-  WorldMapHostileAttackResolvedResponseDto,
-  WorldMapMarchDispatchHeroAttachmentDto,
-  WorldMapMarchCombatOutcome,
-  WorldMapTerrainPassabilityResolver,
-  WorldMapTerrainPassabilitySeedTableV1,
-} from "../domain";
 import {
   WORLD_MAP_HOSTILE_ATTACK_FLOW,
-} from "../domain";
-import type { WorldMapMarchStateRepository } from "../ports";
+  type WorldMapHostileAttackResolvedResponseDto,
+} from "../domain/world-map-hostile-attack-contract.ts";
+import type {
+  WorldMapMarchDispatchHeroAttachmentDto,
+} from "../domain/world-map-march-dispatch-contract.ts";
+import type {
+  WorldMapMarchCombatOutcome,
+} from "../domain/world-map-march-snapshot-contract.ts";
+import type {
+  WorldMapTerrainPassabilityResolver,
+  WorldMapTerrainPassabilitySeedTableV1,
+} from "../domain/world-map-terrain-passability-contract.ts";
+import type { WorldMapMarchStateRepository } from "../ports/world-map-march-state-repository.ts";
 import type {
   WorldMapMarchDispatchService,
-} from "./world-map-march-dispatch-service";
+} from "./world-map-march-dispatch-service.ts";
 import {
   WorldMapMarchDispatchOperationError,
-} from "./world-map-march-dispatch-service";
+} from "./world-map-march-dispatch-service.ts";
 import type {
   WorldMapMarchSnapshotService,
-} from "./world-map-march-snapshot-service";
-import type { HeroAssignmentBoundContextType } from "../../heroes/ports";
-import { DeterministicWorldMapTerrainPassabilityResolver } from "./world-map-terrain-passability-resolver";
+} from "./world-map-march-snapshot-service.ts";
+import type {
+  HeroAssignmentBoundContextType,
+} from "../../heroes/ports/hero-runtime-persistence-repository.ts";
+import {
+  DeterministicWorldMapTerrainPassabilityResolver,
+} from "./world-map-terrain-passability-resolver.ts";
 
 const DEFAULT_ARMY_NAME = "Raid Column";
 const DEFAULT_TARGET_TILE_LABEL = "Hostile Settlement";
@@ -93,19 +101,23 @@ export type WorldMapHostileAttackOperationErrorCode =
 
 export class WorldMapHostileAttackOperationError extends Error {
   readonly status_code = 409;
+  readonly code: WorldMapHostileAttackOperationErrorCode;
 
   constructor(
-    readonly code: WorldMapHostileAttackOperationErrorCode,
+    code: WorldMapHostileAttackOperationErrorCode,
     message: string,
   ) {
     super(message);
     this.name = "WorldMapHostileAttackOperationError";
+    this.code = code;
   }
 }
 
 export class DeterministicWorldMapHostileAttackService
   implements WorldMapHostileAttackService
 {
+  private readonly marchDispatchService: WorldMapMarchDispatchService;
+  private readonly marchSnapshotService: WorldMapMarchSnapshotService;
   private readonly maxActiveMarches: number;
   private readonly worldSeed: string;
   private readonly mapSize: number;
@@ -123,8 +135,8 @@ export class DeterministicWorldMapHostileAttackService
   }) => boolean;
 
   constructor(
-    private readonly marchDispatchService: WorldMapMarchDispatchService,
-    private readonly marchSnapshotService: WorldMapMarchSnapshotService,
+    marchDispatchService: WorldMapMarchDispatchService,
+    marchSnapshotService: WorldMapMarchSnapshotService,
     options?: {
       readonly max_active_marches?: number;
       readonly world_seed?: string;
@@ -148,6 +160,8 @@ export class DeterministicWorldMapHostileAttackService
       }) => boolean;
     },
   ) {
+    this.marchDispatchService = marchDispatchService;
+    this.marchSnapshotService = marchSnapshotService;
     this.maxActiveMarches = normalizeMinimumPositiveInteger(
       options?.max_active_marches,
       DEFAULT_MAX_ACTIVE_MARCHES,

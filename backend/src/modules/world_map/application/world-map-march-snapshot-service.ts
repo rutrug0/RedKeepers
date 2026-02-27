@@ -3,14 +3,16 @@ import type {
   WorldMapMarchMapCoordinate,
   WorldMapMarchSnapshotResponseDto,
   WorldMapMarchState,
-} from "../domain";
-import { WORLD_MAP_MARCH_SNAPSHOT_FLOW } from "../domain";
+} from "../domain/world-map-march-snapshot-contract.ts";
+import { WORLD_MAP_MARCH_SNAPSHOT_FLOW } from "../domain/world-map-march-snapshot-contract.ts";
 import type {
   WorldMapMarchHeroAttachmentRuntimeState,
   WorldMapMarchRuntimeState,
   WorldMapMarchStateRepository,
-} from "../ports";
-import type { HeroRuntimePersistenceRepository } from "../../heroes/ports";
+} from "../ports/world-map-march-state-repository.ts";
+import type {
+  HeroRuntimePersistenceRepository,
+} from "../../heroes/ports/hero-runtime-persistence-repository.ts";
 
 const DEFAULT_SECONDS_PER_TILE = 30;
 const DEFAULT_SNAPSHOT_INTERVAL_MS = 1000;
@@ -43,18 +45,20 @@ interface WorldMapMarchTravelTiming {
 export class DeterministicWorldMapMarchSnapshotService
   implements WorldMapMarchSnapshotService
 {
+  private readonly marchStateRepository: WorldMapMarchStateRepository;
   private readonly defaultSecondsPerTile: number;
   private readonly snapshotIntervalMs: number;
   private readonly heroRuntimePersistenceRepository?: HeroRuntimePersistenceRepository;
 
   constructor(
-    private readonly marchStateRepository: WorldMapMarchStateRepository,
+    marchStateRepository: WorldMapMarchStateRepository,
     options?: {
       readonly default_seconds_per_tile?: number;
       readonly snapshot_interval_ms?: number;
       readonly hero_runtime_persistence_repository?: HeroRuntimePersistenceRepository;
     },
   ) {
+    this.marchStateRepository = marchStateRepository;
     this.defaultSecondsPerTile = normalizeMinimumPositiveInteger(
       options?.default_seconds_per_tile,
       DEFAULT_SECONDS_PER_TILE,

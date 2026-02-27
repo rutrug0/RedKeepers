@@ -1,5 +1,5 @@
-import type { WorldMapMarchCombatOutcome } from "./world-map-march-snapshot-contract";
-import type { WorldMapMarchDispatchHeroAttachmentDto } from "./world-map-march-dispatch-contract";
+import type { WorldMapMarchCombatOutcome } from "./world-map-march-snapshot-contract.ts";
+import type { WorldMapMarchDispatchHeroAttachmentDto } from "./world-map-march-dispatch-contract.ts";
 
 export const WORLD_MAP_HOSTILE_ATTACK_FLOW = "world_map.hostile_attack_v1" as const;
 

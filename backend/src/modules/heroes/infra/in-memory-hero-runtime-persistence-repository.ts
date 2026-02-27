@@ -20,7 +20,7 @@ import type {
   HeroRuntimeWriteConflict,
   HeroRuntimeWriteConflictCode,
   HeroRuntimeWriteResult,
-} from "../ports";
+} from "../ports/hero-runtime-persistence-repository.ts";
 
 export class InMemoryHeroRuntimePersistenceRepository
   implements HeroRuntimePersistenceRepository

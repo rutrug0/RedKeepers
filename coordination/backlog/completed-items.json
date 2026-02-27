@@ -7058,5 +7058,42 @@
     "runtime_seconds": 449.7,
     "started_at": "2026-02-27T11:07:26.462088+00:00",
     "finished_at": "2026-02-27T11:14:56.158264+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0007-F04-F01-ESC",
+    "title": "Escalation: Align hostile attack runtime payload tokens with canonical dispatch contract",
+    "description": "Investigate repeated failure for item RK-AUTO-BACKLOG-0007-F04-F01. Reason: retry threshold exceeded",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": null,
+    "dependencies": [],
+    "inputs": [
+      "coordination/state/run-history.jsonl",
+      "coordination/backlog/work-items.json"
+    ],
+    "acceptance_criteria": [
+      "Root cause identified",
+      "Follow-up work items created or item unblocked"
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:18:40.646889+00:00",
+    "updated_at": "2026-02-27T11:21:14.661349+00:00",
+    "estimated_effort": "S",
+    "token_budget": 6000,
+    "result_summary": "- Repro evidence captured and embedded in the outbox entry for `RK-AUTO-BACKLOG-0007-F04-F01-ESC`.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "source_item_id": "RK-AUTO-BACKLOG-0007-F04-F01",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "1ec7a53192f9475f785a5948849a98724a428b2b",
+    "resolved_by_agent": "mara-voss",
+    "resolved_by_role": "lead",
+    "runtime_seconds": 146.84,
+    "started_at": "2026-02-27T11:18:46.004255+00:00",
+    "finished_at": "2026-02-27T11:21:12.858448+00:00"
   }
 ]

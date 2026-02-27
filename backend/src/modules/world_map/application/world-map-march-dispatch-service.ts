@@ -2,17 +2,17 @@ import {
   WORLD_MAP_MARCH_DISPATCH_FLOW,
   type WorldMapMarchDispatchAcceptedResponseDto,
   type WorldMapMarchDispatchErrorCode,
-} from "../domain";
+} from "../domain/world-map-march-dispatch-contract.ts";
 import type {
   WorldMapMarchHeroAttachmentRuntimeState,
   WorldMapMarchRuntimeState,
   WorldMapMarchStateRepository,
-} from "../ports";
+} from "../ports/world-map-march-state-repository.ts";
 import type {
   HeroAssignmentBoundContextType,
   HeroRuntimePersistenceRepository,
   HeroRuntimeWriteConflictCode,
-} from "../../heroes/ports";
+} from "../../heroes/ports/hero-runtime-persistence-repository.ts";
 
 const DEFAULT_SECONDS_PER_TILE = 30;
 
@@ -43,31 +43,35 @@ export interface WorldMapMarchDispatchService {
 
 export class WorldMapMarchDispatchOperationError extends Error {
   readonly status_code = 409;
+  readonly code: WorldMapMarchDispatchErrorCode;
 
   constructor(
-    readonly code: WorldMapMarchDispatchErrorCode,
+    code: WorldMapMarchDispatchErrorCode,
     message: string,
   ) {
     super(message);
     this.name = "WorldMapMarchDispatchOperationError";
+    this.code = code;
   }
 }
 
 export class DeterministicWorldMapMarchDispatchService
   implements WorldMapMarchDispatchService
 {
+  private readonly marchStateRepository: WorldMapMarchStateRepository;
   private readonly defaultSecondsPerTile: number;
   private readonly heroAttachmentEnabled: boolean;
   private readonly heroRuntimePersistenceRepository?: HeroRuntimePersistenceRepository;
 
   constructor(
-    private readonly marchStateRepository: WorldMapMarchStateRepository,
+    marchStateRepository: WorldMapMarchStateRepository,
     options?: {
       readonly default_seconds_per_tile?: number;
       readonly hero_attachment_enabled?: boolean;
       readonly hero_runtime_persistence_repository?: HeroRuntimePersistenceRepository;
     },
   ) {
+    this.marchStateRepository = marchStateRepository;
     this.defaultSecondsPerTile = normalizeMinimumPositiveInteger(
       options?.default_seconds_per_tile,
       DEFAULT_SECONDS_PER_TILE,

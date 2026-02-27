@@ -3,7 +3,7 @@ import type {
   WorldMapTerrainPassabilityQuery,
   WorldMapTerrainPassabilityResolver,
   WorldMapTerrainPassabilitySeedTableV1,
-} from "../domain";
+} from "../domain/world-map-terrain-passability-contract.ts";
 
 const DEFAULT_IMPASSABLE_TILE_HASH_MODULUS = 11;
 const DEFAULT_WORLD_SEED = "world_seed_unknown";
