@@ -1,4 +1,6 @@
 import { strict as assert } from "node:assert";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { test } from "node:test";
 
 import type {
@@ -17,6 +19,28 @@ import {
   DeterministicWorldMapMarchSnapshotService,
 } from "./world-map-march-snapshot-service.ts";
 import { DeterministicWorldMapTerrainPassabilityResolver } from "./world-map-terrain-passability-resolver.ts";
+import type {
+  WorldMapHostileAttackResolvedResponseDto,
+} from "../domain/world-map-hostile-attack-contract.ts";
+
+interface FirstSliceHostileRuntimeTokenContractKey {
+  readonly phase: "dispatch" | "arrive" | "resolve" | "post_battle";
+  readonly canonical_key: string;
+  readonly required_tokens: readonly string[];
+}
+
+interface FirstSliceHostileRuntimeTokenContract {
+  readonly required_runtime_keys: readonly FirstSliceHostileRuntimeTokenContractKey[];
+  readonly compatibility_alias_only_keys: readonly string[];
+}
+
+const HOSTILE_RUNTIME_TOKEN_CONTRACT = loadFirstSliceHostileRuntimeTokenContract();
+const HOSTILE_REQUIRED_TOKENS_BY_KEY = new Map(
+  HOSTILE_RUNTIME_TOKEN_CONTRACT.required_runtime_keys.map((entry) => [
+    entry.canonical_key,
+    [...entry.required_tokens].sort((left, right) => left.localeCompare(right)),
+  ]),
+);
 
 const HOSTILE_ATTACK_TIE_FIXTURE_40V40 = {
   fixture_id: "attack_fixture_tie_40v40",
@@ -91,6 +115,7 @@ test("hostile attack service resolves deterministic attacker-win losses and pers
   });
   assert.equal(response.hero_attachment, null);
   assert.deepStrictEqual(response.hero_runtime_payloads, []);
+  assertRuntimePayloadTokensMatchHostileContract(response);
   assert.deepStrictEqual(
     response.events.map((event) => event.payload_key),
     ["dispatch_sent", "march_arrived", "combat_resolved"],
@@ -196,6 +221,7 @@ test("hostile attack service returns deterministic hero attachment metadata and 
     response.hero_runtime_payloads.map((payload) => payload.payload_key),
     ["hero_attached"],
   );
+  assertRuntimePayloadTokensMatchHostileContract(response);
   assert.equal(response.hero_runtime_payloads[0]?.content_key, "event.hero.assigned");
   assert.equal(response.hero_runtime_payloads[0]?.tokens.hero_id, "hero_frontline");
   assert.deepStrictEqual(
@@ -267,6 +293,7 @@ test("hostile attack service resolves tie fixture attack_fixture_tie_40v40 as de
     response.losses.attacker_unit_losses_by_id,
     HOSTILE_ATTACK_TIE_FIXTURE_40V40.expected.attacker_unit_losses_by_id,
   );
+  assertRuntimePayloadTokensMatchHostileContract(response);
   assert.equal(
     response.event_payloads.combat_resolved.content_key,
     "event.combat.hostile_resolve_tie_defender_holds",
@@ -313,6 +340,7 @@ test("hostile attack service emits defender-win hostile combat narrative key for
   });
 
   assert.equal(response.combat_outcome, "defender_win");
+  assertRuntimePayloadTokensMatchHostileContract(response);
   assert.equal(
     response.event_payloads.combat_resolved.content_key,
     "event.combat.hostile_resolve_defender_win",
@@ -708,4 +736,69 @@ function createOwnershipReadRepositories(input?: {
         ),
     },
   };
+}
+
+function loadFirstSliceHostileRuntimeTokenContract(): FirstSliceHostileRuntimeTokenContract {
+  const contractPath = join(
+    process.cwd(),
+    "backend/src/app/config/seeds/v1/narrative/first-slice-hostile-runtime-token-contract.json",
+  );
+  const raw = readFileSync(contractPath, "utf8");
+  return JSON.parse(raw) as FirstSliceHostileRuntimeTokenContract;
+}
+
+function assertRuntimePayloadTokensMatchHostileContract(
+  response: WorldMapHostileAttackResolvedResponseDto,
+): void {
+  assertCanonicalPayloadMatchesContract(response.event_payloads.dispatch_sent, {
+    expect_exact_token_set: true,
+  });
+  assertCanonicalPayloadMatchesContract(response.event_payloads.march_arrived);
+  assertCanonicalPayloadMatchesContract(response.event_payloads.combat_resolved);
+}
+
+function assertCanonicalPayloadMatchesContract(
+  payload: {
+    readonly content_key: string;
+    readonly tokens: Readonly<Record<string, string>>;
+  },
+  options?: {
+    readonly expect_exact_token_set?: boolean;
+  },
+): void {
+  assert.equal(
+    HOSTILE_RUNTIME_TOKEN_CONTRACT.compatibility_alias_only_keys.includes(payload.content_key),
+    false,
+    `Payload emitted legacy alias-only content key '${payload.content_key}' instead of canonical hostile content key.`,
+  );
+
+  const expectedRequiredTokens = HOSTILE_REQUIRED_TOKENS_BY_KEY.get(payload.content_key);
+  assert.notEqual(
+    expectedRequiredTokens,
+    undefined,
+    `Hostile token contract missing canonical content key '${payload.content_key}'.`,
+  );
+  if (expectedRequiredTokens === undefined) {
+    return;
+  }
+
+  const actualTokenKeys = Object.keys(payload.tokens).sort((left, right) =>
+    left.localeCompare(right)
+  );
+  const missingRequiredTokens = expectedRequiredTokens.filter((token) =>
+    !actualTokenKeys.includes(token)
+  );
+  assert.deepStrictEqual(
+    missingRequiredTokens,
+    [],
+    `Payload '${payload.content_key}' missing hostile contract token(s): ${missingRequiredTokens.join(", ")}.`,
+  );
+
+  if (options?.expect_exact_token_set === true) {
+    assert.deepStrictEqual(
+      actualTokenKeys,
+      expectedRequiredTokens,
+      `Payload '${payload.content_key}' token keys drifted from canonical hostile token contract.`,
+    );
+  }
 }
