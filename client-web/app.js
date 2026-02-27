@@ -211,7 +211,8 @@
     },
   });
   const firstSliceContentKeyManifestV1 = Object.freeze({
-    include_only_content_keys: [
+    default_first_slice_seed_usage: Object.freeze({
+      include_only_content_keys: [
       "event.tick.passive_income",
       "event.tick.storage_near_cap",
       "event.tick.producer_unlocked_hint",
@@ -263,7 +264,8 @@
       "event.world.hostile_defeat_command_silent",
       "event.world.hostile_post_battle_return_started",
       "event.world.hostile_post_battle_returned",
-    ],
+      ],
+    }),
     legacy_alias_mapping: [
       { canonical_key: "event.tick.passive_income", legacy_keys: ["event.economy.tick_passive_income"] },
       { canonical_key: "event.tick.storage_near_cap", legacy_keys: ["event.economy.storage_near_cap"] },
@@ -285,14 +287,38 @@
       { canonical_key: "event.combat.hostile_resolve_defender_win", legacy_keys: ["event.combat.placeholder_skirmish_loss"] },
       { canonical_key: "event.combat.hostile_resolve_tie_defender_holds", legacy_keys: ["event.combat.placeholder_skirmish_loss"] },
     ],
+    deferred_post_slice_keys: [
+      { key: "event.world.gather_started" },
+      { key: "event.world.gather_completed" },
+      { key: "event.world.ambush_triggered" },
+      { key: "event.world.ambush_resolved" },
+      { key: "event.hero.assigned" },
+      { key: "event.hero.unassigned" },
+      { key: "event.hero.ability_activated" },
+      { key: "event.hero.cooldown_complete" },
+    ],
   });
   const firstSliceAllowedEventContentKeySet = new Set(
-    firstSliceContentKeyManifestV1.include_only_content_keys,
+    firstSliceContentKeyManifestV1.default_first_slice_seed_usage.include_only_content_keys,
   );
-  const firstSliceCanonicalEventKeyByLegacyAlias = Object.freeze(
+  const firstSliceDeferredPostSliceEventContentKeySet = new Set(
+    firstSliceContentKeyManifestV1.deferred_post_slice_keys
+      .map((entry) => String(entry?.key || "").trim())
+      .filter((key) => key.length > 0),
+  );
+  const firstSliceCanonicalEventKeyCandidatesByLegacyAlias = Object.freeze(
     firstSliceContentKeyManifestV1.legacy_alias_mapping.reduce((lookup, row) => {
       for (const legacyKey of row.legacy_keys) {
-        lookup[legacyKey] = row.canonical_key;
+        const normalizedLegacyKey = String(legacyKey || "").trim();
+        if (normalizedLegacyKey.length < 1) {
+          continue;
+        }
+        if (!Array.isArray(lookup[normalizedLegacyKey])) {
+          lookup[normalizedLegacyKey] = [];
+        }
+        if (!lookup[normalizedLegacyKey].includes(row.canonical_key)) {
+          lookup[normalizedLegacyKey].push(row.canonical_key);
+        }
       }
       return lookup;
     }, {}),
@@ -1484,59 +1510,30 @@
         ? formatTemplateTokenValue(tokens[tokenName])
         : match,
     );
-  const normalizeHostileAttackEventKeyAlias = (contentKey) => {
-    const normalizedContentKey = String(contentKey || "").trim();
-    if (normalizedContentKey.length < 1) {
+  const normalizeManifestEventContentKey = (contentKey) =>
+    String(contentKey || "").trim();
+  const isManifestAllowedCanonicalEventContentKey = (contentKey) =>
+    firstSliceAllowedEventContentKeySet.has(contentKey)
+    && !firstSliceDeferredPostSliceEventContentKeySet.has(contentKey);
+  const resolveCanonicalFirstSliceEventKeyFromLegacyAlias = (legacyAliasKey) => {
+    const normalizedLegacyAlias = normalizeManifestEventContentKey(legacyAliasKey);
+    if (normalizedLegacyAlias.length < 1) {
       return "";
     }
-
-    if (normalizedContentKey === "event.world.hostile_dispatch_accepted") {
-      return "event.world.march_started";
-    }
-    if (normalizedContentKey === "event.world.hostile_post_battle_returned") {
-      return "event.world.march_returned";
-    }
-
-    if (!normalizedContentKey.startsWith("event.combat.placeholder_skirmish_")) {
-      return normalizedContentKey;
-    }
-
-    const skirmishSuffix = normalizedContentKey.slice("event.combat.placeholder_skirmish_".length);
-    if (skirmishSuffix === "attacker_win") {
-      return "event.combat.placeholder_skirmish_win";
-    }
-    if (skirmishSuffix === "defender_win" || skirmishSuffix === "tie_defender_holds") {
-      return "event.combat.placeholder_skirmish_loss";
-    }
-
-    return normalizedContentKey;
-  };
-  const mapBackendEventKeyToClientKey = (contentKey) => {
-    if (!contentKey) {
+    const canonicalCandidates =
+      firstSliceCanonicalEventKeyCandidatesByLegacyAlias[normalizedLegacyAlias];
+    if (!Array.isArray(canonicalCandidates) || canonicalCandidates.length < 1) {
       return "";
     }
-
-    let mappedContentKey = contentKey;
-    if (contentKey === "event.economy.tick_passive_income") {
-      mappedContentKey = "event.tick.passive_income";
+    for (const canonicalCandidate of canonicalCandidates) {
+      if (isManifestAllowedCanonicalEventContentKey(canonicalCandidate)) {
+        return canonicalCandidate;
+      }
     }
-
-    if (mappedContentKey.startsWith("event.buildings.")) {
-      mappedContentKey = mappedContentKey.replace("event.buildings.", "event.build.");
-    }
-
-    if (mappedContentKey.startsWith("event.units.")) {
-      mappedContentKey = mappedContentKey.replace("event.units.", "event.train.");
-    }
-
-    if (mappedContentKey.startsWith("event.world.scout_")) {
-      mappedContentKey = mappedContentKey.replace("event.world.", "event.scout.");
-    }
-
-    return normalizeHostileAttackEventKeyAlias(mappedContentKey);
+    return "";
   };
   const resolveDeterministicFallbackEventContentKey = (contentKey) => {
-    const normalizedContentKey = String(contentKey || "").trim();
+    const normalizedContentKey = normalizeManifestEventContentKey(contentKey);
     if (
       normalizedContentKey.startsWith("event.tick.")
       || normalizedContentKey.startsWith("event.economy.")
@@ -1567,35 +1564,22 @@
     return firstSliceDeterministicFallbackEventContentKey;
   };
   const resolveManifestScopedEventContentKey = (contentKey) => {
-    const normalizedContentKey = String(contentKey || "").trim();
+    const normalizedContentKey = normalizeManifestEventContentKey(contentKey);
     if (normalizedContentKey.length < 1) {
       return "";
     }
-
-    const candidates = [];
-    const addCandidate = (candidate) => {
-      const normalized = String(candidate || "").trim();
-      if (normalized.length > 0 && !candidates.includes(normalized)) {
-        candidates.push(normalized);
-      }
-    };
-
-    addCandidate(normalizedContentKey);
-    addCandidate(mapBackendEventKeyToClientKey(normalizedContentKey));
-    addCandidate(normalizeHostileAttackEventKeyAlias(normalizedContentKey));
-
-    for (const candidate of candidates) {
-      const canonicalCandidate = firstSliceCanonicalEventKeyByLegacyAlias[candidate] || candidate;
-      if (firstSliceAllowedEventContentKeySet.has(canonicalCandidate)) {
-        return canonicalCandidate;
-      }
-      if (firstSliceAllowedEventContentKeySet.has(candidate)) {
-        return candidate;
-      }
+    if (isManifestAllowedCanonicalEventContentKey(normalizedContentKey)) {
+      return normalizedContentKey;
     }
-
+    const canonicalKeyFromLegacyAlias =
+      resolveCanonicalFirstSliceEventKeyFromLegacyAlias(normalizedContentKey);
+    if (canonicalKeyFromLegacyAlias.length > 0) {
+      return canonicalKeyFromLegacyAlias;
+    }
     return resolveDeterministicFallbackEventContentKey(normalizedContentKey);
   };
+  const mapBackendEventKeyToClientKey = (contentKey) =>
+    resolveManifestScopedEventContentKey(contentKey);
   const hostileDispatchFailureContentKeyByCode = Object.freeze({
     source_target_not_foreign: "event.world.hostile_dispatch_failed_source_target_not_foreign",
     max_active_marches_reached: "event.world.hostile_dispatch_failed_max_active_marches_reached",
@@ -1617,54 +1601,31 @@
     if (!contentKey) {
       return "";
     }
-
-    const scopedContentKey = String(contentKey).startsWith("event.")
-      ? resolveManifestScopedEventContentKey(contentKey)
-      : String(contentKey).trim();
-    const normalizedContentKey = normalizeHostileAttackEventKeyAlias(scopedContentKey);
+    const normalizedContentKey = String(contentKey).trim();
+    if (normalizedContentKey.length < 1) {
+      return "";
+    }
+    if (!normalizedContentKey.startsWith("event.")) {
+      return placeholderNarrativeSeedTemplates[normalizedContentKey] || "";
+    }
+    const scopedContentKey = resolveManifestScopedEventContentKey(normalizedContentKey);
+    const canonicalScopedContentKey = isManifestAllowedCanonicalEventContentKey(scopedContentKey)
+      ? scopedContentKey
+      : resolveCanonicalFirstSliceEventKeyFromLegacyAlias(scopedContentKey);
     const candidates = [];
     const addCandidate = (candidate) => {
-      if (candidate && !candidates.includes(candidate)) {
-        candidates.push(candidate);
+      const normalizedCandidate = String(candidate || "").trim();
+      if (normalizedCandidate.length > 0 && !candidates.includes(normalizedCandidate)) {
+        candidates.push(normalizedCandidate);
       }
     };
 
-    addCandidate(normalizedContentKey);
-    addCandidate(scopedContentKey);
-    addCandidate(contentKey);
-    const canonicalFromScoped =
-      firstSliceCanonicalEventKeyByLegacyAlias[scopedContentKey] || scopedContentKey;
-    addCandidate(canonicalFromScoped);
-    const legacyAliases = firstSliceLegacyAliasKeysByCanonicalEventKey[canonicalFromScoped] || [];
+    addCandidate(canonicalScopedContentKey || scopedContentKey);
+    const legacyAliases = firstSliceLegacyAliasKeysByCanonicalEventKey[
+      canonicalScopedContentKey || scopedContentKey
+    ] || [];
     for (const legacyAlias of legacyAliases) {
       addCandidate(legacyAlias);
-    }
-
-    if (normalizedContentKey.startsWith("event.buildings.")) {
-      addCandidate(normalizedContentKey.replace("event.buildings.", "event.build."));
-    } else if (normalizedContentKey.startsWith("event.units.")) {
-      addCandidate(normalizedContentKey.replace("event.units.", "event.train."));
-    } else if (normalizedContentKey.startsWith("event.economy.")) {
-      addCandidate(
-        normalizedContentKey.replace("event.economy.tick_passive_income", "event.tick.passive_income"),
-      );
-    } else if (normalizedContentKey.startsWith("event.world.scout_")) {
-      addCandidate(normalizedContentKey.replace("event.world.", "event.scout."));
-    } else if (normalizedContentKey.startsWith("event.combat.placeholder_skirmish_")) {
-      addCandidate("event.combat.placeholder_skirmish_win");
-      addCandidate("event.combat.placeholder_skirmish_loss");
-    }
-
-    if (normalizedContentKey.startsWith("event.build.")) {
-      addCandidate(normalizedContentKey.replace("event.build.", "event.buildings."));
-    } else if (normalizedContentKey.startsWith("event.train.")) {
-      addCandidate(normalizedContentKey.replace("event.train.", "event.units."));
-    } else if (normalizedContentKey.startsWith("event.tick.")) {
-      addCandidate(
-        normalizedContentKey.replace("event.tick.passive_income", "event.economy.tick_passive_income"),
-      );
-    } else if (normalizedContentKey.startsWith("event.scout.")) {
-      addCandidate(normalizedContentKey.replace("event.scout.", "event.world.scout_"));
     }
 
     return candidates.find((key) => placeholderNarrativeSeedTemplates[key]);

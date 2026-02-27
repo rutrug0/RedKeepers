@@ -642,5 +642,19 @@
                                     "node --check client-web/app.js",
                                     "python tools/rk_m0_0011_first_slice_loop_smoke.py"
                                 ]
+    },
+    {
+        "ts":  "2026-02-27T09:02:22.2523612Z",
+        "item_id":  "RK-AUTO-BACKLOG-0005-F04-F01",
+        "status":  "completed",
+        "summary":  "Refactored frontend event-feed content-key resolution to consume first-slice manifest default include-only keys, enforce deferred-key exclusion, and resolve legacy aliases strictly through manifest-declared canonical-first deterministic ordering.",
+        "files":  [
+                      "client-web/app.js",
+                      "agents/sera-kest/outbox.json"
+                  ],
+        "validation_commands":  [
+                                    "node --check client-web/app.js",
+                                    "python tools/orchestrator.py status"
+                                ]
     }
 ]
