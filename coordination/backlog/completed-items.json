@@ -6344,5 +6344,43 @@
     "runtime_seconds": 490.86,
     "started_at": "2026-02-27T09:06:44.074070+00:00",
     "finished_at": "2026-02-27T09:14:54.926081+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F02-F01-F01",
+    "title": "Normalize backend seed-loader TypeScript ESM specifiers for strip-types test execution",
+    "description": "Unblock direct `node --experimental-strip-types --test` execution for seed loader tests by standardizing local TypeScript import specifiers (or introducing a tested loader runtime shim) so module resolution is deterministic without ad-hoc flags.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F02-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "Seed loader test files under `backend/src/app/config/seeds/v1` run via `node --experimental-strip-types --test` without `ERR_MODULE_NOT_FOUND`.",
+      "No functional behavior changes in seed parsing/filtering outputs; only import/runtime compatibility updates.",
+      "Validation command(s) are documented in the updated outbox entry for reproducibility."
+    ],
+    "validation_commands": [],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T08:50:56.826370+00:00",
+    "updated_at": "2026-02-27T09:21:23.071168+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [outbox.json](D:/RedKeepers/agents/ilya-fen/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F02-F01",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "fb7b71ee88e7556542364e022a1cf5265fd19551",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 378.27,
+    "started_at": "2026-02-27T09:15:02.854754+00:00",
+    "finished_at": "2026-02-27T09:21:21.120785+00:00"
   }
 ]

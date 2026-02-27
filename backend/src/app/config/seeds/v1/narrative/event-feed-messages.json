@@ -145,8 +145,8 @@
       "template": "{settlement_name}: tick logic resolved with {reason_codes} over {duration_ms}ms.",
       "tokens": [
         "settlement_name",
-        "duration_ms",
-        "reason_codes"
+        "reason_codes",
+        "duration_ms"
       ]
     },
     {
@@ -325,9 +325,9 @@
       "template": "{building_id}: upgrade halted. Missing stores {missing_resources_by_id}; needed {required_cost_by_id}, on hand {available_stock_by_id}.",
       "tokens": [
         "building_id",
+        "missing_resources_by_id",
         "required_cost_by_id",
-        "available_stock_by_id",
-        "missing_resources_by_id"
+        "available_stock_by_id"
       ]
     },
     {
@@ -344,8 +344,7 @@
       "template": "{building_id}: work crews are still turning to complete prior orders; new orders resume at {cooldown_ends_at}.",
       "tokens": [
         "building_id",
-        "cooldown_ends_at",
-        "cooldown_remaining_ms"
+        "cooldown_ends_at"
       ]
     },
     {
@@ -505,10 +504,8 @@
       "template": "{unit_id}: muster delayed; missing resources {missing_resources_by_id} against required {required_cost_by_id}.",
       "tokens": [
         "unit_id",
-        "quantity",
-        "required_cost_by_id",
-        "available_stock_by_id",
-        "missing_resources_by_id"
+        "missing_resources_by_id",
+        "required_cost_by_id"
       ]
     },
     {

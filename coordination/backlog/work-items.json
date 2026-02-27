@@ -80,38 +80,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0005"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0005-F02-F01-F01",
-    "title": "Normalize backend seed-loader TypeScript ESM specifiers for strip-types test execution",
-    "description": "Unblock direct `node --experimental-strip-types --test` execution for seed loader tests by standardizing local TypeScript import specifiers (or introducing a tested loader runtime shim) so module resolution is deterministic without ad-hoc flags.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0005-F02-F01"
-    ],
-    "inputs": [],
-    "acceptance_criteria": [
-      "Seed loader test files under `backend/src/app/config/seeds/v1` run via `node --experimental-strip-types --test` without `ERR_MODULE_NOT_FOUND`.",
-      "No functional behavior changes in seed parsing/filtering outputs; only import/runtime compatibility updates.",
-      "Validation command(s) are documented in the updated outbox entry for reproducibility."
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T08:50:56.826370+00:00",
-    "updated_at": "2026-02-27T09:21:21.181261+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F02-F01",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0005-F04-F02-F01",
     "title": "Fix narrative event seed token ordering mismatch for passive gain reasoned message",
     "description": "Resolve the existing validation failure in `event-feed-messages.json` by aligning the `event.tick.passive_gain_reasoned` token list order with template placeholder order so the baseline narrative seed loader test suite passes cleanly.",
@@ -129,16 +97,47 @@
       "`node --experimental-strip-types --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/narrative-seed-loaders.test.ts` passes without failures related to token mismatch."
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T09:06:38.780912+00:00",
-    "updated_at": "2026-02-27T09:06:38.780912+00:00",
+    "updated_at": "2026-02-27T09:23:43.532313+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "ilya-fen",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F04-F02"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F04-F02",
+    "assigned_agent": "ilya-fen"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F02-F01-F01-F01",
+    "title": "Fix async throw assertions in first-slice runtime manifest lock validator tests",
+    "description": "Update `first-slice-runtime-manifest-lock-validator.test.ts` failing cases to use async-aware assertion patterns (`assert.rejects`) so expected validation errors are asserted correctly under Node test runner.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F02-F01-F01"
+    ],
+    "inputs": [],
+    "acceptance_criteria": [
+      "The two failing drift tests in `first-slice-runtime-manifest-lock-validator.test.ts` assert expected error messages using async-aware assertions.",
+      "`node --experimental-strip-types --test --test-isolation=none backend/src/app/config/seeds/v1/first-slice-runtime-manifest-lock-validator.test.ts` passes."
+    ],
+    "validation_commands": [],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T09:21:23.287992+00:00",
+    "updated_at": "2026-02-27T09:21:23.287992+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "ilya-fen",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F02-F01-F01"
   }
 ]
