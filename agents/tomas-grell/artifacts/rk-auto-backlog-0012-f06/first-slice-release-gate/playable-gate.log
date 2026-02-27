@@ -1,0 +1,31 @@
+command: "C:\Program Files\Inkscape\bin\python.exe" tools/rk_m0_0011_first_slice_loop_smoke.py
+exit_code: 0
+
+stdout:
+RK-M0-0011_SMOKE check=client_shell_panels status=PASS detail=client shell settlement/map/event-feed panels are present
+RK-M0-0011_SMOKE check=tick_touchpoint status=PASS detail=route='/settlements/{settlementId}/tick'
+RK-M0-0011_SMOKE check=upgrade_touchpoint status=PASS detail=route='/settlements/{settlementId}/buildings/{buildingId}/upgrade'
+RK-M0-0011_SMOKE check=train_touchpoint status=PASS detail=route='/settlements/{settlementId}/units/{unitId}/train'
+RK-M0-0011_SMOKE check=scout_touchpoint status=PASS detail=route='/world-map/tiles/{tileId}/interact'
+RK-M0-0011_SMOKE check=attack_touchpoint status=PASS detail=route='/world-map/settlements/{targetSettlementId}/attack'
+RK-M0-0011_SMOKE check=negative_insufficient_resources status=PASS detail=backend/client insufficient_resources assertions are wired
+RK-M0-0011_SMOKE check=negative_unavailable_state status=PASS detail=backend/client unavailable_tile assertions are wired
+RK-M0-0011_SMOKE check=deterministic_placeholder_contract status=PASS detail=flow_version v1 placeholder contracts are deterministic across tick/build/train/scout/attack/snapshot
+RK-M0-0011_SMOKE check=hostile_dispatch_deterministic_contract status=PASS detail=transport hostile attack contract asserts deterministic dispatch/combat-resolve payloads
+RK-M0-0011_SMOKE check=hostile_dispatch_event_feed_binding status=PASS detail=client hostile dispatch lifecycle events are bridged into event feed output
+RK-M0-0011_SMOKE check=frontend_manifest_snapshot_manifest_ids status=PASS detail=playable=first_slice_playable_manifest_lock_v1, content_keys=first_slice_content_key_manifest_v1
+RK-M0-0011_SMOKE check=frontend_manifest_snapshot_settlement_defaults status=PASS detail=snapshot settlement defaults match playable manifest
+RK-M0-0011_SMOKE check=frontend_manifest_snapshot_content_allowlist status=PASS detail=allowlist_count=58
+RK-M0-0011_SMOKE check=hostile_loop_content_keys status=PASS detail=required_hostile_content_keys=['event.world.hostile_dispatch_en_route', 'event.world.hostile_post_battle_returned', 'event.combat.hostile_resolve_attacker_win', 'event.combat.hostile_resolve_defender_win', 'event.combat.hostile_resolve_tie_defender_holds']
+RK-M0-0011_SMOKE check=foreign_hostile_profile_present status=PASS detail=profile_id=foreign_settlement_profile_v1_ruin_holdfast, settlement_id=settlement_hostile, tile=Ruin Holdfast
+RK-M0-0011_SMOKE check=stage_tick_progression status=PASS detail=evidence=['tick_touchpoint']
+RK-M0-0011_SMOKE check=stage_build_upgrade status=PASS detail=evidence=['upgrade_touchpoint']
+RK-M0-0011_SMOKE check=stage_unit_training status=PASS detail=evidence=['train_touchpoint']
+RK-M0-0011_SMOKE check=stage_map_interaction status=PASS detail=evidence=['scout_touchpoint']
+RK-M0-0011_SMOKE check=stage_hostile_dispatch status=PASS detail=evidence=['attack_touchpoint', 'foreign_hostile_profile_present']
+RK-M0-0011_SMOKE check=stage_deterministic_combat_resolve status=PASS detail=evidence=['hostile_dispatch_deterministic_contract']
+RK-M0-0011_SMOKE check=stage_event_feed_output status=PASS detail=evidence=['client_shell_panels', 'hostile_dispatch_event_feed_binding']
+RK-M0-0011_SMOKE summary status=PASS pass=23 fail=0
+
+stderr:
+

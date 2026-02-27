@@ -1,0 +1,22 @@
+command: "C:\Program Files\Inkscape\bin\python.exe" tools/orchestrator.py status
+exit_code: 0
+
+stdout:
+RedKeepers Daemon Status
+State: running
+Lock held: True
+Last updated (UTC): 2026-02-27T15:55:54.191026+00:00
+Active: RK-AUTO-BACKLOG-0012-F06 | Run release-blocking gate for transport-backed first-slice candidate | tomas-grell (qa)
+Queue: queued=4 dependency_ready=4 running=1 blocked=22 completed=204
+Agent Utilization:
+  - ilya-fen (backend): runs=47 done=45 fail=1 time=18335.0s load=76.06 | open: ready=2 waiting=0 running=0 total=2 | backlog: blocked=2 completed=67
+  - sera-kest (frontend): runs=29 done=22 fail=2 time=12248.6s load=43.41 | open: ready=2 waiting=0 running=0 total=2 | backlog: blocked=7 completed=27
+  - tomas-grell (qa): runs=27 done=17 fail=8 time=9997.6s load=37.66 | open: ready=0 waiting=0 running=1 total=1 | backlog: blocked=4 completed=23
+  - juno-cairn (platform): runs=10 done=9 fail=0 time=3189.5s load=14.32 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=3 completed=11
+  - mara-voss (lead): runs=42 done=40 fail=0 time=11386.7s load=58.98 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=6 completed=47
+  - nika-thorn (content): runs=9 done=8 fail=0 time=2468.4s load=12.11 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=0 completed=11
+  - rowan-hale (design): runs=11 done=10 fail=0 time=2110.5s load=13.52 | open: ready=0 waiting=0 running=0 total=0 | backlog: blocked=0 completed=18
+Workload Buckets: ready=dependency-ready queued, waiting=queued with unmet dependencies.
+
+stderr:
+
