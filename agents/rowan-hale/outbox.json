@@ -754,5 +754,65 @@
         ]
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-27T15:20:39.5478865Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-AUTO-BACKLOG-0012-F01",
+    "status": "done",
+    "summary": "Locked a first-session live transport action contract matrix in strict `tick/build/train/scout/attack` order with route-template references, required request/response fields, status contracts, canonical event-key mapping, scoped failure-family allowlist, and explicit post-slice/deferred exclusions.",
+    "changed_files": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Align scout unavailable-tile failure key with first-slice manifest canonical key policy",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Resolve the current transport-only scout unavailable key mismatch by adding an explicit canonical/alias mapping path for unavailable-tile scout failures so endpoint responses, manifest include lists, and frontend key resolution use one deterministic key family.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0012-F01"
+        ],
+        "inputs": [
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.ts",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+          "client-web/app.js"
+        ],
+        "acceptance_criteria": [
+          "Scout unavailable-tile failures resolve through a declared canonical key with optional compatibility aliases (no undocumented transport-only key path)",
+          "Manifest include/alias tables and event-feed template rows are consistent with the chosen scout unavailable key",
+          "Frontend resolver and world-map scout action handling produce the same rendered key for unavailable-tile failures without fallback ambiguity"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "title": "Keep hero dispatch failure branches out of default first-session attack contract rows",
+        "owner_role": "frontend",
+        "milestone": "M0",
+        "priority": "low",
+        "description": "Ensure default first-session attack UI/error mapping keeps only deterministic hostile dispatch failures in-scope and treats hero failure branches as deferred diagnostics until hero systems are in-slice.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0012-F01"
+        ],
+        "inputs": [
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "client-web/app.js",
+          "backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.ts"
+        ],
+        "acceptance_criteria": [
+          "Default first-session hostile dispatch handling prioritizes only `source_target_not_foreign`, `march_already_exists`, `max_active_marches_reached`, and `path_blocked_impassable`",
+          "Hero-related dispatch failure keys remain tagged deferred and do not appear in default first-session contract rows",
+          "UI fallback behavior for deferred hero failures is explicit and non-blocking when those errors surface in debug/non-default runs"
+        ],
+        "validation_commands": []
+      }
+    ]
   }
 ]

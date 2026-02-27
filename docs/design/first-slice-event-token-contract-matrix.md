@@ -219,6 +219,54 @@
 | `invalid_target` | `event.world.hostile_dispatch_target_required`, `event.world.hostile_dispatch_failed_source_target_not_foreign` | Preserve invalid hostile target feedback before dispatch completion. |
 | `combat_loss` | `event.combat.hostile_resolve_defender_win`, `event.combat.hostile_resolve_tie_defender_holds`, `event.combat.hostile_loss_report` | Preserve loss legibility even when resolve step does not end in attacker win. |
 
+## First-Session Live Transport Action Contract Matrix (Locked: `tick -> build -> train -> scout -> attack`)
+
+### Retention Rationale
+
+- Next 1-5 minute goal: issue one action per loop step and receive immediate, legible success/failure feedback without contract drift.
+- Session goal: complete the first-session transport chain with stable request/response shapes shared by backend host, frontend adapter, and content key resolution.
+- Return hook: deterministic action outcomes and predictable failure messaging let players plan the next build/train/scout/attack cycle confidently.
+
+### Route Template Source Lock
+
+- Backend route constants (authoritative transport templates):
+  - `POST_SETTLEMENT_TICK_ROUTE` -> `/settlements/{settlementId}/tick`
+  - `POST_SETTLEMENT_BUILDING_UPGRADE_ROUTE` -> `/settlements/{settlementId}/buildings/{buildingId}/upgrade`
+  - `POST_SETTLEMENT_UNIT_TRAIN_ROUTE` -> `/settlements/{settlementId}/units/{unitId}/train`
+  - `POST_WORLD_MAP_TILE_INTERACT_ROUTE` -> `/world-map/tiles/{tileId}/interact`
+  - `POST_WORLD_MAP_SETTLEMENT_ATTACK_ROUTE` -> `/world-map/settlements/{targetSettlementId}/attack`
+- Frontend adapter templates must remain byte-identical to the backend constants (`client-web/app.js:firstSliceTransportRoutes`).
+
+### Failure Family Allowlist (First-Session Action Rows Only)
+
+| failure_family | allowed_error_codes | in_matrix_scope |
+| --- | --- | --- |
+| `insufficient_resources` | `insufficient_resources` | `build`, `train` |
+| `cooldown` | `cooldown` | `build`, `train` |
+| `unavailable_tile` | `unavailable_tile` | `scout` |
+| `invalid_state` | `invalid_state` | `tick` (transport/validation fallback only), `build`, `train` |
+| `deterministic_hostile_dispatch_failures` | `source_target_not_foreign`, `march_already_exists`, `max_active_marches_reached`, `path_blocked_impassable` | `attack` |
+
+Notes:
+- `tick` does not expose a normal in-contract `failed` status row; failures are transport/validation-level and map to `invalid_state` family diagnostics.
+- `resolve` is not a separate first-session transport action row; deterministic resolve keys are emitted inside the `attack` success payload lifecycle.
+
+### Locked Action Matrix
+
+| order | action | route_template (backend + frontend) | required_request_fields | required_response_fields | status_contract | canonical_event_key_mapping |
+| --- | --- | --- | --- | --- | --- | --- |
+| `1` | `tick` | `/settlements/{settlementId}/tick` | `path.settlementId`; `body.settlement_id`; `body.flow_version`; `body.tick_started_at`; `body.tick_ended_at` | success: `flow`, `status`, `resource_delta_by_id`, `resource_stock_by_id`, `placeholder_events[]` | success: `accepted`; failure: transport/validation only (`invalid_state` family) | backend payload key `event.economy.tick_passive_income` -> canonical `event.tick.passive_income` (compatibility alias mapping). Fallback diagnostic key: `event.tick.passive_gain_stalled`. |
+| `2` | `build` | `/settlements/{settlementId}/buildings/{buildingId}/upgrade` | `path.settlementId`; `path.buildingId`; `body.settlement_id`; `body.building_id`; `body.flow_version`; `body.current_level`; `body.requested_at` | success: `flow`, `status`, `building_id`, `from_level`, `to_level`, `resource_stock_after_by_id`, `placeholder_events[]`; failure: `flow`, `status`, `error_code`, `building_id` | success: `accepted`; failure: `failed` with `insufficient_resources|cooldown|invalid_state` | success payload key `event.buildings.upgrade_started` -> canonical `event.build.upgrade_started`; failure mapping: `insufficient_resources -> event.build.failure_insufficient_resources`, `cooldown -> event.build.failure_cooldown`, `invalid_state -> event.build.failure_invalid_state`. |
+| `3` | `train` | `/settlements/{settlementId}/units/{unitId}/train` | `path.settlementId`; `path.unitId`; `body.settlement_id`; `body.unit_id`; `body.flow_version`; `body.quantity`; `body.requested_at`; `body.barracks_level` | success: `flow`, `status`, `unit_id`, `quantity`, `resource_stock_after_by_id`, `placeholder_events[]`; failure: `flow`, `status`, `error_code`, `unit_id` | success: `accepted`; failure: `failed` with `insufficient_resources|cooldown|invalid_state` | success payload key `event.units.training_started` -> canonical `event.train.started`; failure mapping: `insufficient_resources -> event.train.failure_insufficient_resources`, `cooldown -> event.train.failure_cooldown`, `invalid_state -> event.train.failure_invalid_state`. |
+| `4` | `scout` | `/world-map/tiles/{tileId}/interact` | `path.tileId`; `body.settlement_id`; `body.tile_id`; `body.interaction_type` (`scout`); `body.flow_version` | success: `status`, `flow`, `tile_id`, `tile_state`, `interaction_outcome`, `event{content_key,tokens}`; failure: `status`, `flow`, `error_code`, `tile_id`, `event{content_key,tokens}` | success: `accepted`; failure: `failed` with `unavailable_tile` | success keys: `event.world.scout_dispatched|event.world.scout_report_empty|event.world.scout_report_hostile` -> canonical `event.scout.dispatched|event.scout.report_empty|event.scout.report_hostile`. failure key: transport emits `event.world.scout_unavailable_tile` (transport-only diagnostic; not a canonical default key row). |
+| `5` | `attack` | `/world-map/settlements/{targetSettlementId}/attack` | `path.targetSettlementId`; `body.flow_version`; `body.march_id`; `body.source_settlement_id`; `body.target_settlement_id`; `body.origin`; `body.target`; `body.defender_garrison_strength`; `body.dispatched_units` | success: `status`, `flow`, `march_id`, `combat_outcome`, `losses`, `event_payloads{dispatch_sent,march_arrived,combat_resolved}`; failure: `status`, `flow`, `march_id`, `error_code`, `message` | success: `accepted`; failure: `failed` with deterministic hostile dispatch error codes in-scope | success payload keys include canonical `event.world.hostile_dispatch_en_route` and canonical resolve keys (`event.combat.hostile_resolve_attacker_win|event.combat.hostile_resolve_defender_win|event.combat.hostile_resolve_tie_defender_holds`) plus deterministic post-battle world keys. failure mapping: `source_target_not_foreign -> event.world.hostile_dispatch_failed_source_target_not_foreign`; `march_already_exists -> event.world.hostile_dispatch_failed_march_already_exists`; `max_active_marches_reached -> event.world.hostile_dispatch_failed_max_active_marches_reached`; `path_blocked_impassable -> event.world.hostile_dispatch_failed_path_blocked_impassable`; fallback -> `event.world.hostile_dispatch_failed`. |
+
+### Deferred/Excluded Transport Branches (Not Default First-Session Rows)
+
+- Deferred hero attack branch failure codes are excluded from default action matrix rows: `feature_not_in_slice`, `hero_unavailable`, `hero_already_assigned`, `hero_target_scope_mismatch`.
+- Hero runtime payload key `event.hero.assigned` is post-slice and excluded from required first-session canonical default rendering.
+- Alliances, advanced PvP branches, gather, and ambush remain post-slice and excluded from this locked action matrix.
+
 ### Deferred and Excluded From Required Objective Coverage
 
 - Post-slice objective families are deferred: `first_session.hero.*`, `first_session.ambush.*`, `first_session.gather.*`.

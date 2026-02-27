@@ -1,41 +1,234 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0012",
-    "title": "Generate next backlog tranche",
-    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas. Prioritize fast cycle throughput: bias toward implementation tasks (backend/frontend/design/content/platform) and add dedicated QA/regression tasks only when risk is critical or release-blocking.",
+    "id": "RK-AUTO-BACKLOG-0012-F01",
+    "title": "Lock first-session live transport action contract matrix",
+    "description": "Define one implementation-ready contract table for first-session tick/build/train/scout/attack actions so backend HTTP host, frontend adapter wiring, and content templates share the same required request/response fields and canonical event keys.",
     "milestone": "M0",
-    "type": "qa",
+    "type": "feature",
     "priority": "high",
-    "owner_role": "lead",
-    "preferred_agent": "mara-voss",
+    "owner_role": "design",
+    "preferred_agent": null,
     "dependencies": [],
     "inputs": [
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/completed-items.json",
-      "coordination/backlog/blocked-items.json",
       "docs/design/first-vertical-slice.md",
-      "coordination/runtime/run-history.jsonl"
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
+      "client-web/app.js"
     ],
     "acceptance_criteria": [
-      "At least 3 new queued tasks are created or requeued",
-      "Each task has owner_role, dependencies, and acceptance criteria",
-      "Tasks reflect current project priorities and unblock progress",
-      "Generated tranche is implementation-heavy; non-critical QA/lead coordination tasks are minimized",
-      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
+      "Matrix documents canonical first-session actions in strict tick/build/train/scout/attack order with required request fields, success/failure statuses, and event-key mapping",
+      "Contract references existing first-slice route templates and keeps failure families scoped to insufficient_resources, cooldown, unavailable_tile, invalid_state, and deterministic hostile dispatch failures",
+      "Any mechanics outside first vertical slice (heroes/alliances/advanced PvP branches) are explicitly marked deferred and excluded from default contract rows"
     ],
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
     "status": "validating",
     "retry_count": 0,
-    "created_at": "2026-02-27T15:07:25.350323+00:00",
-    "updated_at": "2026-02-27T15:16:11.289934+00:00",
+    "created_at": "2026-02-27T15:16:12.685880+00:00",
+    "updated_at": "2026-02-27T15:21:39.954665+00:00",
     "estimated_effort": "S",
-    "token_budget": 12000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "backlog_refill",
-    "assigned_agent": "mara-voss"
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012",
+    "assigned_agent": "rowan-hale"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F02",
+    "title": "Expose deterministic first-slice settlement loop as local HTTP host",
+    "description": "Implement a lightweight backend host that serves the existing deterministic settlement loop transport routes over HTTP so client-web fetch mode can run the full first-session loop without custom browser injection.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F01"
+    ],
+    "inputs": [
+      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts",
+      "backend/src/modules/economy/api/settlement-tick-endpoint.ts",
+      "backend/src/modules/buildings/api/settlement-building-upgrade-endpoint.ts",
+      "backend/src/modules/units/api/settlement-unit-train-endpoint.ts",
+      "backend/src/modules/world_map/api/world-map-tile-interact-endpoint.ts",
+      "backend/src/modules/world_map/api/world-map-settlement-attack-endpoint.ts"
+    ],
+    "acceptance_criteria": [
+      "A deterministic local HTTP host command is available and serves first-slice routes for tick, build upgrade, unit train, scout tile interact, hostile settlement attack, and march snapshot",
+      "HTTP responses preserve existing contract behavior (status + body) from local transport handlers, including deterministic failure code mapping",
+      "At least one targeted transport smoke check covers end-to-end HTTP invocation for one settlement action and one hostile map action"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:16:12.686387+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F03",
+    "title": "Backfill first-session narrative templates for transport-failure and cooldown paths",
+    "description": "Expand first-slice narrative seed rows so transport-backed settlement and world-map actions have canonical placeholder templates for both success and deterministic failure states without relying on client hard-coded fallback text.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F01"
+    ],
+    "inputs": [
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+      "client-web/app.js"
+    ],
+    "acceptance_criteria": [
+      "Canonical placeholder templates cover first-session action outcomes for success plus failure cases triggered in transport mode (insufficient_resources, cooldown, unavailable_tile, invalid_state, hostile dispatch failure)",
+      "Template token fields align with the first-session transport contract matrix and remain deterministic for frontend substitution",
+      "Content stays first-slice scoped and does not introduce post-slice hero/alliance or expanded PvP narrative branches"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:16:12.686387+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F04",
+    "title": "Default client shell to transport-backed first-session state with deterministic fallback",
+    "description": "Refactor client shell bootstrap so default populated mode is driven by transport-backed runtime actions/state, while preserving a deterministic offline fallback state when transport is unavailable.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F02",
+      "RK-AUTO-BACKLOG-0012-F03"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "client-web/index.html",
+      "client-web/first-slice-bootstrap-payload.js",
+      "backend/src/app/transport/local-first-slice-settlement-loop-transport.ts"
+    ],
+    "acceptance_criteria": [
+      "Default first-session path renders settlement/map/feed from transport-backed runtime data without requiring manual mock-state toggles",
+      "When transport is unreachable, UI switches to one deterministic non-crashing fallback mode that surfaces a clear placeholder warning and keeps core controls responsive",
+      "Tick/build/train/scout/attack actions continue to map contract responses to canonical first-slice content keys and objective progression remains intact"
+    ],
+    "validation_commands": [
+      "python tools/rk_m0_0011_first_slice_loop_smoke.py"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:16:12.686387+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F05",
+    "title": "Add one-command local first-slice runtime launcher for backend + web shell",
+    "description": "Create a reproducible launcher that starts the first-slice backend transport host and client-web shell together for local iteration and release-candidate prep without manual multi-terminal setup.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F02",
+      "RK-AUTO-BACKLOG-0012-F04"
+    ],
+    "inputs": [
+      "launch-local-game.bat",
+      "scripts/",
+      "tools/",
+      "docs/operations/first-slice-release-gate.md"
+    ],
+    "acceptance_criteria": [
+      "A single documented command starts backend transport host and client shell with deterministic defaults for first-session settlement/world identifiers",
+      "Launcher emits clear process URLs/status and exits non-zero when either lane fails to start",
+      "Runtime launch docs stay placeholder-art compliant and avoid adding post-slice packaging or production infrastructure scope"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:16:12.686387+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0012-F06",
+    "title": "Run release-blocking gate for transport-backed first-slice candidate",
+    "description": "Execute the first-slice release gate after transport-host/backend-client runtime integration, publish updated evidence artifacts, and record owner-tagged blockers if any mandatory gate fails.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0012-F05"
+    ],
+    "inputs": [
+      "tools/first_slice_release_gate_runner.py",
+      "coordination/runtime/first-slice-release-gate/",
+      "docs/design/vertical-slice-done-v1.md",
+      "docs/operations/first-slice-release-gate.md"
+    ],
+    "acceptance_criteria": [
+      "Release-gate evidence is regenerated for the transport-backed candidate and includes playable, scope, quality, platform, and release-readiness outcomes",
+      "Any failing mandatory gate includes exact failing command, artifact path, and explicit owner_role blocker assignment",
+      "No additional non-critical QA-only follow-up tasks are created unless a release-blocking failure is observed"
+    ],
+    "validation_commands": [
+      "python tools/first_slice_release_gate_runner.py",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T15:16:12.686387+00:00",
+    "updated_at": "2026-02-27T15:16:12.686387+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0012"
   }
 ]
