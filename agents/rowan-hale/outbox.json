@@ -717,5 +717,42 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-27T13:50:57.9771612Z",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-AUTO-BACKLOG-0011-F01",
+    "status": "done",
+    "summary": "Locked a snapshot-ready first-session objective gate schema in the first-slice token matrix with six canonical objective keys (`tick/build/train/scout/attack/resolve`), explicit `required_all`/optional `required_any` canonical gate keys, compatibility-alias lookup policy, canonical-only gate guidance, preserved negative-state families, and explicit post-slice objective-family deferrals.",
+    "changed_files": [
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Align narrative manifest objective rows with snapshot gate schema fields",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Update `objective_step_outcome_contract` in `first-slice-content-key-manifest.json` to serialize the locked objective gate shape (`canonical_objective_key`, `loop_step`, `required_all_canonical_keys`, optional `required_any_canonical_keys`, `compatibility_alias_lookup_keys`) without adding mechanics.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0011-F01"
+        ],
+        "inputs": [
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+        ],
+        "acceptance_criteria": [
+          "Manifest contains exactly six first-session objective rows in locked `tick/build/train/scout/attack/resolve` order",
+          "Each row includes canonical-default keys only for `required_all_canonical_keys` and optional `required_any_canonical_keys`",
+          "Compatibility aliases are listed as lookup-only and are excluded from direct default gate evaluation",
+          "Negative-state family coverage (`insufficient_resources`, `cooldown`, `invalid_target`, `combat_loss`) remains preserved in objective diagnostics"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

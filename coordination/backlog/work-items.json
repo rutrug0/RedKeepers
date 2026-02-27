@@ -1,43 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0010-F02-F01",
-    "title": "Expose first-session objective outcome key contract as machine-readable manifest data",
-    "description": "Add a structured objective-step outcome contract section to `first-slice-content-key-manifest.json` so objective success/failure key coverage is data-driven instead of test-local constants.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0010-F02"
-    ],
-    "inputs": [
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
-      "docs/design/first-slice-event-token-contract-matrix.md"
-    ],
-    "acceptance_criteria": [
-      "Manifest includes objective-step success and negative canonical key lists for first-session loops",
-      "Negative-state family coverage includes insufficient_resources, cooldown, invalid_target, and combat_loss",
-      "Snapshot/seed contract tests read objective-step coverage from manifest instead of hard-coded test-only fixtures"
-    ],
-    "validation_commands": [
-      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:11:33.210149+00:00",
-    "updated_at": "2026-02-27T13:49:05.683049+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "nika-thorn",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010-F02",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0011-F01",
     "title": "Lock snapshot-ready first-session objective schema in the slice token matrix",
     "description": "Extend the first-slice objective contract docs with a snapshot-ready schema (canonical objective ids, loop-step order, required gate key families, and compatibility alias policy) so backend/frontend/content consume one machine-targeted objective shape.",
@@ -62,17 +24,18 @@
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T13:44:54.339624+00:00",
-    "updated_at": "2026-02-27T13:44:54.339624+00:00",
+    "updated_at": "2026-02-27T13:51:51.422800+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0011"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0011",
+    "assigned_agent": "rowan-hale"
   },
   {
     "id": "RK-AUTO-BACKLOG-0011-F02",
