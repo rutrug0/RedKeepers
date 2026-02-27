@@ -2496,5 +2496,123 @@
             "coordination/backlog/blocked-items.json",
             "agents/mara-voss/outbox.json"
         ]
+    },
+    {
+        "ts":  "2026-02-27T10:14:51.1701472Z",
+        "item_id":  "RK-AUTO-BACKLOG-0007",
+        "status":  "completed",
+        "summary":  "Generated a six-item implementation-heavy M0 tranche across backend/frontend/design/content/platform plus one release-critical QA gate task, all kept within first vertical slice scope.",
+        "generated_follow_up_item_ids":  [
+                                             "RK-AUTO-BACKLOG-0007-F01",
+                                             "RK-AUTO-BACKLOG-0007-F02",
+                                             "RK-AUTO-BACKLOG-0007-F03",
+                                             "RK-AUTO-BACKLOG-0007-F04",
+                                             "RK-AUTO-BACKLOG-0007-F05",
+                                             "RK-AUTO-BACKLOG-0007-F06"
+                                         ],
+        "files":  [
+                      "coordination/backlog/work-items.json",
+                      "agents/mara-voss/outbox.json"
+                  ],
+        "proposed_work_items":  [
+                                    {
+                                        "id":  "RK-AUTO-BACKLOG-0007-F01",
+                                        "title":  "Add backend narrative template snapshot generator with first-slice lock validation",
+                                        "owner_role":  "backend",
+                                        "milestone":  "M0",
+                                        "priority":  "high",
+                                        "dependencies":  [
+    
+                                                         ],
+                                        "description":  "Generate backend-owned narrative snapshot data from first-slice narrative seeds and enforce deterministic manifest lock validation for canonical and alias key coverage.",
+                                        "acceptance_criteria":  [
+                                                                    "Deterministic snapshot artifact includes canonical first-slice keys and supported legacy aliases.",
+                                                                    "Validation fails on missing canonical keys or token mismatch drift.",
+                                                                    "Deferred post-slice keys remain excluded from default first-session coverage."
+                                                                ]
+                                    },
+                                    {
+                                        "id":  "RK-AUTO-BACKLOG-0007-F02",
+                                        "title":  "Replace client event template constants with generated snapshot consumption",
+                                        "owner_role":  "frontend",
+                                        "milestone":  "M0",
+                                        "priority":  "high",
+                                        "dependencies":  [
+                                                             "RK-AUTO-BACKLOG-0007-F01",
+                                                             "RK-AUTO-BACKLOG-0007-F04"
+                                                         ],
+                                        "description":  "Switch client event-feed template lookup to generated snapshot data and remove duplicate hard-coded maps while keeping deterministic fallback behavior.",
+                                        "acceptance_criteria":  [
+                                                                    "Client lookup consumes generated snapshot data.",
+                                                                    "Canonical plus legacy alias keys resolve deterministic first-slice output.",
+                                                                    "Critical loop path emits no missing-template fallback markers."
+                                                                ]
+                                    },
+                                    {
+                                        "id":  "RK-AUTO-BACKLOG-0007-F03",
+                                        "title":  "Publish first-slice event token contract matrix for settlement and map loops",
+                                        "owner_role":  "design",
+                                        "milestone":  "M0",
+                                        "priority":  "normal",
+                                        "dependencies":  [
+    
+                                                         ],
+                                        "description":  "Publish one design token contract mapping canonical first-slice loop keys to required placeholders/tokens for backend/frontend/content alignment.",
+                                        "acceptance_criteria":  [
+                                                                    "Canonical keys and required token sets are listed for tick/build/train/scout/hostile flows.",
+                                                                    "Legacy alias-to-canonical mapping is explicit.",
+                                                                    "Post-slice keys are excluded from required default rendering coverage."
+                                                                ]
+                                    },
+                                    {
+                                        "id":  "RK-AUTO-BACKLOG-0007-F04",
+                                        "title":  "Align placeholder narrative templates with first-slice token contract",
+                                        "owner_role":  "content",
+                                        "milestone":  "M0",
+                                        "priority":  "normal",
+                                        "dependencies":  [
+                                                             "RK-AUTO-BACKLOG-0007-F03"
+                                                         ],
+                                        "description":  "Update placeholder narrative seed copy so canonical and approved alias keys follow the token contract without expanding first-slice mechanics.",
+                                        "acceptance_criteria":  [
+                                                                    "Canonical loop templates match required token sets.",
+                                                                    "Legacy alias templates remain synchronized to canonical requirements.",
+                                                                    "Deferred keys stay outside default first-session requirements."
+                                                                ]
+                                    },
+                                    {
+                                        "id":  "RK-AUTO-BACKLOG-0007-F05",
+                                        "title":  "Create single-command first-slice release gate runner with evidence output",
+                                        "owner_role":  "platform",
+                                        "milestone":  "M0",
+                                        "priority":  "high",
+                                        "dependencies":  [
+                                                             "RK-AUTO-BACKLOG-0007-F01",
+                                                             "RK-AUTO-BACKLOG-0007-F02"
+                                                         ],
+                                        "description":  "Add one platform/release command to run critical first-slice gates and emit compact PASS/FAIL evidence artifacts for local candidate validation.",
+                                        "acceptance_criteria":  [
+                                                                    "Single command runs critical gates in deterministic order and exits non-zero on failure.",
+                                                                    "Evidence artifacts include gate-level PASS/FAIL and executed command list.",
+                                                                    "Canonical command is documented in operations docs."
+                                                                ]
+                                    },
+                                    {
+                                        "id":  "RK-AUTO-BACKLOG-0007-F06",
+                                        "title":  "Run release-blocking first-slice gate and publish disposition evidence",
+                                        "owner_role":  "qa",
+                                        "milestone":  "M0",
+                                        "priority":  "high",
+                                        "dependencies":  [
+                                                             "RK-AUTO-BACKLOG-0007-F05"
+                                                         ],
+                                        "description":  "Execute the new release gate command and publish pass/fail disposition with owner-tagged blockers for any failures.",
+                                        "acceptance_criteria":  [
+                                                                    "Gate run records pass/fail for playable, scope, quality, platform, and readiness criteria.",
+                                                                    "Critical loop evidence confirms no missing-template fallback markers.",
+                                                                    "Failures produce actionable blocker entries with owning role."
+                                                                ]
+                                    }
+                                ]
     }
 ]

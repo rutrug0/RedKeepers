@@ -6611,5 +6611,52 @@
     "runtime_seconds": 471.44,
     "started_at": "2026-02-27T09:48:37.640989+00:00",
     "finished_at": "2026-02-27T09:56:29.076792+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F06",
+    "title": "Run release-blocking slice gate evidence pass after manifest and wrapper hardening",
+    "description": "Execute a critical release-path QA pass that captures evidence for playable/quality/platform gates after wrapper command hardening and manifest-bound backend/frontend integration are complete.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0004-F06",
+      "RK-AUTO-BACKLOG-0005-F01",
+      "RK-AUTO-BACKLOG-0005-F05"
+    ],
+    "inputs": [
+      "tests/",
+      "tools/",
+      "docs/design/vertical-slice-done-v1.md",
+      "docs/operations/"
+    ],
+    "acceptance_criteria": [
+      "Critical golden-path smoke command runs and records deterministic stage evidence for tick/build/train/map/hostile resolve/event feed.",
+      "Steam and Android wrapper prepare-mode commands are verified in the same gate pass (or produce explicit actionable blocked reason).",
+      "Gate output summarizes PASS/FAIL for playable, quality, and platform gates with artifact links for daemon operators."
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-26T20:55:12.234856+00:00",
+    "updated_at": "2026-02-27T09:59:11.055986+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `agents/tomas-grell/outbox.json`",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005",
+    "assigned_agent": "tomas-grell",
+    "commit_sha": "8c9b1e9687a72fc8c3c7efe6b437fd075ee4f3da",
+    "resolved_by_agent": "tomas-grell",
+    "resolved_by_role": "qa",
+    "runtime_seconds": 152.88,
+    "started_at": "2026-02-27T09:56:36.216211+00:00",
+    "finished_at": "2026-02-27T09:59:09.084966+00:00"
   }
 ]
