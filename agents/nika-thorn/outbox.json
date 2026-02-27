@@ -277,4 +277,39 @@
     "blockers": [],
     "proposed_work_items": []
   }
+  ,
+  {
+    "timestamp_utc": "2026-02-27T12:21:09.4259250Z",
+    "agent_id": "nika-thorn",
+    "work_item_id": "RK-AUTO-BACKLOG-0009-F02",
+    "status": "done",
+    "summary": "Validated that first-slice canonical loop-event seed rows (tick/build/train/scout/hostile) and token fields already match the migration matrix, with compatibility aliases present and excluded from default first-session canonical selection.",
+    "changed_files": [
+      "agents/nika-thorn/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Add full loop token-contract parity test for first-slice narrative matrix",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Extend seed contract coverage so tick/build/train/scout canonical token lists are validated against the first-slice matrix contract with the same strictness currently used for hostile keys.",
+        "inputs": [
+          "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+        ],
+        "acceptance_criteria": [
+          "Tick/build/train/scout canonical keys are asserted against expected required token arrays in automated tests",
+          "Compatibility alias keys remain present and explicitly excluded from default canonical selection checks",
+          "Test fails deterministically on canonical token drift for any first-slice loop key"
+        ],
+        "validation_commands": [
+          "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+        ]
+      }
+    ]
+  }
 ]
