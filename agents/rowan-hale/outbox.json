@@ -608,5 +608,44 @@
         "validation_commands": []
       }
     ]
+  },
+  {
+    "timestamp_utc": "2026-02-27T11:44:07.882674+00:00",
+    "agent_id": "rowan-hale",
+    "work_item_id": "RK-AUTO-BACKLOG-0008-F01",
+    "status": "done",
+    "summary": "Published a machine-readable first-slice hostile runtime token contract artifact covering canonical dispatch/arrive/resolve/post-battle keys with required token fields, compatibility alias expectations, and explicit hero/gather/ambush post-slice exclusions.",
+    "changed_files": [
+      "backend/src/app/config/seeds/v1/narrative/first-slice-hostile-runtime-token-contract.json",
+      "backend/src/app/config/seeds/v1/narrative/README.md",
+      "agents/rowan-hale/outbox.json"
+    ],
+    "blockers": [],
+    "proposed_work_items": [
+      {
+        "title": "Add CI validation for first-slice hostile runtime token contract drift",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "medium",
+        "description": "Add a validator that cross-checks canonical hostile keys, required tokens, alias mappings, and deferred exclusions in `first-slice-hostile-runtime-token-contract.json` against `first-slice-content-key-manifest.json` and `event-feed-messages.json` so dispatch/arrive/resolve/post-battle payload contracts stay locked.",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0008-F01"
+        ],
+        "inputs": [
+          "backend/src/app/config/seeds/v1/narrative/first-slice-hostile-runtime-token-contract.json",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json"
+        ],
+        "acceptance_criteria": [
+          "Validation fails if any hostile canonical key in the contract is missing from manifest loop required keys or event feed seed rows",
+          "Validation fails if any declared compatibility alias key is selected as a direct default canonical key",
+          "Validation fails if any deferred hero/gather/ambush key appears in hostile contract required runtime keys",
+          "Failure output includes key-level mismatch details for fast correction"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

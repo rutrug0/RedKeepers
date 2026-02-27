@@ -34,3 +34,9 @@ Use `narrative-template-table.schema.json` to validate the common table/row stru
   - `canonical_key`
   - `legacy_keys_in_declared_order`
 - Keys listed in `deferred_post_slice_keys` are explicitly excluded from default first-slice seed usage.
+
+## First-Slice Hostile Runtime Token Contract
+
+- Use `first-slice-hostile-runtime-token-contract.json` for machine-readable hostile runtime token requirements in first-slice `dispatch`, `arrive`, `resolve`, and `post_battle` phases.
+- Canonical keys are required defaults; declared alias keys are compatibility lookup-only and must not be promoted to direct default selection.
+- Hero, gather, and ambush keys remain excluded from this contract as post-slice scope.
