@@ -3188,5 +3188,177 @@
         ]
       }
     ]
+  },
+  {
+    "ts": "2026-02-27T13:42:21.582207+00:00",
+    "item_id": "RK-AUTO-BACKLOG-0011",
+    "status": "completed",
+    "summary": "Generated six queued M0 follow-up tasks for manifest-driven objective strip delivery and release-readiness artifact closure, keeping the tranche implementation-heavy with one release-critical QA gate.",
+    "generated_follow_up_item_ids": [
+      "RK-AUTO-BACKLOG-0011-F01",
+      "RK-AUTO-BACKLOG-0011-F02",
+      "RK-AUTO-BACKLOG-0011-F03",
+      "RK-AUTO-BACKLOG-0011-F04",
+      "RK-AUTO-BACKLOG-0011-F05",
+      "RK-AUTO-BACKLOG-0011-F06"
+    ],
+    "files": [
+      "coordination/backlog/work-items.json",
+      "agents/mara-voss/outbox.json"
+    ],
+    "proposed_work_items": [
+      {
+        "id": "RK-AUTO-BACKLOG-0011-F01",
+        "title": "Lock snapshot-ready first-session objective schema in the slice token matrix",
+        "owner_role": "design",
+        "milestone": "M0",
+        "priority": "normal",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0010-F02-F01"
+        ],
+        "inputs": [
+          "docs/design/first-slice-event-token-contract-matrix.md",
+          "docs/design/first-vertical-slice.md",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+        ],
+        "description": "Extend the first-slice objective contract docs with a snapshot-ready schema (canonical objective ids, loop-step order, required gate key families, and compatibility alias policy) so backend/frontend/content consume one machine-targeted objective shape.",
+        "acceptance_criteria": [
+          "Matrix defines one explicit objective row schema with canonical key, loop_step, required_all canonical keys, optional required_any canonical keys, and compatibility alias lookup keys",
+          "Contract locks six in-scope canonical objective ids in tick/build/train/scout/attack/resolve order and marks post-slice objective families deferred",
+          "Objective gate key guidance references canonical-default first-slice keys only and preserves negative-state families (insufficient_resources, cooldown, invalid_target, combat_loss)"
+        ],
+        "validation_commands": [
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0011-F02",
+        "title": "Seed objective-strip placeholder template rows for canonical and alias objective keys",
+        "owner_role": "content",
+        "milestone": "M0",
+        "priority": "normal",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0011-F01"
+        ],
+        "inputs": [
+          "docs/content/placeholder-narrative-seed-pack-v1.md",
+          "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+        ],
+        "description": "Add first-session objective template rows to narrative/content seeds so objective-strip labels are data-backed by canonical objective ids and deterministic compatibility aliases instead of hard-coded frontend fallback text.",
+        "acceptance_criteria": [
+          "Canonical objective placeholder template coverage exists for all six first-session objective ids with replaceable text",
+          "Each objective includes one compatibility alias key path for lookup-only resolution and aliases are not promoted as defaults",
+          "Objective placeholders remain strictly first-slice scope and add no out-of-scope mechanics or hero-specific copy"
+        ],
+        "validation_commands": [
+          "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0011-F03",
+        "title": "Emit first-session objective contract in frontend snapshot generator",
+        "owner_role": "backend",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0010-F02-F01",
+          "RK-AUTO-BACKLOG-0011-F02"
+        ],
+        "inputs": [
+          "tools/generate_first_slice_frontend_manifest_snapshot.py",
+          "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+          "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+          "client-web/first-slice-manifest-snapshot.js"
+        ],
+        "description": "Extend the manifest snapshot generator so first-session objective contract rows are emitted from backend manifest/seed data and validated for ordering, canonical-default key usage, and alias lookup policy.",
+        "acceptance_criteria": [
+          "Generated snapshot includes a first-session objective contract block sourced from manifest/seed data with no hard-coded objective row constants",
+          "Generator fails with deterministic diagnostics on duplicate objective ids, invalid step order, or compatibility-only key default selection",
+          "Objective contract emission and validation are covered by targeted tests and the standard narrative snapshot test suite"
+        ],
+        "validation_commands": [
+          "python tools/generate_first_slice_frontend_manifest_snapshot.py --output coordination/runtime/first-slice-release-gate/objective-contract-snapshot.js",
+          "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0011-F04",
+        "title": "Drive objective-strip rendering from snapshot objective contract rows",
+        "owner_role": "frontend",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0011-F03"
+        ],
+        "inputs": [
+          "client-web/app.js",
+          "client-web/first-slice-manifest-snapshot.js",
+          "tools/generate_first_slice_frontend_manifest_snapshot.py"
+        ],
+        "description": "Refactor client objective-strip and completion-gate logic to read objective rows from the frontend snapshot payload, removing hard-coded objective contract arrays while preserving deterministic fallback behavior.",
+        "acceptance_criteria": [
+          "Objective strip reads canonical objective ids, loop steps, and gate key requirements from snapshot data instead of in-file constants",
+          "Compatibility alias objective keys resolve through deterministic lookup-only mapping and never replace canonical defaults",
+          "First-slice loop smoke remains green and objective progression still renders six ordered steps with active/completed states"
+        ],
+        "validation_commands": [
+          "python tools/rk_m0_0011_first_slice_loop_smoke.py"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0011-F05",
+        "title": "Generate release-readiness checklist and known-issues artifacts from gate evidence",
+        "owner_role": "platform",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0011-F03"
+        ],
+        "inputs": [
+          "tools/first_slice_release_gate_runner.py",
+          "coordination/runtime/first-slice-release-gate/release-gate-evidence.json",
+          "docs/design/vertical-slice-done-v1.md",
+          "docs/operations/first-slice-release-gate.md"
+        ],
+        "description": "Add a deterministic release artifact generator that converts first-slice gate evidence into release-readiness checklist and known-issues markdown outputs required by vertical-slice done criteria.",
+        "acceptance_criteria": [
+          "A deterministic command generates `release-readiness-checklist.md` and `known-issues.md` under `coordination/runtime/first-slice-release-gate/`",
+          "Checklist covers playable, scope, quality, platform, and release-readiness gates with explicit PASS/FAIL/N/A status and artifact references",
+          "Known issues output includes severity/owner placeholders for failing mandatory gates or explicit `none` when all gates pass"
+        ],
+        "validation_commands": [
+          "python tools/first_slice_release_gate_runner.py",
+          "python tools/orchestrator.py status"
+        ]
+      },
+      {
+        "id": "RK-AUTO-BACKLOG-0011-F06",
+        "title": "Run release-blocking gate after objective-contract snapshot integration",
+        "owner_role": "qa",
+        "milestone": "M0",
+        "priority": "high",
+        "dependencies": [
+          "RK-AUTO-BACKLOG-0011-F04",
+          "RK-AUTO-BACKLOG-0011-F05"
+        ],
+        "inputs": [
+          "tools/first_slice_release_gate_runner.py",
+          "coordination/runtime/first-slice-release-gate/",
+          "docs/design/vertical-slice-done-v1.md",
+          "coordination/backlog/blocked-items.json"
+        ],
+        "description": "Execute the release gate after objective-contract snapshot and release-readiness artifact changes, publish PASS/FAIL evidence, and disposition the stale blocked release-gate artifact with explicit rationale.",
+        "acceptance_criteria": [
+          "Release-gate evidence records PASS/FAIL for mandatory stages and includes release-readiness checklist + known-issues artifact links",
+          "Blocked item `RK-AUTO-BACKLOG-0010-F06` is explicitly dispositioned as completed or superseded with a concrete rationale",
+          "Any failing mandatory stage produces owner_role-tagged blocker notes with exact failing command/output path"
+        ],
+        "validation_commands": [
+          "python tools/first_slice_release_gate_runner.py",
+          "python tools/orchestrator.py status"
+        ]
+      }
+    ]
   }
 ]

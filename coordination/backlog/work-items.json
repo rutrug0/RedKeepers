@@ -1,41 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0010-F01-F01",
-    "title": "Wire first-session objective tracker to canonical objective IDs and key gates",
-    "description": "Implement first-session objective progress tracking using the six contract IDs and canonical key gates so UI progression state advances only on the documented `tick/build/train/scout/attack/resolve` event sequence.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0010-F01"
-    ],
-    "inputs": [
-      "docs/design/first-slice-event-token-contract-matrix.md",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
-      "client-web/src"
-    ],
-    "acceptance_criteria": [
-      "Objective tracker uses the exact six stable objective IDs from the design contract",
-      "Progression gates use canonical-default key names only, with compatibility aliases resolved upstream",
-      "Deferred hero/ambush/gather keys do not advance first-session objective completion"
-    ],
-    "validation_commands": [],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:08:08.643609+00:00",
-    "updated_at": "2026-02-27T13:39:23.862601+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "rowan-hale",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010-F01",
-    "assigned_agent": "sera-kest"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0010-F02-F01",
     "title": "Expose first-session objective outcome key contract as machine-readable manifest data",
     "description": "Add a structured objective-step outcome contract section to `first-slice-content-key-manifest.json` so objective success/failure key coverage is data-driven instead of test-local constants.",
@@ -71,5 +35,44 @@
     "escalation_target": "Mara Voss",
     "generated_by_agent": "nika-thorn",
     "generated_from_item_id": "RK-AUTO-BACKLOG-0010-F02"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0011",
+    "title": "Generate next backlog tranche",
+    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas. Prioritize fast cycle throughput: bias toward implementation tasks (backend/frontend/design/content/platform) and add dedicated QA/regression tasks only when risk is critical or release-blocking.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-items.json",
+      "docs/design/first-vertical-slice.md",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "At least 3 new queued tasks are created or requeued",
+      "Each task has owner_role, dependencies, and acceptance criteria",
+      "Tasks reflect current project priorities and unblock progress",
+      "Generated tranche is implementation-heavy; non-critical QA/lead coordination tasks are minimized",
+      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "validating",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:39:25.895736+00:00",
+    "updated_at": "2026-02-27T13:44:52.816044+00:00",
+    "estimated_effort": "S",
+    "token_budget": 12000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "auto_generated": "backlog_refill",
+    "assigned_agent": "mara-voss"
   }
 ]
