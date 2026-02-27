@@ -25,55 +25,250 @@
     "validation_commands": [
       "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T12:21:46.147756+00:00",
-    "updated_at": "2026-02-27T12:21:46.147756+00:00",
+    "updated_at": "2026-02-27T13:05:28.325467+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "nika-thorn",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0009-F02"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0009-F02",
+    "assigned_agent": "ilya-fen"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0010",
-    "title": "Generate next backlog tranche",
-    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas. Prioritize fast cycle throughput: bias toward implementation tasks (backend/frontend/design/content/platform) and add dedicated QA/regression tasks only when risk is critical or release-blocking.",
+    "id": "RK-AUTO-BACKLOG-0010-F01",
+    "title": "Define first-session objective contract for the playable slice loop",
+    "description": "Document one canonical first-session objective sequence (tick/build/train/scout/attack/resolve) mapped to canonical-default event keys and required token fields so backend/frontend/content share the same in-slice progression contract.",
     "milestone": "M0",
-    "type": "qa",
+    "type": "feature",
     "priority": "high",
-    "owner_role": "lead",
-    "preferred_agent": "mara-voss",
-    "dependencies": [],
+    "owner_role": "design",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0009-F02-F01"
+    ],
     "inputs": [
-      "coordination/backlog/work-items.json",
-      "coordination/backlog/completed-items.json",
-      "coordination/backlog/blocked-items.json",
       "docs/design/first-vertical-slice.md",
-      "coordination/runtime/run-history.jsonl"
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
     ],
     "acceptance_criteria": [
-      "At least 3 new queued tasks are created or requeued",
-      "Each task has owner_role, dependencies, and acceptance criteria",
-      "Tasks reflect current project priorities and unblock progress",
-      "Generated tranche is implementation-heavy; non-critical QA/lead coordination tasks are minimized",
-      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
+      "A first-session objective table exists with ordered steps for tick/build/train/scout/attack/resolve and stable objective identifiers",
+      "Each objective step references canonical-default content keys and required runtime token names from the first-slice matrix",
+      "Post-slice mechanics (heroes/ambush/gather branches) are explicitly marked deferred and excluded from required objective coverage"
     ],
     "validation_commands": [
       "python tools/orchestrator.py status"
     ],
-    "status": "validating",
+    "status": "queued",
     "retry_count": 0,
-    "created_at": "2026-02-27T12:57:41.935335+00:00",
-    "updated_at": "2026-02-27T13:02:18.721316+00:00",
+    "created_at": "2026-02-27T13:02:20.591961+00:00",
+    "updated_at": "2026-02-27T13:02:20.591961+00:00",
     "estimated_effort": "S",
-    "token_budget": 12000,
+    "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
-    "auto_generated": "backlog_refill",
-    "assigned_agent": "mara-voss"
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010-F02",
+    "title": "Align narrative placeholder rows to first-session objective outcomes",
+    "description": "Update first-slice narrative seed rows so each objective step has canonical success/failure placeholder coverage (including key negative states) with token fields aligned to the objective contract and loop token matrix.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "content",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F01"
+    ],
+    "inputs": [
+      "docs/content/placeholder-narrative-seed-pack-v1.md",
+      "docs/design/first-slice-event-token-contract-matrix.md",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+    ],
+    "acceptance_criteria": [
+      "Canonical placeholder rows cover objective-step outcomes for success plus at least one negative case per loop family (insufficient_resources/cooldown/invalid_target/combat_loss)",
+      "Token placeholders for each row match required token names in the canonical matrix and objective contract",
+      "No new out-of-scope key families are added to default first-session coverage"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:02:20.591961+00:00",
+    "updated_at": "2026-02-27T13:02:20.592470+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010-F03",
+    "title": "Enforce objective contract parity in first-slice seed validation",
+    "description": "Extend backend first-slice validation so objective contract key references, canonical-default usage, and token requirements are checked against the content-key manifest and narrative seed rows with deterministic diagnostics.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F01",
+      "RK-AUTO-BACKLOG-0010-F02"
+    ],
+    "inputs": [
+      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.ts",
+      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+      "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+    ],
+    "acceptance_criteria": [
+      "Validation fails when any objective step references a content key missing from manifest or seed rows",
+      "Validation fails when objective defaults reference compatibility-only keys instead of canonical-default keys",
+      "Failure output includes objective id, key, and missing token details for one-pass correction"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:02:20.592470+00:00",
+    "updated_at": "2026-02-27T13:02:20.592470+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010-F04",
+    "title": "Render first-session objective strip in client shell from canonical keys",
+    "description": "Implement a lightweight objective strip in the web client that displays step progression for the first-session loop using canonical objective keys and existing action outcomes without introducing new mechanics.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F01",
+      "RK-AUTO-BACKLOG-0010-F03"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "client-web/first-slice-manifest-snapshot.js",
+      "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
+      "docs/design/first-vertical-slice.md"
+    ],
+    "acceptance_criteria": [
+      "Client shell shows an ordered first-session objective strip for tick/build/train/scout/attack/resolve steps with clear active/completed states",
+      "Objective rendering resolves canonical-default keys and does not promote compatibility-only aliases for default display",
+      "When expected objective template data is missing, UI falls back to deterministic placeholder text and keeps the loop interactive"
+    ],
+    "validation_commands": [
+      "python tools/rk_m0_0011_first_slice_loop_smoke.py"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:02:20.592470+00:00",
+    "updated_at": "2026-02-27T13:02:20.592470+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010-F05",
+    "title": "Add deterministic release-candidate prep command for web and wrapper lanes",
+    "description": "Create one canonical prep command/script that refreshes first-slice frontend manifest artifacts and then runs Steam/Android wrapper prepare lanes in deterministic order for reproducible local release-candidate packaging.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "platform",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F03"
+    ],
+    "inputs": [
+      "launch-local-game.bat",
+      "scripts/wrapper_steam_tauri.ps1",
+      "scripts/wrapper_android_capacitor.ps1",
+      "tools/generate_first_slice_frontend_manifest_snapshot.py",
+      "docs/operations/first-slice-release-gate.md"
+    ],
+    "acceptance_criteria": [
+      "A single documented command refreshes first-slice manifest artifacts before running Steam and Android wrapper prepare commands",
+      "Prep flow exits non-zero on stage failure and prints per-stage status in deterministic order",
+      "Platform metadata/assets remain explicitly placeholder-only and replaceable"
+    ],
+    "validation_commands": [
+      "python tools/platform_wrapper_prepare_smoke.py"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:02:20.592470+00:00",
+    "updated_at": "2026-02-27T13:02:20.592470+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010-F06",
+    "title": "Run release-blocking first-slice gate after objective-contract tranche",
+    "description": "Execute the release gate after objective-contract design/content/backend/frontend/platform changes and publish PASS/FAIL evidence with owner-tagged blockers for any failing mandatory stage.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "qa",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F04",
+      "RK-AUTO-BACKLOG-0010-F05"
+    ],
+    "inputs": [
+      "tools/first_slice_release_gate_runner.py",
+      "coordination/runtime/first-slice-release-gate/",
+      "docs/design/vertical-slice-done-v1.md"
+    ],
+    "acceptance_criteria": [
+      "Gate evidence records PASS/FAIL for playable, quality, platform, and hostile_token_contract stages after tranche updates",
+      "Any failing mandatory stage includes exact failing command and explicit owner_role blocker assignment",
+      "No additional non-critical QA-only tasks are generated unless a release-blocking failure is observed"
+    ],
+    "validation_commands": [
+      "python tools/first_slice_release_gate_runner.py",
+      "python tools/orchestrator.py status"
+    ],
+    "status": "queued",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:02:20.592470+00:00",
+    "updated_at": "2026-02-27T13:02:20.592470+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": null,
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
   }
 ]

@@ -7976,5 +7976,50 @@
     "runtime_seconds": 549.64,
     "started_at": "2026-02-27T12:48:30.580975+00:00",
     "finished_at": "2026-02-27T12:57:40.226754+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010",
+    "title": "Generate next backlog tranche",
+    "description": "Queue is running low. Review completed/blocked work and generate the next set of concrete implementation tasks across backend, frontend, design, content, QA, and platform/release with dependencies and acceptance criteria. Keep the backlog inside the first vertical slice scope and defer out-of-scope ideas. Prioritize fast cycle throughput: bias toward implementation tasks (backend/frontend/design/content/platform) and add dedicated QA/regression tasks only when risk is critical or release-blocking.",
+    "milestone": "M0",
+    "type": "qa",
+    "priority": "high",
+    "owner_role": "lead",
+    "preferred_agent": "mara-voss",
+    "dependencies": [],
+    "inputs": [
+      "coordination/backlog/work-items.json",
+      "coordination/backlog/completed-items.json",
+      "coordination/backlog/blocked-items.json",
+      "docs/design/first-vertical-slice.md",
+      "coordination/runtime/run-history.jsonl"
+    ],
+    "acceptance_criteria": [
+      "At least 3 new queued tasks are created or requeued",
+      "Each task has owner_role, dependencies, and acceptance criteria",
+      "Tasks reflect current project priorities and unblock progress",
+      "Generated tranche is implementation-heavy; non-critical QA/lead coordination tasks are minimized",
+      "Tasks stay within first vertical slice scope; out-of-scope ideas are deferred"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T12:57:41.935335+00:00",
+    "updated_at": "2026-02-27T13:02:20.389668+00:00",
+    "estimated_effort": "S",
+    "token_budget": 12000,
+    "result_summary": "- `python tools/orchestrator.py status` passed; queue now shows `queued=7`, `dependency_ready=1`, `running=1`.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "auto_generated": "backlog_refill",
+    "assigned_agent": "mara-voss",
+    "commit_sha": "0b513c981d77442966d114079a3e36a13c7a220b",
+    "resolved_by_agent": "mara-voss",
+    "resolved_by_role": "lead",
+    "runtime_seconds": 271.41,
+    "started_at": "2026-02-27T12:57:47.277663+00:00",
+    "finished_at": "2026-02-27T13:02:18.674344+00:00"
   }
 ]

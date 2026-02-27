@@ -34,6 +34,180 @@ interface FirstSliceHostileRuntimeTokenContractV1 {
   }[];
 }
 
+type FirstSliceSettlementLoopKeyV1 = "tick" | "build" | "train" | "scout";
+
+interface FirstSliceSettlementLoopKeyContractRowV1 {
+  readonly loop_key: FirstSliceSettlementLoopKeyV1;
+  readonly canonical_key: string;
+  readonly required_tokens: readonly string[];
+  readonly compatibility_alias_keys: readonly string[];
+}
+
+const firstSliceSettlementLoopRuntimeTokenMatrixContractV1: readonly FirstSliceSettlementLoopKeyContractRowV1[] = [
+  {
+    loop_key: "tick",
+    canonical_key: "event.tick.passive_income",
+    required_tokens: ["settlement_name", "food_gain", "wood_gain", "stone_gain", "iron_gain"],
+    compatibility_alias_keys: ["event.economy.tick_passive_income"],
+  },
+  {
+    loop_key: "tick",
+    canonical_key: "event.tick.storage_near_cap",
+    required_tokens: ["settlement_name", "resource_label"],
+    compatibility_alias_keys: ["event.economy.storage_near_cap"],
+  },
+  {
+    loop_key: "tick",
+    canonical_key: "event.tick.producer_unlocked_hint",
+    required_tokens: ["building_label", "resource_label", "settlement_name"],
+    compatibility_alias_keys: ["event.economy.producer_unlocked_hint"],
+  },
+  {
+    loop_key: "tick",
+    canonical_key: "event.tick.passive_gain_success",
+    required_tokens: ["settlement_name", "duration_ms"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "tick",
+    canonical_key: "event.tick.passive_gain_reasoned",
+    required_tokens: ["settlement_name", "reason_codes", "duration_ms"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "tick",
+    canonical_key: "event.tick.passive_gain_stalled",
+    required_tokens: ["settlement_name", "duration_ms"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "tick",
+    canonical_key: "event.tick.passive_gain_capped",
+    required_tokens: ["settlement_name"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "build",
+    canonical_key: "event.build.upgrade_started",
+    required_tokens: ["settlement_name", "building_label", "from_level", "to_level"],
+    compatibility_alias_keys: ["event.buildings.upgrade_started"],
+  },
+  {
+    loop_key: "build",
+    canonical_key: "event.build.upgrade_completed",
+    required_tokens: ["settlement_name", "building_label", "new_level"],
+    compatibility_alias_keys: ["event.buildings.upgrade_completed"],
+  },
+  {
+    loop_key: "build",
+    canonical_key: "event.build.queue_blocked_resources",
+    required_tokens: ["settlement_name", "building_label"],
+    compatibility_alias_keys: ["event.buildings.queue_blocked_resources"],
+  },
+  {
+    loop_key: "build",
+    canonical_key: "event.build.success",
+    required_tokens: ["settlement_name", "building_label", "from_level", "to_level"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "build",
+    canonical_key: "event.build.failure_insufficient_resources",
+    required_tokens: ["building_id", "missing_resources_by_id", "required_cost_by_id", "available_stock_by_id"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "build",
+    canonical_key: "event.build.failure_cooldown",
+    required_tokens: ["building_id", "cooldown_ends_at"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "build",
+    canonical_key: "event.build.failure_invalid_state",
+    required_tokens: ["building_id", "invalid_reason"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "train",
+    canonical_key: "event.train.started",
+    required_tokens: ["settlement_name", "quantity", "unit_label"],
+    compatibility_alias_keys: ["event.units.training_started"],
+  },
+  {
+    loop_key: "train",
+    canonical_key: "event.train.completed",
+    required_tokens: ["settlement_name", "quantity", "unit_label"],
+    compatibility_alias_keys: ["event.units.training_completed"],
+  },
+  {
+    loop_key: "train",
+    canonical_key: "event.train.queue_full",
+    required_tokens: ["settlement_name"],
+    compatibility_alias_keys: ["event.units.training_queue_full"],
+  },
+  {
+    loop_key: "train",
+    canonical_key: "event.train.success",
+    required_tokens: ["settlement_name", "quantity", "unit_label"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "train",
+    canonical_key: "event.train.failure_insufficient_resources",
+    required_tokens: ["unit_id", "missing_resources_by_id", "required_cost_by_id"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "train",
+    canonical_key: "event.train.failure_cooldown",
+    required_tokens: ["unit_id", "queue_available_at", "cooldown_remaining_ms"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "train",
+    canonical_key: "event.train.failure_invalid_state",
+    required_tokens: ["unit_id", "invalid_reason"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "scout",
+    canonical_key: "event.scout.dispatched",
+    required_tokens: ["settlement_name", "target_tile_label"],
+    compatibility_alias_keys: ["event.world.scout_dispatched"],
+  },
+  {
+    loop_key: "scout",
+    canonical_key: "event.scout.report_empty",
+    required_tokens: ["target_tile_label"],
+    compatibility_alias_keys: ["event.world.scout_report_empty"],
+  },
+  {
+    loop_key: "scout",
+    canonical_key: "event.scout.report_hostile",
+    required_tokens: ["target_tile_label", "hostile_force_estimate"],
+    compatibility_alias_keys: ["event.world.scout_report_hostile"],
+  },
+  {
+    loop_key: "scout",
+    canonical_key: "event.scout.dispatched_success",
+    required_tokens: ["settlement_name", "target_tile_label"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "scout",
+    canonical_key: "event.scout.return_empty",
+    required_tokens: ["target_tile_label"],
+    compatibility_alias_keys: [],
+  },
+  {
+    loop_key: "scout",
+    canonical_key: "event.scout.return_hostile",
+    required_tokens: ["target_tile_label", "hostile_force_estimate"],
+    compatibility_alias_keys: [],
+  },
+];
+
 const loadFirstSliceHostileRuntimeTokenContractV1 = async (): Promise<FirstSliceHostileRuntimeTokenContractV1> =>
   JSON.parse(await readFile(firstSliceHostileRuntimeTokenContractPath, "utf8")) as FirstSliceHostileRuntimeTokenContractV1;
 
@@ -166,6 +340,89 @@ test("hostile canonical narrative seed keys and tokens align with locked runtime
       false,
       `Deferred post-slice key '${deferredRow.key}' must remain excluded from default canonical selection.`,
     );
+  }
+});
+
+test("tick/build/train/scout canonical narrative seed keys and tokens align with first-slice matrix contract", async () => {
+  const narrativeSeedBundle = await loadNarrativeSeedBundleV1(
+    defaultPaths.narrative_seed_paths,
+  );
+  const manifest = await loadFirstSliceContentKeyManifestV1(
+    defaultPaths.first_slice_content_key_manifest_path!,
+  );
+
+  const rowsByKey = new Map(
+    narrativeSeedBundle.event_feed_messages.rows.map((row) => [row.key, row] as const),
+  );
+  const canonicalSelectionSet = new Set(
+    manifest.default_first_slice_seed_usage.include_only_content_keys,
+  );
+  const loopKeys = ["tick", "build", "train", "scout"] as const;
+  const legacyAliasKeysByCanonicalKey = new Map(
+    manifest.legacy_alias_mapping.map((row) => [row.canonical_key, row.legacy_keys] as const),
+  );
+
+  for (const loopKey of loopKeys) {
+    const loopCanonicalSet = new Set(manifest.loop_required_keys[loopKey]);
+    const contractRows = firstSliceSettlementLoopRuntimeTokenMatrixContractV1.filter(
+      (row) => row.loop_key === loopKey,
+    );
+    const contractCanonicalKeys = contractRows.map((row) => row.canonical_key);
+
+    assert.deepEqual(
+      [...new Set(contractCanonicalKeys)].sort((left, right) => left.localeCompare(right)),
+      [...loopCanonicalSet].sort((left, right) => left.localeCompare(right)),
+      `${loopKey} canonical key matrix contract drift for first-slice loop coverage.`,
+    );
+
+    for (const contractRow of contractRows) {
+      const narrativeRow = rowsByKey.get(contractRow.canonical_key);
+      assert.notEqual(
+        narrativeRow,
+        undefined,
+        `Missing ${loopKey} canonical key '${contractRow.canonical_key}' in narrative seeds.`,
+      );
+      assert.deepEqual(
+        narrativeRow!.tokens,
+        contractRow.required_tokens,
+        `${loopKey} token drift for canonical key '${contractRow.canonical_key}'.`,
+      );
+      assert.equal(
+        canonicalSelectionSet.has(contractRow.canonical_key),
+        true,
+        `${loopKey} canonical key '${contractRow.canonical_key}' must stay in default canonical selection.`,
+      );
+
+      const manifestAliasKeysForCanonical = legacyAliasKeysByCanonicalKey.get(contractRow.canonical_key) ?? [];
+      assert.deepEqual(
+        manifestAliasKeysForCanonical,
+        contractRow.compatibility_alias_keys,
+        `${loopKey} alias mapping drift for canonical key '${contractRow.canonical_key}'.`,
+      );
+
+      for (const aliasKey of contractRow.compatibility_alias_keys) {
+        assert.equal(
+          rowsByKey.has(aliasKey),
+          true,
+          `Missing ${loopKey} alias key '${aliasKey}' in narrative seeds.`,
+        );
+        assert.equal(
+          manifest.compatibility_alias_only_keys.includes(aliasKey),
+          true,
+          `${loopKey} alias key '${aliasKey}' must be declared in compatibility_alias_only_keys.`,
+        );
+        assert.equal(
+          canonicalSelectionSet.has(aliasKey),
+          false,
+          `${loopKey} alias key '${aliasKey}' must not leak into default canonical selection.`,
+        );
+        assert.equal(
+          loopCanonicalSet.has(aliasKey),
+          false,
+          `${loopKey} alias key '${aliasKey}' must not appear as ${loopKey} loop canonical content key.`,
+        );
+      }
+    }
   }
 });
 
