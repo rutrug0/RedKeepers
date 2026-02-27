@@ -36,6 +36,15 @@ GATE_SPECS: tuple[GateSpec, ...] = (
         command_args=("tools/platform_wrapper_prepare_smoke.py",),
         log_filename="platform-gate.log",
     ),
+    GateSpec(
+        gate_id="hostile_token_contract",
+        command_args=(
+            "tools/generate_first_slice_frontend_manifest_snapshot.py",
+            "--output",
+            "coordination/runtime/first-slice-release-gate/hostile-token-contract-snapshot.js",
+        ),
+        log_filename="hostile-token-contract-gate.log",
+    ),
 )
 
 

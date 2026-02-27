@@ -4,7 +4,7 @@ This runbook defines the single-command local release-candidate gate pass for th
 
 ## Scope Guard
 
-- Runs only first-slice critical gates already in scope (`playable`, `quality`, `platform`).
+- Runs only first-slice critical gates already in scope (`playable`, `quality`, `platform`, `hostile_token_contract`).
 - Uses placeholder-friendly validation paths only.
 - Does not introduce post-slice platform or content checks.
 
@@ -25,6 +25,7 @@ python tools/first_slice_release_gate_runner.py --output-dir coordination/runtim
 1. `playable`: `python tools/rk_m0_0011_first_slice_loop_smoke.py`
 2. `quality`: `python tools/orchestrator.py status`
 3. `platform`: `python tools/platform_wrapper_prepare_smoke.py`
+4. `hostile_token_contract`: `python tools/generate_first_slice_frontend_manifest_snapshot.py --output coordination/runtime/first-slice-release-gate/hostile-token-contract-snapshot.js`
 
 The runner always executes in this order and exits non-zero if any gate is `FAIL`.
 
@@ -36,6 +37,7 @@ The runner always executes in this order and exits non-zero if any gate is `FAIL
   - `coordination/runtime/first-slice-release-gate/playable-gate.log`
   - `coordination/runtime/first-slice-release-gate/quality-gate.log`
   - `coordination/runtime/first-slice-release-gate/platform-gate.log`
+  - `coordination/runtime/first-slice-release-gate/hostile-token-contract-gate.log`
 
 The JSON artifact includes:
 - gate-level `PASS`/`FAIL` status

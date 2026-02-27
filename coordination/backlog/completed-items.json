@@ -7402,5 +7402,50 @@
     "runtime_seconds": 169.22,
     "started_at": "2026-02-27T11:48:21.992242+00:00",
     "finished_at": "2026-02-27T11:51:11.204330+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0008-F04",
+    "title": "Use hostile token contract for deterministic frontend event-feed rendering",
+    "description": "Update frontend hostile event-feed key/token handling to consume the hostile runtime token contract so canonical hostile keys render deterministically and alias handling stays compatibility-only.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0008-F02",
+      "RK-AUTO-BACKLOG-0008-F03"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "client-web/first-slice-manifest-snapshot.js",
+      "docs/design/first-slice-hostile-runtime-token-contract.json"
+    ],
+    "acceptance_criteria": [
+      "Frontend hostile dispatch/arrival/combat/post-battle feed rendering resolves canonical hostile keys and expected token substitutions without missing-template markers",
+      "Legacy hostile alias keys resolve through deterministic compatibility mapping and do not override canonical default key selection",
+      "When hostile payload tokens are incomplete, frontend fallback messaging remains deterministic and action-scoped"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T11:14:57.959507+00:00",
+    "updated_at": "2026-02-27T11:57:44.411515+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- `coordination/backlog/work-items.json` and `coordination/backlog/completed-items.json` are currently modified in the working tree by daemon/runtime activity and were not changed by this task implementation.",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "ccdcb595c5957cd8df1a7cbde2915dd115395ab4",
+    "resolved_by_agent": "sera-kest",
+    "resolved_by_role": "frontend",
+    "runtime_seconds": 384.22,
+    "started_at": "2026-02-27T11:51:18.384107+00:00",
+    "finished_at": "2026-02-27T11:57:42.597383+00:00"
   }
 ]

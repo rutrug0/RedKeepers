@@ -1,44 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0008-F04",
-    "title": "Use hostile token contract for deterministic frontend event-feed rendering",
-    "description": "Update frontend hostile event-feed key/token handling to consume the hostile runtime token contract so canonical hostile keys render deterministically and alias handling stays compatibility-only.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0008-F02",
-      "RK-AUTO-BACKLOG-0008-F03"
-    ],
-    "inputs": [
-      "client-web/app.js",
-      "client-web/first-slice-manifest-snapshot.js",
-      "docs/design/first-slice-hostile-runtime-token-contract.json"
-    ],
-    "acceptance_criteria": [
-      "Frontend hostile dispatch/arrival/combat/post-battle feed rendering resolves canonical hostile keys and expected token substitutions without missing-template markers",
-      "Legacy hostile alias keys resolve through deterministic compatibility mapping and do not override canonical default key selection",
-      "When hostile payload tokens are incomplete, frontend fallback messaging remains deterministic and action-scoped"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T11:14:57.959507+00:00",
-    "updated_at": "2026-02-27T11:57:42.639306+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0008",
-    "assigned_agent": "sera-kest"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0008-F05",
     "title": "Add hostile token-contract stage to first-slice release gate runner",
     "description": "Extend the single-command first-slice release gate to run a dedicated hostile token-contract validation stage and include its disposition in gate evidence output.",
@@ -63,17 +24,18 @@
     "validation_commands": [
       "python tools/first_slice_release_gate_runner.py"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T11:14:57.959507+00:00",
-    "updated_at": "2026-02-27T11:14:57.959507+00:00",
+    "updated_at": "2026-02-27T12:00:22.176806+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0008"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0008",
+    "assigned_agent": "juno-cairn"
   },
   {
     "id": "RK-AUTO-BACKLOG-0008-F06",
