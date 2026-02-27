@@ -80,43 +80,6 @@
     "generated_from_item_id": "RK-AUTO-BACKLOG-0005"
   },
   {
-    "id": "RK-AUTO-BACKLOG-0005-F04-F01",
-    "title": "Enforce first-slice narrative key whitelist in frontend event feed resolver",
-    "description": "Load `first-slice-content-key-manifest.json` in client event feed key resolution so default rendering uses only canonical first-slice keys and only falls back to documented legacy aliases in deterministic order.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "normal",
-    "owner_role": "frontend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0005-F04"
-    ],
-    "inputs": [
-      "client-web/app.js",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
-    ],
-    "acceptance_criteria": [
-      "Default client event key selection is constrained to `default_first_slice_seed_usage.include_only_content_keys`",
-      "Legacy alias keys resolve only through `legacy_alias_mapping` with canonical-first ordering",
-      "Deferred keys in `deferred_post_slice_keys` are not directly selected in first-session UI flows"
-    ],
-    "validation_commands": [
-      "python tools/orchestrator.py status"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T08:23:36.747917+00:00",
-    "updated_at": "2026-02-27T09:03:07.835058+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "nika-thorn",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F04",
-    "assigned_agent": "sera-kest"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0005-F04-F02",
     "title": "Add backend contract test for first-slice narrative key manifest coverage",
     "description": "Add a seed contract test that verifies manifest canonical keys exist in `event-feed-messages.json`, alias keys remain present for compatibility, and deferred seeded keys are excluded from default first-slice key selection logic.",
@@ -139,17 +102,18 @@
       "All seeded keys listed in `deferred_post_slice_keys` are absent from default first-slice key selection"
     ],
     "validation_commands": [],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T08:23:36.747917+00:00",
-    "updated_at": "2026-02-27T08:23:36.747917+00:00",
+    "updated_at": "2026-02-27T09:06:36.989944+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "nika-thorn",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F04"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F04",
+    "assigned_agent": "ilya-fen"
   },
   {
     "id": "RK-AUTO-BACKLOG-0005-F05-F01",

@@ -1,4 +1,6 @@
 import { strict as assert } from "node:assert";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { test } from "node:test";
 
 import {
@@ -8,7 +10,49 @@ import {
   parseEventFeedMessagesSeedV1,
   parseStarterSettlementNamePoolSeedV1,
   NARRATIVE_SEED_SCHEMA_VERSION_V1,
-} from "./narrative-seed-loaders";
+} from "./narrative-seed-loaders.ts";
+
+interface FirstSliceContentKeyManifest {
+  readonly default_first_slice_seed_usage: {
+    readonly include_only_content_keys: readonly string[];
+  };
+  readonly legacy_alias_mapping: readonly {
+    readonly canonical_key: string;
+    readonly legacy_keys: readonly string[];
+  }[];
+  readonly deferred_post_slice_keys: readonly {
+    readonly key: string;
+    readonly present_in_event_feed_seed: boolean;
+  }[];
+}
+
+interface EventFeedMessagesSeedRaw {
+  readonly rows: readonly {
+    readonly key: string;
+  }[];
+}
+
+const loadFirstSliceContentKeyManifest = async (): Promise<FirstSliceContentKeyManifest> => {
+  const manifestPath = join(
+    process.cwd(),
+    "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json",
+  );
+  const raw = await readFile(manifestPath, "utf8");
+  return JSON.parse(raw) as FirstSliceContentKeyManifest;
+};
+
+const loadEventFeedMessageKeySet = async (): Promise<Set<string>> => {
+  const seedPath = join(
+    process.cwd(),
+    "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+  );
+  const raw = await readFile(seedPath, "utf8");
+  const parsed = JSON.parse(raw) as EventFeedMessagesSeedRaw;
+  return new Set(parsed.rows.map((row) => row.key));
+};
+
+const toUniqueSorted = (values: readonly string[]): string[] =>
+  [...new Set(values)].sort((a, b) => a.localeCompare(b));
 
 const assertNarrativeSeedValidationError = (
   operation: () => unknown,
@@ -124,5 +168,62 @@ test("parseCivilizationIntrosSeedV1 rejects missing required field", () => {
       parseCivilizationIntrosSeedV1(missingTokens);
     },
     "Missing required field '$.rows[0].tokens'.",
+  );
+});
+
+test("first-slice content key manifest canonical keys exist in narrative event feed seed", async () => {
+  const manifest = await loadFirstSliceContentKeyManifest();
+  const eventFeedKeySet = await loadEventFeedMessageKeySet();
+
+  const missingCanonicalKeys = manifest.default_first_slice_seed_usage.include_only_content_keys.filter(
+    (key) => !eventFeedKeySet.has(key),
+  );
+
+  assert.deepEqual(
+    toUniqueSorted(missingCanonicalKeys),
+    [],
+    `Missing canonical keys in narrative event feed seed: ${toUniqueSorted(missingCanonicalKeys).join(", ")}`,
+  );
+});
+
+test("first-slice content key manifest legacy alias keys exist in narrative event feed seed", async () => {
+  const manifest = await loadFirstSliceContentKeyManifest();
+  const eventFeedKeySet = await loadEventFeedMessageKeySet();
+
+  const legacyAliasKeys = manifest.legacy_alias_mapping.flatMap((entry) => entry.legacy_keys);
+  const missingLegacyAliasKeys = legacyAliasKeys.filter((key) => !eventFeedKeySet.has(key));
+
+  assert.deepEqual(
+    toUniqueSorted(missingLegacyAliasKeys),
+    [],
+    `Missing legacy alias keys in narrative event feed seed: ${toUniqueSorted(missingLegacyAliasKeys).join(", ")}`,
+  );
+});
+
+test("first-slice content key manifest deferred seeded keys are excluded from default first-slice key selection", async () => {
+  const manifest = await loadFirstSliceContentKeyManifest();
+  const eventFeedKeySet = await loadEventFeedMessageKeySet();
+  const defaultFirstSliceKeySet = new Set(
+    manifest.default_first_slice_seed_usage.include_only_content_keys,
+  );
+
+  const deferredSeededKeys = manifest.deferred_post_slice_keys
+    .filter((entry) => entry.present_in_event_feed_seed)
+    .map((entry) => entry.key);
+
+  const missingDeferredSeededKeys = deferredSeededKeys.filter((key) => !eventFeedKeySet.has(key));
+  assert.deepEqual(
+    toUniqueSorted(missingDeferredSeededKeys),
+    [],
+    `Manifest deferred seeded keys marked present_in_event_feed_seed=true are missing from narrative event feed seed: ${toUniqueSorted(missingDeferredSeededKeys).join(", ")}`,
+  );
+
+  const deferredKeysLeakingIntoDefaultSelection = deferredSeededKeys.filter((key) =>
+    defaultFirstSliceKeySet.has(key)
+  );
+  assert.deepEqual(
+    toUniqueSorted(deferredKeysLeakingIntoDefaultSelection),
+    [],
+    `Deferred seeded keys must not appear in default first-slice selection: ${toUniqueSorted(deferredKeysLeakingIntoDefaultSelection).join(", ")}`,
   );
 });

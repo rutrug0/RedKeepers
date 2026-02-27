@@ -6219,5 +6219,48 @@
     "runtime_seconds": 366.91,
     "started_at": "2026-02-27T08:51:02.226039+00:00",
     "finished_at": "2026-02-27T08:57:09.136226+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0005-F04-F01",
+    "title": "Enforce first-slice narrative key whitelist in frontend event feed resolver",
+    "description": "Load `first-slice-content-key-manifest.json` in client event feed key resolution so default rendering uses only canonical first-slice keys and only falls back to documented legacy aliases in deterministic order.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "normal",
+    "owner_role": "frontend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0005-F04"
+    ],
+    "inputs": [
+      "client-web/app.js",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+    ],
+    "acceptance_criteria": [
+      "Default client event key selection is constrained to `default_first_slice_seed_usage.include_only_content_keys`",
+      "Legacy alias keys resolve only through `legacy_alias_mapping` with canonical-first ordering",
+      "Deferred keys in `deferred_post_slice_keys` are not directly selected in first-session UI flows"
+    ],
+    "validation_commands": [
+      "python tools/orchestrator.py status"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T08:23:36.747917+00:00",
+    "updated_at": "2026-02-27T09:03:09.707851+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/sera-kest/outbox.json](/D:/RedKeepers/agents/sera-kest/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "nika-thorn",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0005-F04",
+    "assigned_agent": "sera-kest",
+    "commit_sha": "2b03aa301436ec89aa6b37f34cf3c5e37014406d",
+    "resolved_by_agent": "sera-kest",
+    "resolved_by_role": "frontend",
+    "runtime_seconds": 351.75,
+    "started_at": "2026-02-27T08:57:16.031854+00:00",
+    "finished_at": "2026-02-27T09:03:07.788736+00:00"
   }
 ]
