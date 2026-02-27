@@ -88,88 +88,12 @@ export interface FirstSliceContentKeyManifestV1 {
   readonly source_docs: readonly string[];
   readonly default_first_slice_seed_usage: FirstSliceDefaultSeedUsageV1;
   readonly loop_required_keys: FirstSliceLoopRequiredKeysV1;
+  readonly objective_step_outcome_contract: readonly FirstSliceObjectiveStepOutcomeContractRowV1[];
   readonly compatibility_alias_only_keys: readonly string[];
   readonly legacy_alias_mapping: readonly FirstSliceLegacyAliasMappingRowV1[];
   readonly alias_lookup_contract: FirstSliceAliasLookupContractV1;
   readonly deferred_post_slice_keys: readonly FirstSliceDeferredPostSliceKeyRowV1[];
 }
-
-const FIRST_SLICE_OBJECTIVE_STEP_OUTCOME_CONTRACT_V1: readonly FirstSliceObjectiveStepOutcomeContractRowV1[] = [
-  {
-    objective_id: "first_session.tick.observe_income.v1",
-    loop_step: "tick",
-    success_canonical_keys: [
-      "event.tick.passive_income",
-      "event.tick.passive_gain_success",
-    ],
-    negative_canonical_keys: [
-      "event.tick.passive_gain_stalled",
-    ],
-    required_negative_state_families: [],
-  },
-  {
-    objective_id: "first_session.build.complete_first_upgrade.v1",
-    loop_step: "build",
-    success_canonical_keys: [
-      "event.build.upgrade_started",
-      "event.build.upgrade_completed",
-    ],
-    negative_canonical_keys: [
-      "event.build.failure_insufficient_resources",
-    ],
-    required_negative_state_families: ["insufficient_resources"],
-  },
-  {
-    objective_id: "first_session.train.complete_first_batch.v1",
-    loop_step: "train",
-    success_canonical_keys: [
-      "event.train.started",
-      "event.train.completed",
-    ],
-    negative_canonical_keys: [
-      "event.train.failure_cooldown",
-    ],
-    required_negative_state_families: ["cooldown"],
-  },
-  {
-    objective_id: "first_session.scout.confirm_hostile_target.v1",
-    loop_step: "scout",
-    success_canonical_keys: [
-      "event.scout.dispatched_success",
-      "event.scout.return_hostile",
-    ],
-    negative_canonical_keys: [
-      "event.scout.return_empty",
-    ],
-    required_negative_state_families: [],
-  },
-  {
-    objective_id: "first_session.attack.dispatch_hostile_march.v1",
-    loop_step: "attack",
-    success_canonical_keys: [
-      "event.world.hostile_dispatch_accepted",
-      "event.world.hostile_dispatch_en_route",
-      "event.world.hostile_march_arrived_outer_works",
-    ],
-    negative_canonical_keys: [
-      "event.world.hostile_dispatch_target_required",
-      "event.world.hostile_dispatch_failed_source_target_not_foreign",
-    ],
-    required_negative_state_families: ["invalid_target"],
-  },
-  {
-    objective_id: "first_session.resolve_hostile_outcome.v1",
-    loop_step: "resolve",
-    success_canonical_keys: [
-      "event.combat.hostile_resolve_attacker_win",
-    ],
-    negative_canonical_keys: [
-      "event.combat.hostile_resolve_defender_win",
-      "event.combat.hostile_loss_report",
-    ],
-    required_negative_state_families: ["combat_loss"],
-  },
-];
 
 const FIRST_SLICE_OBJECTIVE_CANONICAL_TOKEN_CONTRACT_V1: readonly FirstSliceObjectiveCanonicalTokenContractRowV1[] = [
   {
@@ -503,7 +427,7 @@ export const createFirstSliceNarrativeTemplateSnapshotV1 = (input: {
   const eventFeed = input.narrative_seed_bundle.event_feed_messages;
   const rowsByKey = createNarrativeRowsByKeyMap(eventFeed);
   const objectiveStepOutcomeContract = input.objective_step_outcome_contract
-    ?? FIRST_SLICE_OBJECTIVE_STEP_OUTCOME_CONTRACT_V1;
+    ?? manifest.objective_step_outcome_contract;
   const objectiveCanonicalTokenContract = input.objective_canonical_token_contract
     ?? FIRST_SLICE_OBJECTIVE_CANONICAL_TOKEN_CONTRACT_V1;
 
@@ -724,6 +648,10 @@ export const parseFirstSliceContentKeyManifestV1 = (
     readUnknown(root, "loop_required_keys", "$"),
     "$.loop_required_keys",
   );
+  const objectiveStepOutcomeContract = parseObjectiveStepOutcomeContractRows(
+    readUnknown(root, "objective_step_outcome_contract", "$"),
+    "$.objective_step_outcome_contract",
+  );
   const compatibilityAliasOnlyKeys = readContentKeyArray(
     root,
     "compatibility_alias_only_keys",
@@ -777,6 +705,7 @@ export const parseFirstSliceContentKeyManifestV1 = (
       include_only_content_keys: includeOnlyContentKeys,
     },
     loop_required_keys: loopRequiredKeys,
+    objective_step_outcome_contract: objectiveStepOutcomeContract,
     compatibility_alias_only_keys: compatibilityAliasOnlyKeys,
     legacy_alias_mapping: legacyAliasMapping,
     alias_lookup_contract: {
@@ -900,6 +829,43 @@ function parseLoopRequiredKeys(
       path,
     ),
   };
+}
+
+function parseObjectiveStepOutcomeContractRows(
+  raw: unknown,
+  path: string,
+): readonly FirstSliceObjectiveStepOutcomeContractRowV1[] {
+  const rowsRaw = asArray(raw, path);
+  const rows: FirstSliceObjectiveStepOutcomeContractRowV1[] = [];
+  const seenObjectiveIds = new Set<string>();
+  const loopStepKeys = ["tick", "build", "train", "scout", "attack", "resolve"] as const;
+  const negativeStateFamilies = ["insufficient_resources", "cooldown", "invalid_target", "combat_loss"] as const;
+
+  for (let i = 0; i < rowsRaw.length; i += 1) {
+    const rowPath = `${path}[${i}]`;
+    const row = asRecord(rowsRaw[i], rowPath);
+    const objectiveId = readContentKey(row, "objective_id", rowPath);
+    if (seenObjectiveIds.has(objectiveId)) {
+      throw new FirstSliceNarrativeTemplateSnapshotValidationError(
+        `Duplicate objective_step_outcome_contract objective_id '${objectiveId}'.`,
+      );
+    }
+    seenObjectiveIds.add(objectiveId);
+    rows.push({
+      objective_id: objectiveId,
+      loop_step: readEnum(row, "loop_step", rowPath, loopStepKeys),
+      success_canonical_keys: readContentKeyArray(row, "success_canonical_keys", rowPath),
+      negative_canonical_keys: readContentKeyArray(row, "negative_canonical_keys", rowPath),
+      required_negative_state_families: readEnumArray(
+        row,
+        "required_negative_state_families",
+        rowPath,
+        negativeStateFamilies,
+      ),
+    });
+  }
+
+  return rows;
 }
 
 function parseLegacyAliasMappingRows(

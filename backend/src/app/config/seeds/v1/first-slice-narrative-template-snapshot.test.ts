@@ -35,7 +35,6 @@ interface FirstSliceHostileRuntimeTokenContractV1 {
 }
 
 type FirstSliceSettlementLoopKeyV1 = "tick" | "build" | "train" | "scout";
-type FirstSliceObjectiveLoopStepKeyV1 = FirstSliceSettlementLoopKeyV1 | "attack" | "resolve";
 type FirstSliceNegativeStateFamilyV1 =
   | "insufficient_resources"
   | "cooldown"
@@ -47,14 +46,6 @@ interface FirstSliceSettlementLoopKeyContractRowV1 {
   readonly canonical_key: string;
   readonly required_tokens: readonly string[];
   readonly compatibility_alias_keys: readonly string[];
-}
-
-interface FirstSliceObjectiveStepOutcomeContractRowV1 {
-  readonly objective_id: string;
-  readonly loop_step: FirstSliceObjectiveLoopStepKeyV1;
-  readonly success_canonical_keys: readonly string[];
-  readonly negative_canonical_keys: readonly string[];
-  readonly required_negative_state_families: readonly FirstSliceNegativeStateFamilyV1[];
 }
 
 const firstSliceSettlementLoopRuntimeTokenMatrixContractV1: readonly FirstSliceSettlementLoopKeyContractRowV1[] = [
@@ -219,83 +210,6 @@ const firstSliceSettlementLoopRuntimeTokenMatrixContractV1: readonly FirstSliceS
     canonical_key: "event.scout.return_hostile",
     required_tokens: ["target_tile_label", "hostile_force_estimate"],
     compatibility_alias_keys: [],
-  },
-];
-
-const firstSliceObjectiveStepOutcomeContractV1: readonly FirstSliceObjectiveStepOutcomeContractRowV1[] = [
-  {
-    objective_id: "first_session.tick.observe_income.v1",
-    loop_step: "tick",
-    success_canonical_keys: [
-      "event.tick.passive_income",
-      "event.tick.passive_gain_success",
-    ],
-    negative_canonical_keys: [
-      "event.tick.passive_gain_stalled",
-    ],
-    required_negative_state_families: [],
-  },
-  {
-    objective_id: "first_session.build.complete_first_upgrade.v1",
-    loop_step: "build",
-    success_canonical_keys: [
-      "event.build.upgrade_started",
-      "event.build.upgrade_completed",
-    ],
-    negative_canonical_keys: [
-      "event.build.failure_insufficient_resources",
-    ],
-    required_negative_state_families: ["insufficient_resources"],
-  },
-  {
-    objective_id: "first_session.train.complete_first_batch.v1",
-    loop_step: "train",
-    success_canonical_keys: [
-      "event.train.started",
-      "event.train.completed",
-    ],
-    negative_canonical_keys: [
-      "event.train.failure_cooldown",
-    ],
-    required_negative_state_families: ["cooldown"],
-  },
-  {
-    objective_id: "first_session.scout.confirm_hostile_target.v1",
-    loop_step: "scout",
-    success_canonical_keys: [
-      "event.scout.dispatched_success",
-      "event.scout.return_hostile",
-    ],
-    negative_canonical_keys: [
-      "event.scout.return_empty",
-    ],
-    required_negative_state_families: [],
-  },
-  {
-    objective_id: "first_session.attack.dispatch_hostile_march.v1",
-    loop_step: "attack",
-    success_canonical_keys: [
-      "event.world.hostile_dispatch_accepted",
-      "event.world.hostile_dispatch_en_route",
-      "event.world.hostile_march_arrived_outer_works",
-    ],
-    negative_canonical_keys: [
-      "event.world.hostile_dispatch_target_required",
-      "event.world.hostile_dispatch_failed_source_target_not_foreign",
-    ],
-    required_negative_state_families: ["invalid_target"],
-  },
-  {
-    objective_id: "first_session.resolve_hostile_outcome.v1",
-    loop_step: "resolve",
-    success_canonical_keys: [
-      "event.combat.hostile_resolve_attacker_win",
-    ],
-    negative_canonical_keys: [
-      "event.combat.hostile_resolve_defender_win",
-      "event.combat.hostile_loss_report",
-    ],
-    required_negative_state_families: ["combat_loss"],
   },
 ];
 
@@ -548,7 +462,7 @@ test("first-session objective steps include canonical success/failure placeholde
   ]);
   const coveredNegativeStateFamilies = new Set<FirstSliceNegativeStateFamilyV1>();
 
-  for (const objectiveRow of firstSliceObjectiveStepOutcomeContractV1) {
+  for (const objectiveRow of manifest.objective_step_outcome_contract) {
     assert.equal(
       objectiveRow.success_canonical_keys.length > 0,
       true,
@@ -614,7 +528,7 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 fails when objective contract 
   );
   const objectiveId = "first_session.tick.observe_income.v1";
   const outOfCanonicalSelectionKey = "event.world.gather_started";
-  const driftedObjectiveContract = firstSliceObjectiveStepOutcomeContractV1.map((row) =>
+  const driftedObjectiveContract = manifest.objective_step_outcome_contract.map((row) =>
     row.objective_id === objectiveId
       ? {
         ...row,
@@ -651,7 +565,7 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 fails when objective contract 
   );
   const objectiveId = "first_session.tick.observe_income.v1";
   const compatibilityAliasKey = "event.economy.tick_passive_income";
-  const driftedObjectiveContract = firstSliceObjectiveStepOutcomeContractV1.map((row) =>
+  const driftedObjectiveContract = manifest.objective_step_outcome_contract.map((row) =>
     row.objective_id === objectiveId
       ? {
         ...row,
@@ -755,7 +669,7 @@ test("createFirstSliceNarrativeTemplateSnapshotV1 fails on missing canonical key
     defaultPaths.first_slice_content_key_manifest_path!,
   );
   const objectiveCanonicalKeys = new Set(
-    firstSliceObjectiveStepOutcomeContractV1.flatMap((row) => [
+    manifest.objective_step_outcome_contract.flatMap((row) => [
       ...row.success_canonical_keys,
       ...row.negative_canonical_keys,
     ]),
