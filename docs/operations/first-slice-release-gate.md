@@ -31,12 +31,16 @@ The runner always executes in this order and exits non-zero if any gate is `FAIL
 
 ## Platform Gate Wrapper Commands
 
-The `platform` gate command (`python tools/platform_wrapper_prepare_smoke.py`) validates wrapper prepare reproducibility by executing these canonical script commands in order:
+The `platform` gate command (`python tools/platform_wrapper_prepare_smoke.py`) is the canonical first-slice release-candidate prep entrypoint for platform lanes.
 
-1. `scripts/wrapper_steam_tauri.ps1 -Mode prepare -CleanWeb`
-2. `scripts/wrapper_android_capacitor.ps1 -Mode prepare -CleanWeb`
+Deterministic platform stage order inside this command:
 
-These commands are the canonical first-slice wrapper prepare paths referenced by platform stage validation.
+1. Refresh first-slice frontend manifest snapshot (`python tools/generate_first_slice_frontend_manifest_snapshot.py`)
+2. Run Steam wrapper prepare (`scripts/wrapper_steam_tauri.ps1 -Mode prepare -CleanWeb`)
+3. Run Android wrapper prepare (`scripts/wrapper_android_capacitor.ps1 -Mode prepare -CleanWeb`)
+
+The command prints ordered per-stage status lines (`PASS`/`FAIL`/`SKIP`) and exits non-zero on stage failure.
+Platform metadata/assets remain placeholder-only and replaceable per wrapper runbooks.
 
 ## Evidence Artifacts
 

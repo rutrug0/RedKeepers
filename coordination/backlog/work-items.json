@@ -1,46 +1,5 @@
 [
   {
-    "id": "RK-AUTO-BACKLOG-0010-F03",
-    "title": "Enforce objective contract parity in first-slice seed validation",
-    "description": "Extend backend first-slice validation so objective contract key references, canonical-default usage, and token requirements are checked against the content-key manifest and narrative seed rows with deterministic diagnostics.",
-    "milestone": "M0",
-    "type": "feature",
-    "priority": "high",
-    "owner_role": "backend",
-    "preferred_agent": null,
-    "dependencies": [
-      "RK-AUTO-BACKLOG-0010-F01",
-      "RK-AUTO-BACKLOG-0010-F02"
-    ],
-    "inputs": [
-      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.ts",
-      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
-      "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
-      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
-      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
-    ],
-    "acceptance_criteria": [
-      "Validation fails when any objective step references a content key missing from manifest or seed rows",
-      "Validation fails when objective defaults reference compatibility-only keys instead of canonical-default keys",
-      "Failure output includes objective id, key, and missing token details for one-pass correction"
-    ],
-    "validation_commands": [
-      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
-    ],
-    "status": "validating",
-    "retry_count": 0,
-    "created_at": "2026-02-27T13:02:20.592470+00:00",
-    "updated_at": "2026-02-27T13:17:42.025079+00:00",
-    "estimated_effort": "S",
-    "token_budget": 8000,
-    "result_summary": null,
-    "blocker_reason": null,
-    "escalation_target": "Mara Voss",
-    "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
-    "assigned_agent": "ilya-fen"
-  },
-  {
     "id": "RK-AUTO-BACKLOG-0010-F04",
     "title": "Render first-session objective strip in client shell from canonical keys",
     "description": "Implement a lightweight objective strip in the web client that displays step progression for the first-session loop using canonical objective keys and existing action outcomes without introducing new mechanics.",
@@ -106,17 +65,18 @@
     "validation_commands": [
       "python tools/platform_wrapper_prepare_smoke.py"
     ],
-    "status": "queued",
+    "status": "validating",
     "retry_count": 0,
     "created_at": "2026-02-27T13:02:20.592470+00:00",
-    "updated_at": "2026-02-27T13:02:20.592470+00:00",
+    "updated_at": "2026-02-27T13:22:24.766883+00:00",
     "estimated_effort": "S",
     "token_budget": 8000,
     "result_summary": null,
     "blocker_reason": null,
     "escalation_target": "Mara Voss",
     "generated_by_agent": "mara-voss",
-    "generated_from_item_id": "RK-AUTO-BACKLOG-0010"
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
+    "assigned_agent": "juno-cairn"
   },
   {
     "id": "RK-AUTO-BACKLOG-0010-F06",

@@ -40,7 +40,7 @@ This repository is bootstrapped with the M0 orchestration foundation:
   - `scripts/wrapper_steam_tauri.ps1 -Mode package -CleanWeb`
 - Standardized dev entry point:
   - `scripts/wrapper_steam_tauri.ps1 -Mode dev -CleanWeb`
-- Prepare-mode wrapper smoke:
+- Canonical release-candidate prep (refreshes first-slice frontend manifest snapshot, then runs Steam + Android wrapper prepare in deterministic order):
   - `python tools/platform_wrapper_prepare_smoke.py`
 - Legacy scripts and direct Python commands remain supported.
 - Runbook:
@@ -54,7 +54,7 @@ This repository is bootstrapped with the M0 orchestration foundation:
   - `scripts/wrapper_android_capacitor.ps1 -Mode package-release -CleanWeb`
 - Standardized dev entry point:
   - `scripts/wrapper_android_capacitor.ps1 -Mode dev -CleanWeb`
-- Prepare-mode wrapper smoke:
+- Canonical release-candidate prep (refreshes first-slice frontend manifest snapshot, then runs Steam + Android wrapper prepare in deterministic order):
   - `python tools/platform_wrapper_prepare_smoke.py`
 - Legacy scripts and direct Python commands remain supported.
 - Runbook:

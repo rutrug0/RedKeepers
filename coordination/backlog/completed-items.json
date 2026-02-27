@@ -8156,5 +8156,52 @@
     "runtime_seconds": 197.2,
     "started_at": "2026-02-27T13:08:13.991325+00:00",
     "finished_at": "2026-02-27T13:11:31.189324+00:00"
+  },
+  {
+    "id": "RK-AUTO-BACKLOG-0010-F03",
+    "title": "Enforce objective contract parity in first-slice seed validation",
+    "description": "Extend backend first-slice validation so objective contract key references, canonical-default usage, and token requirements are checked against the content-key manifest and narrative seed rows with deterministic diagnostics.",
+    "milestone": "M0",
+    "type": "feature",
+    "priority": "high",
+    "owner_role": "backend",
+    "preferred_agent": null,
+    "dependencies": [
+      "RK-AUTO-BACKLOG-0010-F01",
+      "RK-AUTO-BACKLOG-0010-F02"
+    ],
+    "inputs": [
+      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.ts",
+      "backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts",
+      "backend/src/app/config/seeds/v1/first-slice-playable-manifest.json",
+      "backend/src/app/config/seeds/v1/narrative/event-feed-messages.json",
+      "backend/src/app/config/seeds/v1/narrative/first-slice-content-key-manifest.json"
+    ],
+    "acceptance_criteria": [
+      "Validation fails when any objective step references a content key missing from manifest or seed rows",
+      "Validation fails when objective defaults reference compatibility-only keys instead of canonical-default keys",
+      "Failure output includes objective id, key, and missing token details for one-pass correction"
+    ],
+    "validation_commands": [
+      "node --test --test-concurrency=1 --test-isolation=none backend/src/app/config/seeds/v1/first-slice-narrative-template-snapshot.test.ts"
+    ],
+    "status": "completed",
+    "retry_count": 0,
+    "created_at": "2026-02-27T13:02:20.592470+00:00",
+    "updated_at": "2026-02-27T13:17:44.015041+00:00",
+    "estimated_effort": "S",
+    "token_budget": 8000,
+    "result_summary": "- [agents/ilya-fen/outbox.json](D:/RedKeepers/agents/ilya-fen/outbox.json)",
+    "blocker_reason": null,
+    "escalation_target": "Mara Voss",
+    "generated_by_agent": "mara-voss",
+    "generated_from_item_id": "RK-AUTO-BACKLOG-0010",
+    "assigned_agent": "ilya-fen",
+    "commit_sha": "aecc3a49e8f4c8cbbf694842f63fb0584b23768a",
+    "resolved_by_agent": "ilya-fen",
+    "resolved_by_role": "backend",
+    "runtime_seconds": 363.34,
+    "started_at": "2026-02-27T13:11:38.616915+00:00",
+    "finished_at": "2026-02-27T13:17:41.959013+00:00"
   }
 ]

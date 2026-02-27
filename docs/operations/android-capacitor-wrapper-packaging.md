@@ -76,7 +76,7 @@ scripts/wrapper_android_capacitor.ps1 -Mode build-debug -CleanWeb
 scripts/wrapper_android_capacitor.ps1 -Mode build-release -CleanWeb
 ```
 
-Prepare-mode automation smoke:
+Canonical release-candidate prep (refreshes first-slice frontend manifest snapshot, then runs Steam + Android wrapper prepare in deterministic order):
 
 ```powershell
 python tools/platform_wrapper_prepare_smoke.py
